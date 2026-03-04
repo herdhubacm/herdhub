@@ -183,11 +183,11 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
 <body>
 
 <div class="topbar">
-  <a href="#market">Market Prices</a>
-  <a href="#news">Ranch News</a>
-  <a href="#forum">Community Forum</a>
-  <a href="#" onclick="openModal('newsletter')">Free Newsletter</a>
-  <a href="#" onclick="openModal('advertise')">Advertise With Us</a>
+  <a href="javascript:void(0)" onclick="document.getElementById('market').scrollIntoView({behavior:'smooth'})">Market Prices</a>
+  <a href="javascript:void(0)" onclick="document.getElementById('forum').scrollIntoView({behavior:'smooth'})">Ranch News</a>
+  <a href="javascript:void(0)" onclick="showPage('forum')">Community Forum</a>
+  <a href="javascript:void(0)" onclick="openModal('auth');switchTab('register')">Free Newsletter</a>
+  <a href="javascript:void(0)" onclick="openModal('auth');switchTab('register')">Advertise With Us</a>
 </div>
 
 <header>
@@ -197,13 +197,13 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
       <div class="logo-text"><div class="site-name">Herd Hub</div><div class="site-tagline">American Cattle Market</div></div>
     </div>
     <nav>
-      <a onclick="filterCategory('beef_cattle')">🐄 Cattle</a>
-      <a onclick="filterCategory('equipment')">🚜 Equipment</a>
-      <a onclick="filterCategory('trucks_trailers')">🚛 Trucks & Trailers</a>
-      <a onclick="filterCategory('working_dogs')">🐕 Dogs</a>
-      <a onclick="filterCategory('farm_to_table')">🥩 Farm to Table</a>
-      <a onclick="showPage('forum')" id="nav-forum">Forum</a>
-      <a class="nav-cta" onclick="openModal('post-listing')">+ Post Ad</a>
+      <a href="javascript:void(0)" onclick="filterCategory('beef_cattle')">🐄 Cattle</a>
+      <a href="javascript:void(0)" onclick="filterCategory('equipment')">🚜 Equipment</a>
+      <a href="javascript:void(0)" onclick="filterCategory('trucks_trailers')">🚛 Trucks & Trailers</a>
+      <a href="javascript:void(0)" onclick="filterCategory('working_dogs')">🐕 Dogs</a>
+      <a href="javascript:void(0)" onclick="filterCategory('farm_to_table')">🥩 Farm to Table</a>
+      <a href="javascript:void(0)" onclick="showPage('forum')" id="nav-forum">Forum</a>
+      <a href="javascript:void(0)" class="nav-cta" onclick="openModal('post-listing')">+ Post Ad</a>
     </nav>
     <div class="header-actions">
       <button class="btn-signin" id="auth-btn" onclick="openModal('auth')">Sign In / Register</button>
@@ -545,10 +545,10 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
       <div class="footer-brand"><div class="fn">Herd Hub</div><p>America's most trusted online cattle marketplace. Connecting ranchers, farmers and buyers across all 50 states since 1998.</p><div class="footer-social"><a class="soc-btn">📘</a><a class="soc-btn">🐦</a><a class="soc-btn">📸</a><a class="soc-btn">▶️</a></div></div>
       <div class="footer-col"><h4>Cattle</h4><ul><li><a onclick="filterCategory('beef_cattle')">Beef Cattle for Sale</a></li><li><a onclick="filterCategory('dairy')">Dairy Cattle</a></li><li><a onclick="filterCategory('bulls')">Bulls for Sale</a></li><li><a onclick="filterCategory('heifers')">Bred Heifers</a></li><li><a onclick="filterCategory('calves')">Calves</a></li></ul></div>
       <div class="footer-col"><h4>Equipment</h4><ul><li><a onclick="filterCategory('equipment')">Tractors & Equipment</a></li><li><a onclick="filterCategory('trucks_trailers')">Trucks & Trailers</a></li><li><a onclick="filterCategory('working_dogs')">Working Dogs</a></li><li><a onclick="filterCategory('farm_to_table')">Farm to Table</a></li><li><a onclick="filterCategory('feed_hay')">Feed & Hay</a></li></ul></div>
-      <div class="footer-col"><h4>Resources</h4><ul><li><a href="#market">Cattle Prices</a></li><li><a>Market Reports</a></li><li><a>Ranch News</a></li><li><a>Vet Resources</a></li><li><a onclick="showPage('forum')">Community Forum</a></li></ul></div>
+      <div class="footer-col"><h4>Resources</h4><ul><li><a href="javascript:void(0)" onclick="document.getElementById('market').scrollIntoView({behavior:'smooth'})">Cattle Prices</a></li><li><a>Market Reports</a></li><li><a>Ranch News</a></li><li><a>Vet Resources</a></li><li><a onclick="showPage('forum')">Community Forum</a></li></ul></div>
       <div class="footer-col"><h4>Account</h4><ul><li><a onclick="openModal('auth')">Sign In</a></li><li><a onclick="openModal('auth')">Register Free</a></li><li><a onclick="openModal('post-listing')">Post a Listing</a></li><li><a>Contact Support</a></li></ul></div>
     </div>
-    <div class="footer-bottom"><span>© 2026 Herd Hub · American Cattle Market. All rights reserved.</span><span><a href="#">Privacy</a> · <a href="#">Terms</a> · <a href="#">Advertise</a> · <a href="#">Sitemap</a></span></div>
+    <div class="footer-bottom"><span>© 2026 Herd Hub · American Cattle Market. All rights reserved.</span><span><a href="javascript:void(0)">Privacy</a> · <a href="javascript:void(0)">Terms</a> · <a href="javascript:void(0)" onclick="openModal('auth');switchTab('register')">Advertise</a> · <a href="javascript:void(0)">Sitemap</a></span></div>
   </div>
 </footer>
 
@@ -926,18 +926,21 @@ function showPage(page) {
 
 // ── Modals ─────────────────────────────────────────────
 function openModal(id) {
-  // If trying to post a listing but not logged in, show auth modal instead
+  // If trying to post a listing but not logged in, show register tab instead
   if (id === 'post-listing' && !authToken) {
-    id = 'auth';
+    const authEl = document.getElementById('modal-auth');
+    if (authEl) { authEl.classList.add('open'); document.body.style.overflow = 'hidden'; }
     switchTab('register');
+    return;
   }
-  const el = document.getElementById(`modal-${id}`);
-  if (!el) { console.warn('Modal not found:', id); return; }
+  const el = document.getElementById('modal-' + id);
+  if (!el) { console.warn('Modal not found: modal-' + id); return; }
   el.classList.add('open');
   document.body.style.overflow = 'hidden';
 }
 function closeModal(id) {
-  document.getElementById(`modal-${id}`).classList.remove('open');
+  const el = document.getElementById('modal-' + id);
+  if (el) { el.classList.remove('open'); }
   document.body.style.overflow = '';
 }
 // Close on overlay click — runs after DOM is ready
