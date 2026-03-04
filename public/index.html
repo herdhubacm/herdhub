@@ -926,16 +926,25 @@ function showPage(page) {
 
 // ── Modals ─────────────────────────────────────────────
 function openModal(id) {
-  document.getElementById(`modal-${id}`).classList.add('open');
+  // If trying to post a listing but not logged in, show auth modal instead
+  if (id === 'post-listing' && !authToken) {
+    id = 'auth';
+    switchTab('register');
+  }
+  const el = document.getElementById(`modal-${id}`);
+  if (!el) { console.warn('Modal not found:', id); return; }
+  el.classList.add('open');
   document.body.style.overflow = 'hidden';
 }
 function closeModal(id) {
   document.getElementById(`modal-${id}`).classList.remove('open');
   document.body.style.overflow = '';
 }
-// Close on overlay click
-document.querySelectorAll('.modal-overlay').forEach(o => {
-  o.addEventListener('click', e => { if (e.target === o) closeModal(o.id.replace('modal-','')) });
+// Close on overlay click — runs after DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.modal-overlay').forEach(o => {
+    o.addEventListener('click', e => { if (e.target === o) closeModal(o.id.replace('modal-','')) });
+  });
 });
 
 // ── Toast ──────────────────────────────────────────────
