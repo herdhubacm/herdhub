@@ -77,6 +77,13 @@ function buildS3Client() {
         accessKeyId:     process.env.R2_ACCESS_KEY_ID,
         secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
       },
+      requestHandler: {
+        requestTimeout: 15000,
+        httpsAgent: new (require('https').Agent)({
+          secureProtocol: 'TLSv1_2_method',
+          rejectUnauthorized: true,
+        }),
+      },
     });
   }
 

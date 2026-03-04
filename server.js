@@ -18,6 +18,9 @@ const { testConnection: testStorage } = require('./services/storage');
 const app  = express();
 const PORT = process.env.PORT || 3000;
 
+// Trust Railway/Render/Heroku proxy — required for rate limiting + correct IPs
+app.set('trust proxy', 1);
+
 // ── Security ──────────────────────────────────────────
 app.use(helmet({
   contentSecurityPolicy: {

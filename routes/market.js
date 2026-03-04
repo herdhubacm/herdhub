@@ -69,10 +69,12 @@ async function fetchUSDA(reportId) {
   const url = `${BASE_URL}/reports/${reportId}?allSections=true&_limit=50`;
   const resp = await fetch(url, {
     headers: {
-      'Accept': 'application/json',
-      'User-Agent': 'HerdHub/1.0 (cattle-marketplace; contact@herdhub.com)'
+      'Accept': 'application/json, text/plain, */*',
+      'User-Agent': 'Mozilla/5.0 (compatible; HerdHub/1.0; +https://theherdhub.com)',
+      'Accept-Language': 'en-US,en;q=0.9',
+      'Cache-Control': 'no-cache',
     },
-    timeout: 12000
+    timeout: 15000
   });
   if (!resp.ok) throw new Error(`USDA ${resp.status}: ${resp.statusText}`);
   return resp.json();
