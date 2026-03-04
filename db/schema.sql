@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS listings (
   status           TEXT         NOT NULL DEFAULT 'active'
                                 CHECK (status IN ('active','sold','expired','draft','pending')),
   tier             TEXT         NOT NULL DEFAULT 'basic'
-                                CHECK (tier IN ('basic','standard','featured')),
+                                CHECK (tier IN ('basic','ribeye','filet','t_bone')),
   is_featured      BOOLEAN      NOT NULL DEFAULT FALSE,
   views            INTEGER      NOT NULL DEFAULT 0,
   expires_at       TIMESTAMPTZ,

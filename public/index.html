@@ -335,9 +335,10 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
     <h2>Ready to Sell?</h2>
     <p>Post your listing in minutes and reach over 120,000 active ranchers and farmers across America.</p>
     <div class="pricing-pills">
-      <div class="pricing-pill"><div class="pp-price">Free</div><div class="pp-plan">Basic Listing</div><div class="pp-features">1 photo · 30-day run</div></div>
-      <div class="pricing-pill" style="border-color:rgba(212,169,42,.5)"><div class="pp-price">$9.95</div><div class="pp-plan">Standard</div><div class="pp-features">5 photos · 60 days · Spotlight</div></div>
-      <div class="pricing-pill" style="border-color:rgba(181,69,27,.6)"><div class="pp-price">$24.95</div><div class="pp-plan">Featured</div><div class="pp-features">20 photos + video · 90 days · Homepage</div></div>
+      <div class="pricing-pill"><div class="pp-price">Free</div><div class="pp-plan">Basic Listing</div><div class="pp-features">1 photo · 30-day run · Livestock, trucks &amp; equipment</div></div>
+      <div class="pricing-pill" style="border-color:rgba(181,69,27,.6)"><div class="pp-price">$24.95</div><div class="pp-plan">🥩 Ribeye</div><div class="pp-features">3 photos · 90 days · Homepage featured placement</div></div>
+      <div class="pricing-pill" style="border-color:rgba(212,169,42,.5)"><div class="pp-price">$49.99</div><div class="pp-plan">🥩 Filet</div><div class="pp-features">5 photos · 30-day ad · Brands, sale barns &amp; ranches</div></div>
+      <div class="pricing-pill" style="border-color:rgba(212,169,42,.8)"><div class="pp-price">$39.99<span style="font-size:13px;font-weight:400">/mo</span></div><div class="pp-plan">🥩 T-Bone</div><div class="pp-features">5 photos · Recurring · Cancel anytime · Always on homepage</div></div>
     </div>
     <button class="btn-primary" style="font-size:15px;padding:15px 38px" onclick="openModal('post-listing')">Post Your Listing Now →</button>
   </div>
@@ -510,7 +511,12 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
     </div>
     <div class="form-row">
       <div class="form-group"><label>Quantity</label><input type="number" id="pl-quantity" value="1" min="1"></div>
-      <div class="form-group"><label>Listing Tier</label><select id="pl-tier"><option value="basic">Basic (Free)</option><option value="standard">Standard ($9.95)</option><option value="featured">Featured ($24.95)</option></select></div>
+      <div class="form-group"><label>Listing Tier</label><select id="pl-tier">
+  <option value="basic">Basic – Free (1 photo, 30 days)</option>
+  <option value="ribeye">🥩 Ribeye – $24.95 (3 photos, 90 days, homepage featured)</option>
+  <option value="filet">🥩 Filet – $49.99 (5 photos, 30-day ad, homepage)</option>
+  <option value="t_bone">🥩 T-Bone – $39.99/mo (5 photos, recurring, always on homepage)</option>
+</select></div>
     </div>
     <button class="btn-primary" style="width:100%;justify-content:center;margin-top:12px" onclick="doPostListing()">Post Listing</button>
   </div>

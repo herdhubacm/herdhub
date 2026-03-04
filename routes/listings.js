@@ -23,12 +23,14 @@ const upload = multer({
 
 // ── Helpers ────────────────────────────────────────────
 function tierPhotoLimit(tier) {
-  if (tier === 'featured') return parseInt(process.env.MAX_PHOTOS_FEATURED) || 20;
-  if (tier === 'standard') return parseInt(process.env.MAX_PHOTOS_STANDARD) || 5;
+  if (tier === 'filet')  return parseInt(process.env.MAX_PHOTOS_FILET)  || 5;
+  if (tier === 't_bone') return parseInt(process.env.MAX_PHOTOS_TBONE)  || 5;
+  if (tier === 'ribeye') return parseInt(process.env.MAX_PHOTOS_RIBEYE) || 3;
   return parseInt(process.env.MAX_PHOTOS_BASIC) || 1;
 }
 function expiresAt(tier) {
-  const days = tier === 'featured' ? 90 : tier === 'standard' ? 60 : 30;
+  // t_bone = recurring (90 day window), filet = 30 day one-time, ribeye = 90 day featured, basic = 30 day free
+  const days = (tier === 't_bone' || tier === 'ribeye') ? 90 : 30;
   return new Date(Date.now() + days * 86400000);
 }
 
@@ -227,8 +229,8 @@ router.post('/', authenticateToken, upload.array('photos', 20), async (req, res)
     if (!title || !description || !category || !state || !city)
       return res.status(400).json({ error: 'title, description, category, state, city required' });
 
-    const safeTier   = ['basic','standard','featured'].includes(tier) ? tier : 'basic';
-    const isFeatured = safeTier === 'featured';
+    const safeTier   = ['basic','ribeye','filet','t_bone'].includes(tier) ? tier : 'basic';
+    const isFeatured = ['ribeye','filet','t_bone'].includes(safeTier);
     const photoLimit = tierPhotoLimit(safeTier);
 
     await client.query('BEGIN');
@@ -250,7 +252,7 @@ router.post('/', authenticateToken, upload.array('photos', 20), async (req, res)
         age_months ? +age_months : null,
         sex || null, state, city, zip || null,
         safeTier, isFeatured, expiresAt(safeTier),
-        safeTier === 'basic' ? 'free' : 'pending',
+        safeTier === 'basic' ? 'free' : 'pending',  // basic=free, others need Stripe
       ]
     );
     const listingId = rows[0].id;

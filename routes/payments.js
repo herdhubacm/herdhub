@@ -24,8 +24,8 @@ function requireStripe(req, res, next) {
 router.post('/create-checkout', authenticateToken, requireStripe, async (req, res) => {
   try {
     const { listing_id, tier } = req.body;
-    if (!listing_id || !['standard','featured'].includes(tier))
-      return res.status(400).json({ error: 'listing_id and tier (standard|featured) required' });
+    if (!listing_id || !['ribeye','filet','t_bone'].includes(tier))
+      return res.status(400).json({ error: 'listing_id and tier (ribeye|filet|t_bone) required' });
 
     const { rows } = await query(
       'SELECT id, title FROM listings WHERE id=$1 AND user_id=$2',
@@ -33,18 +33,22 @@ router.post('/create-checkout', authenticateToken, requireStripe, async (req, re
     );
     if (!rows.length) return res.status(404).json({ error: 'Listing not found' });
 
-    const priceId = tier === 'featured'
-      ? process.env.STRIPE_PRICE_FEATURED
-      : process.env.STRIPE_PRICE_STANDARD;
+    const priceMap = {
+      ribeye: process.env.STRIPE_PRICE_RIBEYE,
+      filet:  process.env.STRIPE_PRICE_FILET,
+      t_bone: process.env.STRIPE_PRICE_TBONE,
+    };
+    const priceId = priceMap[tier];
 
     if (!priceId || priceId.includes('YOUR_'))
       return res.status(503).json({ error: 'Stripe price IDs not configured' });
 
     const origin  = req.headers.origin || `http://localhost:${process.env.PORT || 3000}`;
+    const mode = tier === 't_bone' ? 'subscription' : 'payment';
     const session = await stripe.checkout.sessions.create({
-      mode: 'payment',
+      mode,
       payment_method_types: ['card'],
-      line_items: [{ price: priceId, quantity: 1 }],
+      line_items: [{ price: priceId, quantity: 1 }],  // Stripe handles recurring billing for t_bone
       success_url: `${origin}/listing/${listing_id}?upgrade=success`,
       cancel_url:  `${origin}/listing/${listing_id}?upgrade=cancelled`,
       metadata:    { listing_id: String(listing_id), user_id: String(req.user.id), tier },
@@ -80,8 +84,8 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
   if (event.type === 'checkout.session.completed') {
     const session                     = event.data.object;
     const { listing_id, tier }        = session.metadata;
-    const isFeatured                  = tier === 'featured';
-    const days                        = isFeatured ? 90 : 60;
+    const isFeatured                  = ['ribeye','filet','t_bone'].includes(tier);
+    const days                        = (tier === 'ribeye' || tier === 't_bone') ? 90 : 30;
     const expires                     = new Date(Date.now() + days * 86400000);
 
     try {
