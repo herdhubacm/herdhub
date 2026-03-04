@@ -1,7 +1,7 @@
 {
   "name": "herdhub",
   "version": "2.1.0",
-  "description": "Herd Hub – American Cattle Market",
+  "description": "Herd Hub \u2013 American Cattle Market",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -26,10 +26,13 @@
     "@aws-sdk/client-s3": "^3.540.0",
     "@aws-sdk/s3-request-presigner": "^3.540.0",
     "sharp": "^0.33.2",
-    "mime-types": "^2.1.35"
+    "mime-types": "^2.1.35",
+    "@smithy/node-http-handler": "^3.0.0"
   },
   "devDependencies": {
     "nodemon": "^3.0.3"
   },
-  "engines": { "node": ">=18.0.0" }
+  "engines": {
+    "node": ">=20.0.0"
+  }
 }
