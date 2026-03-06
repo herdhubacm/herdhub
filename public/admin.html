@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Herd Hub Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0f1117;--surface:#1a1d27;--border:#2a2d3e;--text:#e2e8f0;--muted:#8892a4;--rust:#c0522a;--rust-light:#e06030;--gold:#d4a92a;--green:#22c55e;--red:#ef4444;--blue:#3b82f6;--purple:#a855f7}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex}
+
+/* Sidebar */
+.sidebar{width:220px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;z-index:50}
+.sidebar-logo{padding:20px 18px;border-bottom:1px solid var(--border)}
+.sidebar-logo .brand{font-size:18px;font-weight:700;color:var(--rust-light)}
+.sidebar-logo .sub{font-size:11px;color:var(--muted);margin-top:2px}
+.sidebar-nav{flex:1;padding:12px 8px;overflow-y:auto}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:500;color:var(--muted);transition:all .15s;margin-bottom:2px;border:none;background:none;width:100%;text-align:left}
+.nav-item:hover{background:rgba(255,255,255,.05);color:var(--text)}
+.nav-item.active{background:rgba(192,82,42,.15);color:var(--rust-light)}
+.nav-item .icon{font-size:16px;width:20px;text-align:center}
+.nav-badge{margin-left:auto;background:var(--red);color:white;font-size:10px;font-weight:700;padding:2px 6px;border-radius:10px}
+.sidebar-footer{padding:12px 8px;border-top:1px solid var(--border)}
+.user-info{padding:10px 12px;font-size:12px;color:var(--muted)}
+.user-info strong{display:block;color:var(--text);font-size:13px}
+.btn-logout{width:100%;padding:8px;background:rgba(239,68,68,.1);color:var(--red);border:1px solid rgba(239,68,68,.2);border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;margin-top:8px;transition:all .15s}
+.btn-logout:hover{background:rgba(239,68,68,.2)}
+
+/* Main */
+.main{margin-left:220px;flex:1;display:flex;flex-direction:column;min-height:100vh}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 28px;display:flex;align-items:center;justify-content:space-between}
+.topbar h1{font-size:18px;font-weight:700}
+.topbar .subtitle{font-size:12px;color:var(--muted);margin-top:2px}
+.content{padding:24px 28px;flex:1}
+
+/* Login screen */
+.login-wrap{display:flex;align-items:center;justify-content:center;min-height:100vh;width:100%}
+.login-box{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:40px;width:380px}
+.login-box h1{font-size:24px;font-weight:700;color:var(--rust-light);margin-bottom:4px}
+.login-box p{font-size:13px;color:var(--muted);margin-bottom:28px}
+.login-error{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#fca5a5;padding:10px 14px;border-radius:6px;font-size:13px;margin-bottom:16px;display:none}
+
+/* Stats grid */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px}
+.stat-card .label{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.stat-card .value{font-size:28px;font-weight:700;line-height:1}
+.stat-card .sub{font-size:12px;color:var(--muted);margin-top:4px}
+.stat-card.green .value{color:var(--green)}
+.stat-card.rust  .value{color:var(--rust-light)}
+.stat-card.gold  .value{color:var(--gold)}
+.stat-card.blue  .value{color:var(--blue)}
+
+/* Tables */
+.table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.table-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.table-header h2{font-size:15px;font-weight:600}
+.search-box{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.search-box input,.search-box select{background:var(--bg);border:1px solid var(--border);color:var(--text);padding:7px 12px;border-radius:6px;font-size:13px;outline:none}
+.search-box input:focus,.search-box select:focus{border-color:var(--rust)}
+table{width:100%;border-collapse:collapse}
+th{padding:10px 16px;text-align:left;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);background:rgba(0,0,0,.2)}
+td{padding:11px 16px;font-size:13px;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,.02)}
+.truncate{max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* Badges */
+.badge{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:4px}
+.badge-green{background:rgba(34,197,94,.15);color:#86efac}
+.badge-red{background:rgba(239,68,68,.15);color:#fca5a5}
+.badge-gold{background:rgba(212,169,42,.15);color:#fcd34d}
+.badge-blue{background:rgba(59,130,246,.15);color:#93c5fd}
+.badge-purple{background:rgba(168,85,247,.15);color:#d8b4fe}
+.badge-gray{background:rgba(255,255,255,.08);color:var(--muted)}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:5px;font-size:12px;font-weight:600;cursor:pointer;border:none;transition:all .15s}
+.btn-danger{background:rgba(239,68,68,.15);color:#fca5a5;border:1px solid rgba(239,68,68,.2)}
+.btn-danger:hover{background:rgba(239,68,68,.25)}
+.btn-warn{background:rgba(212,169,42,.15);color:#fcd34d;border:1px solid rgba(212,169,42,.2)}
+.btn-warn:hover{background:rgba(212,169,42,.25)}
+.btn-success{background:rgba(34,197,94,.15);color:#86efac;border:1px solid rgba(34,197,94,.2)}
+.btn-success:hover{background:rgba(34,197,94,.25)}
+.btn-primary{background:var(--rust);color:white;border:1px solid var(--rust)}
+.btn-primary:hover{background:var(--rust-light)}
+.btn-ghost{background:rgba(255,255,255,.05);color:var(--text);border:1px solid var(--border)}
+.btn-ghost:hover{background:rgba(255,255,255,.1)}
+
+/* Forms */
+.form-group{margin-bottom:16px}
+.form-group label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px;letter-spacing:.04em}
+.form-group input,.form-group select,.form-group textarea{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:9px 12px;border-radius:6px;font-size:13px;outline:none;font-family:inherit}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--rust)}
+
+/* Modal */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;align-items:center;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:28px;width:500px;max-width:95vw;max-height:90vh;overflow-y:auto;position:relative}
+.modal h2{font-size:17px;font-weight:700;margin-bottom:16px}
+.modal-close{position:absolute;top:14px;right:16px;background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer}
+.modal-close:hover{color:var(--text)}
+
+/* Panels */
+.panel{display:none}.panel.active{display:block}
+
+/* Pagination */
+.pagination{display:flex;align-items:center;justify-content:flex-end;gap:8px;padding:14px 16px;border-top:1px solid var(--border)}
+.pagination span{font-size:12px;color:var(--muted)}
+.page-btn{padding:5px 10px;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:4px;cursor:pointer;font-size:12px}
+.page-btn:hover{border-color:var(--rust);color:var(--rust-light)}
+.page-btn:disabled{opacity:.4;cursor:default}
+
+/* Charts */
+.mini-charts{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
+.chart-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px}
+.chart-card h3{font-size:13px;font-weight:600;color:var(--muted);margin-bottom:16px;text-transform:uppercase;letter-spacing:.08em}
+.bar-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.bar-label{font-size:12px;color:var(--text);width:140px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar-track{flex:1;background:rgba(255,255,255,.06);border-radius:3px;height:8px}
+.bar-fill{height:8px;border-radius:3px;background:var(--rust);transition:width .5s}
+.bar-count{font-size:11px;color:var(--muted);width:30px;text-align:right}
+
+/* Alert */
+.alert{padding:12px 16px;border-radius:6px;font-size:13px;margin-bottom:16px}
+.alert-success{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2);color:#86efac}
+.alert-error{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);color:#fca5a5}
+
+@media(max-width:900px){.stats-grid{grid-template-columns:repeat(2,1fr)}.mini-charts{grid-template-columns:1fr}.sidebar{width:60px}.sidebar .nav-item span,.sidebar-logo .sub,.sidebar .user-info strong,.nav-badge{display:none}.main{margin-left:60px}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="login-screen" class="login-wrap">
+  <div class="login-box">
+    <h1>🐄 Herd Hub</h1>
+    <p>Admin Panel — authorized personnel only</p>
+    <div class="login-error" id="login-error"></div>
+    <div class="form-group"><label>Email</label><input type="email" id="login-email" placeholder="admin@herdhub.com"></div>
+    <div class="form-group"><label>Password</label><input type="password" id="login-password" placeholder="••••••••"></div>
+    <button class="btn btn-primary" style="width:100%;padding:10px;font-size:14px;justify-content:center" onclick="doLogin()">Sign In →</button>
+  </div>
+</div>
+
+<!-- ADMIN APP -->
+<div id="admin-app" style="display:none;width:100%;display:none">
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <div class="brand">🐄 Herd Hub</div>
+      <div class="sub">Admin Panel</div>
+    </div>
+    <nav class="sidebar-nav">
+      <button class="nav-item active" onclick="switchPanel('dashboard')"><span class="icon">📊</span><span>Dashboard</span></button>
+      <button class="nav-item" onclick="switchPanel('listings')"><span class="icon">📋</span><span>Listings</span></button>
+      <button class="nav-item" onclick="switchPanel('users')"><span class="icon">👥</span><span>Users</span></button>
+      <button class="nav-item" onclick="switchPanel('messages')"><span class="icon">💬</span><span>Messages</span><span class="nav-badge" id="unread-badge" style="display:none">0</span></button>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-info"><strong id="admin-name">Admin</strong><span id="admin-email"></span></div>
+      <button class="btn-logout" onclick="logout()">Sign Out</button>
+    </div>
+  </div>
+
+  <!-- Main content -->
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <h1 id="panel-title">Dashboard</h1>
+        <div class="subtitle" id="panel-subtitle">Platform overview</div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <a href="/" target="_blank" class="btn btn-ghost">🌐 View Site</a>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- DASHBOARD PANEL -->
+      <div class="panel active" id="panel-dashboard">
+        <div class="stats-grid" id="stats-grid">
+          <div class="stat-card green"><div class="label">Active Listings</div><div class="value" id="s-active">—</div><div class="sub" id="s-today">— today</div></div>
+          <div class="stat-card blue"><div class="label">Total Users</div><div class="value" id="s-users">—</div><div class="sub" id="s-users-today">— joined today</div></div>
+          <div class="stat-card gold"><div class="label">Paid Listings</div><div class="value" id="s-paid">—</div><div class="sub" id="s-tier-breakdown">Ribeye / Filet / T-Bone</div></div>
+          <div class="stat-card rust"><div class="label">Unread Messages</div><div class="value" id="s-unread">—</div><div class="sub">Support inbox</div></div>
+        </div>
+
+        <div class="mini-charts">
+          <div class="chart-card">
+            <h3>Top Categories</h3>
+            <div id="chart-categories"><div style="color:var(--muted);font-size:13px">Loading…</div></div>
+          </div>
+          <div class="chart-card">
+            <h3>Top States</h3>
+            <div id="chart-states"><div style="color:var(--muted);font-size:13px">Loading…</div></div>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <div class="table-header"><h2>Recent Listings</h2></div>
+          <table>
+            <thead><tr><th>Title</th><th>Category</th><th>Seller</th><th>State</th><th>Tier</th><th>Status</th><th>Posted</th><th></th></tr></thead>
+            <tbody id="recent-listings-tbody"><tr><td colspan="8" style="text-align:center;color:var(--muted);padding:24px">Loading…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- LISTINGS PANEL -->
+      <div class="panel" id="panel-listings">
+        <div class="table-wrap">
+          <div class="table-header">
+            <h2>All Listings</h2>
+            <div class="search-box">
+              <input type="text" id="listing-search" placeholder="Search title, email…" onkeyup="debounce(loadListings, 400)()">
+              <select id="listing-status" onchange="loadListings()">
+                <option value="">All Status</option>
+                <option value="active">Active</option>
+                <option value="expired">Expired</option>
+                <option value="pending">Pending</option>
+              </select>
+              <select id="listing-tier" onchange="loadListings()">
+                <option value="">All Tiers</option>
+                <option value="basic">Basic</option>
+                <option value="ribeye">Ribeye</option>
+                <option value="filet">Filet</option>
+                <option value="t_bone">T-Bone</option>
+              </select>
+            </div>
+          </div>
+          <table>
+            <thead><tr><th>Title</th><th>Category</th><th>Seller</th><th>State</th><th>Tier</th><th>Status</th><th>Photos</th><th>Posted</th><th>Actions</th></tr></thead>
+            <tbody id="listings-tbody"><tr><td colspan="9" style="text-align:center;color:var(--muted);padding:24px">Loading…</td></tr></tbody>
+          </table>
+          <div class="pagination">
+            <span id="listings-count"></span>
+            <button class="page-btn" id="listings-prev" onclick="listingsPage--;loadListings()">← Prev</button>
+            <button class="page-btn" id="listings-next" onclick="listingsPage++;loadListings()">Next →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- USERS PANEL -->
+      <div class="panel" id="panel-users">
+        <div class="table-wrap">
+          <div class="table-header">
+            <h2>All Users</h2>
+            <div class="search-box">
+              <input type="text" id="user-search" placeholder="Search name, email…" onkeyup="debounce(loadUsers, 400)()">
+              <select id="user-role" onchange="loadUsers()">
+                <option value="">All Roles</option>
+                <option value="user">User</option>
+                <option value="admin">Admin</option>
+                <option value="moderator">Moderator</option>
+              </select>
+              <select id="user-banned" onchange="loadUsers()">
+                <option value="">All</option>
+                <option value="false">Active</option>
+                <option value="true">Banned</option>
+              </select>
+            </div>
+          </div>
+          <table>
+            <thead><tr><th>Name</th><th>Email</th><th>State</th><th>Role</th><th>Listings</th><th>Joined</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="users-tbody"><tr><td colspan="8" style="text-align:center;color:var(--muted);padding:24px">Loading…</td></tr></tbody>
+          </table>
+          <div class="pagination">
+            <span id="users-count"></span>
+            <button class="page-btn" id="users-prev" onclick="usersPage--;loadUsers()">← Prev</button>
+            <button class="page-btn" id="users-next" onclick="usersPage++;loadUsers()">Next →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- MESSAGES PANEL -->
+      <div class="panel" id="panel-messages">
+        <div class="table-wrap">
+          <div class="table-header">
+            <h2>User Messages</h2>
+            <div class="search-box">
+              <select id="msg-filter" onchange="loadMessages()">
+                <option value="">All Messages</option>
+                <option value="true">Unread Only</option>
+              </select>
+            </div>
+          </div>
+          <table>
+            <thead><tr><th>Subject</th><th>From</th><th>To</th><th>Listing</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="messages-tbody"><tr><td colspan="7" style="text-align:center;color:var(--muted);padding:24px">Loading…</td></tr></tbody>
+          </table>
+          <div class="pagination">
+            <span id="messages-count"></span>
+            <button class="page-btn" id="msgs-prev" onclick="messagesPage--;loadMessages()">← Prev</button>
+            <button class="page-btn" id="msgs-next" onclick="messagesPage++;loadMessages()">Next →</button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /admin-app -->
+
+<!-- Delete Listing Modal -->
+<div class="modal-bg" id="modal-delete-listing">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('delete-listing')">✕</button>
+    <h2>🗑️ Delete Listing</h2>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:16px">This will permanently remove the listing and all its photos. This cannot be undone.</p>
+    <div id="delete-listing-title" style="font-weight:600;margin-bottom:16px;color:var(--text)"></div>
+    <div class="form-group"><label>Reason for removal</label>
+      <select id="delete-reason">
+        <option value="Violates listing policy">Violates listing policy</option>
+        <option value="Suspected scam or fraud">Suspected scam or fraud</option>
+        <option value="Wrong category">Wrong category</option>
+        <option value="Duplicate listing">Duplicate listing</option>
+        <option value="Prohibited item">Prohibited item</option>
+        <option value="User request">User request</option>
+        <option value="Other">Other</option>
+      </select>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">
+      <button class="btn btn-ghost" onclick="closeModal('delete-listing')">Cancel</button>
+      <button class="btn btn-danger" onclick="confirmDeleteListing()">Delete Listing</button>
+    </div>
+  </div>
+</div>
+
+<!-- Ban User Modal -->
+<div class="modal-bg" id="modal-ban-user">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('ban-user')">✕</button>
+    <h2>🚫 Ban User</h2>
+    <div id="ban-user-info" style="font-weight:600;margin-bottom:16px;color:var(--text)"></div>
+    <div class="form-group"><label>Reason for ban</label>
+      <select id="ban-reason">
+        <option value="Spam or fraudulent listings">Spam or fraudulent listings</option>
+        <option value="Harassment of other users">Harassment of other users</option>
+        <option value="Repeated policy violations">Repeated policy violations</option>
+        <option value="Fake account">Fake account</option>
+        <option value="Other">Other</option>
+      </select>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">
+      <button class="btn btn-ghost" onclick="closeModal('ban-user')">Cancel</button>
+      <button class="btn btn-danger" onclick="confirmBanUser()">Ban User</button>
+    </div>
+  </div>
+</div>
+
+<!-- Reset Password Modal -->
+<div class="modal-bg" id="modal-reset-pw">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('reset-pw')">✕</button>
+    <h2>🔑 Reset Password</h2>
+    <div id="reset-pw-user" style="font-size:13px;color:var(--muted);margin-bottom:16px"></div>
+    <div id="reset-pw-alert" style="display:none"></div>
+    <div class="form-group"><label>New Password</label><input type="password" id="new-pw-input" placeholder="Min 8 characters"></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">
+      <button class="btn btn-ghost" onclick="closeModal('reset-pw')">Cancel</button>
+      <button class="btn btn-warn" onclick="confirmResetPassword()">Reset Password</button>
+    </div>
+  </div>
+</div>
+
+<!-- View Message Modal -->
+<div class="modal-bg" id="modal-view-message">
+  <div class="modal" style="max-width:560px">
+    <button class="modal-close" onclick="closeModal('view-message')">✕</button>
+    <h2 id="msg-modal-subject">Message</h2>
+    <div id="msg-modal-meta" style="font-size:12px;color:var(--muted);margin-bottom:16px"></div>
+    <div id="msg-modal-body" style="font-size:14px;line-height:1.7;background:var(--bg);padding:16px;border-radius:6px;white-space:pre-wrap"></div>
+  </div>
+</div>
+
+<script>
+const API = '';
+let token = localStorage.getItem('hh_admin_token');
+let adminUser = null;
+let listingsPage = 1;
+let usersPage = 1;
+let messagesPage = 1;
+let pendingDeleteId = null;
+let pendingBanId = null;
+let pendingResetId = null;
+
+// ── Boot ─────────────────────────────────────────────
+window.addEventListener('load', () => {
+  if (token) tryAutoLogin();
+  else showLogin();
+});
+
+async function tryAutoLogin() {
+  try {
+    const r = await fetch(`${API}/api/auth/me`, { headers: { Authorization: `Bearer ${token}` } });
+    const u = await r.json();
+    if (u.role === 'admin' || u.role === 'moderator') {
+      adminUser = u;
+      showApp();
+    } else {
+      localStorage.removeItem('hh_admin_token');
+      showLogin();
+    }
+  } catch { showLogin(); }
+}
+
+async function doLogin() {
+  const email = document.getElementById('login-email').value;
+  const pw    = document.getElementById('login-password').value;
+  const errEl = document.getElementById('login-error');
+  errEl.style.display = 'none';
+  try {
+    const r = await fetch(`${API}/api/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password: pw })
+    });
+    const d = await r.json();
+    if (!r.ok) { errEl.textContent = d.error || 'Login failed'; errEl.style.display = 'block'; return; }
+    if (d.user.role !== 'admin' && d.user.role !== 'moderator') {
+      errEl.textContent = 'Access denied. Admin accounts only.'; errEl.style.display = 'block'; return;
+    }
+    token = d.token;
+    adminUser = d.user;
+    localStorage.setItem('hh_admin_token', token);
+    showApp();
+  } catch { errEl.textContent = 'Connection error'; errEl.style.display = 'block'; }
+}
+
+function showLogin() {
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('admin-app').style.display = 'none';
+}
+
+function showApp() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('admin-app').style.display = 'flex';
+  document.getElementById('admin-name').textContent = adminUser.name;
+  document.getElementById('admin-email').textContent = adminUser.email;
+  loadDashboard();
+}
+
+function logout() {
+  token = null; adminUser = null;
+  localStorage.removeItem('hh_admin_token');
+  showLogin();
+}
+
+// ── Navigation ────────────────────────────────────────
+const panelTitles = {
+  dashboard: ['Dashboard', 'Platform overview'],
+  listings:  ['Listings', 'All listings — view and moderate'],
+  users:     ['Users', 'All accounts — manage and moderate'],
+  messages:  ['Messages', 'User to user messages and support'],
+};
+
+function switchPanel(name) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  document.querySelector(`[onclick="switchPanel('${name}')"]`).classList.add('active');
+  const [title, sub] = panelTitles[name] || [name, ''];
+  document.getElementById('panel-title').textContent = title;
+  document.getElementById('panel-subtitle').textContent = sub;
+
+  if (name === 'listings') { listingsPage = 1; loadListings(); }
+  if (name === 'users')    { usersPage = 1;    loadUsers(); }
+  if (name === 'messages') { messagesPage = 1; loadMessages(); }
+}
+
+// ── Dashboard ─────────────────────────────────────────
+async function loadDashboard() {
+  try {
+    const r = await fetch(`${API}/api/admin/stats`, { headers: { Authorization: `Bearer ${token}` } });
+    const d = await r.json();
+
+    document.getElementById('s-active').textContent = d.listings.active || 0;
+    document.getElementById('s-today').textContent = `${d.listings.today || 0} posted today`;
+    document.getElementById('s-users').textContent = d.users.total || 0;
+    document.getElementById('s-users-today').textContent = `${d.users.today || 0} joined today`;
+    document.getElementById('s-paid').textContent = d.revenue.paid_count || 0;
+    document.getElementById('s-tier-breakdown').textContent =
+      `${d.revenue.ribeye_count||0} Ribeye · ${d.revenue.filet_count||0} Filet · ${d.revenue.tbone_count||0} T-Bone`;
+    document.getElementById('s-unread').textContent = d.messages.unread || 0;
+
+    // Update unread badge
+    const unread = parseInt(d.messages.unread || 0);
+    const badge = document.getElementById('unread-badge');
+    badge.textContent = unread;
+    badge.style.display = unread > 0 ? 'inline-block' : 'none';
+
+    // Charts
+    renderBarChart('chart-categories', d.topCategories, 'category', 'count');
+    renderBarChart('chart-states', d.topStates, 'state', 'count');
+
+    // Recent listings table
+    const tbody = document.getElementById('recent-listings-tbody');
+    tbody.innerHTML = d.recentListings.map(l => `
+      <tr>
+        <td class="truncate" style="max-width:180px">${l.title}</td>
+        <td><span class="badge badge-blue">${l.category.replace(/_/g,' ')}</span></td>
+        <td style="font-size:12px">${l.seller_name}<br><span style="color:var(--muted)">${l.seller_email}</span></td>
+        <td>${l.state || '—'}</td>
+        <td>${tierBadge(l.tier)}</td>
+        <td>${statusBadge(l.status)}</td>
+        <td style="font-size:12px;color:var(--muted)">${timeAgo(l.created_at)}</td>
+        <td><button class="btn btn-danger" onclick="openDeleteListing(${l.id},'${escHtml(l.title)}')">Delete</button></td>
+      </tr>`).join('');
+  } catch (err) {
+    console.error('Dashboard error:', err);
+  }
+}
+
+function renderBarChart(containerId, data, labelKey, countKey) {
+  if (!data || !data.length) { document.getElementById(containerId).innerHTML = '<div style="color:var(--muted);font-size:12px">No data yet</div>'; return; }
+  const max = Math.max(...data.map(d => parseInt(d[countKey])));
+  document.getElementById(containerId).innerHTML = data.map(d => `
+    <div class="bar-row">
+      <div class="bar-label">${String(d[labelKey]).replace(/_/g,' ')}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${Math.round((d[countKey]/max)*100)}%"></div></div>
+      <div class="bar-count">${d[countKey]}</div>
+    </div>`).join('');
+}
+
+// ── Listings ──────────────────────────────────────────
+async function loadListings() {
+  const q        = document.getElementById('listing-search')?.value || '';
+  const status   = document.getElementById('listing-status')?.value || '';
+  const tier     = document.getElementById('listing-tier')?.value || '';
+  const params   = new URLSearchParams({ page: listingsPage, limit: 25, q, status, tier });
+  try {
+    const r = await fetch(`${API}/api/admin/listings?${params}`, { headers: { Authorization: `Bearer ${token}` } });
+    const d = await r.json();
+    const tbody = document.getElementById('listings-tbody');
+    tbody.innerHTML = d.listings.map(l => `
+      <tr>
+        <td class="truncate">${l.title}</td>
+        <td style="font-size:11px">${l.category.replace(/_/g,' ')}</td>
+        <td style="font-size:12px">${l.seller_name}<br><span style="color:var(--muted)">${l.seller_email}</span></td>
+        <td>${l.state || '—'}</td>
+        <td>${tierBadge(l.tier)}</td>
+        <td>${statusBadge(l.status)}</td>
+        <td style="text-align:center">${l.photo_count}</td>
+        <td style="font-size:12px;color:var(--muted)">${timeAgo(l.created_at)}</td>
+        <td><button class="btn btn-danger" onclick="openDeleteListing(${l.id},'${escHtml(l.title)}')">Delete</button></td>
+      </tr>`).join('') || '<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:24px">No listings found</td></tr>';
+    document.getElementById('listings-count').textContent = `${d.total} listings · page ${d.page} of ${d.pages}`;
+    document.getElementById('listings-prev').disabled = d.page <= 1;
+    document.getElementById('listings-next').disabled = d.page >= d.pages;
+  } catch (err) { console.error(err); }
+}
+
+// ── Users ─────────────────────────────────────────────
+async function loadUsers() {
+  const q      = document.getElementById('user-search')?.value || '';
+  const role   = document.getElementById('user-role')?.value || '';
+  const banned = document.getElementById('user-banned')?.value || '';
+  const params = new URLSearchParams({ page: usersPage, limit: 25, q, role, banned });
+  try {
+    const r = await fetch(`${API}/api/admin/users?${params}`, { headers: { Authorization: `Bearer ${token}` } });
+    const d = await r.json();
+    const tbody = document.getElementById('users-tbody');
+    tbody.innerHTML = d.users.map(u => `
+      <tr>
+        <td style="font-weight:500">${u.name}</td>
+        <td style="font-size:12px;color:var(--muted)">${u.email}</td>
+        <td>${u.state || '—'}</td>
+        <td>${roleBadge(u.role)}</td>
+        <td style="text-align:center">${u.active_listings} / ${u.listing_count}</td>
+        <td style="font-size:12px;color:var(--muted)">${timeAgo(u.created_at)}</td>
+        <td>${u.is_banned ? '<span class="badge badge-red">Banned</span>' : '<span class="badge badge-green">Active</span>'}</td>
+        <td>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            ${u.is_banned
+              ? `<button class="btn btn-success" onclick="unbanUser(${u.id},'${escHtml(u.name)}')">Unban</button>`
+              : `<button class="btn btn-danger"  onclick="openBanUser(${u.id},'${escHtml(u.name)} (${escHtml(u.email)})')">Ban</button>`
+            }
+            <button class="btn btn-warn" onclick="openResetPassword(${u.id},'${escHtml(u.name)}')">Reset PW</button>
+            ${u.role === 'user' ? `<button class="btn btn-ghost" onclick="makeAdmin(${u.id})">→ Admin</button>` : ''}
+          </div>
+        </td>
+      </tr>`).join('') || '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:24px">No users found</td></tr>';
+    document.getElementById('users-count').textContent = `${d.total} users · page ${d.page} of ${d.pages}`;
+    document.getElementById('users-prev').disabled = d.page <= 1;
+    document.getElementById('users-next').disabled = d.page >= d.pages;
+  } catch (err) { console.error(err); }
+}
+
+// ── Messages ──────────────────────────────────────────
+async function loadMessages() {
+  const unread = document.getElementById('msg-filter')?.value || '';
+  const params = new URLSearchParams({ page: messagesPage, limit: 25, unread });
+  try {
+    const r = await fetch(`${API}/api/admin/messages?${params}`, { headers: { Authorization: `Bearer ${token}` } });
+    const d = await r.json();
+    const tbody = document.getElementById('messages-tbody');
+    tbody.innerHTML = d.messages.map(m => `
+      <tr style="${!m.is_read ? 'background:rgba(59,130,246,.04)' : ''}">
+        <td style="font-weight:${m.is_read ? '400' : '600'}" class="truncate">${m.subject || '(no subject)'}</td>
+        <td style="font-size:12px">${m.from_name}<br><span style="color:var(--muted)">${m.from_email}</span></td>
+        <td style="font-size:12px">${m.to_name}<br><span style="color:var(--muted)">${m.to_email}</span></td>
+        <td style="font-size:12px;color:var(--muted)" class="truncate">${m.listing_title || '—'}</td>
+        <td style="font-size:12px;color:var(--muted)">${timeAgo(m.created_at)}</td>
+        <td>${m.is_read ? '<span class="badge badge-gray">Read</span>' : '<span class="badge badge-blue">Unread</span>'}</td>
+        <td><button class="btn btn-ghost" onclick="viewMessage(${m.id})">View</button></td>
+      </tr>`).join('') || '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:24px">No messages</td></tr>';
+    document.getElementById('messages-count').textContent = `${d.total} messages · page ${d.page} of ${d.pages}`;
+    document.getElementById('msgs-prev').disabled = d.page <= 1;
+    document.getElementById('msgs-next').disabled = d.page >= d.pages;
+  } catch (err) { console.error(err); }
+}
+
+async function viewMessage(id) {
+  try {
+    const r = await fetch(`${API}/api/admin/messages?limit=100`, { headers: { Authorization: `Bearer ${token}` } });
+    const d = await r.json();
+    const msg = d.messages.find(m => m.id === id);
+    if (!msg) return;
+    document.getElementById('msg-modal-subject').textContent = msg.subject || '(no subject)';
+    document.getElementById('msg-modal-meta').textContent =
+      `From: ${msg.from_name} (${msg.from_email}) → To: ${msg.to_name} (${msg.to_email}) · ${new Date(msg.created_at).toLocaleString()}${msg.listing_title ? ' · Re: ' + msg.listing_title : ''}`;
+    document.getElementById('msg-modal-body').textContent = msg.body;
+    openModal('view-message');
+    if (!msg.is_read) {
+      await fetch(`${API}/api/admin/messages/${id}/read`, { method:'PUT', headers:{ Authorization:`Bearer ${token}` } });
+      loadMessages();
+    }
+  } catch {}
+}
+
+// ── Actions ───────────────────────────────────────────
+function openDeleteListing(id, title) {
+  pendingDeleteId = id;
+  document.getElementById('delete-listing-title').textContent = `"${title}"`;
+  openModal('delete-listing');
+}
+
+async function confirmDeleteListing() {
+  if (!pendingDeleteId) return;
+  const reason = document.getElementById('delete-reason').value;
+  try {
+    await fetch(`${API}/api/admin/listings/${pendingDeleteId}`, {
+      method: 'DELETE',
+      headers: { 'Content-Type':'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ reason })
+    });
+    closeModal('delete-listing');
+    loadListings();
+    loadDashboard();
+    showToast('Listing deleted');
+  } catch { showToast('Error deleting listing'); }
+  pendingDeleteId = null;
+}
+
+function openBanUser(id, info) {
+  pendingBanId = id;
+  document.getElementById('ban-user-info').textContent = info;
+  openModal('ban-user');
+}
+
+async function confirmBanUser() {
+  if (!pendingBanId) return;
+  const reason = document.getElementById('ban-reason').value;
+  try {
+    await fetch(`${API}/api/admin/users/${pendingBanId}/ban`, {
+      method: 'PUT',
+      headers: { 'Content-Type':'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ reason })
+    });
+    closeModal('ban-user');
+    loadUsers();
+    showToast('User banned');
+  } catch { showToast('Error banning user'); }
+  pendingBanId = null;
+}
+
+async function unbanUser(id, name) {
+  if (!confirm(`Unban ${name}?`)) return;
+  try {
+    await fetch(`${API}/api/admin/users/${id}/unban`, { method:'PUT', headers:{ Authorization:`Bearer ${token}` } });
+    loadUsers();
+    showToast('User unbanned');
+  } catch { showToast('Error unbanning user'); }
+}
+
+function openResetPassword(id, name) {
+  pendingResetId = id;
+  document.getElementById('reset-pw-user').textContent = `Resetting password for: ${name}`;
+  document.getElementById('new-pw-input').value = '';
+  document.getElementById('reset-pw-alert').style.display = 'none';
+  openModal('reset-pw');
+}
+
+async function confirmResetPassword() {
+  const pw = document.getElementById('new-pw-input').value;
+  const alertEl = document.getElementById('reset-pw-alert');
+  if (!pw || pw.length < 8) {
+    alertEl.className = 'alert alert-error';
+    alertEl.textContent = 'Password must be at least 8 characters';
+    alertEl.style.display = 'block'; return;
+  }
+  try {
+    await fetch(`${API}/api/admin/users/${pendingResetId}/reset-password`, {
+      method: 'PUT',
+      headers: { 'Content-Type':'application/json', Authorization:`Bearer ${token}` },
+      body: JSON.stringify({ newPassword: pw })
+    });
+    alertEl.className = 'alert alert-success';
+    alertEl.textContent = '✅ Password reset successfully';
+    alertEl.style.display = 'block';
+    setTimeout(() => closeModal('reset-pw'), 1500);
+    showToast('Password reset');
+  } catch { showToast('Error resetting password'); }
+}
+
+async function makeAdmin(id) {
+  if (!confirm('Grant this user admin access? They will be able to access this panel.')) return;
+  try {
+    await fetch(`${API}/api/admin/users/${id}/role`, {
+      method: 'PUT',
+      headers: { 'Content-Type':'application/json', Authorization:`Bearer ${token}` },
+      body: JSON.stringify({ role: 'admin' })
+    });
+    loadUsers();
+    showToast('User promoted to admin');
+  } catch { showToast('Error updating role'); }
+}
+
+// ── Helpers ───────────────────────────────────────────
+function openModal(id) { document.getElementById('modal-' + id).classList.add('open'); }
+function closeModal(id) { document.getElementById('modal-' + id).classList.remove('open'); }
+document.addEventListener('click', e => {
+  if (e.target.classList.contains('modal-bg')) e.target.classList.remove('open');
+});
+
+function tierBadge(tier) {
+  const map = { basic:'badge-gray', ribeye:'badge-rust', filet:'badge-gold', t_bone:'badge-purple' };
+  return `<span class="badge ${map[tier]||'badge-gray'}">${tier||'basic'}</span>`;
+}
+function statusBadge(s) {
+  const map = { active:'badge-green', expired:'badge-red', pending:'badge-gold' };
+  return `<span class="badge ${map[s]||'badge-gray'}">${s}</span>`;
+}
+function roleBadge(r) {
+  const map = { admin:'badge-red', moderator:'badge-purple', user:'badge-gray' };
+  return `<span class="badge ${map[r]||'badge-gray'}">${r}</span>`;
+}
+function timeAgo(iso) {
+  const d = new Date(iso), now = new Date();
+  const diff = Math.floor((now - d) / 1000);
+  if (diff < 60) return 'just now';
+  if (diff < 3600) return `${Math.floor(diff/60)}m ago`;
+  if (diff < 86400) return `${Math.floor(diff/3600)}h ago`;
+  return `${Math.floor(diff/86400)}d ago`;
+}
+function escHtml(s) { return String(s).replace(/'/g, "\\'").replace(/"/g, '&quot;'); }
+
+let toastTimeout;
+function showToast(msg) {
+  let t = document.getElementById('admin-toast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = 'admin-toast';
+    t.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#1e293b;border:1px solid #334155;color:#e2e8f0;padding:12px 20px;border-radius:8px;font-size:13px;font-weight:500;z-index:999;transition:opacity .3s;box-shadow:0 4px 16px rgba(0,0,0,.4)';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg; t.style.opacity = '1';
+  clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => { t.style.opacity = '0'; }, 3000);
+}
+
+function debounce(fn, ms) {
+  let timer;
+  return function(...args) {
+    clearTimeout(timer);
+    timer = setTimeout(() => fn.apply(this, args), ms);
+  };
+}
+
+// Enter key on login
+document.getElementById('login-password').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doLogin();
+});
+</script>
+</body>
+</html>

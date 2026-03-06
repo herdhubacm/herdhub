@@ -57,6 +57,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'public', 'uploads')));
 
 // ── API Routes ────────────────────────────────────────
 app.use('/api/auth',     limiter(30),  require('./routes/auth'));
+app.use('/api/admin',    limiter(100), require('./routes/admin'));
 app.use('/api/listings', limiter(200), require('./routes/listings'));
 app.use('/api/market',   limiter(60),  require('./routes/market'));
 app.use('/api/forum',    limiter(100), require('./routes/forum'));
@@ -81,6 +82,14 @@ app.get('/api/health', async (_req, res) => {
 // ── 404 for unmatched API routes ──────────────────────
 app.use('/api/*', (req, res) =>
   res.status(404).json({ error: `Not found: ${req.method} ${req.path}` })
+);
+
+// ── Admin panel ───────────────────────────────────────
+app.get('/admin', (_req, res) =>
+  res.sendFile(path.join(__dirname, 'public', 'admin.html'))
+);
+app.get('/admin/*', (_req, res) =>
+  res.sendFile(path.join(__dirname, 'public', 'admin.html'))
 );
 
 // ── SPA fallback ──────────────────────────────────────

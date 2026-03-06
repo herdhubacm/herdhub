@@ -134,6 +134,12 @@ CREATE INDEX IF NOT EXISTS idx_photos_listing ON listing_photos(listing_id, sort
 
 -- Safely add new columns if migrating from v2.0 (already has the table)
 DO $$ BEGIN
+  ALTER TABLE users ADD COLUMN IF NOT EXISTS is_banned   BOOLEAN NOT NULL DEFAULT FALSE;
+  ALTER TABLE users ADD COLUMN IF NOT EXISTS ban_reason  TEXT;
+EXCEPTION WHEN duplicate_column THEN NULL;
+END $$;
+
+DO $$ BEGIN
   ALTER TABLE listing_photos ADD COLUMN IF NOT EXISTS storage_key TEXT;
   ALTER TABLE listing_photos ADD COLUMN IF NOT EXISTS thumb_url   TEXT;
   ALTER TABLE listing_photos ADD COLUMN IF NOT EXISTS thumb_key   TEXT;

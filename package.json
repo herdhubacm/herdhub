@@ -1,6 +1,6 @@
 {
   "name": "herdhub",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "Herd Hub \u2013 American Cattle Market",
   "main": "server.js",
   "scripts": {
@@ -9,7 +9,8 @@
     "db:migrate": "node scripts/migrate.js",
     "db:seed": "node scripts/seed.js",
     "setup": "npm install && node scripts/migrate.js && node scripts/seed.js",
-    "storage:test": "node scripts/test-storage.js"
+    "storage:test": "node scripts/test-storage.js",
+    "make-admin": "node scripts/make-admin.js"
   },
   "dependencies": {
     "express": "^4.18.2",
