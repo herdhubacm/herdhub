@@ -112,6 +112,29 @@ async function start() {
   try {
     await testDb();
     await testStorage();
+
+    // Auto-promote ADMIN_EMAIL to admin role on startup
+    if (process.env.ADMIN_EMAIL) {
+      try {
+        const { query } = require('./db/database');
+        const email = process.env.ADMIN_EMAIL.toLowerCase().trim();
+        console.log(`🔑  Attempting to promote: ${email}`);
+        const check = await query('SELECT id, email, name, role FROM users WHERE LOWER(email)=$1', [email]);
+        console.log(`🔑  Found ${check.rows.length} matching user(s)`);
+        if (check.rows.length) {
+          const { rows } = await query(
+            "UPDATE users SET role='admin' WHERE LOWER(email)=$1 RETURNING email, name, role",
+            [email]
+          );
+          console.log(`✅  Promoted ${rows[0].name} (${rows[0].email}) to role: ${rows[0].role}`);
+        } else {
+          console.warn(`⚠️   No user found with email: ${email}`);
+        }
+      } catch (e) {
+        console.warn('Admin promotion error:', e.message);
+      }
+    }
+
     app.listen(PORT, () => {
       console.log(`\n🐄  Herd Hub running → http://localhost:${PORT}`);
       console.log(`☁️   Storage: ${(process.env.STORAGE_PROVIDER || 'local').toUpperCase()}`);
