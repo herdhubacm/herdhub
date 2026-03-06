@@ -33,9 +33,11 @@ CREATE TABLE IF NOT EXISTS listings (
   description      TEXT         NOT NULL,
   category         TEXT         NOT NULL
                                 CHECK (category IN (
-                                  'beef_cattle','dairy','bulls','heifers','calves',
-                                  'full_herd','equipment','trucks_trailers',
-                                  'working_dogs','farm_to_table','feed_hay'
+                                  'beef_cattle','dairy','bulls','heifers_calves',
+                                  'equipment','trucks_trailers','working_dogs','feed_hay',
+                                  'sale_barns','ranches_farms','breed_associations',
+                                  'farm_to_table','livestock_services','feed_stores',
+                                  'insurance_finance','full_herd'
                                 )),
   subcategory      TEXT,
   breed            TEXT,

@@ -178,6 +178,40 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
 .toast.show{transform:translateY(0)}
 @media(max-width:900px){.hero-content{grid-template-columns:1fr}.hero-search{display:none}.two-col{grid-template-columns:1fr}.footer-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:600px){nav a:not(.nav-cta){display:none}.footer-grid{grid-template-columns:1fr}.categories-grid{grid-template-columns:repeat(3,1fr)}}
+/* Account Page */
+.account-page{max-width:1100px;margin:0 auto;padding:32px 24px}
+.account-header{display:flex;align-items:center;gap:20px;margin-bottom:32px;padding-bottom:24px;border-bottom:2px solid var(--light-tan)}
+.account-avatar{width:72px;height:72px;background:var(--rust);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;color:white;font-family:'Playfair Display',serif;font-weight:700;flex-shrink:0}
+.account-tabs{display:flex;gap:4px;margin-bottom:28px;border-bottom:2px solid var(--light-tan)}
+.acct-tab{font-family:'Oswald',sans-serif;font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:11px 22px;border:none;background:none;cursor:pointer;color:var(--mid-brown);border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .2s}
+.acct-tab.active{color:var(--rust);border-bottom-color:var(--rust)}
+.acct-tab:hover{color:var(--rust)}
+.acct-panel{display:none}.acct-panel.active{display:block}
+.my-listing-card{background:white;border:1px solid var(--light-tan);border-radius:6px;padding:18px;margin-bottom:14px;display:flex;gap:16px;align-items:flex-start}
+.mlc-thumb{width:90px;height:72px;object-fit:cover;border-radius:4px;background:var(--light-tan);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:28px}
+.mlc-info{flex:1;min-width:0}
+.mlc-title{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;color:var(--dark-brown);margin-bottom:4px}
+.mlc-meta{font-size:12px;color:#888;font-family:'Oswald',sans-serif;letter-spacing:.05em;text-transform:uppercase;margin-bottom:8px}
+.mlc-actions{display:flex;gap:8px;flex-wrap:wrap}
+.mlc-btn{font-family:'Oswald',sans-serif;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:6px 14px;border-radius:3px;border:none;cursor:pointer;transition:all .2s}
+.mlc-btn-edit{background:var(--dark-brown);color:white}
+.mlc-btn-photos{background:var(--gold);color:var(--dark-brown)}
+.mlc-btn-delete{background:#dc3545;color:white}
+.mlc-status{display:inline-block;font-family:'Oswald',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:3px 8px;border-radius:3px;margin-left:8px}
+.mlc-status.active{background:#d4edda;color:#155724}
+.mlc-status.expired{background:#f8d7da;color:#721c24}
+/* Photo upload area */
+.photo-upload-area{border:2px dashed var(--tan);border-radius:6px;padding:24px;text-align:center;cursor:pointer;transition:all .2s;background:rgba(201,169,110,.05);margin-bottom:12px}
+.photo-upload-area:hover{border-color:var(--rust);background:rgba(181,69,27,.05)}
+.photo-upload-area input[type=file]{display:none}
+.photo-previews{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.photo-preview{position:relative;width:80px;height:64px}
+.photo-preview img{width:100%;height:100%;object-fit:cover;border-radius:4px;border:1px solid var(--light-tan)}
+.photo-preview .remove-photo{position:absolute;top:-6px;right:-6px;background:#dc3545;color:white;border:none;border-radius:50%;width:18px;height:18px;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1}
+/* listing type switcher */
+.listing-type-tabs{display:flex;gap:0;margin-bottom:20px;border:2px solid var(--light-tan);border-radius:4px;overflow:hidden}
+.lt-tab{flex:1;padding:10px;text-align:center;font-family:'Oswald',sans-serif;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;background:white;border:none;color:var(--mid-brown);transition:all .2s}
+.lt-tab.active{background:var(--rust);color:white}
 </style>
 </head>
 <body>
@@ -187,7 +221,7 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
   <a href="javascript:void(0)" data-action="scroll" data-target="forum">Ranch News</a>
   <a href="javascript:void(0)" data-action="page" data-page="forum">Community Forum</a>
   <a href="javascript:void(0)" data-action="modal" data-modal="auth" data-tab="register">Free Newsletter</a>
-  <a href="javascript:void(0)" data-action="modal" data-modal="auth" data-tab="register">Advertise With Us</a>
+  <a href="javascript:void(0)" data-action="modal" data-modal="post-listing">Advertise With Us</a>
 </div>
 
 <header>
@@ -199,14 +233,15 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
     <nav>
       <a href="javascript:void(0)" data-action="category" data-cat="beef_cattle">🐄 Cattle</a>
       <a href="javascript:void(0)" data-action="category" data-cat="equipment">🚜 Equipment</a>
-      <a href="javascript:void(0)" data-action="category" data-cat="trucks_trailers">🚛 Trucks & Trailers</a>
+      <a href="javascript:void(0)" data-action="category" data-cat="trucks_trailers">🚛 Trailers</a>
       <a href="javascript:void(0)" data-action="category" data-cat="working_dogs">🐕 Dogs</a>
-      <a href="javascript:void(0)" data-action="category" data-cat="farm_to_table">🥩 Farm to Table</a>
+      <a href="javascript:void(0)" data-action="all-listings">Browse All</a>
       <a href="javascript:void(0)" data-action="page" data-page="forum" id="nav-forum">Forum</a>
       <a href="javascript:void(0)" class="nav-cta" data-action="modal" data-modal="post-listing">+ Post Ad</a>
     </nav>
     <div class="header-actions">
       <button class="btn-signin" id="auth-btn" data-action="modal" data-modal="auth">Sign In / Register</button>
+      <button class="btn-account" id="account-btn" data-action="page" data-page="account" style="display:none;background:var(--rust);color:white;border:none;font-family:'Oswald',sans-serif;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:9px 18px;border-radius:3px;cursor:pointer">👤 <span id="account-name">My Account</span></button>
     </div>
   </div>
 </header>
@@ -463,6 +498,162 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
   </div>
 </div>
 
+<!-- ── ACCOUNT PAGE ── -->
+<div id="page-account" style="display:none;background:var(--warm-white);min-height:80vh">
+  <div class="account-page">
+    <div class="account-header">
+      <div class="account-avatar" id="acct-avatar">?</div>
+      <div>
+        <div style="font-family:'Playfair Display',serif;font-size:26px;font-weight:700;color:var(--dark-brown)" id="acct-fullname">My Account</div>
+        <div style="font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--tan);margin-top:3px" id="acct-location"></div>
+      </div>
+      <button class="mlc-btn mlc-btn-delete" style="margin-left:auto;padding:8px 18px" data-action="logout">Sign Out</button>
+    </div>
+
+    <!-- Tabs -->
+    <div class="account-tabs">
+      <button class="acct-tab active" data-action="acct-tab" data-tab="profile">👤 Profile</button>
+      <button class="acct-tab" data-action="acct-tab" data-tab="listings">📋 My Listings</button>
+      <button class="acct-tab" data-action="acct-tab" data-tab="post">+ Post New Listing</button>
+    </div>
+
+    <!-- Profile Panel -->
+    <div class="acct-panel active" id="acct-panel-profile">
+      <div style="max-width:520px">
+        <h3 style="font-family:'Playfair Display',serif;font-size:20px;margin-bottom:20px;color:var(--dark-brown)">Edit Your Profile</h3>
+        <div id="profile-success" class="form-success" style="display:none"></div>
+        <div id="profile-error" class="form-error" style="display:none"></div>
+        <div class="form-row">
+          <div class="form-group"><label>Full Name</label><input type="text" id="acct-name" placeholder="Jake Harrington"></div>
+          <div class="form-group"><label>Phone</label><input type="tel" id="acct-phone" placeholder="(806) 555-1234"></div>
+        </div>
+        <div class="form-group"><label>Email</label><input type="email" id="acct-email" placeholder="you@example.com" disabled style="opacity:.6;cursor:not-allowed"></div>
+        <div class="form-row">
+          <div class="form-group"><label>State</label><select id="acct-state">
+            <option value="">Select…</option>
+            <option>AL</option><option>AK</option><option>AZ</option><option>AR</option><option>CA</option>
+            <option>CO</option><option>CT</option><option>DE</option><option>FL</option><option>GA</option>
+            <option>HI</option><option>ID</option><option>IL</option><option>IN</option><option>IA</option>
+            <option>KS</option><option>KY</option><option>LA</option><option>ME</option><option>MD</option>
+            <option>MA</option><option>MI</option><option>MN</option><option>MS</option><option>MO</option>
+            <option>MT</option><option>NE</option><option>NV</option><option>NH</option><option>NJ</option>
+            <option>NM</option><option>NY</option><option>NC</option><option>ND</option><option>OH</option>
+            <option>OK</option><option>OR</option><option>PA</option><option>RI</option><option>SC</option>
+            <option>SD</option><option>TN</option><option>TX</option><option>UT</option><option>VT</option>
+            <option>VA</option><option>WA</option><option>WV</option><option>WI</option><option>WY</option>
+          </select></div>
+          <div class="form-group"><label>City</label><input type="text" id="acct-city" placeholder="Amarillo"></div>
+        </div>
+        <div class="form-group"><label>Bio</label><textarea id="acct-bio" rows="3" placeholder="Tell buyers about your operation…"></textarea></div>
+        <button class="btn-primary" data-action="save-profile" style="margin-top:4px">Save Changes</button>
+        <div style="margin-top:28px;padding-top:20px;border-top:1px solid var(--light-tan)">
+          <h4 style="font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--mid-brown);margin-bottom:14px">Change Password</h4>
+          <div id="pw-error" class="form-error" style="display:none"></div>
+          <div id="pw-success" class="form-success" style="display:none"></div>
+          <div class="form-group"><label>Current Password</label><input type="password" id="pw-current" placeholder="••••••••"></div>
+          <div class="form-row">
+            <div class="form-group"><label>New Password</label><input type="password" id="pw-new" placeholder="Min 8 characters"></div>
+            <div class="form-group"><label>Confirm New</label><input type="password" id="pw-confirm" placeholder="Match new password"></div>
+          </div>
+          <button class="btn-primary" data-action="change-password" style="margin-top:4px">Update Password</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- My Listings Panel -->
+    <div class="acct-panel" id="acct-panel-listings">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+        <h3 style="font-family:'Playfair Display',serif;font-size:20px;color:var(--dark-brown)">My Listings</h3>
+        <button class="btn-primary" style="padding:9px 18px;font-size:13px" data-action="acct-tab" data-tab="post">+ Post New Listing</button>
+      </div>
+      <div id="my-listings-container"><div class="loading">Loading your listings…</div></div>
+    </div>
+
+    <!-- Post New Listing Panel -->
+    <div class="acct-panel" id="acct-panel-post">
+      <h3 style="font-family:'Playfair Display',serif;font-size:20px;color:var(--dark-brown);margin-bottom:20px">Post a New Listing</h3>
+      <div style="max-width:640px">
+        <!-- Type switcher -->
+        <div class="listing-type-tabs" style="margin-bottom:20px">
+          <button class="lt-tab active" id="acct-lt-regular" data-action="acct-listing-type" data-type="regular">🐄 Regular Listing</button>
+          <button class="lt-tab" id="acct-lt-advertise" data-action="acct-listing-type" data-type="advertise">📢 Advertisement</button>
+        </div>
+        <div id="acct-listing-error" class="form-error" style="display:none"></div>
+        <div id="acct-listing-success" class="form-success" style="display:none"></div>
+        <div class="form-group"><label>Title</label><input type="text" id="acct-pl-title" placeholder="e.g. 2022 Registered Black Angus Bull"></div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Category</label>
+            <select id="acct-pl-category">
+              <optgroup label="🐄 Regular Listings" id="acct-cats-regular">
+                <option value="beef_cattle">Beef Cattle</option>
+                <option value="dairy">Dairy Cattle</option>
+                <option value="bulls">Bulls</option>
+                <option value="heifers_calves">Heifers &amp; Calves</option>
+                <option value="equipment">Equipment</option>
+                <option value="trucks_trailers">Trucks &amp; Trailers</option>
+                <option value="working_dogs">Working Dogs</option>
+                <option value="feed_hay">Feed &amp; Hay</option>
+              </optgroup>
+              <optgroup label="📢 Advertisements" id="acct-cats-advertise" style="display:none">
+                <option value="sale_barns">Sale Barns &amp; Auctions</option>
+                <option value="ranches_farms">Ranches &amp; Farms</option>
+                <option value="breed_associations">Breed Associations</option>
+                <option value="farm_to_table">Farm to Table / Direct Beef</option>
+                <option value="livestock_services">Livestock Services</option>
+                <option value="feed_stores">Feed &amp; Supply Stores</option>
+                <option value="insurance_finance">Insurance &amp; Finance</option>
+                <option value="full_herd">Full Herd Sales</option>
+              </optgroup>
+            </select>
+          </div>
+          <div class="form-group"><label>Breed (optional)</label><input type="text" id="acct-pl-breed" placeholder="Black Angus"></div>
+        </div>
+        <div class="form-group"><label>Description</label><textarea id="acct-pl-description" rows="4" placeholder="Describe your listing in detail…"></textarea></div>
+        <div class="form-row">
+          <div class="form-group"><label>Price ($)</label><input type="number" id="acct-pl-price" placeholder="0.00"></div>
+          <div class="form-group"><label>Price Type</label><select id="acct-pl-price-type"><option value="fixed">Fixed</option><option value="per_head">Per Head</option><option value="per_cwt">Per CWT</option><option value="per_lb">Per Pound</option><option value="obo">OBO</option><option value="negotiable">Negotiable</option><option value="call">Call for Price</option></select></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>State</label><select id="acct-pl-state">
+            <option value="">Select State…</option>
+            <option>AL</option><option>AK</option><option>AZ</option><option>AR</option><option>CA</option>
+            <option>CO</option><option>CT</option><option>DE</option><option>FL</option><option>GA</option>
+            <option>HI</option><option>ID</option><option>IL</option><option>IN</option><option>IA</option>
+            <option>KS</option><option>KY</option><option>LA</option><option>ME</option><option>MD</option>
+            <option>MA</option><option>MI</option><option>MN</option><option>MS</option><option>MO</option>
+            <option>MT</option><option>NE</option><option>NV</option><option>NH</option><option>NJ</option>
+            <option>NM</option><option>NY</option><option>NC</option><option>ND</option><option>OH</option>
+            <option>OK</option><option>OR</option><option>PA</option><option>RI</option><option>SC</option>
+            <option>SD</option><option>TN</option><option>TX</option><option>UT</option><option>VT</option>
+            <option>VA</option><option>WA</option><option>WV</option><option>WI</option><option>WY</option>
+          </select></div>
+          <div class="form-group"><label>City</label><input type="text" id="acct-pl-city" placeholder="Amarillo"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Quantity</label><input type="number" id="acct-pl-quantity" value="1" min="1"></div>
+          <div class="form-group"><label>Listing Tier</label><select id="acct-pl-tier">
+            <option value="basic">Basic – Free (1 photo, 30 days)</option>
+            <option value="ribeye">🥩 Ribeye – $24.95 (3 photos, 90 days, featured)</option>
+            <option value="filet">🥩 Filet – $49.99 (5 photos, 30-day ad)</option>
+            <option value="t_bone">🥩 T-Bone – $39.99/mo (5 photos, recurring)</option>
+          </select></div>
+        </div>
+        <div class="form-group">
+          <label>Photos</label>
+          <div class="photo-upload-area" id="acct-photo-drop-area">
+            <input type="file" id="acct-pl-photos" multiple accept="image/jpeg,image/png,image/webp">
+            <div>📸 <strong>Click to add photos</strong> or drag &amp; drop<br>
+            <span style="font-size:11px;color:#999">JPG, PNG or WEBP · Max 10MB each</span></div>
+            <div class="photo-previews" id="acct-photo-previews"></div>
+          </div>
+        </div>
+        <button class="btn-primary" style="width:100%;justify-content:center;margin-top:8px" data-action="acct-post-listing">Post Listing →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ── MODALS ── -->
 <!-- AUTH -->
 <div class="modal-overlay" id="modal-auth">
@@ -490,35 +681,84 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
 
 <!-- POST LISTING -->
 <div class="modal-overlay" id="modal-post-listing">
-  <div class="modal" style="max-width:560px">
+  <div class="modal" style="max-width:600px">
     <button class="modal-close" data-action="close-modal" data-modal="post-listing">✕</button>
-    <h2>Post a Listing</h2><p>Fill in the details below. Basic listings are always free.</p>
+    <h2>Post a Listing</h2>
+    <!-- Listing type switcher -->
+    <div class="listing-type-tabs">
+      <button class="lt-tab active" id="lt-regular" data-action="listing-type" data-type="regular">🐄 Regular Listing</button>
+      <button class="lt-tab" id="lt-advertise" data-action="listing-type" data-type="advertise">📢 Advertisement</button>
+    </div>
     <div id="listing-form-error" class="form-error" style="display:none"></div>
     <div id="listing-form-success" class="form-success" style="display:none"></div>
     <div class="form-group"><label>Title</label><input type="text" id="pl-title" placeholder="e.g. 2022 Registered Black Angus Bull"></div>
     <div class="form-row">
-      <div class="form-group"><label>Category</label><select id="pl-category"><option value="beef_cattle">Beef Cattle</option><option value="dairy">Dairy</option><option value="bulls">Bulls</option><option value="heifers">Heifers</option><option value="calves">Calves</option><option value="full_herd">Full Herd</option><option value="equipment">Equipment</option><option value="trucks_trailers">Trucks & Trailers</option><option value="working_dogs">Working Dogs</option><option value="farm_to_table">Farm to Table</option><option value="feed_hay">Feed & Hay</option></select></div>
-      <div class="form-group"><label>Breed (if applicable)</label><input type="text" id="pl-breed" placeholder="Black Angus"></div>
+      <div class="form-group">
+        <label>Category</label>
+        <select id="pl-category">
+          <optgroup label="🐄 Regular Listings" id="cats-regular">
+            <option value="beef_cattle">Beef Cattle</option>
+            <option value="dairy">Dairy Cattle</option>
+            <option value="bulls">Bulls</option>
+            <option value="heifers_calves">Heifers &amp; Calves</option>
+            <option value="equipment">Equipment</option>
+            <option value="trucks_trailers">Trucks &amp; Trailers</option>
+            <option value="working_dogs">Working Dogs</option>
+            <option value="feed_hay">Feed &amp; Hay</option>
+          </optgroup>
+          <optgroup label="📢 Advertisements" id="cats-advertise" style="display:none">
+            <option value="sale_barns">Sale Barns &amp; Auctions</option>
+            <option value="ranches_farms">Ranches &amp; Farms</option>
+            <option value="breed_associations">Breed Associations</option>
+            <option value="farm_to_table">Farm to Table / Direct Beef</option>
+            <option value="livestock_services">Livestock Services</option>
+            <option value="feed_stores">Feed &amp; Supply Stores</option>
+            <option value="insurance_finance">Insurance &amp; Finance</option>
+            <option value="full_herd">Full Herd Sales</option>
+          </optgroup>
+        </select>
+      </div>
+      <div class="form-group"><label>Breed (optional)</label><input type="text" id="pl-breed" placeholder="Black Angus"></div>
     </div>
-    <div class="form-group"><label>Description</label><textarea id="pl-description" rows="4" placeholder="Describe your listing in detail — weight, age, health history, etc."></textarea></div>
+    <div class="form-group"><label>Description</label><textarea id="pl-description" rows="3" placeholder="Describe your listing — weight, age, health history, pricing details…"></textarea></div>
     <div class="form-row">
       <div class="form-group"><label>Price ($)</label><input type="number" id="pl-price" placeholder="0.00"></div>
-      <div class="form-group"><label>Price Type</label><select id="pl-price-type"><option value="fixed">Fixed</option><option value="obo">OBO</option><option value="negotiable">Negotiable</option><option value="per_head">Per Head</option><option value="per_lb">Per Pound</option><option value="per_cwt">Per CWT</option><option value="call">Call for Price</option></select></div>
+      <div class="form-group"><label>Price Type</label><select id="pl-price-type"><option value="fixed">Fixed</option><option value="per_head">Per Head</option><option value="per_cwt">Per CWT</option><option value="per_lb">Per Pound</option><option value="obo">OBO</option><option value="negotiable">Negotiable</option><option value="call">Call for Price</option></select></div>
     </div>
     <div class="form-row">
-      <div class="form-group"><label>State</label><select id="pl-state"><option>TX</option><option>KS</option><option>NE</option><option>OK</option><option>MT</option><option>WY</option><option>CO</option><option>IA</option><option>MO</option><option>CA</option></select></div>
+      <div class="form-group"><label>State</label><select id="pl-state"><option value="">Select State…</option>
+<option>AL</option><option>AK</option><option>AZ</option><option>AR</option><option>CA</option>
+<option>CO</option><option>CT</option><option>DE</option><option>FL</option><option>GA</option>
+<option>HI</option><option>ID</option><option>IL</option><option>IN</option><option>IA</option>
+<option>KS</option><option>KY</option><option>LA</option><option>ME</option><option>MD</option>
+<option>MA</option><option>MI</option><option>MN</option><option>MS</option><option>MO</option>
+<option>MT</option><option>NE</option><option>NV</option><option>NH</option><option>NJ</option>
+<option>NM</option><option>NY</option><option>NC</option><option>ND</option><option>OH</option>
+<option>OK</option><option>OR</option><option>PA</option><option>RI</option><option>SC</option>
+<option>SD</option><option>TN</option><option selected>TX</option><option>UT</option><option>VT</option>
+<option>VA</option><option>WA</option><option>WV</option><option>WI</option><option>WY</option></select></div>
       <div class="form-group"><label>City</label><input type="text" id="pl-city" placeholder="Amarillo"></div>
     </div>
     <div class="form-row">
       <div class="form-group"><label>Quantity</label><input type="number" id="pl-quantity" value="1" min="1"></div>
       <div class="form-group"><label>Listing Tier</label><select id="pl-tier">
-  <option value="basic">Basic – Free (1 photo, 30 days)</option>
-  <option value="ribeye">🥩 Ribeye – $24.95 (3 photos, 90 days, homepage featured)</option>
-  <option value="filet">🥩 Filet – $49.99 (5 photos, 30-day ad, homepage)</option>
-  <option value="t_bone">🥩 T-Bone – $39.99/mo (5 photos, recurring, always on homepage)</option>
-</select></div>
+        <option value="basic">Basic – Free (1 photo, 30 days)</option>
+        <option value="ribeye">🥩 Ribeye – $24.95 (3 photos, 90 days, featured)</option>
+        <option value="filet">🥩 Filet – $49.99 (5 photos, 30-day ad)</option>
+        <option value="t_bone">🥩 T-Bone – $39.99/mo (5 photos, recurring)</option>
+      </select></div>
     </div>
-    <button class="btn-primary" style="width:100%;justify-content:center;margin-top:12px" data-action="post-listing">Post Listing</button>
+    <!-- Photo Upload -->
+    <div class="form-group">
+      <label>Photos <span id="photo-count-hint" style="font-weight:400;color:#888;text-transform:none;letter-spacing:0">(up to 1 for Basic, 3 for Ribeye, 5 for Filet/T-Bone)</span></label>
+      <div class="photo-upload-area" id="photo-drop-area">
+        <input type="file" id="pl-photos" multiple accept="image/jpeg,image/png,image/webp">
+        <div>📸 <strong>Click to add photos</strong> or drag &amp; drop here<br>
+        <span style="font-size:11px;color:#999">JPG, PNG or WEBP · Max 10MB each</span></div>
+        <div class="photo-previews" id="photo-previews"></div>
+      </div>
+    </div>
+    <button class="btn-primary" style="width:100%;justify-content:center;margin-top:12px" data-action="post-listing">Post Listing →</button>
   </div>
 </div>
 
@@ -568,6 +808,9 @@ document.addEventListener('DOMContentLoaded', () => {
   loadFeaturedListings();
   loadForumSidebar();
   initEventDelegation();
+  // Init photo uploads
+  initPhotoUpload('pl-photos', 'photo-previews', 'photo-drop-area');
+  initPhotoUpload('acct-pl-photos', 'acct-photo-previews', 'acct-photo-drop-area');
 });
 
 // ── Event Delegation ───────────────────────────────────
@@ -598,6 +841,31 @@ function initEventDelegation() {
     else if (action === 'post-listing') doPostListing();
     else if (action === 'post-topic')  doPostTopic();
     else if (action === 'subscribe')   subscribeNewsletter();
+    else if (action === 'logout')      logout();
+    else if (action === 'save-profile') saveProfile();
+    else if (action === 'change-password') changePassword();
+    else if (action === 'acct-tab')    switchAcctTab(el.dataset.tab);
+    else if (action === 'acct-post-listing') acctPostListing();
+    else if (action === 'delete-listing') deleteMyListing(el.dataset.id);
+    else if (action === 'edit-listing') showToast('Edit listing coming soon!');
+    else if (action === 'listing-type') {
+      const isAdvert = el.dataset.type === 'advertise';
+      document.getElementById('lt-regular').classList.toggle('active', !isAdvert);
+      document.getElementById('lt-advertise').classList.toggle('active', isAdvert);
+      document.getElementById('cats-regular').style.display = isAdvert ? 'none' : '';
+      document.getElementById('cats-advertise').style.display = isAdvert ? '' : 'none';
+      const catSel = document.getElementById('pl-category');
+      catSel.value = isAdvert ? 'sale_barns' : 'beef_cattle';
+    }
+    else if (action === 'acct-listing-type') {
+      const isAdvert = el.dataset.type === 'advertise';
+      document.getElementById('acct-lt-regular').classList.toggle('active', !isAdvert);
+      document.getElementById('acct-lt-advertise').classList.toggle('active', isAdvert);
+      document.getElementById('acct-cats-regular').style.display = isAdvert ? 'none' : '';
+      document.getElementById('acct-cats-advertise').style.display = isAdvert ? '' : 'none';
+      const catSel = document.getElementById('acct-pl-category');
+      catSel.value = isAdvert ? 'sale_barns' : 'beef_cattle';
+    }
     else if (action === 'scroll') {
       const target = document.getElementById(el.dataset.target);
       if (target) target.scrollIntoView({ behavior: 'smooth' });
@@ -615,11 +883,17 @@ function initEventDelegation() {
 // ── Auth ───────────────────────────────────────────────
 function updateAuthUI() {
   const btn = document.getElementById('auth-btn');
+  const acctBtn = document.getElementById('account-btn');
   if (authToken) {
     fetch(`${API}/api/auth/me`, { headers: { Authorization: `Bearer ${authToken}` } })
       .then(r => r.json()).then(u => {
-        if (u.id) { currentUser = u; btn.textContent = `👤 ${u.name.split(' ')[0]}`; }
-        else { authToken = null; localStorage.removeItem('hh_token'); }
+        if (u.id) {
+          currentUser = u;
+          btn.style.display = 'none';
+          acctBtn.style.display = 'inline-block';
+          document.getElementById('account-name').textContent = u.name.split(' ')[0];
+        }
+        else { authToken = null; localStorage.removeItem('hh_token'); btn.style.display=''; acctBtn.style.display='none'; }
       }).catch(() => {});
   }
 }
@@ -635,6 +909,9 @@ async function doLogin() {
     if (!r.ok) { errEl.textContent = d.error; errEl.style.display='block'; return; }
     authToken = d.token; currentUser = d.user;
     localStorage.setItem('hh_token', authToken);
+    document.getElementById('auth-btn').style.display = 'none';
+    document.getElementById('account-btn').style.display = 'inline-block';
+    document.getElementById('account-name').textContent = d.user.name.split(' ')[0];
     closeModal('auth'); updateAuthUI(); showToast('Welcome back, ' + d.user.name.split(' ')[0] + '!');
   } catch(e) { errEl.textContent = 'Connection error'; errEl.style.display='block'; }
 }
@@ -656,6 +933,9 @@ async function doRegister() {
     if (!r.ok) { errEl.textContent = d.error; errEl.style.display='block'; return; }
     authToken = d.token; currentUser = d.user;
     localStorage.setItem('hh_token', authToken);
+    document.getElementById('auth-btn').style.display = 'none';
+    document.getElementById('account-btn').style.display = 'inline-block';
+    document.getElementById('account-name').textContent = d.user.name.split(' ')[0];
     closeModal('auth'); updateAuthUI(); showToast('Welcome to Herd Hub, ' + d.user.name.split(' ')[0] + '!');
   } catch(e) { errEl.textContent = 'Connection error'; errEl.style.display='block'; }
 }
@@ -868,40 +1148,46 @@ async function doPostListing() {
   const sucEl = document.getElementById('listing-form-success');
   errEl.style.display='none'; sucEl.style.display='none';
 
-  const body = {
-    title: document.getElementById('pl-title').value,
-    category: document.getElementById('pl-category').value,
-    breed: document.getElementById('pl-breed').value,
-    description: document.getElementById('pl-description').value,
-    price: document.getElementById('pl-price').value,
-    price_type: document.getElementById('pl-price-type').value,
-    state: document.getElementById('pl-state').value,
-    city: document.getElementById('pl-city').value,
-    quantity: document.getElementById('pl-quantity').value,
-    tier: document.getElementById('pl-tier').value,
-  };
+  const title = document.getElementById('pl-title').value.trim();
+  const description = document.getElementById('pl-description').value.trim();
+  const category = document.getElementById('pl-category').value;
+  const state = document.getElementById('pl-state').value;
+  const city = document.getElementById('pl-city').value.trim();
 
-  if (!body.title || !body.description || !body.city) {
-    errEl.textContent = 'Please fill in title, description, and city.';
-    errEl.style.display='block'; return;
+  if (!title || !description || !category || !state || !city) {
+    errEl.textContent = 'Please fill in all required fields';
+    errEl.style.display = 'block'; return;
   }
+
+  const formData = new FormData();
+  formData.append('title', title);
+  formData.append('description', description);
+  formData.append('category', category);
+  formData.append('breed', document.getElementById('pl-breed').value);
+  formData.append('price', document.getElementById('pl-price').value);
+  formData.append('price_type', document.getElementById('pl-price-type').value);
+  formData.append('quantity', document.getElementById('pl-quantity').value);
+  formData.append('state', state);
+  formData.append('city', city);
+  formData.append('tier', document.getElementById('pl-tier').value);
+
+  const photos = document.getElementById('pl-photos').files;
+  Array.from(photos).forEach(f => formData.append('photos', f));
 
   try {
     const r = await fetch(`${API}/api/listings`, {
-      method:'POST',
-      headers:{'Content-Type':'application/json', Authorization:`Bearer ${authToken}`},
-      body: JSON.stringify(body)
+      method: 'POST',
+      headers: { Authorization: `Bearer ${authToken}` },
+      body: formData
     });
     const d = await r.json();
-    if (!r.ok) { errEl.textContent = d.error; errEl.style.display='block'; return; }
-    sucEl.textContent = '✅ Listing posted successfully! It will appear in search results shortly.';
-    sucEl.style.display='block';
-    showToast('Listing posted!');
-    setTimeout(() => { closeModal('post-listing'); loadFeaturedListings(); loadStats(); }, 2000);
+    if (!r.ok) { errEl.textContent = d.error || 'Failed to post listing'; errEl.style.display='block'; return; }
+    sucEl.textContent = '✅ Listing posted! Redirecting to your account…'; sucEl.style.display='block';
+    setTimeout(() => { closeModal('post-listing'); showPage('account'); }, 1500);
   } catch(e) { errEl.textContent = 'Connection error'; errEl.style.display='block'; }
 }
 
-// ── Forum ──────────────────────────────────────────────
+
 async function loadForumSidebar() {
   try {
     const r = await fetch(`${API}/api/forum/topics?limit=5`);
@@ -963,7 +1249,9 @@ function showPage(page) {
   document.getElementById('page-home').style.display = page === 'home' ? 'block' : 'none';
   document.getElementById('page-listings').style.display = page === 'listings' ? 'block' : 'none';
   document.getElementById('page-forum').style.display = page === 'forum' ? 'block' : 'none';
+  document.getElementById('page-account').style.display = page === 'account' ? 'block' : 'none';
   if (page === 'forum') loadForumPage();
+  if (page === 'account') loadAccountPage();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -992,6 +1280,227 @@ document.addEventListener('DOMContentLoaded', () => {
     o.addEventListener('click', e => { if (e.target === o) closeModal(o.id.replace('modal-','')) });
   });
 });
+
+// ── Account Page ───────────────────────────────────────
+async function loadAccountPage() {
+  if (!authToken) { showPage('home'); openModal('auth'); return; }
+
+  // Fill profile fields
+  if (currentUser) {
+    document.getElementById('acct-avatar').textContent = currentUser.name ? currentUser.name[0].toUpperCase() : '?';
+    document.getElementById('acct-fullname').textContent = currentUser.name || 'My Account';
+    document.getElementById('acct-location').textContent = [currentUser.city, currentUser.state].filter(Boolean).join(', ');
+    document.getElementById('acct-name').value = currentUser.name || '';
+    document.getElementById('acct-phone').value = currentUser.phone || '';
+    document.getElementById('acct-email').value = currentUser.email || '';
+    document.getElementById('acct-state').value = currentUser.state || '';
+    document.getElementById('acct-city').value = currentUser.city || '';
+    document.getElementById('acct-bio').value = currentUser.bio || '';
+  }
+
+  // Load listings
+  loadMyListings();
+}
+
+function switchAcctTab(tab) {
+  document.querySelectorAll('.acct-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.acct-panel').forEach(p => p.classList.remove('active'));
+  document.querySelector(`.acct-tab[data-tab="${tab}"]`).classList.add('active');
+  document.getElementById('acct-panel-' + tab).classList.add('active');
+  if (tab === 'listings') loadMyListings();
+}
+
+async function loadMyListings() {
+  const container = document.getElementById('my-listings-container');
+  container.innerHTML = '<div class="loading">Loading your listings…</div>';
+  try {
+    const r = await fetch(`${API}/api/listings/user/me`, { headers: { Authorization: `Bearer ${authToken}` } });
+    const listings = await r.json();
+    if (!listings.length) {
+      container.innerHTML = '<p style="color:#888;padding:20px 0">You have no listings yet. <a href="javascript:void(0)" data-action="acct-tab" data-tab="post" style="color:var(--rust)">Post your first listing →</a></p>';
+      return;
+    }
+    container.innerHTML = listings.map(l => {
+      const thumb = l.thumb
+        ? `<img src="${l.thumb}" style="width:90px;height:72px;object-fit:cover;border-radius:4px;flex-shrink:0">`
+        : `<div style="width:90px;height:72px;background:var(--light-tan);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0">${catEmoji(l.category)}</div>`;
+      const statusCls = l.status === 'active' ? 'active' : 'expired';
+      const price = l.price ? '$' + Number(l.price).toLocaleString() : 'Call for price';
+      return `<div class="my-listing-card">
+        ${thumb}
+        <div class="mlc-info">
+          <div class="mlc-title">${l.title}<span class="mlc-status ${statusCls}">${l.status}</span></div>
+          <div class="mlc-meta">${l.category.replace(/_/g,' ')} · ${l.city}, ${l.state} · ${price} · ${l.tier} tier</div>
+          <div class="mlc-actions">
+            <button class="mlc-btn mlc-btn-edit" data-action="edit-listing" data-id="${l.id}">✏️ Edit</button>
+            <button class="mlc-btn mlc-btn-delete" data-action="delete-listing" data-id="${l.id}">🗑️ Delete</button>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    container.innerHTML = '<p style="color:#dc3545">Could not load listings.</p>';
+  }
+}
+
+async function saveProfile() {
+  const errEl = document.getElementById('profile-error');
+  const sucEl = document.getElementById('profile-success');
+  errEl.style.display = 'none'; sucEl.style.display = 'none';
+  try {
+    const r = await fetch(`${API}/api/auth/me`, {
+      method: 'PUT',
+      headers: { 'Content-Type':'application/json', Authorization: `Bearer ${authToken}` },
+      body: JSON.stringify({
+        name:  document.getElementById('acct-name').value,
+        phone: document.getElementById('acct-phone').value,
+        state: document.getElementById('acct-state').value,
+        city:  document.getElementById('acct-city').value,
+        bio:   document.getElementById('acct-bio').value,
+      })
+    });
+    const d = await r.json();
+    if (!r.ok) { errEl.textContent = d.error; errEl.style.display='block'; return; }
+    currentUser = { ...currentUser, ...d };
+    document.getElementById('acct-fullname').textContent = currentUser.name;
+    document.getElementById('account-name').textContent = currentUser.name.split(' ')[0];
+    document.getElementById('acct-avatar').textContent = currentUser.name[0].toUpperCase();
+    sucEl.textContent = '✅ Profile saved!'; sucEl.style.display='block';
+    setTimeout(() => sucEl.style.display='none', 3000);
+  } catch(e) { errEl.textContent = 'Connection error'; errEl.style.display='block'; }
+}
+
+async function changePassword() {
+  const errEl = document.getElementById('pw-error');
+  const sucEl = document.getElementById('pw-success');
+  errEl.style.display='none'; sucEl.style.display='none';
+  const newPw = document.getElementById('pw-new').value;
+  const confirm = document.getElementById('pw-confirm').value;
+  if (newPw !== confirm) { errEl.textContent = 'Passwords do not match'; errEl.style.display='block'; return; }
+  if (newPw.length < 8) { errEl.textContent = 'Password must be at least 8 characters'; errEl.style.display='block'; return; }
+  try {
+    const r = await fetch(`${API}/api/auth/change-password`, {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json', Authorization: `Bearer ${authToken}` },
+      body: JSON.stringify({ currentPassword: document.getElementById('pw-current').value, newPassword: newPw })
+    });
+    const d = await r.json();
+    if (!r.ok) { errEl.textContent = d.error; errEl.style.display='block'; return; }
+    sucEl.textContent = '✅ Password updated!'; sucEl.style.display='block';
+    document.getElementById('pw-current').value='';
+    document.getElementById('pw-new').value='';
+    document.getElementById('pw-confirm').value='';
+    setTimeout(() => sucEl.style.display='none', 3000);
+  } catch(e) { errEl.textContent = 'Connection error'; errEl.style.display='block'; }
+}
+
+async function deleteMyListing(id) {
+  if (!confirm('Are you sure you want to delete this listing?')) return;
+  try {
+    await fetch(`${API}/api/listings/${id}`, { method:'DELETE', headers:{ Authorization:`Bearer ${authToken}` } });
+    loadMyListings();
+    showToast('Listing deleted');
+  } catch(e) { showToast('Could not delete listing'); }
+}
+
+// Photo preview handler for both modal and account page
+function initPhotoUpload(inputId, previewId, dropAreaId) {
+  const input = document.getElementById(inputId);
+  const preview = document.getElementById(previewId);
+  const dropArea = document.getElementById(dropAreaId);
+  if (!input || !preview || !dropArea) return;
+
+  dropArea.addEventListener('click', () => input.click());
+  dropArea.addEventListener('dragover', e => { e.preventDefault(); dropArea.style.borderColor='var(--rust)'; });
+  dropArea.addEventListener('dragleave', () => { dropArea.style.borderColor=''; });
+  dropArea.addEventListener('drop', e => {
+    e.preventDefault();
+    dropArea.style.borderColor='';
+    input.files = e.dataTransfer.files;
+    renderPhotoPreviews(input, preview);
+  });
+  input.addEventListener('change', () => renderPhotoPreviews(input, preview));
+}
+
+function renderPhotoPreviews(input, previewEl) {
+  previewEl.innerHTML = '';
+  Array.from(input.files).forEach((file, i) => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const div = document.createElement('div');
+      div.className = 'photo-preview';
+      div.innerHTML = `<img src="${e.target.result}"><button class="remove-photo" data-index="${i}">×</button>`;
+      div.querySelector('.remove-photo').addEventListener('click', ev => {
+        ev.stopPropagation();
+        // Remove file from input (create new DataTransfer)
+        const dt = new DataTransfer();
+        Array.from(input.files).forEach((f, fi) => { if (fi !== i) dt.items.add(f); });
+        input.files = dt.files;
+        renderPhotoPreviews(input, previewEl);
+      });
+      previewEl.appendChild(div);
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+async function acctPostListing() {
+  const errEl = document.getElementById('acct-listing-error');
+  const sucEl = document.getElementById('acct-listing-success');
+  errEl.style.display='none'; sucEl.style.display='none';
+
+  const title = document.getElementById('acct-pl-title').value.trim();
+  const description = document.getElementById('acct-pl-description').value.trim();
+  const category = document.getElementById('acct-pl-category').value;
+  const state = document.getElementById('acct-pl-state').value;
+  const city = document.getElementById('acct-pl-city').value.trim();
+
+  if (!title || !description || !category || !state || !city) {
+    errEl.textContent = 'Please fill in all required fields (Title, Description, Category, State, City)';
+    errEl.style.display = 'block'; return;
+  }
+
+  const formData = new FormData();
+  formData.append('title', title);
+  formData.append('description', description);
+  formData.append('category', category);
+  formData.append('breed', document.getElementById('acct-pl-breed').value);
+  formData.append('price', document.getElementById('acct-pl-price').value);
+  formData.append('price_type', document.getElementById('acct-pl-price-type').value);
+  formData.append('quantity', document.getElementById('acct-pl-quantity').value);
+  formData.append('state', state);
+  formData.append('city', city);
+  formData.append('tier', document.getElementById('acct-pl-tier').value);
+
+  const photos = document.getElementById('acct-pl-photos').files;
+  Array.from(photos).forEach(f => formData.append('photos', f));
+
+  try {
+    const r = await fetch(`${API}/api/listings`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${authToken}` },
+      body: formData
+    });
+    const d = await r.json();
+    if (!r.ok) { errEl.textContent = d.error || 'Failed to post listing'; errEl.style.display='block'; return; }
+    sucEl.textContent = '✅ Listing posted successfully!'; sucEl.style.display='block';
+    // Reset form
+    ['acct-pl-title','acct-pl-breed','acct-pl-description','acct-pl-price','acct-pl-city'].forEach(id => {
+      const el = document.getElementById(id); if(el) el.value = '';
+    });
+    document.getElementById('acct-photo-previews').innerHTML = '';
+    setTimeout(() => { sucEl.style.display='none'; switchAcctTab('listings'); }, 2000);
+  } catch(e) { errEl.textContent = 'Connection error'; errEl.style.display='block'; }
+}
+
+function logout() {
+  authToken = null; currentUser = null;
+  localStorage.removeItem('hh_token');
+  document.getElementById('auth-btn').style.display = 'inline-block';
+  document.getElementById('account-btn').style.display = 'none';
+  showPage('home');
+  showToast('Signed out successfully');
+}
 
 // ── Toast ──────────────────────────────────────────────
 function showToast(msg, duration=3000) {

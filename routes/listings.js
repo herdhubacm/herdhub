@@ -229,6 +229,13 @@ router.post('/', authenticateToken, upload.array('photos', 20), async (req, res)
     if (!title || !description || !category || !state || !city)
       return res.status(400).json({ error: 'title, description, category, state, city required' });
 
+    const validCategories = [
+      'beef_cattle','dairy','bulls','heifers_calves','equipment','trucks_trailers',
+      'working_dogs','feed_hay','sale_barns','ranches_farms','breed_associations',
+      'farm_to_table','livestock_services','feed_stores','insurance_finance','full_herd'
+    ];
+    if (!validCategories.includes(category))
+      return res.status(400).json({ error: 'Invalid category' });
     const safeTier   = ['basic','ribeye','filet','t_bone'].includes(tier) ? tier : 'basic';
     const isFeatured = ['ribeye','filet','t_bone'].includes(safeTier);
     const photoLimit = tierPhotoLimit(safeTier);
