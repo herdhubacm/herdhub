@@ -70,8 +70,6 @@ function buildS3Client() {
   if (PROVIDER === 'r2') {
     const accountId = process.env.R2_ACCOUNT_ID;
     if (!accountId) throw new Error('R2_ACCOUNT_ID is required for Cloudflare R2');
-    const { NodeHttpHandler } = require('@smithy/node-http-handler');
-    const https = require('https');
     return new S3Client({
       region: 'auto',
       endpoint: `https://${accountId}.r2.cloudflarestorage.com`,
@@ -79,15 +77,7 @@ function buildS3Client() {
         accessKeyId:     process.env.R2_ACCESS_KEY_ID,
         secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
       },
-      requestHandler: new NodeHttpHandler({
-        httpsAgent: new https.Agent({
-          minVersion: 'TLSv1.2',
-          rejectUnauthorized: true,
-          keepAlive: true,
-        }),
-        connectionTimeout: 10000,
-        requestTimeout: 30000,
-      }),
+      forcePathStyle: false,
     });
   }
 

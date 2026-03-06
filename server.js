@@ -25,13 +25,14 @@ app.set('trust proxy', 1);
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
-      defaultSrc: ["'self'"],
-      scriptSrc:  ["'self'", "'unsafe-inline'", "https://js.stripe.com", "https://fonts.googleapis.com"],
-      styleSrc:   ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-      fontSrc:    ["'self'", "https://fonts.gstatic.com"],
-      imgSrc:     ["'self'", "data:", "https:", "blob:"],   // https: covers S3/R2/CDN domains
-      connectSrc: ["'self'", "https://api.stripe.com", "https://*.amazonaws.com", "https://*.r2.cloudflarestorage.com"],
-      frameSrc:   ["https://js.stripe.com"],
+      defaultSrc:     ["'self'"],
+      scriptSrc:      ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://js.stripe.com", "https://fonts.googleapis.com"],
+      scriptSrcAttr:  ["'unsafe-inline'"],  // allows onclick in older helmet versions
+      styleSrc:       ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      fontSrc:        ["'self'", "https://fonts.gstatic.com"],
+      imgSrc:         ["'self'", "data:", "https:", "blob:"],
+      connectSrc:     ["'self'", "https://api.stripe.com", "https://*.amazonaws.com", "https://*.r2.cloudflarestorage.com"],
+      frameSrc:       ["https://js.stripe.com"],
     }
   }
 }));
