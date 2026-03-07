@@ -230,14 +230,18 @@ router.post('/', authenticateToken, upload.array('photos', 20), async (req, res)
       return res.status(400).json({ error: 'title, description, category, state, city required' });
 
     const validCategories = [
-      'beef_cattle','dairy','bulls','heifers_calves','equipment','trucks_trailers',
-      'working_dogs','feed_hay','sale_barns','ranches_farms','breed_associations',
-      'farm_to_table','livestock_services','feed_stores','insurance_finance','full_herd'
+      'bulls','bred_heifers','bred_cows','open_heifers','open_cows',
+      'feeder_stocker','fat_cattle','bottle_calves','cow_calf_pairs',
+      'embryos','semen','showstock','dairy',
+      'equipment','trailers','chutes_pens','working_dogs','feed_hay',
+      'sale_barns','ranches_farms','breed_associations',
+      'farm_to_table','livestock_services','feed_stores',
+      'insurance_finance','full_herd'
     ];
     if (!validCategories.includes(category))
       return res.status(400).json({ error: 'Invalid category' });
-    const safeTier   = ['basic','ribeye','filet','t_bone'].includes(tier) ? tier : 'basic';
-    const isFeatured = ['ribeye','filet','t_bone'].includes(safeTier);
+    const safeTier   = ['burger','sirloin','ribeye','filet','t_bone','farm_to_table'].includes(tier) ? tier : 'burger';
+    const isFeatured = ['sirloin','ribeye','filet','t_bone'].includes(safeTier);
     const photoLimit = tierPhotoLimit(safeTier);
 
     await client.query('BEGIN');

@@ -33,8 +33,10 @@ CREATE TABLE IF NOT EXISTS listings (
   description      TEXT         NOT NULL,
   category         TEXT         NOT NULL
                                 CHECK (category IN (
-                                  'beef_cattle','dairy','bulls','heifers_calves',
-                                  'equipment','trucks_trailers','working_dogs','feed_hay',
+                                  'bulls','bred_heifers','bred_cows','open_heifers','open_cows',
+                                  'feeder_stocker','fat_cattle','bottle_calves','cow_calf_pairs',
+                                  'embryos','semen','showstock','dairy',
+                                  'equipment','trailers','chutes_pens','working_dogs','feed_hay',
                                   'sale_barns','ranches_farms','breed_associations',
                                   'farm_to_table','livestock_services','feed_stores',
                                   'insurance_finance','full_herd'
@@ -57,7 +59,7 @@ CREATE TABLE IF NOT EXISTS listings (
   status           TEXT         NOT NULL DEFAULT 'active'
                                 CHECK (status IN ('active','sold','expired','draft','pending')),
   tier             TEXT         NOT NULL DEFAULT 'basic'
-                                CHECK (tier IN ('basic','ribeye','filet','t_bone')),
+                                CHECK (tier IN ('burger','sirloin','ribeye','filet','t_bone','farm_to_table')),
   is_featured      BOOLEAN      NOT NULL DEFAULT FALSE,
   views            INTEGER      NOT NULL DEFAULT 0,
   expires_at       TIMESTAMPTZ,

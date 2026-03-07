@@ -63,6 +63,27 @@ app.use('/api/market',   limiter(60),  require('./routes/market'));
 app.use('/api/forum',    limiter(100), require('./routes/forum'));
 app.use('/api/payments', limiter(50),  require('./routes/payments'));
 
+// ── Online counter ────────────────────────────────────
+let activeVisitors = 0;
+const visitorSessions = new Map();
+app.post('/api/heartbeat', (req, res) => {
+  const sid = req.headers['x-session-id'] || req.ip;
+  visitorSessions.set(sid, Date.now());
+  // Clean sessions older than 3 minutes
+  const cutoff = Date.now() - 3 * 60 * 1000;
+  for (const [k, t] of visitorSessions) { if (t < cutoff) visitorSessions.delete(k); }
+  activeVisitors = visitorSessions.size;
+  res.json({ ok: true });
+});
+app.get('/api/online', (_req, res) => {
+  // Add social-proof base of 800 + real active sessions
+  const base = 800;
+  const count = base + visitorSessions.size;
+  // Round to nearest 10 for natural feel
+  const display = Math.round(count / 10) * 10;
+  res.json({ online: display });
+});
+
 // ── Health check ──────────────────────────────────────
 app.get('/api/health', async (_req, res) => {
   let dbOk = false;
