@@ -228,3 +228,56 @@ CREATE TRIGGER trig_users_updated_at
 DROP TRIGGER IF EXISTS trig_forum_updated_at ON forum_topics;
 CREATE TRIGGER trig_forum_updated_at
   BEFORE UPDATE ON forum_topics FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
+-- ── Articles ──────────────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS articles (
+  id          SERIAL PRIMARY KEY,
+  title       TEXT    NOT NULL,
+  excerpt     TEXT,
+  body        TEXT,
+  category    TEXT    NOT NULL DEFAULT 'General',
+  image_url   TEXT,
+  author      TEXT    NOT NULL DEFAULT 'Herd Hub Staff',
+  published   BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Seed default articles if empty
+INSERT INTO articles (title, excerpt, category, image_url, author, created_at)
+SELECT * FROM (VALUES
+  (
+    'Cattle Prices Surge to Multi-Year Highs Amid Tight Supplies',
+    'Fed cattle prices have climbed to their highest levels since 2015 as the U.S. cow herd remains at historically low numbers following drought-driven liquidation. Analysts say the tight supply cycle could persist through 2027.',
+    'Market Report',
+    'https://images.unsplash.com/photo-1500595046743-cd271d694d30?w=240&q=75',
+    'Herd Hub Staff',
+    NOW() - INTERVAL '5 days'
+  ),
+  (
+    'What to Look for When Buying a Used Round Baler in 2026',
+    'A thorough pre-purchase inspection can save you thousands. Here is a practical checklist from experienced ranchers for evaluating balers in the field — from the pickup teeth to the drive chain.',
+    'Equipment',
+    'https://images.unsplash.com/photo-1589739900243-4b52cd9b104e?w=240&q=75',
+    'Herd Hub Staff',
+    NOW() - INTERVAL '9 days'
+  ),
+  (
+    'Border Collies vs. Australian Shepherds: Which Breed for Your Ranch?',
+    'Both breeds excel in different scenarios. We break down temperament, trainability, and herd-handling ability to help you choose the right working dog partner for your operation.',
+    'Working Dogs',
+    'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=240&q=75',
+    'Herd Hub Staff',
+    NOW() - INTERVAL '12 days'
+  ),
+  (
+    'Direct-to-Consumer Beef: How Ranchers Are Capturing More Margin',
+    'More producers are cutting out the middleman. Learn how to set up your own direct beef sales and processing program, from USDA-inspected lockers to online storefronts.',
+    'Farm to Table',
+    'https://images.unsplash.com/photo-1550583724-b2692b85b150?w=240&q=75',
+    'Herd Hub Staff',
+    NOW() - INTERVAL '16 days'
+  )
+) AS v(title, excerpt, category, image_url, author, created_at)
+WHERE NOT EXISTS (SELECT 1 FROM articles LIMIT 1);
+

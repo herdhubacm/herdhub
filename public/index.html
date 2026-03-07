@@ -526,23 +526,8 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
   <!-- NEWS + SIDEBAR -->
   <div class="two-col" id="news">
     <div>
-      <div class="section-header"><h2>Ranch <span>News & Resources</span></h2><a class="see-all">All Articles →</a></div>
-      <div class="article-card">
-        <img class="article-img-el" src="https://images.unsplash.com/photo-1500595046743-cd271d694d30?w=240&q=75" alt="">
-        <div><div class="article-meta">Market Report · Mar 1, 2026</div><div class="article-title">Cattle Prices Surge to Multi-Year Highs Amid Tight Supplies</div><div class="article-excerpt">Fed cattle prices have climbed to their highest levels since 2015 as the U.S. cow herd remains at historically low numbers following drought-driven liquidation…</div></div>
-      </div>
-      <div class="article-card">
-        <img class="article-img-el" src="https://images.unsplash.com/photo-1589739900243-4b52cd9b104e?w=240&q=75" alt="">
-        <div><div class="article-meta">Equipment · Feb 25, 2026</div><div class="article-title">What to Look for When Buying a Used Round Baler in 2026</div><div class="article-excerpt">A thorough pre-purchase inspection can save you thousands. Here's a practical checklist from experienced ranchers for evaluating balers in the field…</div></div>
-      </div>
-      <div class="article-card">
-        <img class="article-img-el" src="https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=240&q=75" alt="">
-        <div><div class="article-meta">Working Dogs · Feb 22, 2026</div><div class="article-title">Border Collies vs. Australian Shepherds: Which Breed for Your Ranch?</div><div class="article-excerpt">Both breeds excel in different scenarios. We break down temperament, trainability, and herd-handling to help you choose the right partner…</div></div>
-      </div>
-      <div class="article-card">
-        <img class="article-img-el" src="https://images.unsplash.com/photo-1550583724-b2692b85b150?w=240&q=75" alt="">
-        <div><div class="article-meta">Farm to Table · Feb 18, 2026</div><div class="article-title">Direct-to-Consumer Beef: How Ranchers Are Capturing More Margin</div><div class="article-excerpt">More producers are cutting out the middleman. Learn how to set up your own direct beef sales and processing program…</div></div>
-      </div>
+      <div class="section-header"><h2>Ranch <span>News & Resources</span></h2><a class="see-all" data-action="page" data-page="articles">All Articles →</a></div>
+      <div id="news-articles-list"><div class="loading" style="padding:24px 0">Loading articles…</div></div>
     </div>
 
     <!-- SIDEBAR -->
@@ -581,6 +566,37 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
 </div>
 
 
+
+<!-- ARTICLES LIST PAGE -->
+<div id="page-articles" style="display:none">
+  <div style="background:var(--dark-brown);padding:48px 0 36px;border-bottom:2px solid var(--rust)">
+    <div style="max-width:900px;margin:0 auto;padding:0 24px;text-align:center">
+      <div style="font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--tan);margin-bottom:8px">Ranch News &amp; Resources</div>
+      <h1 style="font-family:'Playfair Display',serif;font-size:40px;font-weight:900;color:var(--cream)">Herd Hub <span style="color:var(--gold)">Articles</span></h1>
+    </div>
+  </div>
+  <div style="max-width:900px;margin:0 auto;padding:40px 24px">
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:28px" id="article-cat-filters">
+      <button onclick="loadArticlesPage('')" style="font-family:'Oswald',sans-serif;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:7px 16px;border:1.5px solid var(--rust);background:var(--rust);color:white;border-radius:3px;cursor:pointer">All</button>
+      <button onclick="loadArticlesPage('Market Report')" style="font-family:'Oswald',sans-serif;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:7px 16px;border:1.5px solid var(--light-tan);background:transparent;color:var(--dark-brown);border-radius:3px;cursor:pointer">Market Reports</button>
+      <button onclick="loadArticlesPage('Equipment')" style="font-family:'Oswald',sans-serif;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:7px 16px;border:1.5px solid var(--light-tan);background:transparent;color:var(--dark-brown);border-radius:3px;cursor:pointer">Equipment</button>
+      <button onclick="loadArticlesPage('Working Dogs')" style="font-family:'Oswald',sans-serif;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:7px 16px;border:1.5px solid var(--light-tan);background:transparent;color:var(--dark-brown);border-radius:3px;cursor:pointer">Working Dogs</button>
+      <button onclick="loadArticlesPage('Farm to Table')" style="font-family:'Oswald',sans-serif;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:7px 16px;border:1.5px solid var(--light-tan);background:transparent;color:var(--dark-brown);border-radius:3px;cursor:pointer">Farm to Table</button>
+    </div>
+    <div id="articles-page-list"><div class="loading">Loading…</div></div>
+    <div style="margin-top:24px;text-align:center">
+      <button class="btn-secondary" data-action="page" data-page="home">← Back to Home</button>
+    </div>
+  </div>
+</div>
+
+<!-- ARTICLE DETAIL PAGE -->
+<div id="page-article-detail" style="display:none">
+  <div style="max-width:800px;margin:0 auto;padding:48px 24px">
+    <button class="btn-secondary" style="margin-bottom:28px;font-size:12px;padding:8px 16px" data-action="page" data-page="articles">← Back to Articles</button>
+    <div id="article-detail-content"><div class="loading">Loading…</div></div>
+  </div>
+</div>
 <!-- ABOUT PAGE -->
 <div id="page-about" style="display:none">
   <div style="background:var(--dark-brown);padding:64px 0 48px">
@@ -1182,6 +1198,7 @@ document.addEventListener('DOMContentLoaded', () => {
   loadMarketData();
   loadStats();
   loadTierSections();
+  loadNewsArticles();
   loadForumSidebar();
   initEventDelegation();
   initBrowseMode();
@@ -1668,12 +1685,13 @@ function subscribeNewsletter() {
 // ── Navigation ─────────────────────────────────────────
 function showPage(page) {
   currentPage = page;
-  ['home','listings','forum','account','about','pricing'].forEach(p => {
+  ['home','listings','forum','account','about','pricing','articles','article-detail'].forEach(p => {
     const el = document.getElementById('page-' + p);
     if (el) el.style.display = p === page ? 'block' : 'none';
   });
   if (page === 'forum') loadForumPage();
   if (page === 'account') loadAccountPage();
+  if (page === 'articles') loadArticlesPage();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 

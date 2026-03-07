@@ -6,7 +6,19 @@
  */
 const express = require('express');
 const bcrypt  = require('bcryptjs');
+const multer  = require('multer');
 const { query } = require('../db/database');
+const storage = require('../services/storage');
+
+// multer — memory only, admin image uploads
+const adminUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 15 * 1024 * 1024, files: 1 },
+  fileFilter: (_req, file, cb) => {
+    if (!file.mimetype.startsWith('image/')) return cb(new Error('Images only'));
+    cb(null, true);
+  }
+});
 const { authenticateToken, requireAdmin } = require('../middleware/auth');
 const { deleteFile } = require('../services/storage');
 
@@ -312,5 +324,80 @@ router.get('/users/:id/detail', async (req, res) => {
     res.status(500).json({ error: 'Could not load user detail' });
   }
 });
+
+// ── POST /api/admin/upload-image ─────────────────────
+// Single image upload for articles and other admin uses
+router.post('/upload-image', adminUpload.single('image'), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ error: 'No image provided' });
+    const result = await storage.uploadFile(
+      req.file.buffer,
+      req.file.originalname,
+      req.file.mimetype,
+      'articles',
+      { generateThumb: false, optimise: true }
+    );
+    res.json({ url: result.url, name: result.name });
+  } catch (e) {
+    console.error('Admin image upload error:', e);
+    res.status(500).json({ error: 'Upload failed: ' + e.message });
+  }
+});
+
+
+// ── ARTICLES CRUD ─────────────────────────────────────
+
+// GET /api/admin/articles
+router.get('/articles', async (req, res) => {
+  try {
+    const limit  = Math.min(parseInt(req.query.limit) || 20, 100);
+    const offset = parseInt(req.query.offset) || 0;
+    const { rows } = await query(
+      `SELECT id, title, excerpt, category, image_url, author, published, created_at, updated_at
+       FROM articles ORDER BY created_at DESC LIMIT $1 OFFSET $2`,
+      [limit, offset]
+    );
+    const total = await query(`SELECT COUNT(*) FROM articles`);
+    res.json({ articles: rows, total: parseInt(total.rows[0].count) });
+  } catch (e) { res.status(500).json({ error: 'Failed to load articles' }); }
+});
+
+// POST /api/admin/articles
+router.post('/articles', async (req, res) => {
+  try {
+    const { title, excerpt, body, category, image_url, author, published } = req.body;
+    if (!title || !category) return res.status(400).json({ error: 'Title and category required' });
+    const { rows } = await query(
+      `INSERT INTO articles (title, excerpt, body, category, image_url, author, published)
+       VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *`,
+      [title, excerpt||'', body||'', category, image_url||'', author||'Herd Hub Staff', published !== false]
+    );
+    res.status(201).json(rows[0]);
+  } catch (e) { console.error(e); res.status(500).json({ error: 'Failed to create article' }); }
+});
+
+// PUT /api/admin/articles/:id
+router.put('/articles/:id', async (req, res) => {
+  try {
+    const { title, excerpt, body, category, image_url, author, published } = req.body;
+    const { rows } = await query(
+      `UPDATE articles SET title=$1, excerpt=$2, body=$3, category=$4,
+       image_url=$5, author=$6, published=$7, updated_at=NOW()
+       WHERE id=$8 RETURNING *`,
+      [title, excerpt||'', body||'', category, image_url||'', author||'Herd Hub Staff', published !== false, req.params.id]
+    );
+    if (!rows.length) return res.status(404).json({ error: 'Not found' });
+    res.json(rows[0]);
+  } catch (e) { res.status(500).json({ error: 'Failed to update article' }); }
+});
+
+// DELETE /api/admin/articles/:id
+router.delete('/articles/:id', async (req, res) => {
+  try {
+    await query(`DELETE FROM articles WHERE id=$1`, [req.params.id]);
+    res.json({ ok: true });
+  } catch (e) { res.status(500).json({ error: 'Failed to delete article' }); }
+});
+
 
 module.exports = router;
