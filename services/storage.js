@@ -318,8 +318,7 @@ async function _putObject(key, buffer, mimeType) {
     CacheControl:  'public, max-age=31536000, immutable',
     Metadata:      { 'uploaded-by': 'herdhub' },
   };
-  // Only send ACL for AWS S3 — R2 does not support ACL header
-  if (PROVIDER === 's3') putParams.ACL = 'public-read';
+  // No ACL — public access handled by bucket policy
   await s3.send(new PutObjectCommand(putParams));
 
   return `${PUBLIC_BASE_URL}/${key}`;
