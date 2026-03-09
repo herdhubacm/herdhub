@@ -321,17 +321,32 @@ router.put('/:id', authenticateToken, async (req, res) => {
     if (rows[0].user_id !== req.user.id && req.user.role !== 'admin')
       return res.status(403).json({ error: 'Not authorized' });
 
-    const { title, description, breed, price, price_type, quantity, state, city, zip, status } = req.body;
+    const { title, description, breed, price, price_type, quantity, state, city, zip, status, category } = req.body;
+
+    // Validate category if provided
+    const validCategories = [
+      'bulls','bred_heifers','bred_cows','open_heifers','open_cows',
+      'feeder_stocker','fat_cattle','bottle_calves','cow_calf_pairs',
+      'embryos','semen','showstock','dairy',
+      'equipment','trailers','chutes_pens','working_dogs','feed_hay',
+      'sale_barns','ranches_farms','breed_associations',
+      'farm_to_table','livestock_services','feed_stores',
+      'insurance_finance','full_herd'
+    ];
+    const safeCategory = category && validCategories.includes(category)
+      ? category : rows[0].category;
+
     await query(
       `UPDATE listings
        SET title=$1, description=$2, breed=$3, price=$4, price_type=$5,
-           quantity=$6, state=$7, city=$8, zip=$9, status=$10
-       WHERE id=$11`,
+           quantity=$6, state=$7, city=$8, zip=$9, status=$10, category=$11,
+           updated_at=NOW()
+       WHERE id=$12`,
       [
         title, description, breed || null,
         price ? +price : null, price_type || 'fixed',
         +quantity || 1, state, city, zip || null,
-        status || 'active', req.params.id,
+        status || 'active', safeCategory, req.params.id,
       ]
     );
     res.json({ message: 'Listing updated' });

@@ -1025,6 +1025,175 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
 </div>
 
 <!-- POST LISTING -->
+<!-- EDIT LISTING MODAL -->
+<div class="modal-overlay" id="modal-edit-listing">
+  <div class="modal" style="max-width:620px">
+    <button class="modal-close" data-action="close-modal" data-modal="edit-listing">✕</button>
+    <h2>Edit Listing</h2>
+    <input type="hidden" id="el-id">
+
+    <div class="form-row">
+      <div class="form-group" style="flex:2">
+        <label>Title *</label>
+        <input type="text" id="el-title" placeholder="e.g. 10 Angus Steers — 650lb avg">
+      </div>
+      <div class="form-group">
+        <label>Status</label>
+        <select id="el-status">
+          <option value="active">Active</option>
+          <option value="sold">Sold</option>
+          <option value="expired">Expired</option>
+          <option value="draft">Draft</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Category</label>
+        <select id="el-category">
+          <optgroup label="🐄 Cattle">
+            <option value="bulls">Bulls</option>
+            <option value="bred_heifers">Bred Heifers</option>
+            <option value="bred_cows">Bred Cows</option>
+            <option value="open_heifers">Open Heifers</option>
+            <option value="open_cows">Open Cows</option>
+            <option value="feeder_stocker">Feeder / Stocker</option>
+            <option value="fat_cattle">Fat Cattle</option>
+            <option value="bottle_calves">Bottle Calves</option>
+            <option value="cow_calf_pairs">Cow / Calf Pairs</option>
+            <option value="embryos">Embryos</option>
+            <option value="semen">Semen</option>
+            <option value="showstock">Showstock</option>
+            <option value="dairy">Dairy</option>
+          </optgroup>
+          <optgroup label="🚜 Equipment & Supplies">
+            <option value="equipment">Equipment</option>
+            <option value="trailers">Trailers</option>
+            <option value="chutes_pens">Chutes / Pens / Tubs</option>
+            <option value="working_dogs">Working Dogs</option>
+            <option value="feed_hay">Feed &amp; Hay</option>
+          </optgroup>
+          <optgroup label="📢 Advertiser">
+            <option value="sale_barns">Sale Barns &amp; Auctions</option>
+            <option value="ranches_farms">Ranches &amp; Farms</option>
+            <option value="breed_associations">Breed Associations</option>
+            <option value="farm_to_table">Farm to Table</option>
+            <option value="livestock_services">Livestock Services</option>
+            <option value="feed_stores">Feed &amp; Supply Stores</option>
+            <option value="insurance_finance">Insurance &amp; Finance</option>
+            <option value="full_herd">Full Herd Sales</option>
+          </optgroup>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Breed (optional)</label>
+        <select id="el-breed">
+          <option value="">No breed / N/A</option>
+          <option>Aberdeen Angus</option><option>Ayrshire</option><option>Barzona</option>
+          <option>Bazadaise</option><option>Beef Shorthorn</option><option>Beefalo</option>
+          <option>Beefmaster</option><option>Belgian Blue</option><option>Belmont Red</option>
+          <option>Belted Galloway</option><option>Black Angus</option><option>Blonde d'Aquitaine</option>
+          <option>Bonsmara</option><option>Boran</option><option>Braford</option><option>Brahman</option>
+          <option>Brahmousin</option><option>Brangus</option><option>British White</option>
+          <option>Brown Swiss</option><option>Buelingo</option><option>Busa</option>
+          <option>Canadienne</option><option>Caracu</option><option>Charolais</option>
+          <option>Chianina</option><option>Composite</option><option>Corriente</option>
+          <option>Dairy Shorthorn</option><option>Devon</option><option>Dexter</option>
+          <option>Drakensberger</option><option>Droughtmaster</option><option>Dutch Belted</option>
+          <option>English Longhorn</option><option>Fleckvieh</option><option>Friesian</option>
+          <option>Galloway</option><option>Gelbvieh</option><option>Girolando</option>
+          <option>Gloucester</option><option>Guernsey</option><option>Hays Converter</option>
+          <option>Hereford</option><option>Highland</option><option>Holstein</option>
+          <option>Hybridmaster</option><option>Irish Moiled</option><option>Jersey</option>
+          <option>Kerry</option><option>Limousin</option><option>Lincoln Red</option>
+          <option>Lineback</option><option>Lowline</option><option>Miniature Hereford</option>
+          <option>Mirandesa</option><option>Mongolian</option><option>Red Angus</option>
+          <option>Red Poll</option><option>Shetland</option><option>Simbrah</option>
+          <option>Simmental</option><option>South Devon</option><option>Speckle Park</option>
+          <option>Square Meaters</option><option>Sussex</option><option>Texas Longhorn</option>
+          <option>Tuli</option><option>Wagyu</option><option>Watusi</option>
+          <option>Welsh Black</option><option>Whitebred Shorthorn</option><option>Zebu</option>
+          <option>Mixed</option><option>Other</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Description</label>
+      <textarea id="el-description" rows="4" placeholder="Describe your listing — weight, age, health history, pricing details…"></textarea>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Price ($)</label>
+        <input type="number" id="el-price" placeholder="0.00" min="0">
+      </div>
+      <div class="form-group">
+        <label>Price Type</label>
+        <select id="el-price-type">
+          <option value="fixed">Fixed</option>
+          <option value="per_head">Per Head</option>
+          <option value="per_cwt">Per CWT</option>
+          <option value="per_lb">Per Pound</option>
+          <option value="obo">OBO</option>
+          <option value="negotiable">Negotiable</option>
+          <option value="call">Call for Price</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Quantity</label>
+        <input type="number" id="el-quantity" min="1" value="1">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>State</label>
+        <select id="el-state">
+          <option value="">Select State…</option>
+          <option>AL</option><option>AK</option><option>AZ</option><option>AR</option><option>CA</option>
+          <option>CO</option><option>CT</option><option>DE</option><option>FL</option><option>GA</option>
+          <option>HI</option><option>ID</option><option>IL</option><option>IN</option><option>IA</option>
+          <option>KS</option><option>KY</option><option>LA</option><option>ME</option><option>MD</option>
+          <option>MA</option><option>MI</option><option>MN</option><option>MS</option><option>MO</option>
+          <option>MT</option><option>NE</option><option>NV</option><option>NH</option><option>NJ</option>
+          <option>NM</option><option>NY</option><option>NC</option><option>ND</option><option>OH</option>
+          <option>OK</option><option>OR</option><option>PA</option><option>RI</option><option>SC</option>
+          <option>SD</option><option>TN</option><option>TX</option><option>UT</option><option>VT</option>
+          <option>VA</option><option>WA</option><option>WV</option><option>WI</option><option>WY</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>City</label>
+        <input type="text" id="el-city" placeholder="Amarillo">
+      </div>
+    </div>
+
+    <!-- Photo management -->
+    <div class="form-group">
+      <label>Photos <span id="el-photo-hint" style="font-weight:400;color:#888;text-transform:none;letter-spacing:0;font-size:12px"></span></label>
+      <!-- Existing photos -->
+      <div id="el-existing-photos" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px"></div>
+      <!-- Add new photos -->
+      <div class="photo-upload-area" id="el-photo-drop-area">
+        <input type="file" id="el-photos" multiple accept="image/jpeg,image/png,image/webp">
+        <div>📸 <strong>Click to add more photos</strong> or drag &amp; drop<br>
+        <span style="font-size:11px;color:#999">JPG, PNG or WEBP · Max 10MB each</span></div>
+        <div class="photo-previews" id="el-photo-previews"></div>
+      </div>
+    </div>
+
+    <div id="el-error" style="display:none;color:#dc3545;font-size:13px;margin-bottom:12px;padding:10px;background:#fff0f0;border-radius:4px"></div>
+    <div id="el-success" style="display:none;color:#28a745;font-size:13px;margin-bottom:12px;padding:10px;background:#f0fff4;border-radius:4px"></div>
+
+    <div style="display:flex;gap:10px">
+      <button class="btn-primary" style="flex:1;justify-content:center" data-action="save-edit-listing">💾 Save Changes</button>
+      <button class="btn-secondary" style="padding:12px 20px" data-action="close-modal" data-modal="edit-listing">Cancel</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="modal-post-listing">
   <div class="modal" style="max-width:600px">
     <button class="modal-close" data-action="close-modal" data-modal="post-listing">✕</button>
@@ -1261,6 +1430,155 @@ async function openArticle(id) {
   }
 }
 
+// ── Edit Listing ───────────────────────────────────────
+let editListingNewPhotos = []; // new File objects to upload
+
+async function openEditListing(id) {
+  if (!authToken) { openModal('auth'); return; }
+
+  // Reset form
+  document.getElementById('el-id').value = id;
+  document.getElementById('el-error').style.display   = 'none';
+  document.getElementById('el-success').style.display = 'none';
+  document.getElementById('el-existing-photos').innerHTML = '';
+  document.getElementById('el-photo-previews').innerHTML  = '';
+  editListingNewPhotos = [];
+
+  openModal('edit-listing');
+
+  try {
+    const r = await fetch(`${API}/api/listings/${id}`);
+    if (!r.ok) throw new Error('Could not load listing');
+    const l = await r.json();
+
+    // Populate fields
+    document.getElementById('el-title').value       = l.title        || '';
+    document.getElementById('el-description').value = l.description  || '';
+    document.getElementById('el-price').value       = l.price        || '';
+    document.getElementById('el-quantity').value    = l.quantity      || 1;
+    document.getElementById('el-city').value        = l.city         || '';
+
+    // Selects — set by value
+    setSelectVal('el-category',   l.category);
+    setSelectVal('el-breed',      l.breed || '');
+    setSelectVal('el-price-type', l.price_type || 'fixed');
+    setSelectVal('el-state',      l.state);
+    setSelectVal('el-status',     l.status || 'active');
+
+    // Photo limit hint
+    const limit = {burger:1, sirloin:3, ribeye:3, farm_to_table:3, filet:5, t_bone:5, basic:1}[l.tier] || 1;
+    document.getElementById('el-photo-hint').textContent =
+      `(${(l.photos||[]).length} existing · up to ${limit} total for ${l.tier} tier)`;
+
+    // Render existing photos with delete buttons
+    const photosEl = document.getElementById('el-existing-photos');
+    if (l.photos && l.photos.length) {
+      photosEl.innerHTML = l.photos.map(p => `
+        <div id="ephoto-${p.id}" style="position:relative;display:inline-block">
+          <img src="${p.thumb_url || p.url}" style="width:80px;height:64px;object-fit:cover;border-radius:4px;border:2px solid var(--light-tan)">
+          <button onclick="deleteExistingPhoto(${p.id}, ${id})"
+            style="position:absolute;top:-6px;right:-6px;background:#dc3545;color:white;border:none;
+                   border-radius:50%;width:20px;height:20px;font-size:11px;cursor:pointer;
+                   display:flex;align-items:center;justify-content:center;padding:0;line-height:1">✕</button>
+        </div>`).join('');
+    } else {
+      photosEl.innerHTML = '<span style="font-size:12px;color:#aaa">No photos yet</span>';
+    }
+  } catch(e) {
+    document.getElementById('el-error').textContent = 'Failed to load listing: ' + e.message;
+    document.getElementById('el-error').style.display = 'block';
+  }
+}
+
+function setSelectVal(id, val) {
+  const sel = document.getElementById(id);
+  if (!sel || val === null || val === undefined) return;
+  // Try exact match first
+  for (const opt of sel.options) {
+    if (opt.value === val || opt.text === val) { sel.value = opt.value; return; }
+  }
+}
+
+async function deleteExistingPhoto(photoId, listingId) {
+  if (!confirm('Remove this photo?')) return;
+  try {
+    const r = await fetch(`${API}/api/listings/${listingId}/photos/${photoId}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${authToken}` }
+    });
+    if (!r.ok) throw new Error('Failed');
+    const el = document.getElementById(`ephoto-${photoId}`);
+    if (el) el.remove();
+    showToast('Photo removed');
+  } catch(e) {
+    showToast('Could not remove photo — ' + e.message);
+  }
+}
+
+async function doSaveEditListing() {
+  const id      = document.getElementById('el-id').value;
+  const errEl   = document.getElementById('el-error');
+  const sucEl   = document.getElementById('el-success');
+  const saveBtn = document.querySelector('[data-action="save-edit-listing"]');
+  errEl.style.display = 'none';
+  sucEl.style.display = 'none';
+
+  const title = document.getElementById('el-title').value.trim();
+  if (!title) { errEl.textContent = 'Title is required.'; errEl.style.display = 'block'; return; }
+
+  saveBtn.textContent = 'Saving…'; saveBtn.disabled = true;
+
+  try {
+    // 1. Save text fields
+    const r = await fetch(`${API}/api/listings/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
+      body: JSON.stringify({
+        title,
+        description: document.getElementById('el-description').value.trim(),
+        breed:       document.getElementById('el-breed').value || null,
+        price:       document.getElementById('el-price').value || null,
+        price_type:  document.getElementById('el-price-type').value,
+        quantity:    parseInt(document.getElementById('el-quantity').value) || 1,
+        state:       document.getElementById('el-state').value,
+        city:        document.getElementById('el-city').value.trim(),
+        status:      document.getElementById('el-status').value,
+        category:    document.getElementById('el-category').value,
+      })
+    });
+    if (!r.ok) { const d = await r.json(); throw new Error(d.error || 'Update failed'); }
+
+    // 2. Upload any new photos
+    const newFiles = document.getElementById('el-photos').files;
+    if (newFiles.length) {
+      const fd = new FormData();
+      for (const f of newFiles) fd.append('photos', f);
+      const rp = await fetch(`${API}/api/listings/${id}/photos`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${authToken}` },
+        body: fd
+      });
+      if (!rp.ok) {
+        const dp = await rp.json();
+        showToast('Listing saved but photo upload failed: ' + (dp.error || 'unknown error'));
+      }
+    }
+
+    sucEl.textContent = '✅ Listing updated successfully!';
+    sucEl.style.display = 'block';
+    setTimeout(() => {
+      closeModal('edit-listing');
+      loadMyListings(); // refresh the listings tab
+    }, 1200);
+
+  } catch(e) {
+    errEl.textContent = e.message;
+    errEl.style.display = 'block';
+  } finally {
+    saveBtn.textContent = '💾 Save Changes'; saveBtn.disabled = false;
+  }
+}
+
 // ── Browse Mode Toggle ─────────────────────────────────
 function initBrowseMode() {
   const sel = document.getElementById('browse-mode-select');
@@ -1338,6 +1656,7 @@ document.addEventListener('DOMContentLoaded', () => {
   startHeartbeat();
   // Init photo uploads
   initPhotoUpload('pl-photos', 'photo-previews', 'photo-drop-area');
+  initPhotoUpload('el-photos', 'el-photo-previews', 'el-photo-drop-area');
   initPhotoUpload('acct-pl-photos', 'acct-photo-previews', 'acct-photo-drop-area');
 });
 
@@ -1375,7 +1694,7 @@ function initEventDelegation() {
     else if (action === 'acct-tab')    switchAcctTab(el.dataset.tab);
     else if (action === 'acct-post-listing') acctPostListing();
     else if (action === 'delete-listing') deleteMyListing(el.dataset.id);
-    else if (action === 'edit-listing') showToast('Edit listing coming soon!');
+    else if (action === 'edit-listing') openEditListing(el.dataset.id);
     else if (action === 'listing-type') {
       const isAdvert = el.dataset.type === 'advertise';
       document.getElementById('lt-regular').classList.toggle('active', !isAdvert);
