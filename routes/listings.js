@@ -177,7 +177,7 @@ router.get('/:id', optionalAuth, async (req, res) => {
 
     const { rows } = await query(
       `SELECT l.*, u.name AS seller_name, u.phone AS seller_phone,
-              u.state AS seller_state, u.city AS seller_city
+              u.email AS seller_email, u.state AS seller_state, u.city AS seller_city
        FROM listings l
        JOIN users u ON u.id = l.user_id
        WHERE l.id = $1 AND l.status = 'active'`,

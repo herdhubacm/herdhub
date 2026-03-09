@@ -374,6 +374,15 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
     </div>
   </div>
 
+  <!-- RECENT LISTINGS -->
+  <div class="section" style="border-top:1px solid var(--light-tan)">
+    <div class="section-header">
+      <h2>Recent <span>Listings</span></h2>
+      <a class="see-all" data-action="see-all">All Listings →</a>
+    </div>
+    <div class="listings-grid" id="recent-listings-grid"><div class="loading">Loading…</div></div>
+  </div>
+
   <!-- BROWSE BY CATEGORY / BREED -->
   <div class="section">
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:24px">
@@ -1025,6 +1034,14 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
 </div>
 
 <!-- POST LISTING -->
+<!-- LISTING DETAIL MODAL -->
+<div class="modal-overlay" id="modal-listing-detail">
+  <div class="modal" style="max-width:720px;padding:0;overflow:hidden">
+    <button class="modal-close" data-action="close-modal" data-modal="listing-detail" style="z-index:2;position:absolute;top:12px;right:12px;background:rgba(0,0,0,.5);color:white;border:none;width:32px;height:32px;border-radius:50%;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
+    <div id="listing-detail-body"><div class="loading" style="padding:60px;text-align:center">Loading…</div></div>
+  </div>
+</div>
+
 <!-- EDIT LISTING MODAL -->
 <div class="modal-overlay" id="modal-edit-listing">
   <div class="modal" style="max-width:620px">
@@ -1648,6 +1665,7 @@ document.addEventListener('DOMContentLoaded', () => {
   loadStats();
   loadTierSections();
   loadNewsArticles();
+  loadRecentListings();
   loadForumSidebar();
   initEventDelegation();
   initBrowseMode();
@@ -2017,7 +2035,132 @@ function renderPagination(p) {
   el.innerHTML = html;
 }
 
-function openListing(id) { showToast('Listing detail view coming soon!'); }
+// ── Recent Listings (homepage) ─────────────────────────
+async function loadRecentListings() {
+  const el = document.getElementById('recent-listings-grid');
+  if (!el) return;
+  try {
+    const r = await fetch(`${API}/api/listings?sort=newest&limit=8`);
+    const d = await r.json();
+    const listings = d.listings || [];
+    if (!listings.length) { el.innerHTML = '<p style="color:#aaa;padding:20px 0">No listings yet — be the first to post!</p>'; return; }
+    el.innerHTML = listings.map(l => renderListingCard(l, false)).join('');
+  } catch(e) { el.innerHTML = '<p style="color:#aaa">Could not load listings.</p>'; }
+}
+
+// ── Listing Detail Modal ────────────────────────────────
+async function openListing(id) {
+  openModal('listing-detail');
+  const body = document.getElementById('listing-detail-body');
+  body.innerHTML = '<div class="loading" style="padding:60px;text-align:center">Loading…</div>';
+
+  try {
+    const r = await fetch(`${API}/api/listings/${id}`, {
+      headers: authToken ? { Authorization: `Bearer ${authToken}` } : {}
+    });
+    if (!r.ok) throw new Error('Not found');
+    const l = await r.json();
+
+    // Photo gallery
+    const photos = l.photos || [];
+    let gallery = '';
+    if (photos.length) {
+      const mainImg = `<img id="ld-main-img" src="${photos[0].url}" alt="${l.title}"
+        style="width:100%;height:340px;object-fit:cover;display:block;cursor:${photos.length > 1 ? 'pointer' : 'default'}"
+        ${photos.length > 1 ? `onclick="ldNextPhoto()"` : ''}>`;
+      const dots = photos.length > 1
+        ? `<div style="position:absolute;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:6px">
+            ${photos.map((_,i) => `<div id="ld-dot-${i}" style="width:7px;height:7px;border-radius:50%;background:${i===0?'white':'rgba(255,255,255,.5)'}"></div>`).join('')}
+           </div>`
+        : '';
+      gallery = `<div style="position:relative">${mainImg}${dots}</div>`;
+    } else {
+      gallery = `<div style="height:220px;background:var(--light-tan);display:flex;align-items:center;justify-content:center;font-size:64px">${catEmoji(l.category)}</div>`;
+    }
+
+    // Price display
+    const priceLabel = {per_head:'/head', per_cwt:'/cwt', per_lb:'/lb', obo:' OBO', negotiable:' — Negotiable', call:'', fixed:''}[l.price_type] || '';
+    const priceHtml = l.price
+      ? `<span style="font-family:'Playfair Display',serif;font-size:28px;font-weight:900;color:var(--rust)">$${Number(l.price).toLocaleString()}<span style="font-size:15px;font-weight:400;color:#888">${priceLabel}</span></span>`
+      : `<span style="font-size:18px;color:#888;font-style:italic">Call for price</span>`;
+
+    // Tier badge
+    const tierBadge = {t_bone:'🥩 T-Bone Partner', filet:'🥩 Filet Advertiser', sirloin:'🥩 Sirloin Featured',
+      ribeye:'🥩 Ribeye Featured', farm_to_table:'🌿 Farm to Table', burger:'🍔 Standard'}[l.tier] || '';
+
+    // Meta pills
+    const pills = [
+      l.breed       && `<span style="background:var(--light-tan);padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600">🐄 ${l.breed}</span>`,
+      l.quantity > 1 && `<span style="background:var(--light-tan);padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600">Qty: ${l.quantity}</span>`,
+      l.price_type && l.price_type !== 'fixed' && `<span style="background:var(--light-tan);padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600">${fmtCat(l.price_type)}</span>`,
+    ].filter(Boolean).join('');
+
+    // Contact section — show phone only if logged in
+    let contactHtml = '';
+    if (authToken && l.seller_phone) {
+      contactHtml = `
+        <a href="tel:${l.seller_phone}" style="display:flex;align-items:center;gap:8px;padding:12px 16px;background:var(--rust);color:white;border-radius:4px;font-family:'Oswald',sans-serif;font-weight:600;letter-spacing:.06em;text-decoration:none;justify-content:center">
+          📞 ${l.seller_phone}
+        </a>`;
+    } else if (authToken) {
+      contactHtml = `<button class="btn-primary" style="width:100%;justify-content:center" onclick="openMessageModal(${l.id}, '${(l.title||'').replace(/'/g,"\\'")}')">✉️ Message Seller</button>`;
+    } else {
+      contactHtml = `<button class="btn-primary" style="width:100%;justify-content:center" onclick="closeModal('listing-detail');openModal('auth')">🔒 Sign In to Contact Seller</button>`;
+    }
+
+    const posted = new Date(l.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+
+    body.innerHTML = `
+      ${gallery}
+      <div style="padding:24px">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:12px">
+          <div>
+            <div style="font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--rust);margin-bottom:4px">${catEmoji(l.category)} ${fmtCat(l.category)}${tierBadge ? ' · ' + tierBadge : ''}</div>
+            <h2 style="font-family:'Playfair Display',serif;font-size:22px;font-weight:900;color:var(--dark-brown);margin:0 0 6px">${l.title}</h2>
+            <div style="font-size:13px;color:#888">📍 ${l.city}, ${l.state} · Posted ${posted} · ${l.views||0} views</div>
+          </div>
+          <div style="text-align:right">${priceHtml}</div>
+        </div>
+
+        ${pills ? `<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px">${pills}</div>` : ''}
+
+        ${l.description ? `<div style="font-size:14px;color:#444;line-height:1.7;margin-bottom:20px;white-space:pre-line">${l.description}</div>` : ''}
+
+        <div style="border-top:1px solid var(--light-tan);padding-top:16px;margin-bottom:16px">
+          <div style="font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#888;margin-bottom:8px">Seller</div>
+          <div style="font-size:15px;font-weight:600;color:var(--dark-brown)">👤 ${l.seller_name}</div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:10px">
+          ${contactHtml}
+          <button class="btn-secondary" style="width:100%;justify-content:center" onclick="toggleSave(${l.id}, this)">
+            ${l.is_saved ? '❤️ Saved' : '♡ Save Listing'}
+          </button>
+        </div>
+      </div>`;
+
+    // Store photos for gallery navigation
+    window._ldPhotos = photos;
+    window._ldPhotoIdx = 0;
+
+  } catch(e) {
+    body.innerHTML = `<div style="padding:40px;text-align:center;color:#888">Could not load listing.</div>`;
+  }
+}
+
+// Photo gallery navigation inside detail modal
+function ldNextPhoto() {
+  const photos = window._ldPhotos || [];
+  if (photos.length < 2) return;
+  window._ldPhotoIdx = (window._ldPhotoIdx + 1) % photos.length;
+  const idx = window._ldPhotoIdx;
+  const img = document.getElementById('ld-main-img');
+  if (img) img.src = photos[idx].url;
+  photos.forEach((_, i) => {
+    const dot = document.getElementById(`ld-dot-${i}`);
+    if (dot) dot.style.background = i === idx ? 'white' : 'rgba(255,255,255,.5)';
+  });
+}
 
 async function toggleSave(id, btn) {
   if (!authToken) { openModal('auth'); return; }
