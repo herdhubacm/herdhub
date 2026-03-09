@@ -134,6 +134,38 @@ async function start() {
     await testDb();
     await testStorage();
 
+    // ── One-time migrations ──────────────────────────────
+    try {
+      const { query } = require('./db/database');
+
+      // Fix tier CHECK constraint to match current tier names
+      await query(`ALTER TABLE listings DROP CONSTRAINT IF EXISTS listings_tier_check`);
+      await query(`ALTER TABLE listings ADD CONSTRAINT listings_tier_check
+        CHECK (tier IN ('burger','sirloin','ribeye','filet','t_bone','farm_to_table','basic'))`);
+      console.log('✅  Tier constraint updated');
+
+      // Ensure articles table exists (added in v3.1)
+      await query(`CREATE TABLE IF NOT EXISTS articles (
+        id          SERIAL PRIMARY KEY,
+        title       TEXT    NOT NULL,
+        excerpt     TEXT,
+        body        TEXT,
+        category    TEXT    NOT NULL DEFAULT 'General',
+        image_url   TEXT,
+        author      TEXT    NOT NULL DEFAULT 'Herd Hub Staff',
+        published   BOOLEAN NOT NULL DEFAULT TRUE,
+        created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      )`);
+      console.log('✅  Articles table ready');
+
+      // Ensure updated_at column exists on listings
+      await query(`ALTER TABLE listings ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW()`);
+
+    } catch (migErr) {
+      console.warn('⚠️  Migration warning:', migErr.message);
+    }
+
     // Auto-promote ADMIN_EMAIL to admin role on startup
     if (process.env.ADMIN_EMAIL) {
       try {

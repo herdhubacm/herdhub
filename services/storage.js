@@ -309,21 +309,18 @@ async function _putObject(key, buffer, mimeType) {
     return `${PUBLIC_BASE_URL}/${path.basename(localPath)}`;
   }
 
-  await s3.send(new PutObjectCommand({
-    Bucket:       BUCKET,
-    Key:          key,
-    Body:         buffer,
-    ContentType:  mimeType,
+  const putParams = {
+    Bucket:        BUCKET,
+    Key:           key,
+    Body:          buffer,
+    ContentType:   mimeType,
     ContentLength: buffer.length,
-    // Make publicly readable
-    // For S3: bucket must have public access enabled
-    // For R2 with custom domain: public by default via your domain
-    CacheControl: 'public, max-age=31536000, immutable',
-    Metadata: {
-      'uploaded-by': 'herdhub',
-      'app-version': '2.1.0',
-    },
-  }));
+    CacheControl:  'public, max-age=31536000, immutable',
+    Metadata:      { 'uploaded-by': 'herdhub' },
+  };
+  // Only send ACL for AWS S3 — R2 does not support ACL header
+  if (PROVIDER === 's3') putParams.ACL = 'public-read';
+  await s3.send(new PutObjectCommand(putParams));
 
   return `${PUBLIC_BASE_URL}/${key}`;
 }
