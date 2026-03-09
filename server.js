@@ -138,11 +138,9 @@ async function start() {
     try {
       const { query } = require('./db/database');
 
-      // Fix tier CHECK constraint to match current tier names
+      // Drop old tier CHECK constraint — tier validation happens in app routes
       await query(`ALTER TABLE listings DROP CONSTRAINT IF EXISTS listings_tier_check`);
-      await query(`ALTER TABLE listings ADD CONSTRAINT listings_tier_check
-        CHECK (tier IN ('burger','sirloin','ribeye','filet','t_bone','farm_to_table','basic'))`);
-      console.log('✅  Tier constraint updated');
+      console.log('✅  Tier constraint removed (validated in app layer)');
 
       // Ensure articles table exists (added in v3.1)
       await query(`CREATE TABLE IF NOT EXISTS articles (
