@@ -20,6 +20,9 @@ CREATE TABLE IF NOT EXISTS users (
                                   CHECK (role IN ('user','admin','moderator')),
   is_verified        BOOLEAN      NOT NULL DEFAULT FALSE,
   stripe_customer_id TEXT,
+  terms_accepted     BOOLEAN      NOT NULL DEFAULT FALSE,
+  terms_accepted_at  TIMESTAMPTZ,
+  newsletter_opt_in  BOOLEAN      NOT NULL DEFAULT FALSE,
   created_at         TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
   updated_at         TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 );

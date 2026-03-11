@@ -15,11 +15,14 @@ function signToken(payload) {
 // ── POST /api/auth/register ────────────────────────────
 router.post('/register', async (req, res) => {
   try {
-    const { email, password, name, phone, state, city } = req.body;
+    const { email, password, name, phone, state, city,
+            terms_accepted, terms_accepted_at, newsletter_opt_in } = req.body;
     if (!email || !password || !name)
       return res.status(400).json({ error: 'email, password and name are required' });
     if (password.length < 8)
       return res.status(400).json({ error: 'Password must be at least 8 characters' });
+    if (!terms_accepted)
+      return res.status(400).json({ error: 'You must agree to the Terms of Service to create an account.' });
 
     const { rows: exists } = await query(
       'SELECT id FROM users WHERE email = $1', [email.toLowerCase()]
@@ -27,11 +30,14 @@ router.post('/register', async (req, res) => {
     if (exists.length) return res.status(409).json({ error: 'Email already registered' });
 
     const hash = await bcrypt.hash(password, 12);
+    const acceptedAt = terms_accepted_at ? new Date(terms_accepted_at) : new Date();
     const { rows } = await query(
-      `INSERT INTO users (email, password_hash, name, phone, state, city)
-       VALUES ($1, $2, $3, $4, $5, $6)
+      `INSERT INTO users (email, password_hash, name, phone, state, city,
+                          terms_accepted, terms_accepted_at, newsletter_opt_in)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
        RETURNING id, email, name, role`,
-      [email.toLowerCase(), hash, name, phone || null, state || null, city || null]
+      [email.toLowerCase(), hash, name, phone || null, state || null, city || null,
+       true, acceptedAt, newsletter_opt_in === true]
     );
 
     const user  = rows[0];
