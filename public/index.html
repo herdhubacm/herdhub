@@ -212,6 +212,112 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
 .listing-type-tabs{display:flex;gap:0;margin-bottom:20px;border:2px solid var(--light-tan);border-radius:4px;overflow:hidden}
 .lt-tab{flex:1;padding:10px;text-align:center;font-family:'Oswald',sans-serif;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;background:white;border:none;color:var(--mid-brown);transition:all .2s}
 .lt-tab.active{background:var(--rust);color:white}
+
+/* ── 3-COLUMN HOMEPAGE LAYOUT ── */
+.home-3col{display:grid;grid-template-columns:210px 1fr 210px;align-items:start}
+.home-sidebar{position:sticky;top:0;height:100vh;overflow-y:auto;scrollbar-width:thin}
+.home-sidebar::-webkit-scrollbar{width:3px}
+.home-sidebar-left{background:var(--dark-brown);border-right:2px solid var(--mid-brown)}
+.home-sidebar-left::-webkit-scrollbar-thumb{background:var(--mid-brown)}
+.home-sidebar-right{background:#1a0f06;border-left:2px solid var(--mid-brown)}
+.home-sidebar-right::-webkit-scrollbar-thumb{background:rgba(212,169,42,.4)}
+.sidebar-col-header{padding:12px 12px 9px;position:sticky;top:0;z-index:2}
+.sidebar-col-header-left{background:var(--dark-brown);border-bottom:2px solid var(--rust)}
+.sidebar-col-header-right{background:#1a0f06;border-bottom:2px solid var(--gold)}
+.sidebar-col-title{font-family:'Playfair Display',serif;font-size:15px;font-weight:900;color:var(--cream)}
+/* Sidebar ad cards */
+.sidebar-ad-card{margin:8px;border-radius:4px;overflow:hidden;cursor:pointer;transition:transform .15s}
+.sidebar-ad-card:hover{transform:translateY(-2px)}
+.sidebar-ad-img{width:100%;height:80px;display:flex;align-items:center;justify-content:center;font-size:24px;overflow:hidden;position:relative}
+.sidebar-ad-img img{width:100%;height:100%;object-fit:cover}
+.sidebar-ad-body{padding:7px 9px 9px}
+.sidebar-ad-label{font-family:'Oswald',sans-serif;font-size:8px;letter-spacing:.15em;text-transform:uppercase;margin-bottom:3px}
+.sidebar-ad-name{font-family:'Playfair Display',serif;font-size:12px;font-weight:700;line-height:1.25;margin-bottom:2px}
+.sidebar-ad-sub{font-size:10px;line-height:1.45}
+.sidebar-left-card{background:rgba(255,255,255,.06);border:1px solid rgba(201,169,110,.12)}
+.sidebar-left-card .sidebar-ad-img{background:rgba(255,255,255,.04)}
+.sidebar-left-card .sidebar-ad-label{color:var(--tan)}
+.sidebar-left-card .sidebar-ad-name{color:var(--cream)}
+.sidebar-left-card .sidebar-ad-sub{color:rgba(245,239,224,.45)}
+.sidebar-right-card{background:rgba(212,169,42,.07);border:1px solid rgba(212,169,42,.18)}
+.sidebar-right-card .sidebar-ad-img{background:rgba(212,169,42,.04)}
+.sidebar-right-card .sidebar-ad-label{color:var(--gold)}
+.sidebar-right-card .sidebar-ad-name{color:var(--cream)}
+.sidebar-right-card .sidebar-ad-sub{color:rgba(245,239,224,.45)}
+/* FTF scroll */
+.ftf-scroll-track{display:flex;gap:10px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.ftf-scroll-track::-webkit-scrollbar{display:none}
+.ftf-mini-card{flex:0 0 140px;background:rgba(255,255,255,.06);border:1px solid rgba(122,140,110,.25);border-radius:4px;overflow:hidden;cursor:pointer;transition:transform .15s}
+.ftf-mini-card:hover{transform:translateY(-2px)}
+.ftf-mini-img{height:84px;display:flex;align-items:center;justify-content:center;font-size:24px;background:rgba(122,140,110,.1);overflow:hidden;position:relative}
+.ftf-mini-img img{width:100%;height:100%;object-fit:cover}
+.ftf-mini-body{padding:7px 9px}
+.ftf-mini-title{font-family:'Playfair Display',serif;font-size:11px;font-weight:700;color:var(--cream);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ftf-mini-loc{font-size:9px;color:var(--tan)}
+.ftf-mini-price{font-family:'Playfair Display',serif;font-size:12px;font-weight:700;color:var(--gold);margin-top:3px}
+/* Center sections */
+.home-center-section{padding:16px}
+.home-center-section+.home-center-section{border-top:1px solid var(--light-tan)}
+.hcs-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.hcs-eyebrow{font-family:'Oswald',sans-serif;font-size:9px;letter-spacing:.25em;text-transform:uppercase;color:var(--rust)}
+.hcs-title{font-family:'Playfair Display',serif;font-size:17px;font-weight:900;color:var(--dark-brown)}
+.rotate-badge{font-family:'Oswald',sans-serif;font-size:9px;letter-spacing:.06em;text-transform:uppercase;background:rgba(212,169,42,.13);color:var(--gold);border:1px solid rgba(212,169,42,.3);padding:3px 8px;border-radius:10px}
+.hcs-see-all{font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--rust);text-decoration:none;cursor:pointer}
+/* Compact 5-col listing grid */
+.compact-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.compact-card{background:white;border-radius:4px;overflow:hidden;border:1px solid var(--light-tan);cursor:pointer;transition:box-shadow .15s}
+.compact-card:hover{box-shadow:0 3px 12px rgba(44,26,14,.1)}
+.cc-img{height:80px;display:flex;align-items:center;justify-content:center;font-size:22px;background:var(--cream);position:relative;overflow:hidden}
+.cc-img img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}
+.cc-badge{position:absolute;top:5px;left:5px;font-family:'Oswald',sans-serif;font-size:8px;letter-spacing:.06em;text-transform:uppercase;padding:2px 5px;border-radius:2px;z-index:1}
+.cc-badge-star{background:var(--gold);color:var(--dark-brown)}
+.cc-badge-new{background:var(--rust);color:white}
+.cc-body{padding:6px 7px 8px}
+.cc-cat{font-family:'Oswald',sans-serif;font-size:8px;letter-spacing:.08em;text-transform:uppercase;color:var(--rust);margin-bottom:2px}
+.cc-title{font-family:'Playfair Display',serif;font-size:11px;font-weight:700;color:var(--dark-brown);line-height:1.3;margin-bottom:3px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:28px}
+.cc-footer{display:flex;justify-content:space-between;align-items:flex-end}
+.cc-price{font-family:'Playfair Display',serif;font-size:12px;font-weight:700;color:var(--rust);line-height:1}
+.cc-loc{font-size:9px;color:#aaa;text-align:right;line-height:1.2}
+/* Rotation pagination dots */
+.rotate-dots{display:flex;gap:4px;margin-top:10px;justify-content:center}
+.rotate-dot{width:6px;height:6px;border-radius:50%;background:var(--light-tan);transition:background .3s;border:none;padding:0;cursor:pointer}
+.rotate-dot.active{background:var(--rust)}
+.rotate-count{font-family:'Oswald',sans-serif;font-size:9px;letter-spacing:.08em;text-align:center;color:#bbb;margin-top:5px}
+/* Home join CTA */
+.home-join-cta{background:linear-gradient(135deg,var(--rust) 0%,var(--dark-rust) 100%);padding:22px 20px;text-align:center;position:relative;overflow:hidden}
+.home-join-cta::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Ccircle cx='20' cy='20' r='3'/%3E%3C/g%3E%3C/svg%3E")}
+.home-join-cta h2{font-family:'Playfair Display',serif;font-size:20px;font-weight:900;color:white;position:relative;margin-bottom:5px}
+.home-join-cta p{font-size:13px;color:rgba(255,255,255,.8);position:relative;margin-bottom:12px;line-height:1.5}
+.home-join-btns{display:flex;gap:10px;justify-content:center;position:relative;flex-wrap:wrap}
+/* Compact category grid */
+.compact-cat-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:7px}
+.compact-cat-card{background:white;border:1px solid var(--light-tan);border-radius:4px;padding:8px 4px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s}
+.compact-cat-card:hover{background:var(--cream);border-color:var(--rust)}
+.compact-cat-icon{font-size:18px;margin-bottom:3px}
+.compact-cat-name{font-family:'Oswald',sans-serif;font-size:8px;letter-spacing:.06em;text-transform:uppercase;color:var(--dark-brown)}
+/* ── PLAN CARDS in post modal ── */
+.plan-card-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px}
+.plan-card{border:2px solid var(--light-tan);border-radius:6px;padding:12px 10px;cursor:pointer;transition:all .2s;text-align:center;position:relative;background:white}
+.plan-card:hover{border-color:var(--rust)}
+.plan-card.selected{border-color:var(--rust);background:rgba(181,69,27,.04)}
+.plan-card.selected::after{content:'✓';position:absolute;top:6px;right:8px;color:var(--rust);font-weight:900;font-size:13px}
+.plan-card-icon{font-size:22px;margin-bottom:5px}
+.plan-card-name{font-family:'Oswald',sans-serif;font-size:12px;font-weight:700;letter-spacing:.05em;color:var(--dark-brown);margin-bottom:3px}
+.plan-card-price{font-family:'Playfair Display',serif;font-size:14px;font-weight:700;color:var(--rust);margin-bottom:4px}
+.plan-card-features{font-size:10px;color:#666;line-height:1.5}
+.plan-card-badge{display:inline-block;font-family:'Oswald',sans-serif;font-size:8px;letter-spacing:.1em;text-transform:uppercase;padding:2px 6px;border-radius:2px;margin-bottom:5px}
+.pcb-free{background:#d1fae5;color:#065f46}
+.pcb-paid{background:rgba(181,69,27,.1);color:var(--rust)}
+.pcb-gold{background:rgba(212,169,42,.15);color:#92670a}
+.photo-limit-hint{font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:.06em;color:var(--rust);background:rgba(181,69,27,.07);border:1px solid rgba(181,69,27,.18);border-radius:3px;padding:6px 10px;margin-bottom:10px}
+/* listing type tabs in post modal - wider */
+.lt-tab-wide{padding:12px 8px}
+.lt-tab-desc{font-size:9px;font-weight:400;display:block;letter-spacing:.04em;margin-top:2px;opacity:.8;text-transform:none}
+@keyframes ccFadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.cc-animate{animation:ccFadeIn .35s ease}
+@media(max-width:1100px){.home-3col{grid-template-columns:180px 1fr 180px}}
+@media(max-width:900px){.home-3col{grid-template-columns:1fr}.home-sidebar{display:none}.hero-content{grid-template-columns:1fr}.hero-search{display:none}.two-col{grid-template-columns:1fr}.footer-grid{grid-template-columns:1fr 1fr}.compact-grid{grid-template-columns:repeat(3,1fr)}.compact-cat-grid{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:600px){nav a:not(.nav-cta){display:none}#online-counter{display:none!important}.footer-grid{grid-template-columns:1fr}.categories-grid{grid-template-columns:repeat(3,1fr)}}
 </style>
 </head>
 <body>
@@ -236,13 +342,12 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
       <a href="javascript:void(0)" data-action="category" data-cat="trucks_trailers">🚛 Trailers</a>
       <a href="javascript:void(0)" data-action="category" data-cat="working_dogs">🐕 Dogs</a>
       <a href="javascript:void(0)" data-action="all-listings">Browse All</a>
-      <a href="javascript:void(0)" data-action="page" data-page="forum" id="nav-forum">Forum</a>
       <a href="javascript:void(0)" data-action="page" data-page="about">About</a>
       <a href="javascript:void(0)" data-action="page" data-page="pricing">Pricing</a>
-      <a href="javascript:void(0)" class="nav-cta" data-action="modal" data-modal="post-listing">+ Post Ad</a>
+      <a href="javascript:void(0)" class="nav-cta" style="margin-left:20px" data-action="modal" data-modal="post-listing">+ Post Ad</a>
     </nav>
     <div class="header-actions">
-      <div id="online-counter" style="font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:.08em;color:var(--tan);display:flex;align-items:center;gap:5px;margin-right:8px"><span style="display:inline-block;width:7px;height:7px;background:#4ade80;border-radius:50%;box-shadow:0 0 6px #4ade80"></span><span id="online-count">—</span> online</div>
+      <div id="online-counter" style="font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:.08em;color:var(--tan);display:flex;align-items:center;gap:5px;margin-right:16px"><span style="display:inline-block;width:7px;height:7px;background:#4ade80;border-radius:50%;box-shadow:0 0 6px #4ade80"></span><span id="online-count">—</span> online</div>
       <button class="btn-signin" id="auth-btn" data-action="modal" data-modal="auth">Sign In / Register</button>
       <button class="btn-account" id="account-btn" data-action="page" data-page="account" style="display:none;background:var(--rust);color:white;border:none;font-family:'Oswald',sans-serif;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:9px 18px;border-radius:3px;cursor:pointer">👤 <span id="account-name">My Account</span></button>
     </div>
@@ -328,100 +433,135 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
 
 <!-- MAIN PAGE CONTENT -->
 <div id="page-home">
-  <!-- FARM TO TABLE SCROLL SECTION -->
-  <div style="background:var(--dark-brown);padding:32px 0 36px">
-    <div style="max-width:1280px;margin:0 auto;padding:0 24px">
-      <div class="section-header" style="margin-bottom:16px"><h2 style="color:var(--cream)">🥩 Farm to <span>Table</span></h2><a class="see-all" data-action="category" data-cat="farm_to_table" style="color:var(--tan)">Shop All →</a></div>
-      <div id="ftf-scroll-track" style="display:flex;gap:16px;overflow-x:auto;padding-bottom:8px;scrollbar-width:thin;scrollbar-color:var(--rust) transparent">
-        <div class="loading" style="color:var(--tan);padding:20px 0">Loading farm to table listings…</div>
+  <!-- 3-COLUMN LAYOUT -->
+  <div class="home-3col">
+
+    <!-- ══ LEFT SIDEBAR — FEATURED PARTNERS (T-Bone) ══ -->
+    <div class="home-sidebar home-sidebar-left">
+      <div class="sidebar-col-header sidebar-col-header-left">
+        <div class="sidebar-col-title">Featured Partners</div>
+      </div>
+      <div id="tbone-sidebar-listings">
+        <div class="loading" style="color:var(--tan);padding:20px 12px;font-size:12px">Loading…</div>
       </div>
     </div>
-  </div>
 
-  <!-- T-BONE ADVERTISERS -->
-  <div style="background:linear-gradient(135deg,#1a0e07 0%,#2C1A0E 100%);padding:36px 0;border-top:3px solid var(--gold)">
-    <div style="max-width:1280px;margin:0 auto;padding:0 24px">
-      <div class="section-header" style="margin-bottom:4px"><h2 style="color:var(--gold)">🥩 T-Bone <span style="color:var(--cream)">Partners</span></h2><a class="see-all" data-action="all-listings" style="color:var(--tan)">View All →</a></div>
-      <p style="font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--tan);margin-bottom:18px">Premium annual partners · Featured year-round</p>
-      <div class="listings-grid" id="tbone-listings"><div class="loading" style="color:var(--tan)">Loading…</div></div>
-    </div>
-  </div>
+    <!-- ══ CENTER COLUMN ══ -->
+    <div>
 
-  <!-- FILET ADVERTISERS -->
-  <div style="background:var(--cream);padding:36px 0;border-top:2px solid var(--rust)">
-    <div style="max-width:1280px;margin:0 auto;padding:0 24px">
-      <div class="section-header" style="margin-bottom:4px"><h2>🥩 Filet <span>Advertisers</span></h2><a class="see-all" data-action="all-listings">View All →</a></div>
-      <p style="font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--rust);margin-bottom:18px">Featured businesses · Sale barns · Ranches · Associations</p>
-      <div class="listings-grid" id="filet-listings"><div class="loading">Loading…</div></div>
-    </div>
-  </div>
-
-  <!-- SIRLOIN FEATURED -->
-  <div style="background:white;padding:36px 0">
-    <div style="max-width:1280px;margin:0 auto;padding:0 24px">
-      <div class="section-header" style="margin-bottom:4px"><h2>🥩 Sirloin <span>Featured</span></h2><a class="see-all" data-action="all-listings">Browse All →</a></div>
-      <p style="font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--rust);margin-bottom:18px">Recurring featured listings from active sellers</p>
-      <div class="listings-grid" id="sirloin-listings"><div class="loading">Loading…</div></div>
-    </div>
-  </div>
-
-  <!-- RIBEYE FEATURED -->
-  <div style="background:var(--warm-white);padding:36px 0">
-    <div style="max-width:1280px;margin:0 auto;padding:0 24px">
-      <div class="section-header" style="margin-bottom:4px"><h2>🥩 Ribeye <span>Featured</span></h2><a class="see-all" data-action="all-listings">Browse All →</a></div>
-      <p style="font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--rust);margin-bottom:18px">One-time 30-day featured listings</p>
-      <div class="listings-grid" id="ribeye-listings"><div class="loading">Loading…</div></div>
-    </div>
-  </div>
-
-  <!-- RECENT LISTINGS -->
-  <div class="section" style="border-top:1px solid var(--light-tan)">
-    <div class="section-header">
-      <h2>Recent <span>Listings</span></h2>
-      <a class="see-all" data-action="see-all">All Listings →</a>
-    </div>
-    <div class="listings-grid" id="recent-listings-grid"><div class="loading">Loading…</div></div>
-  </div>
-
-  <!-- BROWSE BY CATEGORY / BREED -->
-  <div class="section">
-    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:24px">
-      <h2 style="font-family:'Playfair Display',serif;font-size:26px;font-weight:700;color:var(--dark-brown)">Browse by <span style="color:var(--rust)" id="browse-mode-label">Category</span></h2>
-      <div style="display:flex;align-items:center;gap:10px">
-        <span style="font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--mid-brown)">View:</span>
-        <select id="browse-mode-select" style="font-family:'Oswald',sans-serif;font-size:13px;font-weight:600;padding:8px 14px;border:2px solid var(--light-tan);border-radius:3px;background:white;color:var(--dark-brown);cursor:pointer;outline:none" data-action="browse-mode">
-          <option value="category">By Category</option>
-          <option value="breed">By Breed</option>
-        </select>
-        <a class="see-all" data-action="all-listings">View All →</a>
+      <!-- FARM TO TABLE -->
+      <div style="background:var(--dark-brown);padding:18px 16px 20px">
+        <div style="font-family:'Oswald',sans-serif;font-size:9px;letter-spacing:.25em;text-transform:uppercase;color:var(--sage);margin-bottom:5px">Direct from the Ranch</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+          <div style="font-family:'Playfair Display',serif;font-size:16px;font-weight:900;color:var(--cream)">Farm to Table</div>
+          <a class="hcs-see-all" style="color:var(--tan)" data-action="category" data-cat="farm_to_table">Shop All →</a>
+        </div>
+        <div class="ftf-scroll-track" id="ftf-scroll-track">
+          <div class="loading" style="color:var(--tan);font-size:12px">Loading…</div>
+        </div>
       </div>
-    </div>
-    <!-- Category grid -->
-    <div id="browse-categories">
-      <div class="categories-grid">
-        <div class="cat-tile" data-action="category" data-cat="bulls"><div class="cat-tile-bg" style="background-image:url('https://images.unsplash.com/photo-1523741543316-beb7fc7023d8?w=400&q=75')"></div><div class="cat-tile-overlay"></div><div class="cat-tile-content"><span class="cat-tile-icon">🐂</span><div class="cat-tile-name">Bulls</div></div></div>
-        <div class="cat-tile" data-action="category" data-cat="bred_heifers"><div class="cat-tile-bg" style="background-image:url('https://images.unsplash.com/photo-1546445284-4c77d35a4a1c?w=400&q=75')"></div><div class="cat-tile-overlay"></div><div class="cat-tile-content"><span class="cat-tile-icon">🐄</span><div class="cat-tile-name">Bred Heifers</div></div></div>
-        <div class="cat-tile" data-action="category" data-cat="bred_cows"><div class="cat-tile-bg" style="background-image:url('https://images.unsplash.com/photo-1516467508483-a7212febe31a?w=400&q=75')"></div><div class="cat-tile-overlay"></div><div class="cat-tile-content"><span class="cat-tile-icon">🐄</span><div class="cat-tile-name">Bred Cows</div></div></div>
-        <div class="cat-tile" data-action="category" data-cat="open_heifers"><div class="cat-tile-bg" style="background-image:url('https://images.unsplash.com/photo-1546445284-4c77d35a4a1c?w=400&q=75')"></div><div class="cat-tile-overlay"></div><div class="cat-tile-content"><span class="cat-tile-icon">🐮</span><div class="cat-tile-name">Open Heifers</div></div></div>
-        <div class="cat-tile" data-action="category" data-cat="open_cows"><div class="cat-tile-bg" style="background-image:url('https://images.unsplash.com/photo-1546445284-4c77d35a4a1c?w=400&q=75')"></div><div class="cat-tile-overlay"></div><div class="cat-tile-content"><span class="cat-tile-icon">🐮</span><div class="cat-tile-name">Open Cows</div></div></div>
-        <div class="cat-tile" data-action="category" data-cat="feeder_stocker"><div class="cat-tile-bg" style="background-image:url('https://images.unsplash.com/photo-1523741543316-beb7fc7023d8?w=400&q=75')"></div><div class="cat-tile-overlay"></div><div class="cat-tile-content"><span class="cat-tile-icon">🐄</span><div class="cat-tile-name">Feeder / Stocker</div></div></div>
-        <div class="cat-tile" data-action="category" data-cat="fat_cattle"><div class="cat-tile-bg" style="background-image:url('https://images.unsplash.com/photo-1546445284-4c77d35a4a1c?w=400&q=75')"></div><div class="cat-tile-overlay"></div><div class="cat-tile-content"><span class="cat-tile-icon">🐄</span><div class="cat-tile-name">Fat Cattle</div></div></div>
-        <div class="cat-tile" data-action="category" data-cat="cow_calf_pairs"><div class="cat-tile-bg" style="background-image:url('https://images.unsplash.com/photo-1516467508483-a7212febe31a?w=400&q=75')"></div><div class="cat-tile-overlay"></div><div class="cat-tile-content"><span class="cat-tile-icon">🐄</span><div class="cat-tile-name">Cow / Calf Pairs</div></div></div>
-        <div class="cat-tile" data-action="category" data-cat="equipment"><div class="cat-tile-bg" style="background-image:url('https://images.unsplash.com/photo-1589739900243-4b52cd9b104e?w=400&q=75')"></div><div class="cat-tile-overlay"></div><div class="cat-tile-content"><span class="cat-tile-icon">🚜</span><div class="cat-tile-name">Equipment</div></div></div>
-        <div class="cat-tile" data-action="category" data-cat="trailers"><div class="cat-tile-bg" style="background-image:url('https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?w=400&q=75')"></div><div class="cat-tile-overlay"></div><div class="cat-tile-content"><span class="cat-tile-icon">🚛</span><div class="cat-tile-name">Trailers</div></div></div>
-        <div class="cat-tile" data-action="category" data-cat="working_dogs"><div class="cat-tile-bg" style="background-image:url('https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400&q=75')"></div><div class="cat-tile-overlay"></div><div class="cat-tile-content"><span class="cat-tile-icon">🐕</span><div class="cat-tile-name">Working Dogs</div></div></div>
-        <div class="cat-tile" data-action="category" data-cat="feed_hay"><div class="cat-tile-bg" style="background-image:url('https://images.unsplash.com/photo-1464226184884-fa280b87c399?w=400&q=75')"></div><div class="cat-tile-overlay"></div><div class="cat-tile-content"><span class="cat-tile-icon">🌾</span><div class="cat-tile-name">Feed &amp; Hay</div></div></div>
-      </div>
-    </div>
-    <!-- Breed grid (hidden by default) -->
-    <div id="browse-breeds" style="display:none">
-      <div class="breed-grid" id="breed-grid-full">
-        <!-- Populated by JS -->
-      </div>
-    </div>
-  </div>
 
-  <!-- SELL YOUR STOCK + ADVERTISE SPLIT CTA -->
+      <!-- FEATURED CATTLE -->
+      <div class="home-center-section" id="featured-cattle-section">
+        <div class="hcs-header">
+          <div>
+            <div class="hcs-eyebrow">Premium Livestock</div>
+            <div class="hcs-title">Featured Cattle</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span class="rotate-badge" id="cattle-rotate-badge" style="display:none">🔄 Rotates every 4hrs</span>
+            <a class="hcs-see-all" data-action="category" data-cat="beef_cattle">View All →</a>
+          </div>
+        </div>
+        <div class="compact-grid" id="featured-cattle-grid">
+          <div class="loading" style="grid-column:1/-1;color:#aaa">Loading featured cattle…</div>
+        </div>
+        <div class="rotate-dots" id="cattle-dots" style="display:none"></div>
+        <div class="rotate-count" id="cattle-count"></div>
+      </div>
+
+      <!-- JOIN CTA -->
+      <div class="home-join-cta">
+        <h2>Join America's Cattle Marketplace</h2>
+        <p>Thousands of producers and buyers active daily.<br>List your livestock, equipment, or services today.</p>
+        <div class="home-join-btns">
+          <button class="btn-primary" data-action="modal" data-modal="post-listing">Post a Listing</button>
+          <button class="btn-secondary" data-action="page" data-page="pricing" style="border-color:rgba(255,255,255,.5);color:white">View Pricing</button>
+        </div>
+      </div>
+
+      <!-- FEATURED EQUIPMENT -->
+      <div class="home-center-section" id="featured-equip-section">
+        <div class="hcs-header">
+          <div>
+            <div class="hcs-eyebrow">Machinery & Supplies</div>
+            <div class="hcs-title">Featured Equipment</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span class="rotate-badge" id="equip-rotate-badge" style="display:none">🔄 Rotates every 4hrs</span>
+            <a class="hcs-see-all" data-action="category" data-cat="equipment">View All →</a>
+          </div>
+        </div>
+        <div class="compact-grid" id="featured-equip-grid">
+          <div class="loading" style="grid-column:1/-1;color:#aaa">Loading featured equipment…</div>
+        </div>
+        <div class="rotate-dots" id="equip-dots" style="display:none"></div>
+        <div class="rotate-count" id="equip-count"></div>
+      </div>
+
+      <!-- RECENT LISTINGS -->
+      <div class="home-center-section" style="background:var(--cream)">
+        <div class="hcs-header">
+          <div>
+            <div class="hcs-eyebrow">Latest Activity</div>
+            <div class="hcs-title">Recent Listings</div>
+          </div>
+          <a class="hcs-see-all" data-action="see-all">View All →</a>
+        </div>
+        <div class="compact-grid" id="recent-listings-grid">
+          <div class="loading" style="grid-column:1/-1;color:#aaa">Loading…</div>
+        </div>
+      </div>
+
+      <!-- BROWSE BY CATEGORY -->
+      <div class="home-center-section">
+        <div class="hcs-eyebrow" style="margin-bottom:6px">Find What You Need</div>
+        <div class="hcs-title" style="margin-bottom:12px">Browse by Category</div>
+        <div class="compact-cat-grid">
+          <div class="compact-cat-card" data-action="category" data-cat="bulls"><div class="compact-cat-icon">🐂</div><div class="compact-cat-name">Bulls</div></div>
+          <div class="compact-cat-card" data-action="category" data-cat="bred_heifers"><div class="compact-cat-icon">🐄</div><div class="compact-cat-name">Bred Heifers</div></div>
+          <div class="compact-cat-card" data-action="category" data-cat="cow_calf_pairs"><div class="compact-cat-icon">🐮</div><div class="compact-cat-name">Cow/Calf Pairs</div></div>
+          <div class="compact-cat-card" data-action="category" data-cat="feeder_stocker"><div class="compact-cat-icon">🐄</div><div class="compact-cat-name">Feeder Cattle</div></div>
+          <div class="compact-cat-card" data-action="category" data-cat="showstock"><div class="compact-cat-icon">🏆</div><div class="compact-cat-name">Showstock</div></div>
+          <div class="compact-cat-card" data-action="category" data-cat="dairy"><div class="compact-cat-icon">🥛</div><div class="compact-cat-name">Dairy</div></div>
+          <div class="compact-cat-card" data-action="category" data-cat="equipment"><div class="compact-cat-icon">🚜</div><div class="compact-cat-name">Equipment</div></div>
+          <div class="compact-cat-card" data-action="category" data-cat="trailers"><div class="compact-cat-icon">🚛</div><div class="compact-cat-name">Trailers</div></div>
+          <div class="compact-cat-card" data-action="category" data-cat="working_dogs"><div class="compact-cat-icon">🐕</div><div class="compact-cat-name">Working Dogs</div></div>
+          <div class="compact-cat-card" data-action="category" data-cat="feed_hay"><div class="compact-cat-icon">🌾</div><div class="compact-cat-name">Feed & Hay</div></div>
+        </div>
+      </div>
+
+      <!-- NEWS + SIDEBAR WIDGETS -->
+      <div class="two-col" id="news" style="padding:24px;gap:24px;max-width:100%">
+        <div>
+          <div class="section-header"><h2>Ranch <span>News & Resources</span></h2><a class="see-all" data-action="page" data-page="articles">All Articles →</a></div>
+          <div id="news-articles-list"><div class="loading" style="padding:24px 0">Loading articles…</div></div>
+        </div>
+        <aside>
+          <div class="sidebar-widget" id="market">
+            <div class="widget-header">📈 USDA Cattle Prices <span class="market-live-badge" id="market-badge">LOADING</span></div>
+            <div class="widget-body">
+              <div id="market-prices"><div class="loading" style="padding:20px 0">Fetching USDA data…</div></div>
+              <div class="market-source" id="market-source">Source: USDA Agricultural Marketing Service</div>
+            </div>
+          </div>
+          <div class="sidebar-widget" id="forum">
+            <div class="widget-header">💬 Community Forum</div>
+            <div class="widget-body">
+              <ul class="post-list" id="forum-topics-sidebar"><li><span class="post-icon">💬</span><a>Loading…</a></li></ul>
+              <button class="btn-primary" style="margin-top:12px;justify-content:center;padding:10px;font-size:12px;width:100%" data-action="page" data-page="forum">Join the Forum</button>
+            </div>
+          </div>
   <div style="background:var(--dark-brown);padding:52px 0">
     <div style="max-width:1280px;margin:0 auto;padding:0 24px">
       <div style="text-align:center;margin-bottom:40px">
@@ -539,40 +679,30 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
       <div id="news-articles-list"><div class="loading" style="padding:24px 0">Loading articles…</div></div>
     </div>
 
-    <!-- SIDEBAR -->
-    <aside>
-      <div class="sidebar-widget" id="market">
-        <div class="widget-header">📈 USDA Cattle Prices <span class="market-live-badge" id="market-badge">LOADING</span></div>
-        <div class="widget-body">
-          <div id="market-prices"><div class="loading" style="padding:20px 0">Fetching USDA data…</div></div>
-          <div class="market-source" id="market-source">Source: USDA Agricultural Marketing Service</div>
-        </div>
+          <div class="sidebar-widget">
+            <div class="widget-header">📬 Herd Hub Digital Monthly Newsletter</div>
+            <div class="widget-body" style="text-align:center">
+              <p style="font-size:13px;color:#666;margin-bottom:6px;line-height:1.6">Monthly cattle prices, featured listings, ranch news, and exclusive deals — straight to your inbox.</p>
+              <input type="email" id="nl-email" placeholder="Your email address" style="width:100%;padding:9px;border:1px solid var(--light-tan);border-radius:3px;font-size:13px;margin-bottom:10px;outline:none">
+              <button class="btn-primary" style="justify-content:center;padding:10px;font-size:13px;width:100%" data-action="subscribe">Join the Newsletter →</button>
+            </div>
+          </div>
+        </aside>
       </div>
+    </div><!-- end center -->
 
-      <div class="sidebar-widget" id="forum">
-        <div class="widget-header">💬 Community Forum</div>
-        <div class="widget-body">
-          <ul class="post-list" id="forum-topics-sidebar"><li><span class="post-icon">💬</span><a>Loading…</a></li></ul>
-          <button class="btn-primary" style="margin-top:12px;justify-content:center;padding:10px;font-size:12px;width:100%" data-action="page" data-page="forum">Join the Forum</button>
-        </div>
+    <!-- ══ RIGHT SIDEBAR — FEATURED ADS (Filet) ══ -->
+    <div class="home-sidebar home-sidebar-right">
+      <div class="sidebar-col-header sidebar-col-header-right">
+        <div class="sidebar-col-title">Featured Ads</div>
       </div>
-      <div class="sidebar-widget">
-        <div class="widget-header">📬 Herd Hub Digital Monthly Newsletter</div>
-        <div class="widget-body" style="text-align:center">
-          <p style="font-size:13px;color:#666;margin-bottom:6px;line-height:1.6">Monthly cattle prices, featured listings, ranch news, and exclusive deals — straight to your inbox.</p>
-          <ul style="text-align:left;font-size:12px;color:var(--rust);margin-bottom:12px;padding-left:16px;line-height:1.8">
-            <li>USDA market updates</li>
-            <li>Featured ranches &amp; businesses</li>
-            <li>New listings you won't want to miss</li>
-            <li>Ranch tips &amp; industry news</li>
-          </ul>
-          <input type="email" id="nl-email" placeholder="Your email address" style="width:100%;padding:9px;border:1px solid var(--light-tan);border-radius:3px;font-size:13px;margin-bottom:10px;outline:none">
-          <button class="btn-primary" style="justify-content:center;padding:10px;font-size:13px;width:100%" data-action="subscribe">Join the Newsletter →</button>
-        </div>
+      <div id="filet-sidebar-listings">
+        <div class="loading" style="color:var(--gold);opacity:.6;padding:20px 12px;font-size:12px">Loading…</div>
       </div>
-    </aside>
-  </div>
-</div>
+    </div>
+
+  </div><!-- end home-3col -->
+</div><!-- end page-home -->
 
 
 
@@ -1288,17 +1418,83 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
 </div>
 
 <div class="modal-overlay" id="modal-post-listing">
-  <div class="modal" style="max-width:600px">
+  <div class="modal" style="max-width:620px">
     <button class="modal-close" data-action="close-modal" data-modal="post-listing">✕</button>
     <h2>Post a Listing</h2>
-    <!-- Listing type switcher -->
-    <div class="listing-type-tabs">
-      <button class="lt-tab active" id="lt-regular" data-action="listing-type" data-type="regular">🐄 Regular Listing</button>
-      <button class="lt-tab" id="lt-advertise" data-action="listing-type" data-type="advertise">📢 Advertisement</button>
+
+    <!-- Type tabs -->
+    <div class="listing-type-tabs" style="margin-bottom:16px">
+      <button class="lt-tab active lt-tab-wide" id="lt-regular" data-action="listing-type" data-type="regular">
+        🐄 Regular Listing
+        <span class="lt-tab-desc">Cattle · Equipment · Supplies</span>
+      </button>
+      <button class="lt-tab lt-tab-wide" id="lt-advertise" data-action="listing-type" data-type="advertise">
+        📢 Advertisement
+        <span class="lt-tab-desc">Businesses · Ranches · Associations</span>
+      </button>
     </div>
+
+    <!-- Plan cards — Regular -->
+    <div id="pl-seller-plans">
+      <div style="font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--mid-brown);margin-bottom:10px">Select Your Plan</div>
+      <div class="plan-card-grid">
+        <div class="plan-card selected" data-plan="burger" data-action="select-plan">
+          <span class="plan-card-badge pcb-free">Free</span>
+          <div class="plan-card-icon">🍔</div>
+          <div class="plan-card-name">Burger</div>
+          <div class="plan-card-price">$0</div>
+          <div class="plan-card-features">1 photo · 30-day listing<br>Basic visibility</div>
+        </div>
+        <div class="plan-card" data-plan="sirloin" data-action="select-plan">
+          <span class="plan-card-badge pcb-paid">Monthly</span>
+          <div class="plan-card-icon">🥩</div>
+          <div class="plan-card-name">Sirloin</div>
+          <div class="plan-card-price">$19.99/mo</div>
+          <div class="plan-card-features">3 photos · Featured center<br>Auto-renewing</div>
+        </div>
+        <div class="plan-card" data-plan="ribeye" data-action="select-plan">
+          <span class="plan-card-badge pcb-paid">One-Time</span>
+          <div class="plan-card-icon">🥩</div>
+          <div class="plan-card-name">Ribeye</div>
+          <div class="plan-card-price">$24.95</div>
+          <div class="plan-card-features">3 photos · 30-day featured<br>One-time payment</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Plan cards — Advertisement -->
+    <div id="pl-ad-plans" style="display:none">
+      <div style="font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--mid-brown);margin-bottom:10px">Select Your Advertising Plan</div>
+      <div class="plan-card-grid">
+        <div class="plan-card selected" data-plan="farm_to_table" data-action="select-plan">
+          <span class="plan-card-badge pcb-free">Free</span>
+          <div class="plan-card-icon">🌿</div>
+          <div class="plan-card-name">Farm to Table</div>
+          <div class="plan-card-price">$0</div>
+          <div class="plan-card-features">3 photos · F2T scroll section<br>Direct beef listings only</div>
+        </div>
+        <div class="plan-card" data-plan="filet" data-action="select-plan">
+          <span class="plan-card-badge pcb-paid">One-Time</span>
+          <div class="plan-card-icon">🥩</div>
+          <div class="plan-card-name">Filet</div>
+          <div class="plan-card-price">$49.99</div>
+          <div class="plan-card-features">5 photos · Right sidebar<br>30-day premium ad</div>
+        </div>
+        <div class="plan-card" data-plan="t_bone" data-action="select-plan">
+          <span class="plan-card-badge pcb-gold">Best Value</span>
+          <div class="plan-card-icon">🥩</div>
+          <div class="plan-card-name">T-Bone</div>
+          <div class="plan-card-price">$39.95/yr</div>
+          <div class="plan-card-features">5 photos · Left sidebar<br>Year-round + PR package</div>
+        </div>
+      </div>
+    </div>
+
     <div id="listing-form-error" class="form-error" style="display:none"></div>
     <div id="listing-form-success" class="form-success" style="display:none"></div>
-    <div class="form-group"><label>Title</label><input type="text" id="pl-title" placeholder="e.g. 2022 Registered Black Angus Bull"></div>
+
+    <div class="form-group"><label>Title</label><input type="text" id="pl-title" placeholder="e.g. Registered Black Angus Herd Bull — 2yr"></div>
+
     <div class="form-row">
       <div class="form-group">
         <label>Category</label>
@@ -1318,7 +1514,7 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
             <option value="showstock">Showstock</option>
             <option value="dairy">Dairy</option>
           </optgroup>
-          <optgroup label="🚜 Equipment & Supplies">
+          <optgroup label="🚜 Equipment &amp; Supplies" id="cats-equip">
             <option value="equipment">Equipment</option>
             <option value="trailers">Trailers</option>
             <option value="chutes_pens">Chutes / Pens / Tubs</option>
@@ -1337,7 +1533,8 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
           </optgroup>
         </select>
       </div>
-      <div class="form-group"><label>Breed (optional)</label>
+      <div class="form-group" id="pl-breed-group">
+        <label>Breed <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:11px">(optional)</span></label>
         <select id="pl-breed">
           <option value="">Select Breed (optional)</option>
           <option>Aberdeen Angus</option><option>Ayrshire</option><option>Barzona</option>
@@ -1368,6 +1565,7 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
         </select>
       </div>
     </div>
+
     <div class="form-group"><label>Description</label><textarea id="pl-description" rows="3" placeholder="Describe your listing — weight, age, health history, pricing details…"></textarea></div>
     <div class="form-row">
       <div class="form-group"><label>Price ($)</label><input type="number" id="pl-price" placeholder="0.00"></div>
@@ -1389,22 +1587,14 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
     </div>
     <div class="form-row">
       <div class="form-group"><label>Quantity</label><input type="number" id="pl-quantity" value="1" min="1"></div>
-      <div class="form-group"><label>Listing Tier</label><select id="pl-tier">
-        <optgroup label="🐄 Seller Plans">
-          <option value="burger">🍔 Burger – Free (1 photo, 30 days)</option>
-          <option value="sirloin">🥩 Sirloin – $19.99/mo (3 photos, featured, recurring)</option>
-          <option value="ribeye">🥩 Ribeye – $24.95 one-time (3 photos, 30-day featured)</option>
-        </optgroup>
-        <optgroup label="📢 Advertiser Plans">
-          <option value="farm_to_table">🌿 Farm to Table – Free (3 photos)</option>
-          <option value="filet">🥩 Filet – $49.99 one-time (5 photos, 30-day featured)</option>
-          <option value="t_bone">🥩 T-Bone – $39.95/yr (5 photos, year-round, PR + magazine)</option>
-        </optgroup>
-      </select></div>
+      <!-- hidden tier field — set by plan card selection -->
+      <input type="hidden" id="pl-tier" value="burger">
     </div>
-    <!-- Photo Upload -->
+
+    <!-- Photo upload with live limit display -->
     <div class="form-group">
-      <label>Photos <span id="photo-count-hint" style="font-weight:400;color:#888;text-transform:none;letter-spacing:0">(1 for Burger/Free, 3 for Sirloin/Ribeye/Farm-to-Table, 5 for Filet/T-Bone)</span></label>
+      <label>Photos <span id="photo-count-hint" style="font-weight:400;color:#888;text-transform:none;letter-spacing:0"></span></label>
+      <div class="photo-limit-hint" id="pl-photo-hint">📸 Your plan allows <strong id="pl-photo-limit-label">1 photo</strong> (Burger — Free)</div>
       <div class="photo-upload-area" id="photo-drop-area">
         <input type="file" id="pl-photos" multiple accept="image/jpeg,image/png,image/webp">
         <div>📸 <strong>Click to add photos</strong> or drag &amp; drop here<br>
@@ -1752,6 +1942,8 @@ document.addEventListener('DOMContentLoaded', () => {
   initPhotoUpload('pl-photos', 'photo-previews', 'photo-drop-area');
   initPhotoUpload('el-photos', 'el-photo-previews', 'el-photo-drop-area');
   initPhotoUpload('acct-pl-photos', 'acct-photo-previews', 'acct-photo-drop-area');
+  // Init post modal hint
+  updatePlPhotoHint('burger');
 });
 
 // ── Event Delegation ───────────────────────────────────
@@ -1793,10 +1985,33 @@ function initEventDelegation() {
       const isAdvert = el.dataset.type === 'advertise';
       document.getElementById('lt-regular').classList.toggle('active', !isAdvert);
       document.getElementById('lt-advertise').classList.toggle('active', isAdvert);
+      // Show/hide plan card sets
+      document.getElementById('pl-seller-plans').style.display = isAdvert ? 'none' : '';
+      document.getElementById('pl-ad-plans').style.display = isAdvert ? '' : 'none';
+      // Show/hide category optgroups — only relevant group visible
       document.getElementById('cats-regular').style.display = isAdvert ? 'none' : '';
+      document.getElementById('cats-equip').style.display = isAdvert ? 'none' : '';
       document.getElementById('cats-advertise').style.display = isAdvert ? '' : 'none';
+      // Show/hide breed selector (ads don't need it)
+      const breedGroup = document.getElementById('pl-breed-group');
+      if (breedGroup) breedGroup.style.display = isAdvert ? 'none' : '';
+      // Reset category select to first visible option
       const catSel = document.getElementById('pl-category');
-      catSel.value = isAdvert ? 'sale_barns' : 'beef_cattle';
+      catSel.value = isAdvert ? 'sale_barns' : 'bulls';
+      // Reset plan selection to first of that type + update hidden tier + photo hint
+      const defaultPlan = isAdvert ? 'farm_to_table' : 'burger';
+      document.getElementById('pl-tier').value = defaultPlan;
+      document.querySelectorAll(isAdvert ? '#pl-ad-plans .plan-card' : '#pl-seller-plans .plan-card')
+        .forEach((c,i) => c.classList.toggle('selected', i===0));
+      updatePlPhotoHint(defaultPlan);
+    }
+    else if (action === 'select-plan') {
+      const plan = el.dataset.plan;
+      // Deselect siblings
+      el.closest('.plan-card-grid').querySelectorAll('.plan-card').forEach(c => c.classList.remove('selected'));
+      el.classList.add('selected');
+      document.getElementById('pl-tier').value = plan;
+      updatePlPhotoHint(plan);
     }
     else if (action === 'acct-listing-type') {
       const isAdvert = el.dataset.type === 'advertise';
@@ -1966,52 +2181,206 @@ async function loadStats() {
   } catch(e) {}
 }
 
-async function loadFeaturedListings() { await loadTierSections(); }
+async function loadFeaturedListings() { await loadHomepageSections(); }
 
-async function loadTierSection(tier, elId, emptyMsg, darkBg) {
-  try {
-    const r = await fetch(`${API}/api/listings?tier=${tier}&sort=featured&limit=4`);
-    const data = await r.json();
-    const listings = data.listings || data || [];
-    const el = document.getElementById(elId);
-    if (!el) return;
-    const empty = `<p style="color:${darkBg?'rgba(201,169,110,.5)':'#aaa'};font-size:14px;padding:20px 0">${emptyMsg}</p>`;
-    el.innerHTML = listings.length ? listings.map(l => renderListingCard(l, darkBg)).join('') : empty;
-  } catch(e) { console.warn('tier load err', tier, e); }
+// ── Compact card renderer (5-col grid) ─────────────────
+function renderCompactCard(l) {
+  const emoji = catEmoji(l.category);
+  const imgHtml = l.thumb
+    ? `<img src="${l.thumb}" alt="" onerror="this.style.display='none'">`
+    : `<span style="font-size:22px">${emoji}</span>`;
+  const isFeatured = l.is_featured || ['t_bone','filet','sirloin','ribeye'].includes(l.tier);
+  const badge = isFeatured
+    ? `<span class="cc-badge cc-badge-star">★</span>`
+    : `<span class="cc-badge cc-badge-new">New</span>`;
+  const price = l.price
+    ? `$${Number(l.price).toLocaleString()}${l.price_type && l.price_type !== 'fixed' ? '<small style="font-size:9px;font-weight:400;color:#aaa"> ' + l.price_type.replace(/_/g,' ') + '</small>' : ''}`
+    : `<span style="font-size:10px;color:#aaa">Call</span>`;
+  return `<div class="compact-card cc-animate" onclick="openListing(${l.id})">
+    <div class="cc-img">${imgHtml}${badge}</div>
+    <div class="cc-body">
+      <div class="cc-cat">${emoji} ${fmtCat(l.category)}</div>
+      <div class="cc-title">${l.title}</div>
+      <div class="cc-footer">
+        <div class="cc-price">${price}</div>
+        <div class="cc-loc">${l.state||''}</div>
+      </div>
+    </div>
+  </div>`;
 }
 
-async function loadTierSections() {
-  // Farm to Table horizontal scroll
+// ── Sidebar ad card renderer ────────────────────────────
+function renderSidebarAdCard(l, side) {
+  const cls = side === 'left' ? 'sidebar-left-card' : 'sidebar-right-card';
+  const imgHtml = l.thumb
+    ? `<img src="${l.thumb}" alt="" onerror="this.style.display='none'">`
+    : `<span style="font-size:24px">${catEmoji(l.category)}</span>`;
+  return `<div class="sidebar-ad-card ${cls}" onclick="openListing(${l.id})">
+    <div class="sidebar-ad-img">${imgHtml}</div>
+    <div class="sidebar-ad-body">
+      <div class="sidebar-ad-label">${fmtCat(l.category)} · ${l.state||''}</div>
+      <div class="sidebar-ad-name">${l.title}</div>
+      <div class="sidebar-ad-sub">${l.city||''}</div>
+    </div>
+  </div>`;
+}
+
+// ── Rotation state ──────────────────────────────────────
+const rotationState = {};
+
+function setupRotation(key, allListings, gridId, dotsId, countId, badgeId, pageSize) {
+  if (allListings.length === 0) return;
+  rotationState[key] = { all: allListings, page: 0, pageSize };
+  const pages = Math.ceil(allListings.length / pageSize);
+
+  // Show badge + count if multiple pages
+  if (pages > 1) {
+    const badge = document.getElementById(badgeId);
+    if (badge) badge.style.display = '';
+    const dotsEl = document.getElementById(dotsId);
+    if (dotsEl) {
+      dotsEl.style.display = 'flex';
+      dotsEl.innerHTML = Array.from({length: pages}, (_, i) =>
+        `<button class="rotate-dot${i===0?' active':''}" onclick="jumpRotation('${key}',${i})"></button>`
+      ).join('');
+    }
+  }
+
+  renderRotationPage(key, gridId, dotsId, countId, 0);
+
+  // Auto-rotate every 4 hours (14400s), but for demo purposes also accept a test interval
+  if (pages > 1) {
+    const interval = 4 * 60 * 60 * 1000;
+    rotationState[key].timer = setInterval(() => {
+      const st = rotationState[key];
+      const nextPage = (st.page + 1) % Math.ceil(st.all.length / st.pageSize);
+      renderRotationPage(key, gridId, dotsId, countId, nextPage);
+    }, interval);
+  }
+}
+
+function jumpRotation(key, page) {
+  const st = rotationState[key];
+  if (!st) return;
+  const gridId = key === 'cattle' ? 'featured-cattle-grid' : 'featured-equip-grid';
+  const dotsId = key === 'cattle' ? 'cattle-dots' : 'equip-dots';
+  const countId = key === 'cattle' ? 'cattle-count' : 'equip-count';
+  renderRotationPage(key, gridId, dotsId, countId, page);
+}
+
+function renderRotationPage(key, gridId, dotsId, countId, page) {
+  const st = rotationState[key];
+  if (!st) return;
+  st.page = page;
+  const {all, pageSize} = st;
+  const slice = all.slice(page * pageSize, (page + 1) * pageSize);
+  const grid = document.getElementById(gridId);
+  if (grid) grid.innerHTML = slice.map(renderCompactCard).join('');
+  const pages = Math.ceil(all.length / pageSize);
+  // Update dots
+  document.querySelectorAll(`#${dotsId} .rotate-dot`).forEach((d,i) => d.classList.toggle('active', i===page));
+  // Update count text
+  const countEl = document.getElementById(countId);
+  if (countEl && pages > 1) {
+    countEl.textContent = `Showing ${slice.length} of ${all.length} featured · page ${page+1} of ${pages} · refreshes every 4 hours`;
+  }
+}
+
+// ── FTF mini scroll card renderer ──────────────────────
+function renderFtfMiniCard(l) {
+  const imgHtml = l.thumb
+    ? `<img src="${l.thumb}" alt="" onerror="this.style.display='none'">`
+    : `<span style="font-size:24px">🥩</span>`;
+  const price = l.price ? `$${Number(l.price).toLocaleString()}` : '';
+  return `<div class="ftf-mini-card" onclick="openListing(${l.id})">
+    <div class="ftf-mini-img">${imgHtml}</div>
+    <div class="ftf-mini-body">
+      <div class="ftf-mini-title">${l.title}</div>
+      <div class="ftf-mini-loc">📍 ${l.city||''}, ${l.state||''}</div>
+      ${price ? `<div class="ftf-mini-price">${price}</div>` : ''}
+    </div>
+  </div>`;
+}
+
+// ── Main homepage section loader ────────────────────────
+async function loadHomepageSections() {
+  // 1. Farm to Table scroll
   try {
-    const r = await fetch(`${API}/api/listings?category=farm_to_table&limit=8&sort=newest`);
+    const r = await fetch(`${API}/api/listings?category=farm_to_table&limit=12&sort=newest`);
     const data = await r.json();
     const listings = data.listings || data || [];
     const track = document.getElementById('ftf-scroll-track');
     if (track) {
-      if (listings.length) {
-        track.innerHTML = listings.map(l => `
-          <div style="flex:0 0 220px;background:rgba(245,239,224,.06);border:1px solid rgba(201,169,110,.2);border-radius:4px;overflow:hidden;cursor:pointer" onclick="openListing(${l.id})">
-            <div style="height:140px;background:var(--dark-brown);overflow:hidden">
-              ${l.thumb ? `<img src="${l.thumb}" style="width:100%;height:100%;object-fit:cover" alt="">` : `<div style="height:100%;display:flex;align-items:center;justify-content:center;font-size:48px">🥩</div>`}
-            </div>
-            <div style="padding:12px">
-              <div style="font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--sage);margin-bottom:4px">Farm to Table</div>
-              <div style="font-family:'Playfair Display',serif;font-size:14px;font-weight:700;color:var(--cream);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${l.title}</div>
-              <div style="font-size:12px;color:var(--tan)">📍 ${l.city||''}, ${l.state||''}</div>
-              ${l.price ? `<div style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--gold);margin-top:6px">$${Number(l.price).toLocaleString()}</div>` : ''}
-            </div>
-          </div>`).join('');
-      } else {
-        track.innerHTML = `<p style="color:rgba(201,169,110,.5);font-size:14px;padding:20px 0">No farm to table listings yet — <span style="cursor:pointer;text-decoration:underline;color:var(--tan)" onclick="openModal('post-listing')">be the first to post!</span></p>`;
-      }
+      track.innerHTML = listings.length
+        ? listings.map(renderFtfMiniCard).join('')
+        : `<p style="color:rgba(201,169,110,.5);font-size:13px;padding:16px 0">No listings yet — <span style="cursor:pointer;text-decoration:underline;color:var(--tan)" data-action="modal" data-modal="post-listing">be the first to post!</span></p>`;
     }
-  } catch(e) { console.warn(e); }
+  } catch(e) { console.warn('ftf load', e); }
 
-  await loadTierSection('t_bone',  'tbone-listings',   'No T-Bone partners yet.', true);
-  await loadTierSection('filet',   'filet-listings',   'No Filet advertisers yet.', false);
-  await loadTierSection('sirloin', 'sirloin-listings', 'No Sirloin featured listings yet.', false);
-  await loadTierSection('ribeye',  'ribeye-listings',  'No Ribeye featured listings yet.', false);
+  // 2. Left sidebar — T-Bone partners
+  try {
+    const r = await fetch(`${API}/api/listings?tier=t_bone&sort=featured&limit=20`);
+    const data = await r.json();
+    const listings = data.listings || data || [];
+    const el = document.getElementById('tbone-sidebar-listings');
+    if (el) {
+      el.innerHTML = listings.length
+        ? listings.map(l => renderSidebarAdCard(l, 'left')).join('')
+        : `<p style="color:rgba(201,169,110,.4);font-size:12px;padding:16px 12px">No partners yet.</p>`;
+    }
+  } catch(e) { console.warn('tbone sidebar', e); }
+
+  // 3. Right sidebar — Filet ads
+  try {
+    const r = await fetch(`${API}/api/listings?tier=filet&sort=featured&limit=20`);
+    const data = await r.json();
+    const listings = data.listings || data || [];
+    const el = document.getElementById('filet-sidebar-listings');
+    if (el) {
+      el.innerHTML = listings.length
+        ? listings.map(l => renderSidebarAdCard(l, 'right')).join('')
+        : `<p style="color:rgba(212,169,42,.4);font-size:12px;padding:16px 12px">No ads yet.</p>`;
+    }
+  } catch(e) { console.warn('filet sidebar', e); }
+
+  // 4. Featured Cattle — all paid cattle tiers pooled, rotated in pages of 15
+  try {
+    const [r1, r2] = await Promise.all([
+      fetch(`${API}/api/listings?tier=sirloin&sort=featured&limit=60`),
+      fetch(`${API}/api/listings?tier=ribeye&sort=featured&limit=60`)
+    ]);
+    const [d1, d2] = await Promise.all([r1.json(), r2.json()]);
+    const cattle = [...(d1.listings||[]), ...(d2.listings||[])];
+    const grid = document.getElementById('featured-cattle-grid');
+    if (cattle.length) {
+      setupRotation('cattle', cattle, 'featured-cattle-grid', 'cattle-dots', 'cattle-count', 'cattle-rotate-badge', 15);
+    } else if (grid) {
+      grid.innerHTML = `<div style="grid-column:1/-1;color:#aaa;font-size:13px;padding:16px 0;text-align:center">No featured cattle yet — <a style="color:var(--rust);cursor:pointer" data-action="modal" data-modal="post-listing">post a listing</a> to be first!</div>`;
+    }
+  } catch(e) { console.warn('cattle featured', e); }
+
+  // 5. Featured Equipment — rotated in pages of 10
+  try {
+    const [r1, r2] = await Promise.all([
+      fetch(`${API}/api/listings?tier=sirloin&sort=featured&limit=40`),
+      fetch(`${API}/api/listings?tier=ribeye&sort=featured&limit=40`)
+    ]);
+    const [d1, d2] = await Promise.all([r1.json(), r2.json()]);
+    const allEquip = [...(d1.listings||[]), ...(d2.listings||[])];
+    // Filter to equipment/supply categories only
+    const EQUIP_CATS = new Set(['equipment','trailers','chutes_pens','working_dogs','feed_hay']);
+    const equip = allEquip.filter(l => EQUIP_CATS.has(l.category));
+    const grid = document.getElementById('featured-equip-grid');
+    if (equip.length) {
+      setupRotation('equip', equip, 'featured-equip-grid', 'equip-dots', 'equip-count', 'equip-rotate-badge', 10);
+    } else if (grid) {
+      grid.innerHTML = `<div style="grid-column:1/-1;color:#aaa;font-size:13px;padding:16px 0;text-align:center">No featured equipment yet.</div>`;
+    }
+  } catch(e) { console.warn('equip featured', e); }
 }
+
+// Keep old name working for boot call
+async function loadTierSections() { await loadHomepageSections(); }
 
 function renderListingCard(l, darkBg) {
   const img = l.thumb
@@ -2116,12 +2485,12 @@ async function loadRecentListings() {
   const el = document.getElementById('recent-listings-grid');
   if (!el) return;
   try {
-    const r = await fetch(`${API}/api/listings?sort=newest&limit=8`);
+    const r = await fetch(`${API}/api/listings?sort=newest&limit=10`);
     const d = await r.json();
     const listings = d.listings || [];
-    if (!listings.length) { el.innerHTML = '<p style="color:#aaa;padding:20px 0">No listings yet — be the first to post!</p>'; return; }
-    el.innerHTML = listings.map(l => renderListingCard(l, false)).join('');
-  } catch(e) { el.innerHTML = '<p style="color:#aaa">Could not load listings.</p>'; }
+    if (!listings.length) { el.innerHTML = '<div style="grid-column:1/-1;color:#aaa;padding:20px 0;text-align:center">No listings yet — be the first to post!</div>'; return; }
+    el.innerHTML = listings.map(l => renderCompactCard(l)).join('');
+  } catch(e) { el.innerHTML = '<div style="grid-column:1/-1;color:#aaa">Could not load listings.</div>'; }
 }
 
 // ── Listing Detail Modal ────────────────────────────────
@@ -2250,20 +2619,45 @@ async function toggleSave(id, btn) {
 }
 
 // ── Post Listing ───────────────────────────────────────
+// ── Photo limit helper ──────────────────────────────────
+const TIER_PHOTO_LIMITS = {
+  burger: 1, sirloin: 3, ribeye: 3,
+  farm_to_table: 3, filet: 5, t_bone: 5
+};
+
+function updatePlPhotoHint(plan) {
+  const limit = TIER_PHOTO_LIMITS[plan] || 1;
+  const names = {burger:'Burger — Free', sirloin:'Sirloin', ribeye:'Ribeye',
+    farm_to_table:'Farm to Table — Free', filet:'Filet', t_bone:'T-Bone'};
+  const label = document.getElementById('pl-photo-limit-label');
+  const hint = document.getElementById('pl-photo-hint');
+  if (label) label.textContent = `${limit} photo${limit>1?'s':''}`;
+  if (hint) hint.innerHTML = `📸 Your plan allows <strong>${limit} photo${limit>1?'s':''}</strong> (${names[plan]||plan})`;
+}
+
 async function doPostListing() {
   if (!authToken) { closeModal('post-listing'); openModal('auth'); return; }
   const errEl = document.getElementById('listing-form-error');
   const sucEl = document.getElementById('listing-form-success');
   errEl.style.display='none'; sucEl.style.display='none';
 
-  const title = document.getElementById('pl-title').value.trim();
+  const title       = document.getElementById('pl-title').value.trim();
   const description = document.getElementById('pl-description').value.trim();
-  const category = document.getElementById('pl-category').value;
-  const state = document.getElementById('pl-state').value;
-  const city = document.getElementById('pl-city').value.trim();
+  const category    = document.getElementById('pl-category').value;
+  const state       = document.getElementById('pl-state').value;
+  const city        = document.getElementById('pl-city').value.trim();
+  const tier        = document.getElementById('pl-tier').value || 'burger';
 
   if (!title || !description || !category || !state || !city) {
-    errEl.textContent = 'Please fill in all required fields';
+    errEl.textContent = 'Please fill in Title, Description, Category, State and City.';
+    errEl.style.display = 'block'; return;
+  }
+
+  // Enforce photo limit client-side
+  const photos = document.getElementById('pl-photos').files;
+  const limit = TIER_PHOTO_LIMITS[tier] || 1;
+  if (photos.length > limit) {
+    errEl.textContent = `Your ${tier} plan allows ${limit} photo${limit>1?'s':''}. Please remove ${photos.length - limit} photo${photos.length-limit>1?'s':''}.`;
     errEl.style.display = 'block'; return;
   }
 
@@ -2271,15 +2665,17 @@ async function doPostListing() {
   formData.append('title', title);
   formData.append('description', description);
   formData.append('category', category);
-  formData.append('breed', document.getElementById('pl-breed').value);
+  // Breed is hidden for ad type — only append if visible
+  const breedGroup = document.getElementById('pl-breed-group');
+  if (breedGroup && breedGroup.style.display !== 'none') {
+    formData.append('breed', document.getElementById('pl-breed').value);
+  }
   formData.append('price', document.getElementById('pl-price').value);
   formData.append('price_type', document.getElementById('pl-price-type').value);
   formData.append('quantity', document.getElementById('pl-quantity').value);
   formData.append('state', state);
   formData.append('city', city);
-  formData.append('tier', document.getElementById('pl-tier').value);
-
-  const photos = document.getElementById('pl-photos').files;
+  formData.append('tier', tier);
   Array.from(photos).forEach(f => formData.append('photos', f));
 
   try {
@@ -2291,7 +2687,8 @@ async function doPostListing() {
     const d = await r.json();
     if (!r.ok) { errEl.textContent = d.error || 'Failed to post listing'; errEl.style.display='block'; return; }
     sucEl.textContent = '✅ Listing posted! Redirecting to your account…'; sucEl.style.display='block';
-    setTimeout(() => { closeModal('post-listing'); showPage('account'); }, 1500);
+    // Reload homepage sections so new listing appears
+    setTimeout(() => { closeModal('post-listing'); showPage('account'); loadHomepageSections(); loadRecentListings(); }, 1500);
   } catch(e) { errEl.textContent = 'Connection error'; errEl.style.display='block'; }
 }
 
@@ -2519,16 +2916,37 @@ function initPhotoUpload(inputId, previewId, dropAreaId) {
   const dropArea = document.getElementById(dropAreaId);
   if (!input || !preview || !dropArea) return;
 
-  dropArea.addEventListener('click', () => input.click());
+  function getLimit() {
+    if (inputId === 'pl-photos') {
+      const tier = (document.getElementById('pl-tier') || {}).value || 'burger';
+      return TIER_PHOTO_LIMITS[tier] || 1;
+    }
+    return 20;
+  }
+
+  function enforceLimit() {
+    const limit = getLimit();
+    if (input.files.length > limit) {
+      const dt = new DataTransfer();
+      Array.from(input.files).slice(0, limit).forEach(f => dt.items.add(f));
+      input.files = dt.files;
+      showToast(`Only ${limit} photo${limit>1?'s':''} allowed for this plan.`);
+    }
+  }
+
+  dropArea.addEventListener('click', e => { if (e.target !== input) input.click(); });
   dropArea.addEventListener('dragover', e => { e.preventDefault(); dropArea.style.borderColor='var(--rust)'; });
   dropArea.addEventListener('dragleave', () => { dropArea.style.borderColor=''; });
   dropArea.addEventListener('drop', e => {
     e.preventDefault();
     dropArea.style.borderColor='';
-    input.files = e.dataTransfer.files;
+    const dt2 = new DataTransfer();
+    Array.from(e.dataTransfer.files).forEach(f => dt2.items.add(f));
+    input.files = dt2.files;
+    enforceLimit();
     renderPhotoPreviews(input, preview);
   });
-  input.addEventListener('change', () => renderPhotoPreviews(input, preview));
+  input.addEventListener('change', () => { enforceLimit(); renderPhotoPreviews(input, preview); });
 }
 
 function renderPhotoPreviews(input, previewEl) {

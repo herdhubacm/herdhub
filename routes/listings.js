@@ -23,9 +23,12 @@ const upload = multer({
 
 // ── Helpers ────────────────────────────────────────────
 function tierPhotoLimit(tier) {
-  if (tier === 'filet')  return parseInt(process.env.MAX_PHOTOS_FILET)  || 5;
-  if (tier === 't_bone') return parseInt(process.env.MAX_PHOTOS_TBONE)  || 5;
-  if (tier === 'ribeye') return parseInt(process.env.MAX_PHOTOS_RIBEYE) || 3;
+  if (tier === 'filet')        return parseInt(process.env.MAX_PHOTOS_FILET)  || 5;
+  if (tier === 't_bone')       return parseInt(process.env.MAX_PHOTOS_TBONE)  || 5;
+  if (tier === 'ribeye')       return parseInt(process.env.MAX_PHOTOS_RIBEYE) || 3;
+  if (tier === 'sirloin')      return parseInt(process.env.MAX_PHOTOS_SIRLOIN) || 3;
+  if (tier === 'farm_to_table') return 3;
+  if (tier === 'burger')       return 1;
   return parseInt(process.env.MAX_PHOTOS_BASIC) || 1;
 }
 function expiresAt(tier) {
