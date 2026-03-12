@@ -160,7 +160,8 @@ router.get('/user/me', authenticateToken, async (req, res) => {
   try {
     const { rows } = await query(
       `SELECT l.*,
-              (SELECT url FROM listing_photos WHERE listing_id=l.id ORDER BY sort_order LIMIT 1) AS thumb
+              (SELECT url       FROM listing_photos WHERE listing_id=l.id ORDER BY sort_order LIMIT 1) AS thumb,
+              (SELECT thumb_url FROM listing_photos WHERE listing_id=l.id ORDER BY sort_order LIMIT 1) AS thumb_small
        FROM listings l
        WHERE l.user_id = $1
        ORDER BY l.created_at DESC`,

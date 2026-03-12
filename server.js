@@ -11,6 +11,7 @@ const cors      = require('cors');
 const helmet    = require('helmet');
 const path      = require('path');
 const rateLimit = require('express-rate-limit');
+const compression = require('compression');
 
 const { testConnection: testDb } = require('./db/database');
 const { testConnection: testStorage } = require('./services/storage');
@@ -20,6 +21,17 @@ const PORT = process.env.PORT || 3000;
 
 // Trust Railway/Render/Heroku proxy — required for rate limiting + correct IPs
 app.set('trust proxy', 1);
+
+// ── Compression — gzip all text responses ─────────────
+app.use(compression({
+  level: 6,           // balanced speed vs size (1=fastest, 9=smallest)
+  threshold: 1024,    // only compress responses > 1KB (no point for tiny responses)
+  filter: (req, res) => {
+    // Don't compress already-compressed formats
+    if (req.headers['x-no-compression']) return false;
+    return compression.filter(req, res);
+  }
+}));
 
 // ── Security ──────────────────────────────────────────
 app.use(helmet({
@@ -51,8 +63,21 @@ app.use('/api/payments/webhook', express.raw({ type: 'application/json' }));
 app.use(express.json({ limit: '2mb' }));
 app.use(express.urlencoded({ extended: true, limit: '2mb' }));
 
-// ── Static files (local uploads fallback) ─────────────
-app.use(express.static(path.join(__dirname, 'public')));
+// ── Static files ──────────────────────────────────────
+// HTML — no cache so users always get latest version
+app.use(express.static(path.join(__dirname, 'public'), {
+  setHeaders(res, filePath) {
+    if (filePath.endsWith('.html')) {
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    } else if (/\.(css|js|woff2?|ttf|otf)$/.test(filePath)) {
+      // Fonts and scripts — cache for 7 days
+      res.setHeader('Cache-Control', 'public, max-age=604800, immutable');
+    } else if (/\.(jpe?g|png|webp|gif|svg|ico)$/.test(filePath)) {
+      // Local images — cache for 30 days
+      res.setHeader('Cache-Control', 'public, max-age=2592000');
+    }
+  }
+}));
 app.use('/uploads', express.static(path.join(__dirname, 'public', 'uploads')));
 
 // ── API Routes ────────────────────────────────────────
@@ -86,15 +111,27 @@ app.get('/api/online', (_req, res) => {
 
 // ── Health check ──────────────────────────────────────
 app.get('/api/health', async (_req, res) => {
-  let dbOk = false;
-  try { const { pool } = require('./db/database'); await pool.query('SELECT 1'); dbOk = true; } catch {}
+  let dbOk = false, poolStats = {};
+  try {
+    const { pool } = require('./db/database');
+    await pool.query('SELECT 1');
+    dbOk = true;
+    poolStats = {
+      total:   pool.totalCount,
+      idle:    pool.idleCount,
+      waiting: pool.waitingCount,
+    };
+  } catch {}
   const { getStorageInfo } = require('./services/storage');
   const storageInfo = getStorageInfo();
   res.status(dbOk ? 200 : 503).json({
     status:  dbOk ? 'ok' : 'degraded',
-    version: '2.1.0',
+    version: '2.3.0',
     db:      dbOk ? 'postgres connected' : 'postgres unreachable',
+    pool:    poolStats,
     storage: { provider: storageInfo.provider, configured: storageInfo.configured },
+    uptime:  Math.floor(process.uptime()) + 's',
+    memory:  Math.round(process.memoryUsage().heapUsed / 1024 / 1024) + 'MB used',
     time:    new Date().toISOString(),
     env:     process.env.NODE_ENV || 'development',
   });
