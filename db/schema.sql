@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS listings (
   description      TEXT         NOT NULL,
   category         TEXT         NOT NULL
                                 CHECK (category IN (
-                                  'bulls','bred_heifers','bred_cows','open_heifers','open_cows',
+                                  'bulls','bucking_bulls','bred_heifers','bred_cows','open_heifers','open_cows',
                                   'feeder_stocker','fat_cattle','bottle_calves','cow_calf_pairs',
                                   'embryos','semen','showstock','dairy',
                                   'equipment','trailers','chutes_pens','working_dogs','feed_hay',

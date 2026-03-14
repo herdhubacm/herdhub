@@ -234,7 +234,7 @@ router.post('/', authenticateToken, upload.array('photos', 20), async (req, res)
       return res.status(400).json({ error: 'title, description, category, state, city required' });
 
     const validCategories = [
-      'bulls','bred_heifers','bred_cows','open_heifers','open_cows',
+      'bulls','bucking_bulls','bred_heifers','bred_cows','open_heifers','open_cows',
       'feeder_stocker','fat_cattle','bottle_calves','cow_calf_pairs',
       'embryos','semen','showstock','dairy',
       'equipment','trailers','chutes_pens','working_dogs','feed_hay',
@@ -329,7 +329,7 @@ router.put('/:id', authenticateToken, async (req, res) => {
 
     // Validate category if provided
     const validCategories = [
-      'bulls','bred_heifers','bred_cows','open_heifers','open_cows',
+      'bulls','bucking_bulls','bred_heifers','bred_cows','open_heifers','open_cows',
       'feeder_stocker','fat_cattle','bottle_calves','cow_calf_pairs',
       'embryos','semen','showstock','dairy',
       'equipment','trailers','chutes_pens','working_dogs','feed_hay',
