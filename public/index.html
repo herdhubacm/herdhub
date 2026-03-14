@@ -380,6 +380,9 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
   </div>
 </header>
 
+<!-- MAIN PAGE CONTENT -->
+<div id="page-home">
+
 <!-- HERO -->
 <section class="hero">
   <div class="hero-bg"></div>
@@ -458,8 +461,6 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
   </div>
 </div>
 
-<!-- MAIN PAGE CONTENT -->
-<div id="page-home">
   <!-- 3-COLUMN LAYOUT -->
   <div class="home-3col">
 
@@ -677,6 +678,17 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
 <!-- ABOUT PAGE -->
 <div id="page-about" style="display:none">
 
+  <!-- OUR STORY HERO -->
+  <div style="position:relative;height:420px;overflow:hidden;background:#1a0f06">
+    <div style="position:absolute;inset:0;background:url('https://images.unsplash.com/photo-1500595046743-cd271d694d30?w=1600&q=80') center/cover no-repeat"></div>
+    <div style="position:absolute;inset:0;background:linear-gradient(to bottom, rgba(26,15,6,.55) 0%, rgba(26,15,6,.72) 100%)"></div>
+    <div style="position:relative;z-index:2;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 24px">
+      <div style="font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:.35em;text-transform:uppercase;color:var(--tan);margin-bottom:18px">Our Story</div>
+      <h1 style="font-family:'Playfair Display',serif;font-size:clamp(36px,5vw,64px);font-weight:900;color:white;line-height:1.05;margin-bottom:16px">American Cattle Marketplace</h1>
+      <p style="font-family:'Playfair Display',serif;font-size:clamp(20px,2.5vw,30px);font-weight:400;font-style:italic;color:var(--gold);margin-bottom:0">We'll Get The Gate For You</p>
+    </div>
+  </div>
+
   <!-- ORIGIN STORY -->
   <div style="background:var(--cream);padding:72px 0">
     <div style="max-width:780px;margin:0 auto;padding:0 24px">
@@ -807,7 +819,8 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
           <li style="padding:8px 0;border-bottom:1px solid #f3f4f6;font-size:14px;display:flex;align-items:center;gap:8px"><span style="color:var(--rust);font-weight:700">✓</span> Featured on homepage</li>
           <li style="padding:8px 0;border-bottom:1px solid #f3f4f6;font-size:14px;display:flex;align-items:center;gap:8px"><span style="color:var(--rust);font-weight:700">✓</span> Monthly newsletter inclusion</li>
           <li style="padding:8px 0;border-bottom:1px solid #f3f4f6;font-size:14px;display:flex;align-items:center;gap:8px"><span style="color:var(--rust);font-weight:700">✓</span> All categories</li>
-          <li style="padding:8px 0;font-size:14px;display:flex;align-items:center;gap:8px"><span style="color:var(--rust);font-weight:700">✓</span> Change listing category anytime (ex. Bull→Heifer)</li>
+          <li style="padding:8px 0;border-bottom:1px solid #f3f4f6;font-size:14px;display:flex;align-items:center;gap:8px"><span style="color:var(--rust);font-weight:700">✓</span> Set listing private anytime</li>
+          <li style="padding:8px 0;font-size:14px;display:flex;align-items:center;gap:8px"><span style="color:var(--rust);font-weight:700">✓</span> Resume listing anytime (ex. Bull→Heifer)</li>
         </ul>
         <button class="btn-primary" style="width:100%;justify-content:center" data-action="modal" data-modal="post-listing">Get Sirloin →</button>
       </div>
@@ -1404,6 +1417,7 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
           <span class="plan-card-badge pcb-paid">Monthly</span>
           <div class="plan-card-icon">🥩</div>
           <div class="plan-card-name">Sirloin</div>
+          <div style="font-family:'Oswald',sans-serif;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--rust);margin-bottom:2px">Billed Yearly</div>
           <div class="plan-card-price">$5.99/mo</div>
           <div class="plan-card-features">3 photos · Featured center<br>Auto-renewing</div>
         </div>
@@ -1411,7 +1425,7 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
           <span class="plan-card-badge pcb-paid">One-Time</span>
           <div class="plan-card-icon">🥩</div>
           <div class="plan-card-name">Ribeye</div>
-          <div class="plan-card-price">$24.95</div>
+          <div class="plan-card-price">$9.99</div>
           <div class="plan-card-features">3 photos · 30-day featured<br>One-time payment</div>
         </div>
       </div>
@@ -1439,7 +1453,8 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
           <span class="plan-card-badge pcb-gold">Best Value</span>
           <div class="plan-card-icon">🥩</div>
           <div class="plan-card-name">Prime</div>
-          <div class="plan-card-price">$39.95/yr</div>
+          <div style="font-family:'Oswald',sans-serif;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#92400e;margin-bottom:2px">Billed Yearly</div>
+          <div class="plan-card-price">$39.99/mo</div>
           <div class="plan-card-features">5 photos · Left sidebar<br>Year-round + PR package</div>
         </div>
       </div>
@@ -1523,9 +1538,19 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
     </div>
 
     <div class="form-group"><label>Description</label><textarea id="pl-description" rows="3" placeholder="Describe your listing — weight, age, health history, pricing details…"></textarea></div>
-    <div class="form-row">
+    <div class="form-row" id="pl-price-row">
       <div class="form-group"><label>Price ($)</label><input type="number" id="pl-price" placeholder="0.00"></div>
-      
+      <div class="form-group" id="pl-price-type-group"><label>Price Type</label>
+        <select id="pl-price-type">
+          <option value="fixed">Fixed</option>
+          <option value="per_head">Per Head</option>
+          <option value="per_cwt">Per CWT</option>
+          <option value="per_lb">Per Pound</option>
+          <option value="obo">OBO</option>
+          <option value="negotiable">Negotiable</option>
+          <option value="call">Call for Price</option>
+        </select>
+      </div>
     </div>
     <div class="form-row">
       <div class="form-group"><label>State</label><select id="pl-state"><option value="">Select State…</option>
@@ -2246,9 +2271,11 @@ function initEventDelegation() {
             <option value="working_dogs">Working Dogs</option>
             <option value="feed_hay">Feed &amp; Hay</option>
            </optgroup>`;
-      // Show/hide breed selector (ads don't need it)
+      // Show/hide breed selector and price row (ads don't need them)
       const breedGroup = document.getElementById('pl-breed-group');
       if (breedGroup) breedGroup.style.display = isAdvert ? 'none' : '';
+      const priceRow = document.getElementById('pl-price-row');
+      if (priceRow) priceRow.style.display = isAdvert ? 'none' : '';
       // Reset plan selection to first of that type + update hidden tier + photo hint
       const defaultPlan = isAdvert ? 'farm_to_table' : 'burger';
       document.getElementById('pl-tier').value = defaultPlan;
