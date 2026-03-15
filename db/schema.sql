@@ -70,6 +70,7 @@ CREATE TABLE IF NOT EXISTS listings (
   payment_status   TEXT         NOT NULL DEFAULT 'free'
                                 CHECK (payment_status IN ('free','pending','paid','refunded')),
   search_vector    TSVECTOR,
+  website_url      TEXT,
   created_at       TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
   updated_at       TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 );

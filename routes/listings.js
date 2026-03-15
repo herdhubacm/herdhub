@@ -255,8 +255,8 @@ router.post('/', authenticateToken, upload.array('photos', 20), async (req, res)
       `INSERT INTO listings
          (user_id, title, description, category, subcategory, breed,
           price, price_type, quantity, weight_lbs, age_months, sex,
-          state, city, zip, tier, is_featured, expires_at, payment_status)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19)
+          state, city, zip, tier, is_featured, expires_at, payment_status, website_url)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20)
        RETURNING id`,
       [
         req.user.id, title, description, category,
@@ -267,7 +267,8 @@ router.post('/', authenticateToken, upload.array('photos', 20), async (req, res)
         age_months ? +age_months : null,
         sex || null, state, city, zip || null,
         safeTier, isFeatured, expiresAt(safeTier),
-        safeTier === 'basic' ? 'free' : 'pending',  // basic=free, others need Stripe
+        safeTier === 'basic' ? 'free' : 'pending',
+        req.body.website_url || null,
       ]
     );
     const listingId = rows[0].id;

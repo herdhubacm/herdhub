@@ -1110,6 +1110,10 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
       </div>
         </div>
         <div class="form-group"><label>Description</label><textarea id="acct-pl-description" rows="4" placeholder="Describe your listing in detail…"></textarea></div>
+        <div class="form-group" id="acct-pl-website-group" style="display:none">
+          <label>Website URL <span style="font-size:11px;color:#aaa;font-weight:400">(optional — links directly to your business)</span></label>
+          <input type="url" id="acct-pl-website-url" placeholder="https://yourfarm.com">
+        </div>
         <div class="form-row" id="acct-pl-price-row">
           <div class="form-group"><label>Price ($)</label><input type="number" id="acct-pl-price" placeholder="0.00"></div>
           <div class="form-group" id="acct-pl-price-type-group"><label>Price Type</label>
@@ -1550,6 +1554,10 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
     </div>
 
     <div class="form-group"><label>Description</label><textarea id="pl-description" rows="3" placeholder="Describe your listing — weight, age, health history, pricing details…"></textarea></div>
+    <div class="form-group" id="pl-website-group" style="display:none">
+      <label>Website URL <span style="font-size:11px;color:#aaa;font-weight:400">(optional — links directly to your business)</span></label>
+      <input type="url" id="pl-website-url" placeholder="https://yourfarm.com">
+    </div>
     <div class="form-row" id="pl-price-row">
       <div class="form-group"><label>Price ($)</label><input type="number" id="pl-price" placeholder="0.00"></div>
       <div class="form-group" id="pl-price-type-group"><label>Price Type</label>
@@ -2288,6 +2296,8 @@ function initEventDelegation() {
       if (breedGroup) breedGroup.style.display = isAdvert ? 'none' : '';
       const priceRow = document.getElementById('pl-price-row');
       if (priceRow) priceRow.style.display = isAdvert ? 'none' : '';
+      const websiteGroup = document.getElementById('pl-website-group');
+      if (websiteGroup) websiteGroup.style.display = isAdvert ? '' : 'none';
       // Reset plan selection to first of that type + update hidden tier + photo hint
       const defaultPlan = isAdvert ? 'farm_to_table' : 'burger';
       document.getElementById('pl-tier').value = defaultPlan;
@@ -2353,6 +2363,9 @@ function initEventDelegation() {
       // Hide breed for advertisements
       const breedGroup = document.getElementById('acct-pl-breed') ? document.getElementById('acct-pl-breed').closest('.form-group') : null;
       if (breedGroup) breedGroup.style.display = isAdvert ? 'none' : '';
+      // Show website URL for advertisements only
+      const acctWebsiteGroup = document.getElementById('acct-pl-website-group');
+      if (acctWebsiteGroup) acctWebsiteGroup.style.display = isAdvert ? '' : 'none';
     }
     else if (action === 'scroll') {
       const target = document.getElementById(el.dataset.target);
@@ -2956,6 +2969,7 @@ async function openListing(id) {
         </div>
 
         <div style="display:flex;flex-direction:column;gap:10px">
+          ${l.website_url ? `<a href="${l.website_url}" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:12px 16px;background:var(--dark-brown);color:var(--gold);border:1.5px solid var(--gold);border-radius:4px;font-family:'Oswald',sans-serif;font-weight:600;letter-spacing:.08em;text-transform:uppercase;font-size:13px;text-decoration:none">🌐 Visit Website</a>` : ''}
           ${contactHtml}
           <button class="btn-secondary" style="width:100%;justify-content:center" onclick="toggleSave(${l.id}, this)">
             ${l.is_saved ? '❤️ Saved' : '♡ Save Listing'}
@@ -3036,11 +3050,16 @@ function resetPostModal() {
    </optgroup>`;
   const breedGroup = document.getElementById('pl-breed-group');
   if (breedGroup) breedGroup.style.display = '';
+  // Reset price row visible, website hidden (regular mode default)
+  const priceRow = document.getElementById('pl-price-row');
+  if (priceRow) priceRow.style.display = '';
+  const websiteGroup = document.getElementById('pl-website-group');
+  if (websiteGroup) websiteGroup.style.display = 'none';
   document.getElementById('pl-tier').value = 'burger';
   document.querySelectorAll('#pl-seller-plans .plan-card').forEach((c,i) => c.classList.toggle('selected', i===0));
   updatePlPhotoHint('burger');
   // Clear form fields
-  ['pl-title','pl-description','pl-city'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
+  ['pl-title','pl-description','pl-city','pl-website-url'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
   const errEl = document.getElementById('listing-form-error');
   const sucEl = document.getElementById('listing-form-success');
   if(errEl) errEl.style.display='none';
@@ -3094,6 +3113,8 @@ async function doPostListing() {
   }
   formData.append('price', document.getElementById('pl-price').value);
   formData.append('price_type', 'fixed');
+  const websiteUrlEl = document.getElementById('pl-website-url');
+  if (websiteUrlEl && websiteUrlEl.value) formData.append('website_url', websiteUrlEl.value);
   formData.append('quantity', document.getElementById('pl-quantity').value);
   formData.append('state', state);
   formData.append('city', city);
@@ -3423,6 +3444,8 @@ async function acctPostListing() {
   formData.append('price', document.getElementById('acct-pl-price').value);
   const acctPtEl = document.getElementById('acct-pl-price-type');
   formData.append('price_type', acctPtEl ? acctPtEl.value : 'fixed');
+  const acctWebsiteEl = document.getElementById('acct-pl-website-url');
+  if (acctWebsiteEl && acctWebsiteEl.value) formData.append('website_url', acctWebsiteEl.value);
   formData.append('quantity', document.getElementById('acct-pl-quantity').value);
   formData.append('state', state);
   formData.append('city', city);
