@@ -2241,6 +2241,15 @@ function initEventDelegation() {
     else if (action === 'state')       filterState(el.dataset.state);
     else if (action === 'all-listings') showAllListings();
     else if (action === 'hero-search') doHeroSearch();
+    else if (action === 'share-fb') {
+      shareListingFacebook(el.dataset.id, el.dataset.title);
+    }
+    else if (action === 'share-copy') {
+      copyListingLink(el.dataset.id, el);
+    }
+    else if (action === 'share-native') {
+      nativeShareListing(el.dataset.id, el.dataset.title);
+    }
     else if (action === 'search-listings') loadListings();
     else if (action === 'login')       doLogin();
     else if (action === 'register')    doRegister();
@@ -2979,14 +2988,14 @@ async function openListing(id) {
           ${contactHtml}
           <!-- Share row -->
           <div style="display:flex;gap:8px">
-            <button onclick="shareListingFacebook(${l.id},'${encodeURIComponent(l.title)}')" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:10px 8px;background:#1877f2;color:white;border:none;border-radius:4px;font-family:'Oswald',sans-serif;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;cursor:pointer">
+            <button data-action="share-fb" data-id="${l.id}" data-title="${encodeURIComponent(l.title)}" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:10px 8px;background:#1877f2;color:white;border:none;border-radius:4px;font-family:'Oswald',sans-serif;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;cursor:pointer">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
               Share
             </button>
-            <button onclick="copyListingLink(${l.id}, this)" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:10px 8px;background:var(--light-tan);color:var(--dark-brown);border:1px solid var(--tan);border-radius:4px;font-family:'Oswald',sans-serif;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;cursor:pointer">
+            <button data-action="share-copy" data-id="${l.id}" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:10px 8px;background:var(--light-tan);color:var(--dark-brown);border:1px solid var(--tan);border-radius:4px;font-family:'Oswald',sans-serif;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;cursor:pointer">
               🔗 Copy Link
             </button>
-            <button onclick="nativeShareListing(${l.id},'${encodeURIComponent(l.title)}')" id="native-share-btn-${l.id}" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:10px 8px;background:var(--sage);color:white;border:none;border-radius:4px;font-family:'Oswald',sans-serif;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;cursor:pointer">
+            <button data-action="share-native" data-id="${l.id}" data-title="${encodeURIComponent(l.title)}" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:10px 8px;background:var(--sage);color:white;border:none;border-radius:4px;font-family:'Oswald',sans-serif;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;cursor:pointer">
               ↗ More
             </button>
           </div>
@@ -3017,12 +3026,18 @@ function shareListingFacebook(id, encodedTitle) {
 
 function copyListingLink(id, btn) {
   const url = getListingUrl(id);
+  const orig = btn.innerHTML;
   navigator.clipboard.writeText(url).then(() => {
-    const orig = btn.innerHTML;
     btn.innerHTML = '✅ Copied!';
     btn.style.background = 'var(--sage)';
     btn.style.color = 'white';
-    setTimeout(() => { btn.innerHTML = orig; btn.style.background = ''; btn.style.color = ''; }, 2000);
+    btn.style.borderColor = 'var(--sage)';
+    setTimeout(() => {
+      btn.innerHTML = orig;
+      btn.style.background = '';
+      btn.style.color = '';
+      btn.style.borderColor = '';
+    }, 2000);
   }).catch(() => {
     // Fallback for older browsers
     const ta = document.createElement('textarea');
@@ -3039,12 +3054,15 @@ function nativeShareListing(id, encodedTitle) {
   const url = getListingUrl(id);
   const title = decodeURIComponent(encodedTitle);
   if (navigator.share) {
-    navigator.share({ title: `${title} — Herd Hub`, text: `Check out this listing on Herd Hub: ${title}`, url })
-      .catch(() => {});
+    navigator.share({
+      title: `${title} — Herd Hub`,
+      text: `Check out this listing on Herd Hub: ${title}`,
+      url
+    }).catch(() => {});
   } else {
-    // Fallback — open SMS on mobile, copy on desktop
-    const smsUrl = `sms:?body=${encodeURIComponent(title + ' — ' + url)}`;
-    window.open(smsUrl);
+    // Fallback — copy to clipboard
+    copyListingLink(id, document.querySelector(`[data-action="share-copy"][data-id="${id}"]`) || document.createElement('button'));
+    showToast('Link copied — paste to share!');
   }
 }
   const photos = window._ldPhotos || [];
