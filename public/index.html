@@ -678,6 +678,18 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
 <!-- ABOUT PAGE -->
 <div id="page-about" style="display:none">
 
+  <!-- ABOUT NAV BAR -->
+  <div style="background:var(--dark-brown);padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:100;border-bottom:1px solid rgba(201,169,110,.15)">
+    <button data-action="page" data-page="home" style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:10px;padding:0">
+      <span style="font-size:22px">🐄</span>
+      <span style="font-family:'Playfair Display',serif;font-size:20px;font-weight:900;color:var(--cream)">Herd <span style="color:var(--gold)">Hub</span></span>
+    </button>
+    <div style="display:flex;align-items:center;gap:8px">
+      <button class="btn-primary" style="padding:8px 18px;font-size:12px" data-action="page" data-page="listings">Browse Listings</button>
+      <button class="btn-secondary" style="padding:8px 18px;font-size:12px;border-color:rgba(245,239,224,.3)" data-action="modal" data-modal="post-listing">Post Free Ad</button>
+    </div>
+  </div>
+
   <!-- OUR STORY HERO -->
   <div style="position:relative;height:420px;overflow:hidden;background:#1a0f06">
     <div style="position:absolute;inset:0;background:url('https://images.unsplash.com/photo-1500595046743-cd271d694d30?w=1600&q=80') center/cover no-repeat"></div>
@@ -1041,9 +1053,9 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
           <div class="form-group">
             <label>Category</label>
             <select id="acct-pl-category">
-              <optgroup label="🐄 Cattle" id="acct-cats-regular">
+              <optgroup label="🐄 Cattle">
                 <option value="bulls">Bulls</option>
-            <option value="bucking_bulls">Bucking Bulls</option>
+                <option value="bucking_bulls">Bucking Bulls</option>
                 <option value="bred_heifers">Bred Heifers</option>
                 <option value="bred_cows">Bred Cows</option>
                 <option value="open_heifers">Open Heifers</option>
@@ -1057,22 +1069,12 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
                 <option value="showstock">Showstock</option>
                 <option value="dairy">Dairy</option>
               </optgroup>
-              <optgroup label="🚜 Equipment & Supplies">
+              <optgroup label="🚜 Equipment &amp; Supplies">
                 <option value="equipment">Equipment</option>
                 <option value="trailers">Trailers</option>
                 <option value="chutes_pens">Chutes / Pens / Tubs</option>
                 <option value="working_dogs">Working Dogs</option>
                 <option value="feed_hay">Feed &amp; Hay</option>
-              </optgroup>
-              <optgroup label="📢 Advertisements" id="acct-cats-advertise" style="display:none">
-                <option value="sale_barns">Sale Barns &amp; Auctions</option>
-                <option value="ranches_farms">Ranches &amp; Farms</option>
-                <option value="breed_associations">Breed Associations</option>
-                <option value="farm_to_table">Farm to Table / Direct Beef</option>
-                <option value="livestock_services">Livestock Services</option>
-                <option value="feed_stores">Feed &amp; Supply Stores</option>
-                <option value="insurance_finance">Insurance &amp; Finance</option>
-                <option value="full_herd">Full Herd Sales</option>
               </optgroup>
             </select>
           </div>
@@ -1108,9 +1110,19 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
       </div>
         </div>
         <div class="form-group"><label>Description</label><textarea id="acct-pl-description" rows="4" placeholder="Describe your listing in detail…"></textarea></div>
-        <div class="form-row">
+        <div class="form-row" id="acct-pl-price-row">
           <div class="form-group"><label>Price ($)</label><input type="number" id="acct-pl-price" placeholder="0.00"></div>
-          
+          <div class="form-group" id="acct-pl-price-type-group"><label>Price Type</label>
+            <select id="acct-pl-price-type">
+              <option value="fixed">Fixed</option>
+              <option value="per_head">Per Head</option>
+              <option value="per_cwt">Per CWT</option>
+              <option value="per_lb">Per Pound</option>
+              <option value="obo">OBO</option>
+              <option value="negotiable">Negotiable</option>
+              <option value="call">Call for Price</option>
+            </select>
+          </div>
         </div>
         <div class="form-row">
           <div class="form-group"><label>State</label><select id="acct-pl-state">
@@ -2295,10 +2307,52 @@ function initEventDelegation() {
       const isAdvert = el.dataset.type === 'advertise';
       document.getElementById('acct-lt-regular').classList.toggle('active', !isAdvert);
       document.getElementById('acct-lt-advertise').classList.toggle('active', isAdvert);
-      document.getElementById('acct-cats-regular').style.display = isAdvert ? 'none' : '';
-      document.getElementById('acct-cats-advertise').style.display = isAdvert ? '' : 'none';
+      // Rebuild category select to match main modal
       const catSel = document.getElementById('acct-pl-category');
-      catSel.value = isAdvert ? 'sale_barns' : 'beef_cattle';
+      if (isAdvert) {
+        catSel.innerHTML = `
+          <optgroup label="📢 Advertisement">
+            <option value="sale_barns">Sale Barns &amp; Auctions</option>
+            <option value="ranches_farms">Ranches &amp; Farms</option>
+            <option value="breed_associations">Breed Associations</option>
+            <option value="farm_to_table">Farm to Table / Direct Beef</option>
+            <option value="livestock_services">Livestock Services</option>
+            <option value="feed_stores">Feed &amp; Supply Stores</option>
+            <option value="insurance_finance">Insurance &amp; Finance</option>
+            <option value="full_herd">Full Herd Sales</option>
+          </optgroup>`;
+      } else {
+        catSel.innerHTML = `
+          <optgroup label="🐄 Cattle">
+            <option value="bulls">Bulls</option>
+            <option value="bucking_bulls">Bucking Bulls</option>
+            <option value="bred_heifers">Bred Heifers</option>
+            <option value="bred_cows">Bred Cows</option>
+            <option value="open_heifers">Open Heifers</option>
+            <option value="open_cows">Open Cows</option>
+            <option value="feeder_stocker">Feeder / Stocker</option>
+            <option value="fat_cattle">Fat Cattle</option>
+            <option value="bottle_calves">Bottle Calves</option>
+            <option value="cow_calf_pairs">Cow / Calf Pairs</option>
+            <option value="embryos">Embryos</option>
+            <option value="semen">Semen</option>
+            <option value="showstock">Showstock</option>
+            <option value="dairy">Dairy</option>
+          </optgroup>
+          <optgroup label="🚜 Equipment &amp; Supplies">
+            <option value="equipment">Equipment</option>
+            <option value="trailers">Trailers</option>
+            <option value="chutes_pens">Chutes / Pens / Tubs</option>
+            <option value="working_dogs">Working Dogs</option>
+            <option value="feed_hay">Feed &amp; Hay</option>
+          </optgroup>`;
+      }
+      // Hide price row for advertisements
+      const priceRow = document.getElementById('acct-pl-price-row');
+      if (priceRow) priceRow.style.display = isAdvert ? 'none' : '';
+      // Hide breed for advertisements
+      const breedGroup = document.getElementById('acct-pl-breed') ? document.getElementById('acct-pl-breed').closest('.form-group') : null;
+      if (breedGroup) breedGroup.style.display = isAdvert ? 'none' : '';
     }
     else if (action === 'scroll') {
       const target = document.getElementById(el.dataset.target);
@@ -3367,7 +3421,8 @@ async function acctPostListing() {
   formData.append('category', category);
   formData.append('breed', document.getElementById('acct-pl-breed').value);
   formData.append('price', document.getElementById('acct-pl-price').value);
-  formData.append('price_type', 'fixed');
+  const acctPtEl = document.getElementById('acct-pl-price-type');
+  formData.append('price_type', acctPtEl ? acctPtEl.value : 'fixed');
   formData.append('quantity', document.getElementById('acct-pl-quantity').value);
   formData.append('state', state);
   formData.append('city', city);
