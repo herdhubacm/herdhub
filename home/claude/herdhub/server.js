@@ -87,7 +87,6 @@ app.use('/api/listings', limiter(200), require('./routes/listings'));
 app.use('/api/market',   limiter(60),  require('./routes/market'));
 app.use('/api/forum',    limiter(100), require('./routes/forum'));
 app.use('/api/payments', limiter(50),  require('./routes/payments'));
-app.use('/api/beefbox',  limiter(30),  require('./routes/beefbox'));
 
 // ── Online counter ────────────────────────────────────
 let activeVisitors = 0;
@@ -195,17 +194,6 @@ async function start() {
         updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
       )`);
       console.log('✅  Articles table ready');
-
-      // Beef Box waitlist table
-      await query(`CREATE TABLE IF NOT EXISTS beefbox_waitlist (
-        id         BIGSERIAL    PRIMARY KEY,
-        name       TEXT         NOT NULL,
-        email      TEXT         NOT NULL UNIQUE,
-        state      TEXT,
-        type       TEXT,
-        created_at TIMESTAMPTZ  NOT NULL DEFAULT NOW()
-      )`);
-      console.log('✅  Beef Box waitlist table ready');
 
       // Ensure updated_at column exists on listings
       await query(`ALTER TABLE listings ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW()`);

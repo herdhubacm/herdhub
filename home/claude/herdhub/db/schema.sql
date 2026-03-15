@@ -285,14 +285,3 @@ SELECT * FROM (VALUES
 ) AS v(title, excerpt, category, image_url, author, created_at)
 WHERE NOT EXISTS (SELECT 1 FROM articles LIMIT 1);
 
-
--- ── BEEF BOX WAITLIST ──────────────────────────────────
-CREATE TABLE IF NOT EXISTS beefbox_waitlist (
-  id         BIGSERIAL    PRIMARY KEY,
-  name       TEXT         NOT NULL,
-  email      TEXT         NOT NULL UNIQUE,
-  state      TEXT,
-  type       TEXT,
-  created_at TIMESTAMPTZ  NOT NULL DEFAULT NOW()
-);
-CREATE INDEX IF NOT EXISTS idx_beefbox_email ON beefbox_waitlist(email);

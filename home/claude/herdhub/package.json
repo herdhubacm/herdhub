@@ -1,0 +1,39 @@
+{
+  "name": "herdhub",
+  "version": "2.2.0",
+  "description": "Herd Hub \u2013 American Cattle Market",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "db:migrate": "node scripts/migrate.js",
+    "db:seed": "node scripts/seed.js",
+    "setup": "npm install && node scripts/migrate.js && node scripts/seed.js",
+    "storage:test": "node scripts/test-storage.js",
+    "make-admin": "node scripts/make-admin.js"
+  },
+  "dependencies": {
+    "compression": "^1.7.4",
+    "express": "^4.18.2",
+    "pg": "^8.11.3",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.1",
+    "node-fetch": "^2.7.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.1",
+    "express-rate-limit": "^7.1.5",
+    "helmet": "^7.1.0",
+    "stripe": "^14.14.0",
+    "@aws-sdk/client-s3": "^3.540.0",
+    "@aws-sdk/s3-request-presigner": "^3.540.0",
+    "sharp": "^0.33.2",
+    "mime-types": "^2.1.35"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.3"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
