@@ -3065,6 +3065,9 @@ function nativeShareListing(id, encodedTitle) {
     showToast('Link copied — paste to share!');
   }
 }
+
+// Photo gallery navigation inside detail modal
+function ldNextPhoto() {
   const photos = window._ldPhotos || [];
   if (photos.length < 2) return;
   window._ldPhotoIdx = (window._ldPhotoIdx + 1) % photos.length;
