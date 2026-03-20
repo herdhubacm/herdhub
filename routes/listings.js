@@ -180,8 +180,8 @@ router.get('/:id', optionalAuth, async (req, res) => {
     if (isNaN(id)) return res.status(400).json({ error: 'Invalid listing ID' });
 
     const { rows } = await query(
-      `SELECT l.*, u.name AS seller_name, u.phone AS seller_phone,
-              u.email AS seller_email, u.state AS seller_state, u.city AS seller_city
+      `SELECT l.*, u.name AS seller_name,
+              u.state AS seller_state, u.city AS seller_city
        FROM listings l
        JOIN users u ON u.id = l.user_id
        WHERE l.id = $1 AND l.status = 'active'`,
@@ -200,7 +200,12 @@ router.get('/:id', optionalAuth, async (req, res) => {
     ]);
     listing.photos = photosRes.rows;
 
+    // Only expose seller contact info to authenticated users
     if (req.user) {
+      const { rows: contactRows } = await query(
+        'SELECT phone FROM users WHERE id=$1', [listing.user_id]
+      );
+      if (contactRows.length) listing.seller_phone = contactRows[0].phone;
       const { rows: saved } = await query(
         'SELECT 1 FROM saved_listings WHERE user_id=$1 AND listing_id=$2',
         [req.user.id, id]

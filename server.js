@@ -49,19 +49,71 @@ app.use(helmet({
   }
 }));
 
-app.use(cors({ origin: process.env.CORS_ORIGIN || '*', credentials: true }));
+// ── CORS — locked to your domain in production ───────
+const allowedOrigins = process.env.NODE_ENV === 'production'
+  ? [process.env.CORS_ORIGIN || 'https://theherdhub.com', 'https://www.theherdhub.com']
+  : ['http://localhost:3000', 'http://localhost:5173', 'http://127.0.0.1:3000'];
+app.use(cors({
+  origin: (origin, cb) => {
+    // Allow requests with no origin (mobile apps, curl, same-origin)
+    if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
+    cb(new Error('Not allowed by CORS'));
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Session-ID'],
+}));
 
 // ── Rate limiting ─────────────────────────────────────
-const limiter = (max) => rateLimit({
-  windowMs: 15 * 60 * 1000, max,
-  standardHeaders: true, legacyHeaders: false,
-  message: { error: 'Too many requests, please try again later.' }
+const limiter = (max, windowMinutes = 15) => rateLimit({
+  windowMs: windowMinutes * 60 * 1000,
+  max,
+  standardHeaders: true,
+  legacyHeaders: false,
+  skipSuccessfulRequests: false,
+  message: { error: 'Too many requests. Please slow down.' },
+  // Use real IP behind Railway/Cloudflare proxy
+  keyGenerator: (req) => req.headers['cf-connecting-ip'] || req.headers['x-forwarded-for']?.split(',')[0] || req.ip,
+});
+
+// Strict limiter for sensitive operations
+const strictLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many attempts. Please wait 15 minutes before trying again.' },
+  keyGenerator: (req) => req.headers['cf-connecting-ip'] || req.headers['x-forwarded-for']?.split(',')[0] || req.ip,
 });
 
 // ── Body parsing ──────────────────────────────────────
 app.use('/api/payments/webhook', express.raw({ type: 'application/json' }));
 app.use(express.json({ limit: '2mb' }));
+// Sanitize query strings — prevent basic injection via URL params
+app.use((req, res, next) => {
+  for (const key in req.query) {
+    if (typeof req.query[key] === 'string') {
+      // Remove null bytes and script tags from query params
+      req.query[key] = req.query[key].replace(/\x00/g, '').replace(/<script[^>]*>.*?<\/script>/gi, '');
+    }
+  }
+  next();
+});
 app.use(express.urlencoded({ extended: true, limit: '2mb' }));
+
+// ── Anti-scraping & security middleware ──────────────
+app.use((req, res, next) => {
+  // Block obviously malicious/scraping user agents
+  const ua = (req.headers['user-agent'] || '').toLowerCase();
+  const blockedAgents = ['scrapy', 'wget', 'libwww', 'python-requests', 'go-http-client', 'java/', 'curl/'];
+  if (blockedAgents.some(b => ua.includes(b)) && !req.path.startsWith('/api/health')) {
+    return res.status(403).json({ error: 'Forbidden' });
+  }
+  // Add security headers not covered by helmet
+  if (req.path.startsWith('/api')) res.setHeader('X-Robots-Tag', 'noindex, nofollow');
+  res.setHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
+  next();
+});
 
 // ── Static files ──────────────────────────────────────
 // HTML — no cache so users always get latest version
@@ -81,7 +133,7 @@ app.use(express.static(path.join(__dirname, 'public'), {
 app.use('/uploads', express.static(path.join(__dirname, 'public', 'uploads')));
 
 // ── API Routes ────────────────────────────────────────
-app.use('/api/auth',     limiter(30),  require('./routes/auth'));
+app.use('/api/auth',     strictLimiter, require('./routes/auth'));
 app.use('/api/admin',    limiter(100), require('./routes/admin'));
 app.use('/api/listings', limiter(200), require('./routes/listings'));
 app.use('/api/market',   limiter(60),  require('./routes/market'));

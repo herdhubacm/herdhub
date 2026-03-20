@@ -39,10 +39,8 @@ router.get('/count', async (_req, res) => {
 });
 
 // ── GET /api/beefbox/list (admin only) ────────────────
-router.get('/list', async (req, res) => {
-  // Simple token check — reuse admin auth
-  const auth = req.headers.authorization;
-  if (!auth) return res.status(401).json({ error: 'Unauthorized' });
+const { authenticateToken, requireAdmin } = require('../middleware/auth');
+router.get('/list', authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { rows } = await query(
       'SELECT name, email, state, type, created_at FROM beefbox_waitlist ORDER BY created_at DESC'
