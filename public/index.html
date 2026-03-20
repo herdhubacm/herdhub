@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Herd Hub | American Cattle Market</title>
+<meta name="description" content="Herd Hub is America's cattle marketplace — buy, sell and trade cattle, livestock, ranch equipment, and farm-fresh beef products. Trusted by ranchers and farmers coast to coast.">
+<meta name="theme-color" content="#2C1A0E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="icon" type="image/png" href="/logo.png">
 <link rel="apple-touch-icon" href="/logo.png">
@@ -176,6 +178,11 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
 .tab-btn{font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:.08em;text-transform:uppercase;padding:10px 20px;border:none;background:none;color:#888;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .2s}
 .tab-btn.active{color:var(--rust);border-bottom-color:var(--rust)}
 .loading{text-align:center;padding:40px;color:#888;font-style:italic}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+:focus-visible{outline:3px solid var(--gold)!important;outline-offset:2px!important;border-radius:2px}
+.modal-close:focus-visible{outline:3px solid var(--gold)!important}
+.skip-nav{position:absolute;top:-100px;left:16px;background:var(--gold);color:var(--dark-brown);padding:10px 20px;border-radius:0 0 4px 4px;font-family:'Oswald',sans-serif;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;text-decoration:none;z-index:9999;transition:top .2s}
+.skip-nav:focus{top:0}
 .toast{position:fixed;bottom:24px;right:24px;background:var(--dark-brown);color:var(--cream);font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:.06em;padding:12px 20px;border-radius:4px;z-index:2000;transform:translateY(80px);transition:transform .3s;box-shadow:0 8px 24px rgba(0,0,0,.3)}
 .toast.show{transform:translateY(0)}
 @media(max-width:900px){.hero-content{grid-template-columns:1fr}.hero-search{display:none}.two-col{grid-template-columns:1fr}.footer-grid{grid-template-columns:1fr 1fr}}
@@ -344,6 +351,8 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
   .mobile-ad-card-title{font-family:'Playfair Display',serif;font-size:12px;font-weight:700;color:var(--dark-brown);line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
   .mobile-ad-card-loc{font-size:10px;color:#aaa;margin-top:4px}
 }
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}.hero-bg{animation:none!important}.toast{transition:none!important}}
+@media(prefers-contrast:more){:focus-visible{outline:4px solid #000!important;outline-offset:3px!important}.btn-primary{border:2px solid #000!important}.btn-secondary{border:2px solid #000!important}}
 </style>
 </head>
 <body>
@@ -356,32 +365,34 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
   <a href="javascript:void(0)" data-action="page" data-page="pricing">Advertise With Us</a>
 </div>
 
+<a href="#main-content" class="skip-nav">Skip to main content</a>
 <header>
   <div class="header-inner">
     <div class="logo-wrap" data-action="page" data-page="home">
-      <img src="/logo.png" alt="Herd Hub" style="height:48px;width:auto;object-fit:contain;">
+      <img src="/logo.png" alt="Herd Hub — American Cattle Marketplace" style="height:48px;width:auto;object-fit:contain;">
       <div class="logo-text"><div class="site-name">Herd <span style="color:var(--gold)">Hub</span></div><div class="site-tagline">American Cattle Market</div></div>
     </div>
-    <nav>
-      <a href="javascript:void(0)" data-action="category" data-cat="beef_cattle">🐄 Cattle</a>
-      <a href="javascript:void(0)" data-action="category" data-cat="equipment">🚜 Equipment</a>
-      <a href="javascript:void(0)" data-action="category" data-cat="trucks_trailers">🚛 Trailers</a>
-      <a href="javascript:void(0)" data-action="category" data-cat="working_dogs">🐕 Dogs</a>
+    <nav aria-label="Main navigation">
+      <a href="javascript:void(0)" data-action="category" data-cat="beef_cattle"><span aria-hidden="true">🐄</span> Cattle</a>
+      <a href="javascript:void(0)" data-action="category" data-cat="equipment"><span aria-hidden="true">🚜</span> Equipment</a>
+      <a href="javascript:void(0)" data-action="category" data-cat="trucks_trailers"><span aria-hidden="true">🚛</span> Trailers</a>
+      <a href="javascript:void(0)" data-action="category" data-cat="working_dogs"><span aria-hidden="true">🐕</span> Dogs</a>
       <a href="javascript:void(0)" data-action="all-listings">Browse All</a>
       <a href="javascript:void(0)" data-action="page" data-page="about">About</a>
       <a href="javascript:void(0)" data-action="page" data-page="pricing">Pricing</a>
       <a href="javascript:void(0)" class="nav-cta" style="margin-left:20px" data-action="modal" data-modal="post-listing">+ Post Ad</a>
     </nav>
     <div class="header-actions">
-      <div id="online-counter" style="font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:.08em;color:var(--tan);display:flex;align-items:center;gap:5px;margin-right:16px"><span style="display:inline-block;width:7px;height:7px;background:#4ade80;border-radius:50%;box-shadow:0 0 6px #4ade80"></span><span id="online-count">—</span> online</div>
-      <button class="btn-signin" id="auth-btn" data-action="modal" data-modal="auth">Sign In / Register</button>
+      <div id="online-counter" aria-label="Users currently online" style="font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:.08em;color:var(--tan);display:flex;align-items:center;gap:5px;margin-right:16px"><span style="display:inline-block;width:7px;height:7px;background:#4ade80;border-radius:50%;box-shadow:0 0 6px #4ade80"></span><span id="online-count">—</span> online</div>
+      <button class="btn-signin" id="auth-btn" data-action="modal" data-modal="auth" aria-label="Sign in or register to Herd Hub">Sign In / Register</button>
       <button class="btn-account" id="account-btn" data-action="page" data-page="account" style="display:none;background:var(--rust);color:white;border:none;font-family:'Oswald',sans-serif;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:9px 18px;border-radius:3px;cursor:pointer">👤 <span id="account-name">My Account</span></button>
     </div>
   </div>
 </header>
 
 <!-- MAIN PAGE CONTENT -->
-<div id="page-home">
+<main id="main-content">
+<main id="main-content"><div id="page-home">
 
 <!-- HERO -->
 <section class="hero">
@@ -395,9 +406,9 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
         <button class="btn-secondary" data-action="modal" data-modal="post-listing">Post Free Ad →</button>
       </div>
     </div>
-    <div class="hero-search">
+    <div class="hero-search" role="search" aria-label="Search cattle listings">
       <h3>🔍 Search Listings</h3>
-      <div class="sf"><label>Category</label>
+      <div class="sf"><label for="hs-cat">Category</label>
         <select id="hs-cat">
           <option value="">All Categories</option>
           <option value="beef_cattle">Beef Cattle</option>
@@ -415,7 +426,7 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
         </select>
       </div>
       <div class="sf-row">
-        <div class="sf"><label>State</label>
+        <div class="sf"><label for="hs-state">State</label>
           <select id="hs-state">
             <option value="">All States</option>
             <option>TX</option><option>KS</option><option>NE</option>
@@ -424,7 +435,7 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
             <option>CA</option><option>SD</option><option>ND</option>
           </select>
         </div>
-        <div class="sf"><label>Breed</label>
+        <div class="sf"><label for="hs-breed">Breed</label>
           <select id="hs-breed">
             <option value="">All Breeds</option>
             <option>Black Angus</option><option>Hereford</option>
@@ -436,7 +447,7 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
         </div>
       </div>
       <div class="sf"><label>Keywords</label>
-        <input type="text" id="hs-q" placeholder="e.g. 'registered Angus bulls'">
+        <input type="text" id="hs-q" placeholder="e.g. 'registered Angus bulls'" aria-label="Search listings by keyword">
       </div>
       <button class="btn-primary" style="width:100%;justify-content:center;margin-top:6px" data-action="hero-search">Search Listings</button>
     </div>
@@ -444,7 +455,7 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
 </section>
 
 <!-- STATS BAR -->
-<div class="stats-bar">
+<div class="stats-bar" aria-label="Herd Hub statistics">
   <div class="stats-inner">
     <div class="stat-item"><span class="num" id="stat-total">—</span><span class="label">Active Listings</span></div>
     <div class="stat-item"><span class="num">1,200+</span><span class="label">Registered Members</span></div>
@@ -465,7 +476,7 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
   <div class="home-3col">
 
     <!-- ══ LEFT SIDEBAR — FEATURED PARTNERS (T-Bone) ══ -->
-    <div class="home-sidebar home-sidebar-left">
+    <div class="home-sidebar home-sidebar-left" aria-label="Featured partners">
       <div class="sidebar-col-header sidebar-col-header-left">
         <div class="sidebar-col-title">Featured Partners</div>
       </div>
@@ -594,7 +605,8 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
             <div class="widget-header">📬 Herd <span style="color:var(--gold)">Hub</span> Digital Monthly Newsletter</div>
             <div class="widget-body" style="text-align:center">
               <p style="font-size:13px;color:#666;margin-bottom:6px;line-height:1.6">Monthly cattle prices, featured listings, ranch news, and exclusive deals — straight to your inbox.</p>
-              <input type="email" id="nl-email" placeholder="Your email address" style="width:100%;padding:9px;border:1px solid var(--light-tan);border-radius:3px;font-size:13px;margin-bottom:10px;outline:none">
+              <label for="nl-email" class="sr-only">Email address for newsletter</label>
+              <input type="email" id="nl-email" placeholder="Your email address" aria-label="Email address for newsletter" style="width:100%;padding:9px;border:1px solid var(--light-tan);border-radius:3px;font-size:13px;margin-bottom:10px;outline:none">
               <button class="btn-primary" style="justify-content:center;padding:10px;font-size:13px;width:100%" data-action="subscribe">Join the Newsletter →</button>
             </div>
           </div>
@@ -620,7 +632,7 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
     </div><!-- end center -->
 
     <!-- ══ RIGHT SIDEBAR — FEATURED ADS (Filet) ══ -->
-    <div class="home-sidebar home-sidebar-right">
+    <div class="home-sidebar home-sidebar-right" aria-label="Featured advertisements">
       <div class="sidebar-col-header sidebar-col-header-right">
         <div class="sidebar-col-title">Featured Ads</div>
       </div>
@@ -697,7 +709,7 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
 
   <!-- ABOUT NAV BAR -->
   <div style="background:var(--dark-brown);padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:100;border-bottom:1px solid rgba(201,169,110,.15)">
-    <button data-action="page" data-page="home" style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:10px;padding:0">
+    <button data-action="page" data-page="home" style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:10px;padding:0" aria-label="Go to Herd Hub homepage">
       <img src="/logo.png" alt="Herd Hub" style="height:38px;width:auto;object-fit:contain;">
       <span style="font-family:'Playfair Display',serif;font-size:20px;font-weight:900;color:var(--cream)">Herd <span style="color:var(--gold)">Hub</span></span>
     </button>
@@ -939,7 +951,7 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
       <a class="see-all" data-action="page" data-page="home">← Back to Home</a>
     </div>
     <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:24px;align-items:center">
-      <select id="f-category" onchange="loadListings()" style="padding:8px 12px;border:1.5px solid var(--light-tan);border-radius:4px;font-family:'Source Serif 4',serif;font-size:14px;outline:none">
+      <select id="f-category" onchange="loadListings()" aria-label="Filter by category" style="padding:8px 12px;border:1.5px solid var(--light-tan);border-radius:4px;font-family:'Source Serif 4',serif;font-size:14px;outline:none">
         <option value="">All Categories</option>
         <option value="beef_cattle">Beef Cattle</option>
         <option value="dairy">Dairy</option>
@@ -953,13 +965,13 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
         <option value="farm_to_table">Farm to Table</option>
         <option value="feed_hay">Feed & Hay</option>
       </select>
-      <select id="f-state" onchange="loadListings()" style="padding:8px 12px;border:1.5px solid var(--light-tan);border-radius:4px;font-family:'Source Serif 4',serif;font-size:14px;outline:none">
+      <select id="f-state" onchange="loadListings()" aria-label="Filter by state" style="padding:8px 12px;border:1.5px solid var(--light-tan);border-radius:4px;font-family:'Source Serif 4',serif;font-size:14px;outline:none">
         <option value="">All States</option>
         <option>TX</option><option>KS</option><option>NE</option><option>OK</option>
         <option>MT</option><option>WY</option><option>CO</option><option>IA</option>
       </select>
-      <input type="text" id="f-q" placeholder="Search keywords…" style="padding:8px 12px;border:1.5px solid var(--light-tan);border-radius:4px;font-family:'Source Serif 4',serif;font-size:14px;outline:none;width:220px" onkeydown="if(event.key==='Enter')loadListings()">
-      <select id="f-sort" onchange="loadListings()" style="padding:8px 12px;border:1.5px solid var(--light-tan);border-radius:4px;font-family:'Source Serif 4',serif;font-size:14px;outline:none">
+      <input type="text" id="f-q" placeholder="Search keywords…" aria-label="Search listings by keyword" style="padding:8px 12px;border:1.5px solid var(--light-tan);border-radius:4px;font-family:'Source Serif 4',serif;font-size:14px;outline:none;width:220px" onkeydown="if(event.key==='Enter')loadListings()">
+      <select id="f-sort" onchange="loadListings()" aria-label="Sort listings" style="padding:8px 12px;border:1.5px solid var(--light-tan);border-radius:4px;font-family:'Source Serif 4',serif;font-size:14px;outline:none">
         <option value="featured">Featured First</option>
         <option value="newest">Newest First</option>
         <option value="price_asc">Price: Low to High</option>
@@ -1009,10 +1021,10 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
         <div id="profile-success" class="form-success" style="display:none"></div>
         <div id="profile-error" class="form-error" style="display:none"></div>
         <div class="form-row">
-          <div class="form-group"><label>Full Name</label><input type="text" id="acct-name" placeholder="Jake Harrington"></div>
-          <div class="form-group"><label>Phone</label><input type="tel" id="acct-phone" placeholder="(806) 555-1234"></div>
+          <div class="form-group"><label for="acct-name">Full Name</label><input type="text" id="acct-name" placeholder="Jake Harrington"></div>
+          <div class="form-group"><label for="acct-phone">Phone</label><input type="tel" id="acct-phone" placeholder="(806) 555-1234"></div>
         </div>
-        <div class="form-group"><label>Email</label><input type="email" id="acct-email" placeholder="you@example.com" disabled style="opacity:.6;cursor:not-allowed"></div>
+        <div class="form-group"><label for="acct-email">Email</label><input type="email" id="acct-email" placeholder="you@example.com" disabled style="opacity:.6;cursor:not-allowed"></div>
         <div class="form-row">
           <div class="form-group"><label>State</label><select id="acct-state">
             <option value="">Select…</option>
@@ -1027,18 +1039,18 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
             <option>SD</option><option>TN</option><option>TX</option><option>UT</option><option>VT</option>
             <option>VA</option><option>WA</option><option>WV</option><option>WI</option><option>WY</option>
           </select></div>
-          <div class="form-group"><label>City</label><input type="text" id="acct-city" placeholder="Amarillo"></div>
+          <div class="form-group"><label for="acct-city">City</label><input type="text" id="acct-city" placeholder="Amarillo"></div>
         </div>
-        <div class="form-group"><label>Bio</label><textarea id="acct-bio" rows="3" placeholder="Tell buyers about your operation…"></textarea></div>
+        <div class="form-group"><label for="acct-bio">Bio</label><textarea id="acct-bio" rows="3" placeholder="Tell buyers about your operation…"></textarea></div>
         <button class="btn-primary" data-action="save-profile" style="margin-top:4px">Save Changes</button>
         <div style="margin-top:28px;padding-top:20px;border-top:1px solid var(--light-tan)">
           <h4 style="font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--mid-brown);margin-bottom:14px">Change Password</h4>
           <div id="pw-error" class="form-error" style="display:none"></div>
           <div id="pw-success" class="form-success" style="display:none"></div>
-          <div class="form-group"><label>Current Password</label><input type="password" id="pw-current" placeholder="••••••••"></div>
+          <div class="form-group"><label for="pw-current">Current Password</label><input type="password" id="pw-current" placeholder="••••••••"></div>
           <div class="form-row">
-            <div class="form-group"><label>New Password</label><input type="password" id="pw-new" placeholder="Min 8 characters"></div>
-            <div class="form-group"><label>Confirm New</label><input type="password" id="pw-confirm" placeholder="Match new password"></div>
+            <div class="form-group"><label for="pw-new">New Password</label><input type="password" id="pw-new" placeholder="Min 8 characters"></div>
+            <div class="form-group"><label for="pw-confirm">Confirm New</label><input type="password" id="pw-confirm" placeholder="Match new password"></div>
           </div>
           <button class="btn-primary" data-action="change-password" style="margin-top:4px">Update Password</button>
         </div>
@@ -1065,7 +1077,7 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
         </div>
         <div id="acct-listing-error" class="form-error" style="display:none"></div>
         <div id="acct-listing-success" class="form-success" style="display:none"></div>
-        <div class="form-group"><label>Title</label><input type="text" id="acct-pl-title" placeholder="e.g. 2022 Registered Black Angus Bull"></div>
+        <div class="form-group"><label for="acct-pl-title">Title</label><input type="text" id="acct-pl-title" placeholder="e.g. 2022 Registered Black Angus Bull"></div>
         <div class="form-row">
           <div class="form-group">
             <label>Category</label>
@@ -1126,13 +1138,13 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
         </select>
       </div>
         </div>
-        <div class="form-group"><label>Description</label><textarea id="acct-pl-description" rows="4" placeholder="Describe your listing in detail…"></textarea></div>
+        <div class="form-group"><label for="acct-pl-description">Description</label><textarea id="acct-pl-description" rows="4" placeholder="Describe your listing in detail…"></textarea></div>
         <div class="form-group" id="acct-pl-website-group" style="display:none">
           <label>Website URL <span style="font-size:11px;color:#aaa;font-weight:400">(optional — links directly to your business)</span></label>
           <input type="url" id="acct-pl-website-url" placeholder="https://yourfarm.com">
         </div>
         <div class="form-row" id="acct-pl-price-row">
-          <div class="form-group"><label>Price ($)</label><input type="number" id="acct-pl-price" placeholder="0.00"></div>
+          <div class="form-group"><label for="acct-pl-price">Price ($)</label><input type="number" id="acct-pl-price" placeholder="0.00"></div>
           <div class="form-group" id="acct-pl-price-type-group"><label>Price Type</label>
             <select id="acct-pl-price-type">
               <option value="fixed">Fixed</option>
@@ -1193,24 +1205,24 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
 
 <!-- ── MODALS ── -->
 <!-- AUTH -->
-<div class="modal-overlay" id="modal-auth">
+<div class="modal-overlay" id="modal-auth" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Sign in or register">
   <div class="modal">
-    <button class="modal-close" data-action="close-modal" data-modal="auth">✕</button>
-    <div class="tab-btns"><button class="tab-btn active" id="tab-login" data-action="tab" data-tab="login">Sign In</button><button class="tab-btn" id="tab-register" data-action="tab" data-tab="register">Register</button></div>
+    <button class="modal-close" data-action="close-modal" data-modal="auth" aria-label="Close dialog">✕</button>
+    <div class="tab-btns"><button class="tab-btn active" id="tab-login" data-action="tab" data-tab="login" aria-selected="true" role="tab">Sign In</button><button class="tab-btn" id="tab-register" data-action="tab" data-tab="register" aria-selected="false" role="tab">Register</button></div>
     <div id="form-login">
       <h2>Welcome Back</h2><p>Sign in to your Herd <span style="color:var(--rust)">Hub</span> account.</p>
       <div id="login-error" class="form-error" style="display:none"></div>
-      <div class="form-group"><label>Email</label><input type="email" id="login-email" placeholder="you@example.com"></div>
-      <div class="form-group"><label>Password</label><input type="password" id="login-password" placeholder="••••••••"></div>
+      <div class="form-group"><label for="login-email">Email</label><input type="email" id="login-email" placeholder="you@example.com" autocomplete="email" aria-label="Email address"></div>
+      <div class="form-group"><label for="login-password">Password</label><input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password" aria-label="Password"></div>
       <button class="btn-primary" style="width:100%;justify-content:center;margin-top:8px" data-action="login">Sign In</button>
     </div>
     <div id="form-register" style="display:none">
       <h2>Create Account</h2><p>Join 1,200+ ranchers on Herd <span style="color:var(--rust)">Hub</span>. It's free.</p>
       <div id="register-error" class="form-error" style="display:none"></div>
-      <div class="form-row"><div class="form-group"><label>Full Name</label><input type="text" id="reg-name" placeholder="Jake Harrington"></div><div class="form-group"><label>Phone</label><input type="tel" id="reg-phone" placeholder="(806) 555-1234"></div></div>
-      <div class="form-group"><label>Email</label><input type="email" id="reg-email" placeholder="you@example.com"></div>
-      <div class="form-group"><label>Password</label><input type="password" id="reg-password" placeholder="Min 8 characters"></div>
-      <div class="form-row"><div class="form-group"><label>State</label><select id="reg-state"><option value="">Select…</option><option>AL</option><option>AK</option><option>AZ</option><option>AR</option><option>CA</option><option>CO</option><option>CT</option><option>DE</option><option>FL</option><option>GA</option><option>HI</option><option>ID</option><option>IL</option><option>IN</option><option>IA</option><option>KS</option><option>KY</option><option>LA</option><option>ME</option><option>MD</option><option>MA</option><option>MI</option><option>MN</option><option>MS</option><option>MO</option><option>MT</option><option>NE</option><option>NV</option><option>NH</option><option>NJ</option><option>NM</option><option>NY</option><option>NC</option><option>ND</option><option>OH</option><option>OK</option><option>OR</option><option>PA</option><option>RI</option><option>SC</option><option>SD</option><option>TN</option><option>TX</option><option>UT</option><option>VT</option><option>VA</option><option>WA</option><option>WV</option><option>WI</option><option>WY</option></select></div><div class="form-group"><label>City</label><input type="text" id="reg-city" placeholder="Amarillo"></div></div>
+      <div class="form-row"><div class="form-group"><label for="reg-name">Full Name</label><input type="text" id="reg-name" placeholder="Jake Harrington" autocomplete="name" aria-label="Full name"></div><div class="form-group"><label for="reg-phone">Phone</label><input type="tel" id="reg-phone" placeholder="(806) 555-1234" autocomplete="tel" aria-label="Phone number"></div></div>
+      <div class="form-group"><label for="reg-email">Email</label><input type="email" id="reg-email" placeholder="you@example.com" autocomplete="email" aria-label="Email address"></div>
+      <div class="form-group"><label for="reg-password">Password</label><input type="password" id="reg-password" placeholder="Min 8 characters" autocomplete="new-password" aria-label="Password, minimum 8 characters"></div>
+      <div class="form-row"><div class="form-group"><label>State</label><select id="reg-state"><option value="">Select…</option><option>AL</option><option>AK</option><option>AZ</option><option>AR</option><option>CA</option><option>CO</option><option>CT</option><option>DE</option><option>FL</option><option>GA</option><option>HI</option><option>ID</option><option>IL</option><option>IN</option><option>IA</option><option>KS</option><option>KY</option><option>LA</option><option>ME</option><option>MD</option><option>MA</option><option>MI</option><option>MN</option><option>MS</option><option>MO</option><option>MT</option><option>NE</option><option>NV</option><option>NH</option><option>NJ</option><option>NM</option><option>NY</option><option>NC</option><option>ND</option><option>OH</option><option>OK</option><option>OR</option><option>PA</option><option>RI</option><option>SC</option><option>SD</option><option>TN</option><option>TX</option><option>UT</option><option>VT</option><option>VA</option><option>WA</option><option>WV</option><option>WI</option><option>WY</option></select></div><div class="form-group"><label for="reg-city">City</label><input type="text" id="reg-city" placeholder="Amarillo" autocomplete="address-level2" aria-label="City"></div></div>
 
       <!-- Terms agreement checkbox — required -->
       <div style="margin:14px 0 10px;padding:14px;background:var(--cream);border:1.5px solid var(--light-tan);border-radius:4px">
@@ -1236,7 +1248,7 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
 
 <!-- POST LISTING -->
 <!-- LISTING DETAIL MODAL -->
-<div class="modal-overlay" id="modal-listing-detail">
+<div class="modal-overlay" id="modal-listing-detail" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Listing details">
   <div class="modal" style="max-width:720px;padding:0;overflow:hidden">
     <button class="modal-close" data-action="close-modal" data-modal="listing-detail" style="z-index:2;position:absolute;top:12px;right:12px;background:rgba(0,0,0,.5);color:white;border:none;width:32px;height:32px;border-radius:50%;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
     <div id="listing-detail-body"><div class="loading" style="padding:60px;text-align:center">Loading…</div></div>
@@ -1249,9 +1261,9 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
 </div>
 
 <!-- EDIT LISTING MODAL -->
-<div class="modal-overlay" id="modal-edit-listing">
+<div class="modal-overlay" id="modal-edit-listing" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Edit listing">
   <div class="modal" style="max-width:620px">
-    <button class="modal-close" data-action="close-modal" data-modal="edit-listing">✕</button>
+    <button class="modal-close" data-action="close-modal" data-modal="edit-listing" aria-label="Close dialog">✕</button>
     <h2>Edit Listing</h2>
     <input type="hidden" id="el-id">
 
@@ -1418,9 +1430,9 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
   </div>
 </div>
 
-<div class="modal-overlay" id="modal-post-listing">
+<div class="modal-overlay" id="modal-post-listing" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Post a new listing">
   <div class="modal" style="max-width:620px">
-    <button class="modal-close" data-action="close-modal" data-modal="post-listing">✕</button>
+    <button class="modal-close" data-action="close-modal" data-modal="post-listing" aria-label="Close dialog">✕</button>
     <h2>Post a Listing</h2>
 
     <!-- Type tabs -->
@@ -1496,7 +1508,7 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
     <div id="listing-form-error" class="form-error" style="display:none"></div>
     <div id="listing-form-success" class="form-success" style="display:none"></div>
 
-    <div class="form-group"><label>Title</label><input type="text" id="pl-title" placeholder="e.g. Registered Black Angus Herd Bull — 2yr"></div>
+    <div class="form-group"><label for="pl-title">Title</label><input type="text" id="pl-title" placeholder="e.g. Registered Black Angus Herd Bull — 2yr"></div>
 
     <div class="form-row">
       <div class="form-group">
@@ -1570,13 +1582,13 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
       </div>
     </div>
 
-    <div class="form-group"><label>Description</label><textarea id="pl-description" rows="3" placeholder="Describe your listing — weight, age, health history, pricing details…"></textarea></div>
+    <div class="form-group"><label for="pl-description">Description</label><textarea id="pl-description" rows="3" placeholder="Describe your listing — weight, age, health history, pricing details…"></textarea></div>
     <div class="form-group" id="pl-website-group" style="display:none">
       <label>Website URL <span style="font-size:11px;color:#aaa;font-weight:400">(optional — links directly to your business)</span></label>
       <input type="url" id="pl-website-url" placeholder="https://yourfarm.com">
     </div>
     <div class="form-row" id="pl-price-row">
-      <div class="form-group"><label>Price ($)</label><input type="number" id="pl-price" placeholder="0.00"></div>
+      <div class="form-group"><label for="pl-price">Price ($)</label><input type="number" id="pl-price" placeholder="0.00"></div>
       <div class="form-group" id="pl-price-type-group"><label>Price Type</label>
         <select id="pl-price-type">
           <option value="fixed">Fixed</option>
@@ -1601,10 +1613,10 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
 <option>OK</option><option>OR</option><option>PA</option><option>RI</option><option>SC</option>
 <option>SD</option><option>TN</option><option selected>TX</option><option>UT</option><option>VT</option>
 <option>VA</option><option>WA</option><option>WV</option><option>WI</option><option>WY</option></select></div>
-      <div class="form-group"><label>City</label><input type="text" id="pl-city" placeholder="Amarillo"></div>
+      <div class="form-group"><label for="pl-city">City</label><input type="text" id="pl-city" placeholder="Amarillo"></div>
     </div>
     <div class="form-row">
-      <div class="form-group"><label>Quantity</label><input type="number" id="pl-quantity" value="1" min="1"></div>
+      <div class="form-group"><label for="pl-quantity">Quantity</label><input type="number" id="pl-quantity" value="1" min="1"></div>
       <!-- hidden tier field — set by plan card selection -->
       <input type="hidden" id="pl-tier" value="burger">
     </div>
@@ -1626,9 +1638,9 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
 </div>
 
 <!-- NEW FORUM TOPIC -->
-<div class="modal-overlay" id="modal-new-topic">
+<div class="modal-overlay" id="modal-new-topic" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Post new forum topic">
   <div class="modal">
-    <button class="modal-close" data-action="close-modal" data-modal="new-topic">✕</button>
+    <button class="modal-close" data-action="close-modal" data-modal="new-topic" aria-label="Close dialog">✕</button>
     <h2>Start a New Topic</h2>
     <div class="form-group"><label>Category</label><select id="nt-category"><option value="general">General</option><option value="cattle">Cattle</option><option value="equipment">Equipment</option><option value="dogs">Working Dogs</option><option value="market">Market Talk</option><option value="health">Herd Health</option><option value="farm_to_table">Farm to Table</option></select></div>
     <div class="form-group"><label>Title</label><input type="text" id="nt-title" placeholder="Your topic title"></div>
@@ -1985,11 +1997,11 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
 
       <div style="display:flex;flex-direction:column;gap:12px;text-align:left">
         <div class="form-group">
-          <label style="color:var(--tan)">Full Name</label>
+          <label for="bb-name" style="color:var(--tan)">Full Name</label>
           <input type="text" id="bb-name" placeholder="Jake Harrington" style="background:rgba(255,255,255,.06);border-color:rgba(201,169,110,.25);color:var(--cream)">
         </div>
         <div class="form-group">
-          <label style="color:var(--tan)">Email Address</label>
+          <label for="bb-email" style="color:var(--tan)">Email Address</label>
           <input type="email" id="bb-email" placeholder="you@example.com" style="background:rgba(255,255,255,.06);border-color:rgba(201,169,110,.25);color:var(--cream)">
         </div>
         <div class="form-group">
@@ -2034,19 +2046,23 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
 
 </div><!-- end page-beef-boxes -->
 
+<!-- TOAST NOTIFICATION -->
+<div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+
 <div class="ribbon">🤝 Herd Hub is 100% American-Owned — Supporting Farmers & Ranchers Since 2018</div>
 
-<footer>
+</main>
+<footer role="contentinfo">
   <div class="footer-inner">
     <div class="footer-grid">
       <div class="footer-brand"><img src="/logo.png" alt="Herd Hub" style="height:56px;width:auto;object-fit:contain;margin-bottom:10px;display:block"><div class="fn">Herd <span style="color:var(--gold)">Hub</span></div><p>Becoming America's most trusted online cattle marketplace. Connecting ranchers, farmers and buyers across all 50 states since 2018.</p><div class="footer-social">
-  <a href="https://www.facebook.com/herdhubcattle" target="_blank" rel="noopener" class="soc-btn" title="Facebook">
+  <a href="https://www.facebook.com/herdhubcattle" target="_blank" rel="noopener" class="soc-btn" title="Facebook" aria-label="Follow Herd Hub on Facebook">
     <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
   </a>
   <a href="https://www.instagram.com/herdhubcattle" target="_blank" rel="noopener" class="soc-btn" title="Instagram">
     <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
   </a>
-  <a href="https://www.tiktok.com/@the.herd.hub" target="_blank" rel="noopener" class="soc-btn" title="TikTok">
+  <a href="https://www.tiktok.com/@the.herd.hub" target="_blank" rel="noopener" class="soc-btn" title="TikTok" aria-label="Follow Herd Hub on TikTok">
     <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.27 6.27 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.19 8.19 0 004.79 1.53V6.77a4.85 4.85 0 01-1.02-.08z"/></svg>
   </a>
 </div></div>
@@ -2076,7 +2092,7 @@ function fmtDate(iso) {
 
 function renderArticleCard(a, onclickExpr) {
   const img = a.image_url
-    ? `<img class="article-img-el" src="${a.image_url}" alt="" onerror="this.style.display='none'">`
+    ? `<img class="article-img-el" role="img" src="${a.image_url}" alt="" onerror="this.style.display='none'">`
     : `<div style="width:110px;height:82px;background:var(--light-tan);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:28px">📰</div>`;
   return `<div class="article-card" style="cursor:pointer" onclick="${onclickExpr}">
     ${img}
@@ -2744,7 +2760,7 @@ function renderCompactCard(l) {
   const price = l.price
     ? `$${Number(l.price).toLocaleString()}${l.price_type && l.price_type !== 'fixed' ? '<small style="font-size:9px;font-weight:400;color:#aaa"> ' + l.price_type.replace(/_/g,' ') + '</small>' : ''}`
     : `<span style="font-size:10px;color:#aaa">Call</span>`;
-  return `<div class="compact-card cc-animate" onclick="openListing(${l.id})">
+  return `<div class="compact-card cc-animate" onclick="openListing(${l.id})" onkeydown="if(event.key==='Enter'||event.key===' ')openListing(${l.id})" tabindex="0" role="button" aria-label="View listing: ${l.title}">
     <div class="cc-img">${imgHtml}${badge}</div>
     <div class="cc-body">
       <div class="cc-cat">${emoji} ${fmtCat(l.category)}</div>
@@ -3479,6 +3495,10 @@ async function loadBeefBoxCount() {
 }
 function showPage(page) {
   currentPage = page;
+  // Update aria-current on nav links for screen readers
+  document.querySelectorAll('nav a[data-page], nav a[data-cat]').forEach(a => {
+    a.removeAttribute('aria-current');
+  });
   ['home','listings','forum','account','about','pricing','articles','article-detail','privacy','terms','user-agreement','beef-boxes'].forEach(p => {
     const el = document.getElementById('page-' + p);
     if (el) el.style.display = p === page ? 'block' : 'none';
@@ -3494,25 +3514,72 @@ function showPage(page) {
 }
 
 // ── Modals ─────────────────────────────────────────────
+// Track what triggered the modal so we can return focus on close
+let _modalTrigger = null;
+
 function openModal(id) {
   // If trying to post a listing but not logged in, show register tab instead
   if (id === 'post-listing' && !authToken) {
     const authEl = document.getElementById('modal-auth');
-    if (authEl) { authEl.classList.add('open'); document.body.style.overflow = 'hidden'; }
+    if (authEl) {
+      authEl.classList.add('open');
+      authEl.removeAttribute('aria-hidden');
+      document.body.style.overflow = 'hidden';
+    }
     switchTab('register');
+    // Focus first input in modal
+    setTimeout(() => {
+      const first = authEl && authEl.querySelector('input, button, select, textarea, a[href]');
+      if (first) first.focus();
+    }, 50);
     return;
   }
   const el = document.getElementById('modal-' + id);
   if (!el) { console.warn('Modal not found: modal-' + id); return; }
+  // Store trigger element to restore focus on close
+  _modalTrigger = document.activeElement;
   // Reset post modal to clean state every time it opens
   if (id === 'post-listing') resetPostModal();
   el.classList.add('open');
+  el.removeAttribute('aria-hidden');
   document.body.style.overflow = 'hidden';
+  // Focus first focusable element in modal
+  setTimeout(() => {
+    const focusable = el.querySelectorAll('button, input, select, textarea, a[href], [tabindex]:not([tabindex="-1"])');
+    if (focusable.length) focusable[0].focus();
+  }, 50);
+  // Trap focus inside modal
+  el._trapFocus = function(e) {
+    if (e.key !== 'Tab') return;
+    const focusable = Array.from(el.querySelectorAll('button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])'));
+    if (!focusable.length) return;
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (e.shiftKey) {
+      if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+    } else {
+      if (document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
+  };
+  el._escClose = function(e) { if (e.key === 'Escape') closeModal(id); };
+  el.addEventListener('keydown', el._trapFocus);
+  document.addEventListener('keydown', el._escClose);
 }
+
 function closeModal(id) {
   const el = document.getElementById('modal-' + id);
-  if (el) { el.classList.remove('open'); }
+  if (el) {
+    el.classList.remove('open');
+    el.setAttribute('aria-hidden', 'true');
+    // Remove focus trap
+    if (el._trapFocus) { el.removeEventListener('keydown', el._trapFocus); delete el._trapFocus; }
+    if (el._escClose) { document.removeEventListener('keydown', el._escClose); delete el._escClose; }
+  }
   document.body.style.overflow = '';
+  // Return focus to triggering element
+  if (_modalTrigger && typeof _modalTrigger.focus === 'function') {
+    setTimeout(() => { _modalTrigger.focus(); _modalTrigger = null; }, 50);
+  }
 }
 // Close on overlay click — runs after DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
