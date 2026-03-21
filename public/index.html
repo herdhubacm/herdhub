@@ -13,11 +13,11 @@
 <style>
 :root{--rust:#B5451B;--dark-rust:#8B3214;--cream:#F5EFE0;--warm-white:#FAF7F2;--tan:#C9A96E;--dark-brown:#2C1A0E;--mid-brown:#5C3D1E;--sage:#7A8C6E;--gold:#D4A92A;--text:#1E1207;--light-tan:#EDE0C8}
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Source Serif 4',serif;background:var(--warm-white);color:var(--text);overflow-x:hidden}
-.topbar{background:var(--dark-brown);color:var(--tan);font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:.08em;padding:6px 0;text-align:center;border-bottom:2px solid var(--rust)}
+body{font-family:'Source Serif 4',serif;background:var(--warm-white);color:var(--text);overflow-x:hidden;max-width:100vw}html{overflow-x:hidden}
+.topbar{background:var(--dark-brown);color:var(--tan);font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:.08em;padding:6px 0;text-align:center;border-bottom:2px solid var(--rust);overflow:hidden;white-space:nowrap}
 .topbar a{color:var(--tan);text-decoration:none;margin:0 14px}.topbar a:hover{color:var(--gold)}
 header{background:var(--dark-brown);position:sticky;top:0;z-index:100;box-shadow:0 4px 20px rgba(0,0,0,.4)}
-.header-inner{max-width:1280px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:12px 24px}
+.header-inner{max-width:1280px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:12px 16px;min-width:0}
 .logo-wrap{display:flex;align-items:center;gap:14px;text-decoration:none;cursor:pointer}
 .logo-icon{width:52px;height:52px}
 .logo-text .site-name{font-family:'Playfair Display',serif;font-size:26px;font-weight:900;color:var(--cream);line-height:1}
@@ -51,7 +51,7 @@ nav a:hover{color:var(--gold);background:rgba(255,255,255,.05)}
 .sf select option{background:var(--dark-brown)}
 .sf-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .stats-bar{background:var(--rust);padding:14px 0}
-.stats-inner{max-width:1280px;margin:0 auto;padding:0 24px;display:flex;justify-content:space-around;align-items:center;flex-wrap:wrap;gap:12px}
+.stats-inner{max-width:1280px;margin:0 auto;padding:8px 16px;display:flex;justify-content:space-around;align-items:center;flex-wrap:wrap;gap:8px 12px}
 .stat-item{text-align:center;color:white}
 .stat-item .num{font-family:'Playfair Display',serif;font-size:24px;font-weight:900;display:block;line-height:1}
 .stat-item .label{font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:.12em;text-transform:uppercase;opacity:.85}
@@ -163,7 +163,7 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
 /* Modal */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1000;align-items:center;justify-content:center}
 .modal-overlay.open{display:flex}
-.modal{background:var(--warm-white);border-radius:8px;padding:32px;max-width:460px;width:90%;max-height:90vh;overflow-y:auto;position:relative}
+.modal{background:var(--warm-white);border-radius:8px;padding:32px;max-width:460px;width:calc(100% - 24px);max-height:90vh;overflow-y:auto;position:relative;box-sizing:border-box}
 .modal h2{font-family:'Playfair Display',serif;font-size:24px;color:var(--dark-brown);margin-bottom:6px}
 .modal p{font-size:14px;color:#666;margin-bottom:20px}
 .modal-close{position:absolute;top:14px;right:16px;background:none;border:none;font-size:22px;cursor:pointer;color:#888}
@@ -256,7 +256,7 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
 /* FTF scroll */
 .ftf-scroll-track{display:flex;gap:10px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
 .ftf-scroll-track::-webkit-scrollbar{display:none}
-.ftf-mini-card{flex:0 0 140px;background:rgba(255,255,255,.06);border:1px solid rgba(122,140,110,.25);border-radius:4px;overflow:hidden;cursor:pointer;transition:transform .15s}
+.ftf-mini-card{flex:0 0 130px;background:rgba(255,255,255,.06);border:1px solid rgba(122,140,110,.25);border-radius:4px;overflow:hidden;cursor:pointer;transition:transform .15s}
 .ftf-mini-card:hover{transform:translateY(-2px)}
 .ftf-mini-img{height:84px;display:flex;align-items:center;justify-content:center;font-size:24px;background:rgba(122,140,110,.1);overflow:hidden;position:relative}
 .ftf-mini-img img{width:100%;height:100%;object-fit:cover}
@@ -327,7 +327,7 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
 @media(max-width:1100px){.home-3col{grid-template-columns:180px 1fr 180px}}
 @media(max-width:900px){.home-3col{grid-template-columns:1fr}.home-sidebar{display:none}.hero-content{grid-template-columns:1fr}.hero-search{display:none}.two-col{grid-template-columns:1fr}.footer-grid{grid-template-columns:1fr 1fr}.compact-grid{grid-template-columns:repeat(3,1fr)}.compact-cat-grid{grid-template-columns:repeat(4,1fr)}}
 @media(max-width:600px){nav a:not(.nav-cta){display:none}#online-counter{display:none!important}.footer-grid{grid-template-columns:1fr}.categories-grid{grid-template-columns:repeat(3,1fr)}}
-@media(max-width:480px){.compact-grid{grid-template-columns:repeat(2,1fr)!important}.compact-cat-grid{grid-template-columns:repeat(3,1fr)!important}.listing-grid{grid-template-columns:1fr!important}.modal{padding:20px 16px!important}.form-row{flex-direction:column!important}}
+@media(max-width:480px){.compact-grid{grid-template-columns:repeat(2,1fr)!important}.compact-cat-grid{grid-template-columns:repeat(3,1fr)!important}.listing-grid{grid-template-columns:1fr!important}.modal{padding:20px 16px!important;width:calc(100% - 16px)!important;max-height:95vh!important}.form-row{flex-direction:column!important}.topbar{display:none}.stats-bar .stat-item .num{font-size:18px!important}.stats-bar .stat-item .label{font-size:9px!important}.hero{height:auto!important;min-height:380px}.hero-text h1{font-size:clamp(28px,8vw,42px)!important}.hero-btns{flex-wrap:wrap;gap:8px}.btn-primary,.btn-secondary{font-size:12px!important;padding:10px 16px!important}.section{padding:32px 16px!important}.plan-card-grid{grid-template-columns:1fr!important}.listing-type-tabs{flex-direction:row!important}.lt-tab{font-size:11px!important;padding:8px 10px!important}}@media(max-width:600px){.header-inner{padding:10px 12px}.logo-text .site-tagline{display:none}.logo-text .site-name{font-size:20px!important}.logo-wrap img{height:36px!important}.stats-bar{padding:12px 0}.footer-grid{grid-template-columns:1fr!important}.mobile-ad-strips{display:block}.section-header h2{font-size:20px!important}.listing-card .listing-body{padding:10px 12px!important}.listing-title{font-size:13px!important}header{position:sticky;top:0;z-index:200}}
 
 /* ── Mobile Ad Strips ───────────────────────────────── */
 .mobile-ad-strips{display:none}
