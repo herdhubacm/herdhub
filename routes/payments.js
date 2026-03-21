@@ -82,22 +82,67 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
   }
 
   if (event.type === 'checkout.session.completed') {
-    const session                     = event.data.object;
-    const { listing_id, tier }        = session.metadata;
-    const isFeatured                  = ['ribeye','filet','t_bone'].includes(tier);
-    const days                        = (tier === 'ribeye' || tier === 't_bone') ? 90 : 30;
-    const expires                     = new Date(Date.now() + days * 86400000);
+    const session = event.data.object;
+    const { listing_id, tier, user_id } = session.metadata;
+
+    // Server-side validation — never trust metadata blindly
+    const VALID_PAID_TIERS = ['ribeye', 'filet', 't_bone', 'sirloin'];
+    if (!VALID_PAID_TIERS.includes(tier)) {
+      console.error(`Webhook rejected: invalid tier "${tier}" in session ${session.id}`);
+      return res.json({ received: true }); // Acknowledge but don't process
+    }
+    if (!listing_id || isNaN(parseInt(listing_id))) {
+      console.error(`Webhook rejected: invalid listing_id in session ${session.id}`);
+      return res.json({ received: true });
+    }
 
     try {
-      await query(
-        `UPDATE listings
-         SET tier=$1, is_featured=$2, payment_status='paid', status='active', expires_at=$3
-         WHERE id=$4`,
-        [tier, isFeatured, expires, parseInt(listing_id)]
+      // Idempotency check — don't process the same session twice
+      const { rows: existing } = await query(
+        "SELECT id FROM listings WHERE stripe_session_id=$1 AND payment_status='paid'",
+        [session.id]
       );
-      console.log(`✅  Listing ${listing_id} upgraded to ${tier}`);
+      if (existing.length) {
+        console.log(`Webhook skipped — session ${session.id} already processed`);
+        return res.json({ received: true });
+      }
+
+      const isFeatured = true;
+      const dayMap     = { ribeye: 30, filet: 30, sirloin: 30, t_bone: 365 };
+      const days       = dayMap[tier] || 30;
+      const expires    = new Date(Date.now() + days * 86400000);
+
+      const { rows } = await query(
+        `UPDATE listings
+         SET tier=$1, is_featured=$2, payment_status='paid', status='active',
+             expires_at=$3, stripe_session_id=$4
+         WHERE id=$5 AND payment_status != 'paid'
+         RETURNING id`,
+        [tier, isFeatured, expires, session.id, parseInt(listing_id)]
+      );
+      if (rows.length) {
+        console.log('Listing ' + listing_id + ' upgraded to ' + tier + ' (session ' + session.id + ')');
+      } else {
+        console.warn('Webhook: listing ' + listing_id + ' not updated — already paid or not found');
+      }
     } catch (err) {
       console.error('Webhook DB error:', err);
+      // Return 500 so Stripe retries
+      return res.status(500).json({ error: 'Database error' });
+    }
+  }
+
+  // Handle subscription cancellation
+  if (event.type === 'customer.subscription.deleted') {
+    const sub = event.data.object;
+    try {
+      await query(
+        "UPDATE listings SET tier='burger', is_featured=false, payment_status='cancelled' WHERE stripe_session_id=$1",
+        [sub.id]
+      );
+      console.log('Subscription cancelled: ' + sub.id);
+    } catch (err) {
+      console.error('Subscription cancel webhook error:', err);
     }
   }
 

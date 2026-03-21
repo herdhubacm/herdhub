@@ -85,7 +85,9 @@ router.get('/stats', async (_req, res) => {
 router.get('/listings', async (req, res) => {
   try {
     const { page = 1, limit = 25, status, category, q, tier } = req.query;
-    const offset = (page - 1) * limit;
+    const safeLimit = Math.min(Math.max(1, parseInt(limit) || 25), 200);
+    const safePage  = Math.max(1, parseInt(page) || 1);
+    const offset = (safePage - 1) * safeLimit;
     const conditions = [];
     const params = [];
     let p = 1;
@@ -108,7 +110,7 @@ router.get('/listings', async (req, res) => {
              ${where}
              ORDER BY l.created_at DESC
              LIMIT $${p} OFFSET $${p+1}`,
-        [...params, limit, offset]),
+        [...params, safeLimit, offset]),
       query(`SELECT COUNT(*) AS total FROM listings l JOIN users u ON u.id=l.user_id ${where}`, params),
     ]);
 
@@ -152,7 +154,9 @@ router.delete('/listings/:id', async (req, res) => {
 router.get('/users', async (req, res) => {
   try {
     const { page = 1, limit = 25, q, role, banned } = req.query;
-    const offset = (page - 1) * limit;
+    const safeLimit = Math.min(Math.max(1, parseInt(limit) || 25), 200);
+    const safePage  = Math.max(1, parseInt(page) || 1);
+    const offset = (safePage - 1) * safeLimit;
     const conditions = [];
     const params = [];
     let p = 1;
@@ -175,7 +179,7 @@ router.get('/users', async (req, res) => {
              GROUP BY u.id
              ORDER BY u.created_at DESC
              LIMIT $${p} OFFSET $${p+1}`,
-        [...params, limit, offset]),
+        [...params, safeLimit, offset]),
       query(`SELECT COUNT(*) AS total FROM users ${where}`, params),
     ]);
 
@@ -350,7 +354,7 @@ router.post('/upload-image', adminUpload.single('image'), async (req, res) => {
 // GET /api/admin/articles
 router.get('/articles', async (req, res) => {
   try {
-    const limit  = Math.min(parseInt(req.query.limit) || 20, 100);
+    const limit  = Math.min(Math.max(1, parseInt(req.query.limit) || 20), 100);
     const offset = parseInt(req.query.offset) || 0;
     const { rows } = await query(
       `SELECT id, title, excerpt, category, image_url, author, published, created_at, updated_at

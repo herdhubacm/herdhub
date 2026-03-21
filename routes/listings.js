@@ -6,6 +6,17 @@ const storage = require('../services/storage');
 
 const router = express.Router();
 
+// Input length limits — prevent abuse and DB overload
+const MAX_TITLE_LEN       = 120;
+const MAX_DESC_LEN        = 5000;
+const MAX_WEBSITE_LEN     = 500;
+const MAX_CITY_LEN        = 80;
+
+function sanitizeText(str, maxLen) {
+  if (!str) return null;
+  return String(str).trim().slice(0, maxLen);
+}
+
 // ── Multer — memory storage only ──────────────────────
 // Files land in req.files as Buffer objects, then we
 // hand them straight to the storage service (S3/R2/local).
@@ -71,7 +82,9 @@ router.get('/', optionalAuth, async (req, res) => {
       price_desc: 'l.price DESC NULLS LAST',
     };
     const order  = tsRank + (orderMap[sort] || orderMap.featured);
-    const offset = (parseInt(page) - 1) * parseInt(limit);
+    const safeLimit  = Math.min(Math.max(1, parseInt(limit)  || 24), 100); // max 100 per request
+    const safePage   = Math.max(1, parseInt(page) || 1);
+    const offset = (safePage - 1) * safeLimit;
 
     const [countRes, dataRes] = await Promise.all([
       query(`SELECT COUNT(*) FROM listings l WHERE ${where}`, params),
@@ -86,14 +99,14 @@ router.get('/', optionalAuth, async (req, res) => {
          WHERE ${where}
          ORDER BY ${order}
          LIMIT $${p} OFFSET $${p + 1}`,
-        [...params, parseInt(limit), offset]
+        [...params, safeLimit, offset]
       ),
     ]);
 
     const total = parseInt(countRes.rows[0].count);
     res.json({
       listings: dataRes.rows,
-      pagination: { total, page: +page, limit: +limit, pages: Math.ceil(total / +limit) },
+      pagination: { total, page: safePage, limit: safeLimit, pages: Math.ceil(total / safeLimit) },
     });
   } catch (err) {
     console.error('GET /listings:', err);
