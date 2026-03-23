@@ -506,21 +506,6 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
       <div id="tbone-sidebar-listings">
         <div class="loading" style="color:var(--tan);padding:20px 12px;font-size:12px">Loading…</div>
       </div>
-
-      <!-- NEWSLETTER WIDGET (left sidebar) -->
-      <div style="padding:14px;border-top:1px solid var(--mid-brown)">
-        <div style="font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:8px">📬 Monthly Newsletter</div>
-        <p style="font-size:11px;color:rgba(245,239,224,.6);line-height:1.5;margin-bottom:8px">Cattle prices, listings &amp; ranch news to your inbox.</p>
-        <input type="email" id="nl-email" placeholder="Your email…" aria-label="Email for newsletter" style="width:100%;padding:7px 8px;border:1px solid var(--mid-brown);border-radius:3px;font-size:11px;margin-bottom:6px;outline:none;background:rgba(255,255,255,.06);color:var(--cream);box-sizing:border-box">
-        <button class="btn-primary" style="justify-content:center;padding:7px;font-size:11px;width:100%;letter-spacing:.06em" data-action="subscribe">Join →</button>
-      </div>
-
-      <!-- BEEF BOXES WIDGET (left sidebar) -->
-      <div style="padding:14px;border-top:1px solid rgba(201,169,110,.2);background:linear-gradient(180deg,rgba(201,169,110,.06) 0%,transparent 100%)">
-        <div style="font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:8px">📦 Beef Boxes</div>
-        <p style="font-size:11px;color:rgba(245,239,224,.6);line-height:1.5;margin-bottom:10px">Curated ranch boxes delivered to your door. Launching soon.</p>
-        <button class="btn-primary" style="justify-content:center;padding:7px;font-size:11px;width:100%;background:var(--gold);color:var(--dark-brown);border-color:var(--gold);letter-spacing:.06em" data-action="page" data-page="beef-boxes">Get on the List →</button>
-      </div>
     </div>
 
     <!-- ══ CENTER COLUMN ══ -->
@@ -639,7 +624,49 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
               <button class="btn-primary" style="margin-top:12px;justify-content:center;padding:10px;font-size:12px;width:100%" data-action="page" data-page="forum">Join the Forum</button>
             </div>
           </div>
-          
+
+          <!-- NEWSLETTER WIDGET -->
+          <div class="sidebar-widget">
+            <div class="widget-header">📬 Herd <span style="color:var(--gold)">Hub</span> Digital Monthly Newsletter</div>
+            <div class="widget-body" style="text-align:center">
+              <p style="font-size:13px;color:#666;margin-bottom:6px;line-height:1.6">Monthly cattle prices, featured listings, ranch news, and exclusive deals — straight to your inbox.</p>
+              <label for="nl-email" class="sr-only">Email address for newsletter</label>
+              <input type="email" id="nl-email" placeholder="Your email address" aria-label="Email address for newsletter" style="width:100%;padding:9px;border:1px solid var(--light-tan);border-radius:3px;font-size:13px;margin-bottom:10px;outline:none">
+              <button class="btn-primary" style="justify-content:center;padding:10px;font-size:13px;width:100%" data-action="subscribe">Join the Newsletter →</button>
+            </div>
+          </div>
+
+          <!-- BEEF BOXES WIDGET -->
+          <div class="sidebar-widget" style="background:linear-gradient(135deg,#1a0f06 0%,#2c1a0e 100%);border:1.5px solid var(--gold);overflow:hidden;position:relative">
+            <div style="position:absolute;top:-18px;right:-18px;width:80px;height:80px;background:var(--gold);opacity:.06;border-radius:50%"></div>
+            <div style="position:absolute;bottom:-24px;left:-12px;width:100px;height:100px;background:var(--rust);opacity:.08;border-radius:50%"></div>
+            <div class="widget-header" style="background:var(--gold);color:var(--dark-brown);font-weight:700;letter-spacing:.12em">📦 BEEF BOXES</div>
+            <div class="widget-body" style="text-align:center;position:relative">
+              <div style="font-size:28px;margin-bottom:8px">🥩</div>
+              <div style="font-family:'Playfair Display',serif;font-size:16px;font-weight:900;color:var(--cream);margin-bottom:6px">A Box Built for the<br>American BEEF LOVER</div>
+              <p style="font-size:12px;color:rgba(245,239,224,.65);line-height:1.6;margin-bottom:14px">Seasonal curated boxes — ranch gear, premium beef products, and partner goods delivered to your door.</p>
+              <div style="background:rgba(201,169,110,.12);border:1px solid rgba(201,169,110,.25);border-radius:4px;padding:8px 10px;margin-bottom:14px">
+                <div style="font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--gold);margin-bottom:2px">Launching Soon</div>
+                <div style="font-size:12px;color:rgba(245,239,224,.7)">Join the waitlist — be first in line</div>
+              </div>
+              <button class="btn-primary" style="width:100%;justify-content:center;background:var(--gold);color:var(--dark-brown);border-color:var(--gold);font-weight:700;font-size:13px" data-action="page" data-page="beef-boxes">Get on the List →</button>
+            </div>
+          </div>
+
+        </aside>
+      </div>
+    </div>
+
+    <!-- ══ RIGHT SIDEBAR — FEATURED ADS (Filet/Choice) ══ -->
+    <div class="home-sidebar home-sidebar-right" aria-label="Featured advertisements">
+      <div class="sidebar-col-header sidebar-col-header-right">
+        <div class="sidebar-col-title">Featured Ads</div>
+        <span style="color:rgba(212,169,42,.6);font-size:10px;font-family:'Oswald',sans-serif;letter-spacing:.08em">Filet Advertisers</span>
+      </div>
+      <div id="filet-sidebar-listings">
+        <div class="loading" style="color:var(--gold);padding:20px 12px;font-size:12px">Loading…</div>
+      </div>
+    </div>
 
   </div><!-- end home-3col -->
 
