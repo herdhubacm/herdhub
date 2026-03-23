@@ -2075,7 +2075,7 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
       </div>
 
       <!-- Shopify Buy Button Collection embed -->
-      <div id="collection-component-1774228827904"></div>
+      <div id="collection-component-1774229966143"></div>
 
     </div>
   </div>
@@ -2107,7 +2107,7 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
 
   function renderCollection() {
     if (rendered) return;
-    var node = document.getElementById('collection-component-1774228827904');
+    var node = document.getElementById('collection-component-1774229966143');
     if (!node) return;
     if (!window.ShopifyBuy || !window.ShopifyBuy.UI) return;
     rendered = true;
@@ -2119,7 +2119,7 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
     });
     ShopifyBuy.UI.onReady(client).then(function (ui) {
       ui.createComponent('collection', {
-        id: '684364300454',
+        id: '684520833190',
         node: node,
         moneyFormat: '%24%7B%7Bamount%7D%7D',
         options: {
