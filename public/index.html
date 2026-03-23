@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Herd Hub | American Cattle Market</title>
+<title>Herd Hub | American Cattle Marketplace</title>
 <meta name="description" content="Herd Hub is America's cattle marketplace — buy, sell and trade cattle, livestock, ranch equipment, and farm-fresh beef products. Trusted by ranchers and farmers coast to coast.">
 <meta name="theme-color" content="#2C1A0E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -223,8 +223,8 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
 .lt-tab.active{background:var(--rust);color:white}
 
 /* ── 3-COLUMN HOMEPAGE LAYOUT ── */
-.home-3col{display:grid;grid-template-columns:210px 1fr 210px;align-items:start}
-.home-sidebar{position:sticky;top:0;height:100vh;overflow-y:auto;scrollbar-width:thin}
+.home-3col{display:grid;grid-template-columns:210px 1fr 210px;align-items:stretch}
+.home-sidebar{min-height:100%;overflow-y:auto;scrollbar-width:thin}
 .home-sidebar::-webkit-scrollbar{width:3px}
 .home-sidebar-left{background:var(--dark-brown);border-right:2px solid var(--mid-brown)}
 .home-sidebar-left::-webkit-scrollbar-thumb{background:var(--mid-brown)}
@@ -369,17 +369,15 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
 <header>
   <div class="header-inner">
     <div class="logo-wrap" data-action="page" data-page="home">
-      <img src="/logo.png" alt="Herd Hub — American Cattle Marketplace" style="height:48px;width:auto;object-fit:contain;">
-      <div class="logo-text"><div class="site-name">Herd <span style="color:var(--gold)">Hub</span></div><div class="site-tagline">American Cattle Market</div></div>
+      <img src="/logo.png" alt="Herd Hub — American Cattle Marketplaceplace" style="height:48px;width:auto;object-fit:contain;">
+      <div class="logo-text"><div class="site-name">Herd <span style="color:var(--gold)">Hub</span></div><div class="site-tagline">American Cattle Marketplace</div></div>
     </div>
     <nav aria-label="Main navigation">
       <a href="javascript:void(0)" data-action="category" data-cat="beef_cattle"><span aria-hidden="true">🐄</span> Cattle</a>
       <a href="javascript:void(0)" data-action="category" data-cat="equipment"><span aria-hidden="true">🚜</span> Equipment</a>
       <a href="javascript:void(0)" data-action="category" data-cat="trucks_trailers"><span aria-hidden="true">🚛</span> Trailers</a>
       <a href="javascript:void(0)" data-action="category" data-cat="working_dogs"><span aria-hidden="true">🐕</span> Dogs</a>
-      <a href="javascript:void(0)" data-action="all-listings">Browse All</a>
       <a href="javascript:void(0)" data-action="page" data-page="about">About</a>
-      <a href="javascript:void(0)" data-action="page" data-page="pricing">Pricing</a>
       <a href="javascript:void(0)" data-action="page" data-page="merch">Merch</a>
       <a href="javascript:void(0)" class="nav-cta" style="margin-left:20px" data-action="modal" data-modal="post-listing">+ Post Ad</a>
     </nav>
@@ -430,20 +428,44 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
         <div class="sf"><label for="hs-state">State</label>
           <select id="hs-state">
             <option value="">All States</option>
-            <option>TX</option><option>KS</option><option>NE</option>
-            <option>OK</option><option>MT</option><option>WY</option>
-            <option>CO</option><option>IA</option><option>MO</option>
-            <option>CA</option><option>SD</option><option>ND</option>
+            <option>AL</option><option>AK</option><option>AZ</option><option>AR</option><option>CA</option>
+            <option>CO</option><option>CT</option><option>DE</option><option>FL</option><option>GA</option>
+            <option>HI</option><option>ID</option><option>IL</option><option>IN</option><option>IA</option>
+            <option>KS</option><option>KY</option><option>LA</option><option>ME</option><option>MD</option>
+            <option>MA</option><option>MI</option><option>MN</option><option>MS</option><option>MO</option>
+            <option>MT</option><option>NE</option><option>NV</option><option>NH</option><option>NJ</option>
+            <option>NM</option><option>NY</option><option>NC</option><option>ND</option><option>OH</option>
+            <option>OK</option><option>OR</option><option>PA</option><option>RI</option><option>SC</option>
+            <option>SD</option><option>TN</option><option>TX</option><option>UT</option><option>VT</option>
+            <option>VA</option><option>WA</option><option>WV</option><option>WI</option><option>WY</option>
           </select>
         </div>
         <div class="sf"><label for="hs-breed">Breed</label>
           <select id="hs-breed">
             <option value="">All Breeds</option>
-            <option>Black Angus</option><option>Hereford</option>
-            <option>Texas Longhorn</option><option>Simmental</option>
-            <option>Charolais</option><option>Brahman</option>
-            <option>Limousin</option><option>Holstein</option>
-            <option>Red Angus</option>
+            <optgroup label="Beef Breeds">
+            <option>Angus</option><option>Black Angus</option><option>Red Angus</option>
+            <option>Hereford</option><option>Polled Hereford</option>
+            <option>Simmental</option><option>Charolais</option><option>Limousin</option>
+            <option>Gelbvieh</option><option>Maine-Anjou</option><option>Chianina</option>
+            <option>Shorthorn</option><option>Brahman</option><option>Brangus</option>
+            <option>Beefmaster</option><option>Santa Gertrudis</option><option>Simbrah</option>
+            <option>Texas Longhorn</option><option>Scottish Highland</option>
+            <option>Wagyu</option><option>Piedmontese</option><option>Belted Galloway</option>
+            <option>Dexter</option><option>Murray Grey</option><option>Salers</option>
+            <option>Tarentaise</option><option>Blonde d'Aquitaine</option>
+            </optgroup>
+            <optgroup label="Dairy Breeds">
+            <option>Holstein</option><option>Jersey</option><option>Guernsey</option>
+            <option>Brown Swiss</option><option>Ayrshire</option><option>Milking Shorthorn</option>
+            </optgroup>
+            <optgroup label="Dual Purpose">
+            <option>Red Poll</option><option>Pinzgauer</option><option>Normande</option>
+            </optgroup>
+            <optgroup label="Crossbred / Commercial">
+            <option>Commercial Angus Cross</option><option>F1 Cross</option>
+            <option>Baldie</option><option>Black Baldy</option><option>Other Cross</option>
+            </optgroup>
           </select>
         </div>
       </div>
@@ -483,6 +505,21 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
       </div>
       <div id="tbone-sidebar-listings">
         <div class="loading" style="color:var(--tan);padding:20px 12px;font-size:12px">Loading…</div>
+      </div>
+
+      <!-- NEWSLETTER WIDGET (left sidebar) -->
+      <div style="padding:14px;border-top:1px solid var(--mid-brown)">
+        <div style="font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:8px">📬 Monthly Newsletter</div>
+        <p style="font-size:11px;color:rgba(245,239,224,.6);line-height:1.5;margin-bottom:8px">Cattle prices, listings &amp; ranch news to your inbox.</p>
+        <input type="email" id="nl-email" placeholder="Your email…" aria-label="Email for newsletter" style="width:100%;padding:7px 8px;border:1px solid var(--mid-brown);border-radius:3px;font-size:11px;margin-bottom:6px;outline:none;background:rgba(255,255,255,.06);color:var(--cream);box-sizing:border-box">
+        <button class="btn-primary" style="justify-content:center;padding:7px;font-size:11px;width:100%;letter-spacing:.06em" data-action="subscribe">Join →</button>
+      </div>
+
+      <!-- BEEF BOXES WIDGET (left sidebar) -->
+      <div style="padding:14px;border-top:1px solid rgba(201,169,110,.2);background:linear-gradient(180deg,rgba(201,169,110,.06) 0%,transparent 100%)">
+        <div style="font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:8px">📦 Beef Boxes</div>
+        <p style="font-size:11px;color:rgba(245,239,224,.6);line-height:1.5;margin-bottom:10px">Curated ranch boxes delivered to your door. Launching soon.</p>
+        <button class="btn-primary" style="justify-content:center;padding:7px;font-size:11px;width:100%;background:var(--gold);color:var(--dark-brown);border-color:var(--gold);letter-spacing:.06em" data-action="page" data-page="beef-boxes">Get on the List →</button>
       </div>
     </div>
 
@@ -602,45 +639,7 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
               <button class="btn-primary" style="margin-top:12px;justify-content:center;padding:10px;font-size:12px;width:100%" data-action="page" data-page="forum">Join the Forum</button>
             </div>
           </div>
-                    <div class="sidebar-widget">
-            <div class="widget-header">📬 Herd <span style="color:var(--gold)">Hub</span> Digital Monthly Newsletter</div>
-            <div class="widget-body" style="text-align:center">
-              <p style="font-size:13px;color:#666;margin-bottom:6px;line-height:1.6">Monthly cattle prices, featured listings, ranch news, and exclusive deals — straight to your inbox.</p>
-              <label for="nl-email" class="sr-only">Email address for newsletter</label>
-              <input type="email" id="nl-email" placeholder="Your email address" aria-label="Email address for newsletter" style="width:100%;padding:9px;border:1px solid var(--light-tan);border-radius:3px;font-size:13px;margin-bottom:10px;outline:none">
-              <button class="btn-primary" style="justify-content:center;padding:10px;font-size:13px;width:100%" data-action="subscribe">Join the Newsletter →</button>
-            </div>
-          </div>
-
-          <!-- BEEF BOXES WIDGET -->
-          <div class="sidebar-widget" style="background:linear-gradient(135deg,#1a0f06 0%,#2c1a0e 100%);border:1.5px solid var(--gold);overflow:hidden;position:relative">
-            <div style="position:absolute;top:-18px;right:-18px;width:80px;height:80px;background:var(--gold);opacity:.06;border-radius:50%"></div>
-            <div style="position:absolute;bottom:-24px;left:-12px;width:100px;height:100px;background:var(--rust);opacity:.08;border-radius:50%"></div>
-            <div class="widget-header" style="background:var(--gold);color:var(--dark-brown);font-weight:700;letter-spacing:.12em">📦 BEEF BOXES</div>
-            <div class="widget-body" style="text-align:center;position:relative">
-              <div style="font-size:28px;margin-bottom:8px">🥩</div>
-              <div style="font-family:'Playfair Display',serif;font-size:16px;font-weight:900;color:var(--cream);margin-bottom:6px">A Box Built for the<br>American Rancher</div>
-              <p style="font-size:12px;color:rgba(245,239,224,.65);line-height:1.6;margin-bottom:14px">Monthly curated boxes — ranch gear, premium beef products, and partner goods delivered to your door.</p>
-              <div style="background:rgba(201,169,110,.12);border:1px solid rgba(201,169,110,.25);border-radius:4px;padding:8px 10px;margin-bottom:14px">
-                <div style="font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--gold);margin-bottom:2px">Launching Soon</div>
-                <div style="font-size:12px;color:rgba(245,239,224,.7)">Join the waitlist — be first in line</div>
-              </div>
-              <button class="btn-primary" style="width:100%;justify-content:center;background:var(--gold);color:var(--dark-brown);border-color:var(--gold);font-weight:700;font-size:13px" data-action="page" data-page="beef-boxes">Get on the List →</button>
-            </div>
-          </div>
-        </aside>
-      </div>
-    </div><!-- end center -->
-
-    <!-- ══ RIGHT SIDEBAR — FEATURED ADS (Filet) ══ -->
-    <div class="home-sidebar home-sidebar-right" aria-label="Featured advertisements">
-      <div class="sidebar-col-header sidebar-col-header-right">
-        <div class="sidebar-col-title">Featured Ads</div>
-      </div>
-      <div id="filet-sidebar-listings">
-        <div class="loading" style="color:var(--gold);opacity:.6;padding:20px 12px;font-size:12px">Loading…</div>
-      </div>
-    </div>
+          
 
   </div><!-- end home-3col -->
 
@@ -726,7 +725,7 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
     <div style="position:absolute;inset:0;background:linear-gradient(to bottom, rgba(26,15,6,.55) 0%, rgba(26,15,6,.72) 100%)"></div>
     <div style="position:relative;z-index:2;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 24px">
       <div style="font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:.35em;text-transform:uppercase;color:var(--tan);margin-bottom:18px">Our Story</div>
-      <h1 style="font-family:'Playfair Display',serif;font-size:clamp(36px,5vw,64px);font-weight:900;color:white;line-height:1.05;margin-bottom:16px">American Cattle Marketplace</h1>
+      <h1 style="font-family:'Playfair Display',serif;font-size:clamp(36px,5vw,64px);font-weight:900;color:white;line-height:1.05;margin-bottom:16px">American Cattle Marketplaceplace</h1>
       <p style="font-family:'Playfair Display',serif;font-size:clamp(20px,2.5vw,30px);font-weight:400;font-style:italic;color:var(--gold);margin-bottom:0">We'll Get The Gate For You</p>
     </div>
   </div>
@@ -2157,6 +2156,12 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
           "productSet": {
             "styles": {
               "products": { "@media (min-width: 601px)": { "margin-left": "-20px" } }
+            },
+            "contents": {
+              "pagination": true
+            },
+            "text": {
+              "nextPageButton": "Load More →"
             }
           },
           "modalProduct": {
@@ -2243,7 +2248,7 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
       <div class="footer-col"><h4>Resources</h4><ul><li><a href="javascript:void(0)" data-action="scroll" data-target="market">Cattle Prices</a></li><li><a href="https://www.ams.usda.gov/market-news/cattle" target="_blank" rel="noopener">Market Reports ↗</a></li><li><a>Ranch News</a></li><li><a data-action="page" data-page="forum">Community Forum</a></li><li><a data-action="page" data-page="merch">Merch Store</a></li><li><a data-action="page" data-page="beef-boxes">Beef Boxes</a></li></ul></div>
       <div class="footer-col"><h4>Account</h4><ul><li><a data-action="modal" data-modal="auth">Sign In</a></li><li><a data-action="modal" data-modal="auth">Register Free</a></li><li><a data-action="modal" data-modal="post-listing">Post a Listing</a></li><li><a>Contact Support</a></li></ul></div>
     </div>
-    <div class="footer-bottom"><span>© 2026 Herd <span style="color:var(--gold)">Hub</span> · American Cattle Market. All rights reserved.</span><span><a href="javascript:void(0)" data-action="page" data-page="privacy">Privacy Policy</a> · <a href="javascript:void(0)" data-action="page" data-page="terms">Terms of Service</a> · <a href="javascript:void(0)" data-action="page" data-page="user-agreement">User Agreement</a> · <a href="javascript:void(0)" data-action="modal" data-modal="auth" data-tab="register">Advertise</a></span></div>
+    <div class="footer-bottom"><span>© 2026 Herd <span style="color:var(--gold)">Hub</span> · American Cattle Marketplace. All rights reserved.</span><span><a href="javascript:void(0)" data-action="page" data-page="privacy">Privacy Policy</a> · <a href="javascript:void(0)" data-action="page" data-page="terms">Terms of Service</a> · <a href="javascript:void(0)" data-action="page" data-page="user-agreement">User Agreement</a> · <a href="javascript:void(0)" data-action="modal" data-modal="auth" data-tab="register">Advertise</a></span></div>
   </div>
 </footer>
 

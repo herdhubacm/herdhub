@@ -159,6 +159,10 @@ tr:hover td{background:rgba(255,255,255,.02)}
       <button class="nav-item" onclick="switchPanel('users')"><span class="icon">👥</span><span>Users</span></button>
       <button class="nav-item" onclick="switchPanel('messages')"><span class="icon">💬</span><span>Messages</span><span class="nav-badge" id="unread-badge" style="display:none">0</span></button>
       <button class="nav-item" onclick="switchPanel('articles')"><span class="icon">📝</span><span>Articles</span></button>
+      <button class="nav-item" onclick="switchPanel('forum')"><span class="icon">🗣️</span><span>Forum</span></button>
+      <button class="nav-item" onclick="switchPanel('waitlists')"><span class="icon">📬</span><span>Waitlists</span></button>
+      <button class="nav-item" onclick="switchPanel('payments')"><span class="icon">💳</span><span>Payments</span></button>
+      <button class="nav-item" onclick="switchPanel('settings')"><span class="icon">⚙️</span><span>Settings</span></button>
     </nav>
     <div class="sidebar-footer">
       <div class="user-info"><strong id="admin-name">Admin</strong><span id="admin-email"></span></div>
@@ -300,6 +304,137 @@ tr:hover td{background:rgba(255,255,255,.02)}
       </div>
 
     </div><!-- /content -->
+
+      <!-- FORUM PANEL -->
+      <div class="panel" id="panel-forum">
+        <div class="table-wrap">
+          <div class="table-header">
+            <h2>Community Forum</h2>
+            <div class="search-box">
+              <input type="text" id="forum-search" placeholder="Search topics…" onkeyup="debounce(loadAdminForum,400)()" style="padding:6px 10px;border:1px solid var(--border);background:var(--bg);color:var(--text);border-radius:5px;font-size:13px">
+              <button class="btn btn-danger" onclick="if(confirm('Delete selected topic?'))deleteForumTopic()" style="margin-left:8px">🗑 Delete Selected</button>
+            </div>
+          </div>
+          <table>
+            <thead><tr><th><input type="checkbox" id="forum-select-all"></th><th>Topic</th><th>Author</th><th>Category</th><th>Replies</th><th>Date</th><th>Actions</th></tr></thead>
+            <tbody id="forum-tbody"><tr><td colspan="7" style="text-align:center;color:var(--muted);padding:24px">Loading…</td></tr></tbody>
+          </table>
+          <div class="pagination">
+            <span id="forum-count"></span>
+            <button class="page-btn" id="forum-prev" onclick="forumPage--;loadAdminForum()">← Prev</button>
+            <button class="page-btn" id="forum-next" onclick="forumPage++;loadAdminForum()">Next →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- WAITLISTS PANEL -->
+      <div class="panel" id="panel-waitlists">
+        <div class="table-wrap">
+          <div class="table-header">
+            <h2>Waitlists</h2>
+            <button class="btn btn-success" onclick="exportWaitlist()" style="margin-left:auto">⬇ Export CSV</button>
+          </div>
+          <div style="margin-bottom:20px">
+            <h3 style="font-size:14px;color:var(--gold);margin-bottom:12px">📦 Beef Box Waitlist</h3>
+            <table>
+              <thead><tr><th>Name</th><th>Email</th><th>State</th><th>Type</th><th>Signed Up</th></tr></thead>
+              <tbody id="beefbox-waitlist-tbody"><tr><td colspan="5" style="text-align:center;color:var(--muted);padding:16px">Loading…</td></tr></tbody>
+            </table>
+            <div style="margin-top:8px;font-size:12px;color:var(--muted)">Total: <strong id="beefbox-waitlist-count" style="color:var(--gold)">—</strong></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PAYMENTS PANEL -->
+      <div class="panel" id="panel-payments">
+        <div class="table-wrap">
+          <div class="table-header">
+            <h2>Payments & Subscriptions</h2>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px">
+            <div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:16px;text-align:center">
+              <div style="font-size:22px;font-weight:700;color:var(--gold)" id="pay-total-paid">—</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:4px">Total Paid Listings</div>
+            </div>
+            <div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:16px;text-align:center">
+              <div style="font-size:22px;font-weight:700;color:#86efac" id="pay-ribeye-count">—</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:4px">Ribeye (30-day)</div>
+            </div>
+            <div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:16px;text-align:center">
+              <div style="font-size:22px;font-weight:700;color:#93c5fd" id="pay-filet-count">—</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:4px">Choice Advertisers</div>
+            </div>
+            <div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:16px;text-align:center">
+              <div style="font-size:22px;font-weight:700;color:#f9a8d4" id="pay-tbone-count">—</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:4px">Prime Partners</div>
+            </div>
+          </div>
+          <h3 style="font-size:14px;color:var(--gold);margin-bottom:12px">Paid Listings</h3>
+          <table>
+            <thead><tr><th>Listing</th><th>Seller</th><th>Tier</th><th>Paid On</th><th>Expires</th><th>Status</th></tr></thead>
+            <tbody id="payments-tbody"><tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px">Loading…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- SETTINGS PANEL -->
+      <div class="panel" id="panel-settings">
+        <div class="table-wrap">
+          <div class="table-header"><h2>Site Settings</h2></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;max-width:900px">
+
+            <div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:20px">
+              <h3 style="font-size:14px;color:var(--gold);margin-bottom:16px">🏷 Stats Bar</h3>
+              <div style="margin-bottom:12px"><label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px">Active Listings Count</label><input id="setting-listings-count" type="text" placeholder="41+" style="width:100%;padding:8px;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:5px;font-size:13px"></div>
+              <div style="margin-bottom:12px"><label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px">Members Count</label><input id="setting-members-count" type="text" placeholder="1,200+" style="width:100%;padding:8px;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:5px;font-size:13px"></div>
+              <div style="margin-bottom:12px"><label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px">Total Sales</label><input id="setting-sales-total" type="text" placeholder="$500K+" style="width:100%;padding:8px;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:5px;font-size:13px"></div>
+              <button class="btn btn-success" onclick="showToast('Stats bar settings saved (requires code deploy to reflect)')">Save</button>
+            </div>
+
+            <div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:20px">
+              <h3 style="font-size:14px;color:var(--gold);margin-bottom:16px">🚦 Platform Status</h3>
+              <div style="margin-bottom:14px;display:flex;justify-content:space-between;align-items:center">
+                <span style="font-size:13px">New Registrations</span>
+                <button class="btn btn-success" id="toggle-registrations" onclick="showToast('Feature toggle — connect to DB setting to activate')">Enabled</button>
+              </div>
+              <div style="margin-bottom:14px;display:flex;justify-content:space-between;align-items:center">
+                <span style="font-size:13px">New Listings</span>
+                <button class="btn btn-success" id="toggle-listings" onclick="showToast('Feature toggle — connect to DB setting to activate')">Enabled</button>
+              </div>
+              <div style="margin-bottom:14px;display:flex;justify-content:space-between;align-items:center">
+                <span style="font-size:13px">Stripe Payments</span>
+                <button class="btn btn-warn" id="toggle-stripe" onclick="showToast('Flip STRIPE_SECRET_KEY in Railway env vars to go live')">Test Mode</button>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <span style="font-size:13px">Maintenance Mode</span>
+                <button class="btn btn-ghost" id="toggle-maintenance" onclick="showToast('Connect to Railway env var to activate')">Off</button>
+              </div>
+            </div>
+
+            <div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:20px">
+              <h3 style="font-size:14px;color:var(--gold);margin-bottom:16px">📊 Quick Actions</h3>
+              <div style="display:flex;flex-direction:column;gap:10px">
+                <button class="btn btn-primary" onclick="window.open('/api/beefbox/list','_blank')">Export Beef Box Waitlist</button>
+                <button class="btn btn-ghost" onclick="window.open('/api/health','_blank')">View Health Check</button>
+                <button class="btn btn-ghost" onclick="window.open('https://railway.app','_blank')">Railway Dashboard ↗</button>
+                <button class="btn btn-ghost" onclick="window.open('https://dashboard.stripe.com','_blank')">Stripe Dashboard ↗</button>
+                <button class="btn btn-ghost" onclick="window.open('https://dash.cloudflare.com','_blank')">Cloudflare Dashboard ↗</button>
+              </div>
+            </div>
+
+            <div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:20px">
+              <h3 style="font-size:14px;color:var(--gold);margin-bottom:16px">🔐 Admin Tools</h3>
+              <div style="display:flex;flex-direction:column;gap:10px">
+                <button class="btn btn-warn" onclick="if(confirm('Expire all listings older than 90 days?'))showToast('Run via Railway console: UPDATE listings SET status=\'expired\' WHERE expires_at < NOW()')">Expire Old Listings</button>
+                <button class="btn btn-warn" onclick="showToast('Cleanup: DELETE FROM beefbox_waitlist WHERE created_at < NOW() - INTERVAL \'1 year\'')">Purge Old Waitlist Data</button>
+                <button class="btn btn-danger" onclick="if(confirm('This will log out all users by invalidating tokens. Are you sure?'))showToast('To invalidate all tokens, rotate JWT_SECRET in Railway env vars')">Invalidate All Sessions</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
   </div><!-- /main -->
 </div><!-- /admin-app -->
 
@@ -382,6 +517,7 @@ let adminUser = null;
 let listingsPage = 1;
 let usersPage = 1;
 let messagesPage = 1;
+let forumPage = 1;
 let pendingDeleteId = null;
 let pendingBanId = null;
 let pendingResetId = null;
@@ -454,6 +590,11 @@ const panelTitles = {
   listings:  ['Listings', 'All listings — view and moderate'],
   users:     ['Users', 'All accounts — manage and moderate'],
   messages:  ['Messages', 'User to user messages and support'],
+  articles:  ['Articles', 'Ranch News & Resources — create and edit'],
+  forum:     ['Community Forum', 'Topics and replies — moderate and manage'],
+  waitlists: ['Waitlists', 'Beef Box and newsletter signups'],
+  payments:  ['Payments', 'Paid listings and subscription status'],
+  settings:  ['Settings', 'Platform configuration and quick actions'],
 };
 
 function switchPanel(name) {
@@ -469,6 +610,9 @@ function switchPanel(name) {
   if (name === 'users')    { usersPage = 1;    loadUsers(); }
   if (name === 'messages') { messagesPage = 1; loadMessages(); }
   if (name === 'articles') { articlesPage = 1; loadAdminArticles(); }
+  if (name === 'forum')    { forumPage = 1;    loadAdminForum(); }
+  if (name === 'waitlists') { loadWaitlists(); }
+  if (name === 'payments')  { loadPayments(); }
 }
 
 // ── Dashboard ─────────────────────────────────────────
@@ -993,6 +1137,134 @@ async function uploadArticleImg(file) {
     uploading.style.display   = 'none';
     placeholder.style.display = 'block';
   }
+}
+
+// ── Forum ─────────────────────────────────────────────
+async function loadAdminForum() {
+  const tbody = document.getElementById('forum-tbody');
+  const q = document.getElementById('forum-search')?.value || '';
+  try {
+    const r = await fetch(`${API}/api/forum/topics?limit=25&page=${forumPage}&q=${encodeURIComponent(q)}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const d = await r.json();
+    const topics = d.topics || d || [];
+    if (!topics.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:24px">No topics found.</td></tr>'; return; }
+    tbody.innerHTML = topics.map(t => `
+      <tr>
+        <td><input type="checkbox" class="forum-check" value="${t.id}"></td>
+        <td><strong>${escHtml(t.title)}</strong></td>
+        <td>${escHtml(t.author_name || '—')}</td>
+        <td>${escHtml(t.category || '—')}</td>
+        <td>${t.reply_count || 0}</td>
+        <td>${fmtDate(t.created_at)}</td>
+        <td>
+          <button class="btn btn-danger" onclick="deleteForumTopicById(${t.id})">🗑 Delete</button>
+        </td>
+      </tr>`).join('');
+    document.getElementById('forum-count').textContent = `${topics.length} topics`;
+    document.getElementById('forum-prev').disabled = forumPage <= 1;
+  } catch(e) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:24px">Could not load forum topics.</td></tr>';
+  }
+}
+
+async function deleteForumTopicById(id) {
+  if (!confirm('Delete this forum topic and all replies?')) return;
+  try {
+    await fetch(`${API}/api/forum/topics/${id}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    showToast('Topic deleted');
+    loadAdminForum();
+  } catch(e) { showToast('Delete failed'); }
+}
+
+function deleteForumTopic() {
+  const checked = [...document.querySelectorAll('.forum-check:checked')].map(c => c.value);
+  if (!checked.length) { showToast('No topics selected'); return; }
+  Promise.all(checked.map(id => fetch(`${API}/api/forum/topics/${id}`, {
+    method: 'DELETE', headers: { Authorization: `Bearer ${token}` }
+  }))).then(() => { showToast(`${checked.length} topic(s) deleted`); loadAdminForum(); });
+}
+
+// ── Waitlists ─────────────────────────────────────────
+async function loadWaitlists() {
+  const tbody = document.getElementById('beefbox-waitlist-tbody');
+  const countEl = document.getElementById('beefbox-waitlist-count');
+  try {
+    const r = await fetch(`${API}/api/beefbox/list`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const rows = await r.json();
+    if (!rows.length) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:16px">No signups yet.</td></tr>'; return; }
+    tbody.innerHTML = rows.map(row => `
+      <tr>
+        <td>${escHtml(row.name)}</td>
+        <td>${escHtml(row.email)}</td>
+        <td>${escHtml(row.state || '—')}</td>
+        <td>${escHtml(row.type || '—')}</td>
+        <td>${fmtDate(row.created_at)}</td>
+      </tr>`).join('');
+    if (countEl) countEl.textContent = rows.length;
+  } catch(e) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:16px">Could not load waitlist.</td></tr>';
+  }
+}
+
+function exportWaitlist() {
+  fetch(`${API}/api/beefbox/list`, { headers: { Authorization: `Bearer ${token}` } })
+    .then(r => r.json())
+    .then(rows => {
+      if (!rows.length) { showToast('No data to export'); return; }
+      const csv = ['Name,Email,State,Type,Signed Up',
+        ...rows.map(r => `"${r.name}","${r.email}","${r.state||''}","${r.type||''}","${r.created_at}"`)
+      ].join('\n');
+      const a = document.createElement('a');
+      a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+      a.download = 'beefbox-waitlist.csv';
+      a.click();
+      showToast('CSV exported');
+    });
+}
+
+// ── Payments ──────────────────────────────────────────
+async function loadPayments() {
+  const tbody = document.getElementById('payments-tbody');
+  try {
+    const r = await fetch(`${API}/api/admin/listings?limit=100&status=active`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const d = await r.json();
+    const paid = (d.listings || []).filter(l => l.payment_status === 'paid');
+
+    document.getElementById('pay-total-paid').textContent = paid.length;
+    document.getElementById('pay-ribeye-count').textContent = paid.filter(l => l.tier === 'ribeye').length;
+    document.getElementById('pay-filet-count').textContent  = paid.filter(l => l.tier === 'filet').length;
+    document.getElementById('pay-tbone-count').textContent  = paid.filter(l => l.tier === 't_bone').length;
+
+    if (!paid.length) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px">No paid listings yet.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = paid.map(l => `
+      <tr>
+        <td><a href="javascript:void(0)" onclick="openListingDetail(${l.id})" style="color:var(--rust-light)">${escHtml(l.title)}</a></td>
+        <td>${escHtml(l.seller_name || '—')}</td>
+        <td><span style="background:rgba(212,169,42,.15);color:#fcd34d;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600">${l.tier?.toUpperCase()}</span></td>
+        <td>${fmtDate(l.created_at)}</td>
+        <td>${l.expires_at ? fmtDate(l.expires_at) : '—'}</td>
+        <td><span style="color:#86efac;font-size:12px">● Active</span></td>
+      </tr>`).join('');
+  } catch(e) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px">Could not load payments.</td></tr>';
+  }
+}
+
+function escHtml(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
 </script>

@@ -111,4 +111,18 @@ router.get('/categories', (_req, res) =>
   res.json(['general','cattle','equipment','dogs','market','health','farm_to_table'])
 );
 
+// ── DELETE /api/forum/topics/:id (admin only) ──────────
+const { requireAdmin } = require('../middleware/auth');
+router.delete('/topics/:id', authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    await query('DELETE FROM forum_replies WHERE topic_id=$1', [req.params.id]);
+    const { rows } = await query('DELETE FROM forum_topics WHERE id=$1 RETURNING id, title', [req.params.id]);
+    if (!rows.length) return res.status(404).json({ error: 'Topic not found' });
+    res.json({ deleted: true, id: req.params.id });
+  } catch (err) {
+    console.error('Forum delete error:', err);
+    res.status(500).json({ error: 'Failed to delete topic' });
+  }
+});
+
 module.exports = router;
