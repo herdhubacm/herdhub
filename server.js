@@ -300,6 +300,7 @@ async function start() {
 
       // Ensure website_url column exists on listings
       await query(`ALTER TABLE listings ADD COLUMN IF NOT EXISTS website_url TEXT`);
+      console.log('✅  website_url column ready');
 
     } catch (migErr) {
       console.warn('⚠️  Migration warning:', migErr.message);

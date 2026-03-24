@@ -305,6 +305,90 @@ tr:hover td{background:rgba(255,255,255,.02)}
 
     </div><!-- /content -->
 
+      <!-- ARTICLES PANEL -->
+      <div class="panel" id="panel-articles">
+        <div class="table-wrap">
+          <div class="table-header">
+            <h2>Articles</h2>
+            <div class="search-box">
+              <button class="btn btn-primary" onclick="openArticleEditor(null)">+ New Article</button>
+            </div>
+          </div>
+          <table>
+            <thead><tr><th>Title</th><th>Category</th><th>Author</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>
+            <tbody id="articles-tbody"><tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px">Loading…</td></tr></tbody>
+          </table>
+          <div class="pagination">
+            <span id="articles-count"></span>
+            <button class="page-btn" id="articles-prev" onclick="articlesPage--;loadAdminArticles()">← Prev</button>
+            <button class="page-btn" id="articles-next" onclick="articlesPage++;loadAdminArticles()">Next →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ARTICLE EDITOR OVERLAY -->
+      <div id="article-editor-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;display:none;align-items:flex-start;justify-content:center;padding:40px 20px;overflow-y:auto">
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;width:100%;max-width:760px;padding:32px;position:relative">
+          <button onclick="closeArticleEditor()" style="position:absolute;top:16px;right:16px;background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer">✕</button>
+          <h2 id="article-editor-title" style="font-size:18px;font-weight:600;margin-bottom:24px">New Article</h2>
+          <input type="hidden" id="article-editor-id">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+            <div>
+              <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px">Title *</label>
+              <input id="ae-title" type="text" placeholder="Article title…" style="width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:6px;font-size:14px;box-sizing:border-box">
+            </div>
+            <div>
+              <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px">Category *</label>
+              <select id="ae-category" style="width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:6px;font-size:14px">
+                <option value="Cattle">Cattle</option>
+                <option value="Market">Market</option>
+                <option value="Equipment">Equipment</option>
+                <option value="Ranch Life">Ranch Life</option>
+                <option value="Working Dogs">Working Dogs</option>
+                <option value="Farm to Table">Farm to Table</option>
+                <option value="Health">Health</option>
+                <option value="News">News</option>
+              </select>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+            <div>
+              <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px">Author</label>
+              <input id="ae-author" type="text" placeholder="Herd Hub Staff" style="width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:6px;font-size:14px;box-sizing:border-box">
+            </div>
+            <div>
+              <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px">Image URL</label>
+              <div style="display:flex;gap:8px">
+                <input id="ae-image" type="text" placeholder="https://… or upload below" style="flex:1;padding:9px 12px;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:6px;font-size:14px">
+                <label style="cursor:pointer;padding:9px 12px;background:var(--bg);border:1px solid var(--border);border-radius:6px;font-size:12px;color:var(--muted);white-space:nowrap">
+                  Upload
+                  <input type="file" id="ae-image-upload" accept="image/*" style="display:none" onchange="uploadArticleImage()">
+                </label>
+              </div>
+            </div>
+          </div>
+          <div style="margin-bottom:16px">
+            <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px">Excerpt <span style="color:var(--muted)">(shown on cards)</span></label>
+            <textarea id="ae-excerpt" rows="2" placeholder="Brief summary of the article…" style="width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:6px;font-size:14px;resize:vertical;box-sizing:border-box"></textarea>
+          </div>
+          <div style="margin-bottom:20px">
+            <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px">Body <span style="color:var(--muted)">(full article content)</span></label>
+            <textarea id="ae-body" rows="12" placeholder="Full article content…" style="width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:6px;font-size:14px;resize:vertical;font-family:monospace;box-sizing:border-box"></textarea>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer">
+              <input type="checkbox" id="ae-published" checked>
+              Publish immediately
+            </label>
+            <div style="display:flex;gap:10px">
+              <button class="btn btn-ghost" onclick="closeArticleEditor()">Cancel</button>
+              <button class="btn btn-primary" onclick="saveArticle()">Save Article</button>
+            </div>
+          </div>
+          <div id="ae-error" style="display:none;color:#fca5a5;font-size:13px;margin-top:12px"></div>
+        </div>
+      </div>
+
       <!-- FORUM PANEL -->
       <div class="panel" id="panel-forum">
         <div class="table-wrap">
@@ -979,8 +1063,8 @@ async function loadAdminArticles() {
 }
 
 async function openArticleEditor(id) {
-  document.getElementById('article-editor-overlay').style.display = 'block';
-  document.getElementById('ae-id').value = '';
+  document.getElementById('article-editor-overlay').style.display = 'flex';
+  document.getElementById('article-editor-id').value = '';
   document.getElementById('ae-title').value = '';
   document.getElementById('ae-category').value = 'General';
   document.getElementById('ae-author').value = 'Herd Hub Staff';
@@ -999,7 +1083,7 @@ async function openArticleEditor(id) {
       const r2 = await fetch(`${API}/api/articles/${id}`);
       const full = await r2.json();
       if (full) {
-        document.getElementById('ae-id').value = full.id;
+        document.getElementById('article-editor-id').value = full.id;
         document.getElementById('ae-title').value = full.title || '';
         document.getElementById('ae-category').value = full.category || 'General';
         document.getElementById('ae-author').value = full.author || 'Herd Hub Staff';
@@ -1013,12 +1097,31 @@ async function openArticleEditor(id) {
   }
 }
 
+async function uploadArticleImage() {
+  const file = document.getElementById('ae-image-upload').files[0];
+  if (!file) return;
+  const form = new FormData();
+  form.append('image', file);
+  try {
+    const r = await fetch(`${API}/api/admin/upload-image`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: form
+    });
+    const d = await r.json();
+    if (d.url) {
+      document.getElementById('ae-image').value = d.url;
+      showToast('Image uploaded');
+    }
+  } catch(e) { showToast('Upload failed'); }
+}
+
 function closeArticleEditor() {
   document.getElementById('article-editor-overlay').style.display = 'none';
 }
 
 async function saveArticle() {
-  const id = document.getElementById('ae-id').value;
+  const id = document.getElementById('article-editor-id').value;
   const payload = {
     title:     document.getElementById('ae-title').value.trim(),
     category:  document.getElementById('ae-category').value,
@@ -1030,8 +1133,8 @@ async function saveArticle() {
   };
   if (!payload.title) { alert('Title is required'); return; }
 
-  const btn = document.getElementById('ae-save-btn');
-  btn.textContent = 'Saving…'; btn.disabled = true;
+  const btn = document.querySelector('#article-editor-overlay .btn.btn-primary');
+  if (btn) { btn.textContent = 'Saving…'; btn.disabled = true; }
 
   try {
     const url    = id ? `${API}/api/admin/articles/${id}` : `${API}/api/admin/articles`;
@@ -1047,7 +1150,7 @@ async function saveArticle() {
   } catch(e) {
     alert('Save failed: ' + e.message);
   } finally {
-    btn.textContent = 'Save Article'; btn.disabled = false;
+    if (btn) { btn.textContent = 'Save Article'; btn.disabled = false; }
   }
 }
 
