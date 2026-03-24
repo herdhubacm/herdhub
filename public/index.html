@@ -185,8 +185,7 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
 .skip-nav:focus{top:0}
 .toast{position:fixed;bottom:24px;right:24px;background:var(--dark-brown);color:var(--cream);font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:.06em;padding:12px 20px;border-radius:4px;z-index:2000;transform:translateY(80px);transition:transform .3s;box-shadow:0 8px 24px rgba(0,0,0,.3)}
 .toast.show{transform:translateY(0)}
-@media(max-width:900px){.hero-content{grid-template-columns:1fr}.hero-search{display:none}.two-col{grid-template-columns:1fr}.footer-grid{grid-template-columns:1fr 1fr}}
-@media(max-width:600px){nav a:not(.nav-cta){display:none}#online-counter{display:none!important}.footer-grid{grid-template-columns:1fr}.categories-grid{grid-template-columns:repeat(3,1fr)}}
+/* mobile breakpoints consolidated below */
 /* Account Page */
 .account-page{max-width:1100px;margin:0 auto;padding:32px 24px}
 .account-header{display:flex;align-items:center;gap:20px;margin-bottom:32px;padding-bottom:24px;border-bottom:2px solid var(--light-tan)}
@@ -325,9 +324,7 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
 @keyframes ccFadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
 .cc-animate{animation:ccFadeIn .35s ease}
 @media(max-width:1100px){.home-3col{grid-template-columns:180px 1fr 180px}}
-@media(max-width:900px){.home-3col{grid-template-columns:1fr}.home-sidebar{display:none}.hero-content{grid-template-columns:1fr}.hero-search{display:none}.two-col{grid-template-columns:1fr}.footer-grid{grid-template-columns:1fr 1fr}.compact-grid{grid-template-columns:repeat(3,1fr)}.compact-cat-grid{grid-template-columns:repeat(4,1fr)}}
-@media(max-width:600px){nav a:not(.nav-cta){display:none}#online-counter{display:none!important}.footer-grid{grid-template-columns:1fr}.categories-grid{grid-template-columns:repeat(3,1fr)}}
-@media(max-width:480px){.compact-grid{grid-template-columns:repeat(2,1fr)!important}.compact-cat-grid{grid-template-columns:repeat(3,1fr)!important}.listing-grid{grid-template-columns:1fr!important}.modal{padding:20px 16px!important;width:calc(100% - 16px)!important;max-height:95vh!important}.form-row{flex-direction:column!important}.topbar{display:none}.stats-bar .stat-item .num{font-size:18px!important}.stats-bar .stat-item .label{font-size:9px!important}.hero{height:auto!important;min-height:380px}.hero-text h1{font-size:clamp(28px,8vw,42px)!important}.hero-btns{flex-wrap:wrap;gap:8px}.btn-primary,.btn-secondary{font-size:12px!important;padding:10px 16px!important}.section{padding:32px 16px!important}.plan-card-grid{grid-template-columns:1fr!important}.listing-type-tabs{flex-direction:row!important}.lt-tab{font-size:11px!important;padding:8px 10px!important}}@media(max-width:600px){.header-inner{padding:10px 12px}.logo-text .site-tagline{display:none}.logo-text .site-name{font-size:20px!important}.logo-wrap img{height:36px!important}.stats-bar{padding:12px 0}.footer-grid{grid-template-columns:1fr!important}.mobile-ad-strips{display:block}.section-header h2{font-size:20px!important}.listing-card .listing-body{padding:10px 12px!important}.listing-title{font-size:13px!important}header{position:sticky;top:0;z-index:200}}
+/* old breakpoints removed — see consolidated below */
 
 /* ── Mobile Ad Strips ───────────────────────────────── */
 .mobile-ad-strips{display:none}
@@ -353,6 +350,74 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
 }
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}.hero-bg{animation:none!important}.toast{transition:none!important}}
 @media(prefers-contrast:more){:focus-visible{outline:4px solid #000!important;outline-offset:3px!important}.btn-primary{border:2px solid #000!important}.btn-secondary{border:2px solid #000!important}}
+
+/* ── Newsletter + Beef Boxes Banner ─────────────────── */
+.nl-bb-banner{display:grid;grid-template-columns:1fr 1fr;background:var(--dark-brown);border-top:2px solid var(--mid-brown);border-bottom:2px solid var(--mid-brown)}
+.nl-bb-half{padding:40px 48px;position:relative;overflow:hidden}
+.nl-bb-newsletter{border-right:1px solid var(--mid-brown)}
+.nl-bb-beefbox{background:linear-gradient(135deg,#1a0f06 0%,#2c1a0e 100%)}
+.nl-bb-eyebrow{font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:var(--sage);margin-bottom:10px}
+.nl-bb-heading{font-family:'Playfair Display',serif;font-size:26px;font-weight:900;color:var(--cream);margin-bottom:8px;line-height:1.2}
+.nl-bb-body{font-size:14px;color:rgba(245,239,224,.6);line-height:1.7;margin-bottom:22px;max-width:380px}
+.nl-bb-form{display:flex;gap:10px;max-width:420px}
+.nl-bb-input{flex:1;padding:11px 14px;border:1px solid rgba(201,169,110,.3);border-radius:3px;font-size:14px;background:rgba(255,255,255,.06);color:var(--cream);outline:none;min-width:0}
+.nl-bb-btn{white-space:nowrap;padding:11px 20px;font-size:13px}
+
+/* ── Mobile responsive overhaul ─────────────────────── */
+@media(max-width:900px){
+  .home-3col{grid-template-columns:1fr!important}
+  .home-sidebar{display:none!important}
+  .hero-content{grid-template-columns:1fr!important}
+  .hero-search{display:none!important}
+  .two-col{grid-template-columns:1fr!important}
+  .footer-grid{grid-template-columns:1fr 1fr!important}
+  .compact-grid{grid-template-columns:repeat(3,1fr)!important}
+  .compact-cat-grid{grid-template-columns:repeat(4,1fr)!important}
+  .nl-bb-banner{grid-template-columns:1fr!important}
+  .nl-bb-newsletter{border-right:none!important;border-bottom:1px solid var(--mid-brown)!important}
+  .nl-bb-half{padding:28px 24px!important}
+}
+@media(max-width:600px){
+  nav a:not(.nav-cta){display:none!important}
+  #online-counter{display:none!important}
+  html,body{overflow-x:hidden!important;max-width:100vw!important}
+  .header-inner{padding:10px 12px!important}
+  .logo-text .site-tagline{display:none!important}
+  .logo-text .site-name{font-size:20px!important}
+  .logo-wrap img{height:36px!important}
+  .stats-bar{padding:12px 0!important}
+  .footer-grid{grid-template-columns:1fr!important}
+  .mobile-ad-strips{display:block!important}
+  .section-header h2{font-size:18px!important}
+  .listing-card .listing-body{padding:10px 12px!important}
+  header{position:sticky!important;top:0!important;z-index:200!important}
+  .topbar{display:none!important}
+  .nl-bb-banner{grid-template-columns:1fr!important}
+  .nl-bb-half{padding:24px 16px!important}
+  .nl-bb-heading{font-size:20px!important}
+  .nl-bb-form{flex-direction:column!important}
+  .nl-bb-btn{width:100%!important}
+  .hero{height:auto!important;min-height:320px!important}
+  .hero-text h1{font-size:clamp(26px,7vw,40px)!important}
+  .hero-btns{flex-wrap:wrap!important;gap:8px!important}
+  .btn-primary,.btn-secondary{font-size:12px!important;padding:10px 14px!important}
+  .section{padding:28px 16px!important}
+  .modal{padding:20px 14px!important;width:calc(100% - 12px)!important;max-height:95vh!important}
+  .plan-card-grid{grid-template-columns:1fr!important}
+  .compact-grid{grid-template-columns:repeat(2,1fr)!important}
+  .compact-cat-grid{grid-template-columns:repeat(3,1fr)!important}
+  .two-col{padding:16px!important;gap:16px!important}
+  #news{padding:16px!important}
+  .hcs-header{padding:12px 16px!important}
+  .ftf-scroll-track{gap:8px!important}
+  .ftf-mini-card{flex:0 0 120px!important}
+  .home-join-cta{padding:32px 20px!important}
+  .home-join-cta h2{font-size:20px!important}
+  .home-join-btns{flex-direction:column!important;align-items:stretch!important}
+  .stats-inner{gap:6px 10px!important;padding:6px 12px!important}
+  .stat-item .num{font-size:18px!important}
+  .stat-item .label{font-size:9px!important}
+}
 </style>
 </head>
 <body>
@@ -624,39 +689,9 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
               <button class="btn-primary" style="margin-top:12px;justify-content:center;padding:10px;font-size:12px;width:100%" data-action="page" data-page="forum">Join the Forum</button>
             </div>
           </div>
-
         </aside>
       </div>
     </div>
-
-      <!-- FULL-WIDTH NEWSLETTER + BEEF BOXES BANNER -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;background:var(--dark-brown);border-top:2px solid var(--mid-brown)">
-
-        <!-- Newsletter half -->
-        <div style="padding:36px 40px;border-right:1px solid var(--mid-brown)">
-          <div style="font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:var(--sage);margin-bottom:10px">Stay Connected</div>
-          <h3 style="font-family:'Playfair Display',serif;font-size:24px;font-weight:900;color:var(--cream);margin-bottom:6px">Herd <span style="color:var(--gold)">Hub</span> Monthly Newsletter</h3>
-          <p style="font-size:14px;color:rgba(245,239,224,.6);line-height:1.7;margin-bottom:20px;max-width:380px">Cattle prices, featured listings, ranch news, and exclusive deals — delivered to your inbox every month.</p>
-          <div style="display:flex;gap:10px;max-width:420px">
-            <label for="nl-email" class="sr-only">Email address for newsletter</label>
-            <input type="email" id="nl-email" placeholder="Your email address" aria-label="Email address for newsletter" style="flex:1;padding:11px 14px;border:1px solid rgba(201,169,110,.3);border-radius:3px;font-size:14px;background:rgba(255,255,255,.06);color:var(--cream);outline:none">
-            <button class="btn-primary" style="white-space:nowrap;padding:11px 20px;font-size:13px" data-action="subscribe">Join →</button>
-          </div>
-        </div>
-
-        <!-- Beef Boxes half -->
-        <div style="padding:36px 40px;background:linear-gradient(135deg,#1a0f06 0%,#2c1a0e 100%);position:relative;overflow:hidden">
-          <div style="position:absolute;top:-30px;right:-30px;width:160px;height:160px;background:var(--gold);opacity:.04;border-radius:50%"></div>
-          <div style="position:absolute;bottom:-40px;left:-20px;width:180px;height:180px;background:var(--rust);opacity:.05;border-radius:50%"></div>
-          <div style="position:relative">
-            <div style="font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:var(--gold);margin-bottom:10px;opacity:.8">Launching Soon</div>
-            <h3 style="font-family:'Playfair Display',serif;font-size:24px;font-weight:900;color:var(--cream);margin-bottom:6px">📦 Beef <span style="color:var(--gold)">Boxes</span></h3>
-            <p style="font-size:14px;color:rgba(245,239,224,.6);line-height:1.7;margin-bottom:20px;max-width:380px">A monthly box built for the American BEEF LOVER. Ranch gear, premium beef products, and partner exclusives — delivered to your door.</p>
-            <button class="btn-primary" style="background:var(--gold);color:var(--dark-brown);border-color:var(--gold);font-weight:700;padding:11px 24px;font-size:13px" data-action="page" data-page="beef-boxes">Get on the List →</button>
-          </div>
-        </div>
-
-      </div>
 
     <!-- ══ RIGHT SIDEBAR — FEATURED ADS (Filet/Choice) ══ -->
     <div class="home-sidebar home-sidebar-right" aria-label="Featured advertisements">
@@ -669,6 +704,35 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
     </div>
 
   </div><!-- end home-3col -->
+
+  <!-- ══ NEWSLETTER + BEEF BOXES — Full width, centered, above articles ══ -->
+  <div class="nl-bb-banner">
+
+    <!-- Newsletter half -->
+    <div class="nl-bb-half nl-bb-newsletter">
+      <div class="nl-bb-eyebrow">Stay Connected</div>
+      <h3 class="nl-bb-heading">Herd <span style="color:var(--gold)">Hub</span> Monthly Newsletter</h3>
+      <p class="nl-bb-body">Cattle prices, featured listings, ranch news, and exclusive deals — delivered to your inbox every month.</p>
+      <div class="nl-bb-form">
+        <label for="nl-email" class="sr-only">Email address for newsletter</label>
+        <input type="email" id="nl-email" placeholder="Your email address" aria-label="Email address for newsletter" class="nl-bb-input">
+        <button class="btn-primary nl-bb-btn" data-action="subscribe">Join →</button>
+      </div>
+    </div>
+
+    <!-- Beef Boxes half -->
+    <div class="nl-bb-half nl-bb-beefbox">
+      <div style="position:absolute;top:-30px;right:-30px;width:160px;height:160px;background:var(--gold);opacity:.04;border-radius:50%"></div>
+      <div style="position:absolute;bottom:-40px;left:-20px;width:180px;height:180px;background:var(--rust);opacity:.05;border-radius:50%"></div>
+      <div style="position:relative">
+        <div class="nl-bb-eyebrow" style="color:var(--gold)">Launching Soon</div>
+        <h3 class="nl-bb-heading">📦 Beef <span style="color:var(--gold)">Boxes</span></h3>
+        <p class="nl-bb-body">A monthly box built for the American BEEF LOVER. Ranch gear, premium beef products, and partner exclusives — delivered to your door.</p>
+        <button class="btn-primary nl-bb-btn" style="background:var(--gold);color:var(--dark-brown);border-color:var(--gold);font-weight:700" data-action="page" data-page="beef-boxes">Get on the List →</button>
+      </div>
+    </div>
+
+  </div><!-- end nl-bb-banner -->
 
   <!-- ══ MOBILE AD STRIPS (visible below 900px only) ══ -->
   <div class="mobile-ad-strips">
