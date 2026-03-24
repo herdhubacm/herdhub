@@ -80,13 +80,20 @@ app.use(helmet({
 
 // ── CORS — locked to your domain in production ───────
 const allowedOrigins = process.env.NODE_ENV === 'production'
-  ? [process.env.CORS_ORIGIN || 'https://theherdhub.com', 'https://www.theherdhub.com']
+  ? [
+      process.env.CORS_ORIGIN || 'https://theherdhub.com',
+      'https://www.theherdhub.com',
+      'https://theherdhub.com',
+    ]
   : ['http://localhost:3000', 'http://localhost:5173', 'http://127.0.0.1:3000'];
+
 app.use(cors({
   origin: (origin, cb) => {
-    // Allow requests with no origin (mobile apps, curl, same-origin)
-    if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
-    cb(new Error('Not allowed by CORS'));
+    // Allow requests with no origin (mobile apps, same-origin, health checks)
+    if (!origin) return cb(null, true);
+    if (allowedOrigins.includes(origin)) return cb(null, true);
+    // Return null (blocked) instead of throwing — prevents unhandled error crash
+    cb(null, false);
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -290,6 +297,9 @@ async function start() {
 
       // Ensure updated_at column exists on listings
       await query(`ALTER TABLE listings ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW()`);
+
+      // Ensure website_url column exists on listings
+      await query(`ALTER TABLE listings ADD COLUMN IF NOT EXISTS website_url TEXT`);
 
     } catch (migErr) {
       console.warn('⚠️  Migration warning:', migErr.message);

@@ -21,6 +21,10 @@ const router   = express.Router();
 const BASE_URL = process.env.USDA_AMS_BASE_URL || 'https://marsapi.ams.usda.gov/services/v1.2';
 const CACHE_TTL = parseInt(process.env.MARKET_CACHE_TTL) || 900; // seconds
 
+// ── USDA 403 backoff — stop hammering when blocked ────
+let usdaBackoffUntil = 0;
+const USDA_BACKOFF_MS = 30 * 60 * 1000; // 30 min backoff after a 403
+
 const REPORTS = {
   fed_cattle:     { id: 'LM_CT155', name: '5-Area Weekly Fed Cattle (Negotiated)' },
   feeder_stocker: { id: 'LM_CT150', name: 'National Weekly Feeder & Stocker Cattle' },
@@ -66,6 +70,10 @@ async function setCache(reportId, data) {
 
 // ── USDA fetch + parse ─────────────────────────────────
 async function fetchUSDA(reportId) {
+  // If USDA blocked us recently, don't retry until backoff expires
+  if (Date.now() < usdaBackoffUntil) {
+    throw new Error('USDA temporarily unavailable (rate limited)');
+  }
   const url = `${BASE_URL}/reports/${reportId}?allSections=true&_limit=50`;
   const resp = await fetch(url, {
     headers: {
@@ -76,6 +84,11 @@ async function fetchUSDA(reportId) {
     },
     timeout: 15000
   });
+  if (resp.status === 403 || resp.status === 429) {
+    usdaBackoffUntil = Date.now() + USDA_BACKOFF_MS;
+    console.warn(`USDA blocked (${resp.status}) — backing off for 30 minutes`);
+    throw new Error(`USDA ${resp.status}: ${resp.statusText}`);
+  }
   if (!resp.ok) throw new Error(`USDA ${resp.status}: ${resp.statusText}`);
   return resp.json();
 }
