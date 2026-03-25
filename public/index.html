@@ -6,28 +6,20 @@
 <title>Herd Hub | American Cattle Marketplace</title>
 <meta name="description" content="Herd Hub is America's cattle marketplace — buy, sell and trade cattle, livestock, ranch equipment, and farm-fresh beef products. Trusted by ranchers and farmers coast to coast.">
 <meta name="theme-color" content="#2C1A0E">
-<!-- Google Analytics — replace G-CK8GY5VK44 with your Measurement ID -->
+<!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-CK8GY5VK44"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
-  gtag('config', 'G-CK8GY5VK44', {
-    page_path: window.location.pathname,
-    anonymize_ip: true,
-    cookie_flags: 'SameSite=None;Secure'
-  });
-  // Track page views on SPA navigation
+  gtag('config', 'G-CK8GY5VK44');
+  // SPA page view tracking
   window._trackPage = function(page) {
-    if (typeof gtag !== 'undefined') {
-      gtag('event', 'page_view', { page_title: page, page_path: '/' + page });
-    }
+    gtag('event', 'page_view', { page_title: page, page_path: '/' + page });
   };
-  // Track events
+  // Event tracking
   window._trackEvent = function(category, action, label) {
-    if (typeof gtag !== 'undefined') {
-      gtag('event', action, { event_category: category, event_label: label });
-    }
+    gtag('event', action, { event_category: category, event_label: label });
   };
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
