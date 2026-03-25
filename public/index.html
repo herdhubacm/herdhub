@@ -6,6 +6,30 @@
 <title>Herd Hub | American Cattle Marketplace</title>
 <meta name="description" content="Herd Hub is America's cattle marketplace — buy, sell and trade cattle, livestock, ranch equipment, and farm-fresh beef products. Trusted by ranchers and farmers coast to coast.">
 <meta name="theme-color" content="#2C1A0E">
+<!-- Google Analytics — replace G-CK8GY5VK44 with your Measurement ID -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-CK8GY5VK44"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-CK8GY5VK44', {
+    page_path: window.location.pathname,
+    anonymize_ip: true,
+    cookie_flags: 'SameSite=None;Secure'
+  });
+  // Track page views on SPA navigation
+  window._trackPage = function(page) {
+    if (typeof gtag !== 'undefined') {
+      gtag('event', 'page_view', { page_title: page, page_path: '/' + page });
+    }
+  };
+  // Track events
+  window._trackEvent = function(category, action, label) {
+    if (typeof gtag !== 'undefined') {
+      gtag('event', action, { event_category: category, event_label: label });
+    }
+  };
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="icon" type="image/png" href="/logo.png">
 <link rel="apple-touch-icon" href="/logo.png">
@@ -1332,7 +1356,16 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
         </label>
       </div>
 
-      <button class="btn-primary" style="width:100%;justify-content:center;margin-top:4px" data-action="register">Create Free Account</button>
+      <!-- Cloudflare Turnstile — invisible bot protection -->
+      <div class="cf-turnstile" id="reg-turnstile"
+           data-sitekey="0x4AAAAAACvlxvfNDqtmZWE-"
+           data-theme="light"
+           data-size="flexible"
+           data-callback="onTurnstileSuccess"
+           data-error-callback="onTurnstileError"
+           style="margin:10px 0"></div>
+
+      <button class="btn-primary" id="reg-submit-btn" style="width:100%;justify-content:center;margin-top:4px" data-action="register">Create Free Account</button>
       <p style="font-size:11px;color:#aaa;text-align:center;margin-top:10px;line-height:1.6">By creating an account you agree to the terms above. Your information is never sold to third parties.</p>
     </div>
   </div>
@@ -2346,7 +2379,10 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
 
 <script>
 // ── State ──────────────────────────────────────────────
-const API = '';  // same-origin — change to 'http://localhost:3000' if running frontend separately
+const API = '';  // same-origin
+let csrfToken = null;
+// Fetch CSRF token on load
+fetch('/api/csrf-token').then(r=>r.json()).then(d=>{ csrfToken=d.token; }).catch(()=>{});
 let authToken = localStorage.getItem('hh_token');
 let currentUser = null;
 let currentPage = 'home';
@@ -2874,6 +2910,19 @@ async function doLogin() {
   } catch(e) { errEl.textContent = 'Connection error'; errEl.style.display='block'; }
 }
 
+// ── Turnstile callbacks ────────────────────────────────
+let turnstileToken = null;
+function onTurnstileSuccess(token) {
+  turnstileToken = token;
+  const btn = document.getElementById('reg-submit-btn');
+  if (btn) btn.disabled = false;
+}
+function onTurnstileError() {
+  turnstileToken = null;
+  const err = document.getElementById('register-error');
+  if (err) { err.textContent = 'Security check failed. Please refresh and try again.'; err.style.display = 'block'; }
+}
+
 async function doRegister() {
   const errEl = document.getElementById('register-error');
   errEl.style.display = 'none';
@@ -2882,6 +2931,14 @@ async function doRegister() {
   const termsCheck = document.getElementById('reg-terms-check');
   if (!termsCheck || !termsCheck.checked) {
     errEl.textContent = 'You must agree to the Terms of Service, Privacy Policy, and User Agreement to create an account.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  // Turnstile check — skip if widget not loaded (dev/localhost)
+  const tsWidget = document.getElementById('reg-turnstile');
+  if (tsWidget && !turnstileToken) {
+    errEl.textContent = 'Please complete the security check.';
     errEl.style.display = 'block';
     return;
   }
@@ -2897,9 +2954,10 @@ async function doRegister() {
     newsletter_opt_in: newsletterOptIn ? newsletterOptIn.checked : false,
     terms_accepted: true,
     terms_accepted_at: new Date().toISOString(),
+    cf_turnstile_token: turnstileToken || null,
   };
   try {
-    const r = await fetch(`${API}/api/auth/register`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+    const r = await fetch(`${API}/api/auth/register`, { method:'POST', headers:{'Content-Type':'application/json','X-CSRF-Token': csrfToken||''}, body: JSON.stringify(body) });
     const d = await r.json();
     if (!r.ok) { errEl.textContent = d.error; errEl.style.display='block'; return; }
     authToken = d.token; currentUser = d.user;
@@ -2907,7 +2965,7 @@ async function doRegister() {
     document.getElementById('auth-btn').style.display = 'none';
     document.getElementById('account-btn').style.display = 'inline-block';
     document.getElementById('account-name').textContent = d.user.name.split(' ')[0];
-    closeModal('auth'); updateAuthUI(); showToast('Welcome to Herd Hub, ' + d.user.name.split(' ')[0] + '!');
+    turnstileToken = null; if(window.turnstile){try{window.turnstile.reset('#reg-turnstile');}catch(e){}} if(window._trackEvent) window._trackEvent('auth','register','new_user'); closeModal('auth'); updateAuthUI(); showToast('Welcome to Herd Hub, ' + d.user.name.split(' ')[0] + '!');
   } catch(e) { errEl.textContent = 'Connection error'; errEl.style.display='block'; }
 }
 
@@ -3653,7 +3711,7 @@ async function doPostListing() {
     if (!r.ok) { errEl.textContent = d.error || 'Failed to post listing'; errEl.style.display='block'; return; }
     sucEl.textContent = '✅ Listing posted! Redirecting to your account…'; sucEl.style.display='block';
     // Reload homepage sections so new listing appears
-    setTimeout(() => { closeModal('post-listing'); showPage('account'); loadHomepageSections(); loadRecentListings(); }, 1500);
+    setTimeout(() => { if(window._trackEvent) window._trackEvent('listings','post_listing','success'); closeModal('post-listing'); showPage('account'); loadHomepageSections(); loadRecentListings(); }, 1500);
   } catch(e) { errEl.textContent = 'Connection error'; errEl.style.display='block'; }
 }
 
@@ -3779,6 +3837,7 @@ function showPage(page) {
   if (page === 'articles') loadArticlesPage();
   if (page === 'beef-boxes') loadBeefBoxCount();
   if (page === 'merch' && window._initShopifyMerch) window._initShopifyMerch();
+  if (window._trackPage) window._trackPage(page);
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -4111,5 +4170,7 @@ function showToast(msg, duration=3000) {
   setTimeout(() => t.classList.remove('show'), duration);
 }
 </script>
+<!-- Cloudflare Turnstile SDK -->
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </body>
 </html>

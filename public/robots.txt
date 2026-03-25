@@ -2,9 +2,7 @@ User-agent: *
 Allow: /
 Disallow: /api/
 Disallow: /admin
-Disallow: /account
 
-# Block known scraper bots
 User-agent: AhrefsBot
 Disallow: /
 
@@ -15,9 +13,6 @@ User-agent: DotBot
 Disallow: /
 
 User-agent: MJ12bot
-Disallow: /
-
-User-agent: BLEXBot
 Disallow: /
 
 Sitemap: https://theherdhub.com/sitemap.xml

@@ -16,13 +16,19 @@ function signToken(payload) {
 router.post('/register', async (req, res) => {
   try {
     const { email, password, name, phone, state, city,
-            terms_accepted, terms_accepted_at, newsletter_opt_in } = req.body;
+            terms_accepted, terms_accepted_at, newsletter_opt_in,
+            cf_turnstile_token } = req.body;
     if (!email || !password || !name)
       return res.status(400).json({ error: 'email, password and name are required' });
     if (password.length < 8)
       return res.status(400).json({ error: 'Password must be at least 8 characters' });
     if (!terms_accepted)
       return res.status(400).json({ error: 'You must agree to the Terms of Service to create an account.' });
+
+    // Verify Turnstile token
+    const turnstileOk = await req.app.locals.verifyTurnstile(cf_turnstile_token);
+    if (!turnstileOk)
+      return res.status(400).json({ error: 'Security check failed. Please try again.' });
 
     const { rows: exists } = await query(
       'SELECT id FROM users WHERE email = $1', [email.toLowerCase()]

@@ -10,8 +10,43 @@ const express   = require('express');
 const cors      = require('cors');
 const helmet    = require('helmet');
 const path      = require('path');
+const crypto    = require('crypto');
 const rateLimit = require('express-rate-limit');
 const compression = require('compression');
+
+// ── CSRF token store (in-memory, 1hr TTL) ─────────────
+const csrfTokens = new Map();
+function generateCsrfToken() {
+  const token = crypto.randomBytes(32).toString('hex');
+  csrfTokens.set(token, Date.now());
+  const cutoff = Date.now() - 3600000;
+  for (const [t, ts] of csrfTokens) { if (ts < cutoff) csrfTokens.delete(t); }
+  return token;
+}
+function validateCsrfToken(token) {
+  if (!token || !csrfTokens.has(token)) return false;
+  const age = Date.now() - csrfTokens.get(token);
+  if (age > 3600000) { csrfTokens.delete(token); return false; }
+  return true;
+}
+
+// ── Cloudflare Turnstile verification ─────────────────
+async function verifyTurnstile(token) {
+  if (!process.env.TURNSTILE_SECRET_KEY) return true; // skip if not configured
+  if (!token) return false;
+  try {
+    const resp = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ secret: process.env.TURNSTILE_SECRET_KEY, response: token })
+    });
+    const data = await resp.json();
+    return data.success === true;
+  } catch(e) {
+    console.warn('Turnstile verify error:', e.message);
+    return true; // fail open — don't block legit users if Cloudflare is down
+  }
+}
 
 const { testConnection: testDb } = require('./db/database');
 const { testConnection: testStorage } = require('./services/storage');
@@ -46,7 +81,9 @@ app.use(helmet({
                        "https://*.shopifycdn.com",
                        "https://*.myshopify.com",
                        "https://*.shopify.com",
-                       "https://static.cloudflareinsights.com"],
+                       "https://static.cloudflareinsights.com",
+                       "https://www.googletagmanager.com",
+                       "https://www.google-analytics.com"],
       scriptSrcAttr:  ["'unsafe-inline'"],
       styleSrc:       ["'self'", "'unsafe-inline'",
                        "https://fonts.googleapis.com",
@@ -176,6 +213,27 @@ app.use('/api/market',   limiter(60),  require('./routes/market'));
 app.use('/api/forum',    limiter(100), require('./routes/forum'));
 app.use('/api/payments', limiter(50),  require('./routes/payments'));
 app.use('/api/beefbox',  limiter(30),  require('./routes/beefbox'));
+
+// ── GET /api/csrf-token ───────────────────────────────
+// Frontend fetches this on page load — attached to state-changing requests
+app.get('/api/csrf-token', (req, res) => {
+  const token = generateCsrfToken();
+  res.json({ token });
+});
+
+// ── CSRF middleware for state-changing API routes ─────
+app.use('/api/auth/register', (req, res, next) => {
+  if (req.method === 'POST') {
+    const token = req.headers['x-csrf-token'] || req.body?.csrf_token;
+    if (process.env.NODE_ENV === 'production' && !validateCsrfToken(token)) {
+      return res.status(403).json({ error: 'Invalid or missing CSRF token. Please refresh and try again.' });
+    }
+  }
+  next();
+});
+
+// Export verifyTurnstile for use in auth route
+app.locals.verifyTurnstile = verifyTurnstile;
 
 // ── Online counter ────────────────────────────────────
 let activeVisitors = 0;
