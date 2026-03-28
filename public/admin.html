@@ -970,6 +970,11 @@ document.addEventListener('click', e => {
   if (e.target.classList.contains('modal-bg')) e.target.classList.remove('open');
 });
 
+function fmtDate(iso) {
+  if (!iso) return '—';
+  return new Date(iso).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+}
+
 function tierBadge(tier) {
   const map = { basic:'badge-gray', ribeye:'badge-rust', filet:'badge-gold', t_bone:'badge-purple' };
   return `<span class="badge ${map[tier]||'badge-gray'}">${tier||'basic'}</span>`;
@@ -1263,7 +1268,7 @@ async function loadAdminForum() {
       <tr>
         <td><input type="checkbox" class="forum-check" value="${t.id}"></td>
         <td><strong>${escHtml(t.title)}</strong></td>
-        <td>${escHtml(t.author_name || '—')}</td>
+        <td>${escHtml(t.author || t.author_name || '—')}</td>
         <td>${escHtml(t.category || '—')}</td>
         <td>${t.reply_count || 0}</td>
         <td>${fmtDate(t.created_at)}</td>
