@@ -333,3 +333,24 @@ CREATE TABLE IF NOT EXISTS listing_reports (
 );
 CREATE INDEX IF NOT EXISTS idx_reports_listing ON listing_reports(listing_id);
 CREATE INDEX IF NOT EXISTS idx_reports_status  ON listing_reports(status);
+
+-- ── GEO + SOLD TIMESTAMP (migrate safely) ──────────────
+-- lat/lng added via startup migration
+-- sold_at added via startup migration
+
+-- ── SAVED SEARCHES ─────────────────────────────────────
+CREATE TABLE IF NOT EXISTS saved_searches (
+  id          BIGSERIAL    PRIMARY KEY,
+  user_id     BIGINT       NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  name        TEXT         NOT NULL,
+  category    TEXT,
+  state       TEXT,
+  min_price   NUMERIC,
+  max_price   NUMERIC,
+  min_weight  NUMERIC,
+  max_weight  NUMERIC,
+  keywords    TEXT,
+  last_alerted_at TIMESTAMPTZ,
+  created_at  TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_saved_searches_user ON saved_searches(user_id);

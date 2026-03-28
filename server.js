@@ -84,7 +84,8 @@ app.use(helmet({
                        "https://static.cloudflareinsights.com",
                        "https://www.googletagmanager.com",
                        "https://www.google-analytics.com",
-                       "https://challenges.cloudflare.com"],
+                       "https://challenges.cloudflare.com",
+                       "https://unpkg.com"],
       scriptSrcAttr:  ["'unsafe-inline'"],
       styleSrc:       ["'self'", "'unsafe-inline'",
                        "https://fonts.googleapis.com",
@@ -95,7 +96,7 @@ app.use(helmet({
                        "https://sdks.shopifycdn.com",
                        "https://cdn.shopify.com",
                        "https://*.shopify.com"],
-      imgSrc:         ["'self'", "data:", "https:", "blob:"],
+      imgSrc:         ["'self'", "data:", "https:", "blob:", "https://*.tile.openstreetmap.org"],
       connectSrc:     ["'self'",
                        "https://api.stripe.com",
                        "https://*.amazonaws.com",
@@ -105,7 +106,8 @@ app.use(helmet({
                        "https://sdks.shopifycdn.com",
                        "https://cdn.shopify.com",
                        "https://monorail-edge.shopifysvc.com",
-                       "https://stats.g.doubleclick.net"],
+                       "https://stats.g.doubleclick.net",
+                       "https://nominatim.openstreetmap.org"],
       frameSrc:       ["https://js.stripe.com",
                        "https://*.myshopify.com",
                        "https://*.shopify.com",
@@ -217,6 +219,7 @@ app.use('/api/payments', limiter(50),  require('./routes/payments'));
 app.use('/api/beefbox',  limiter(30),  require('./routes/beefbox'));
 app.use('/api/reviews',  limiter(60),  require('./routes/reviews'));
 app.use('/api/reports',  limiter(30),  require('./routes/reports'));
+app.use('/api/searches', limiter(60),  require('./routes/searches'));
 
 // ── GET /api/csrf-token ───────────────────────────────
 // Frontend fetches this on page load — attached to state-changing requests
@@ -399,6 +402,28 @@ async function start() {
       )`);
       console.log('✅  Reviews, reset tokens, reports tables ready');
 
+      // Geo columns for map view
+      await query(`ALTER TABLE listings ADD COLUMN IF NOT EXISTS lat NUMERIC(9,6)`);
+      await query(`ALTER TABLE listings ADD COLUMN IF NOT EXISTS lng NUMERIC(9,6)`);
+      await query(`ALTER TABLE listings ADD COLUMN IF NOT EXISTS sold_at TIMESTAMPTZ`);
+
+      // Saved searches table
+      await query(`CREATE TABLE IF NOT EXISTS saved_searches (
+        id          BIGSERIAL    PRIMARY KEY,
+        user_id     BIGINT       NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        name        TEXT         NOT NULL,
+        category    TEXT,
+        state       TEXT,
+        min_price   NUMERIC,
+        max_price   NUMERIC,
+        min_weight  NUMERIC,
+        max_weight  NUMERIC,
+        keywords    TEXT,
+        last_alerted_at TIMESTAMPTZ,
+        created_at  TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+      )`);
+      console.log('✅  Geo columns, sold_at, saved_searches ready');
+
     } catch (migErr) {
       console.warn('⚠️  Migration warning:', migErr.message);
     }
@@ -465,6 +490,94 @@ async function start() {
     // Run immediately then every 6 hours
     runExpiryCron();
     setInterval(runExpiryCron, 6 * 60 * 60 * 1000);
+
+    // ── Saved search alert cron — runs every 6 hours ──
+    async function runSearchAlertCron() {
+      try {
+        const { rows: searches } = await query(
+          `SELECT s.*, u.email, u.name AS user_name
+           FROM saved_searches s
+           JOIN users u ON u.id = s.user_id
+           WHERE u.email IS NOT NULL`
+        );
+
+        for (const s of searches) {
+          // Find listings posted since last alert (or last 24h if never alerted)
+          const since = s.last_alerted_at || new Date(Date.now() - 86400000);
+          const conditions = [`l.status='active'`, `l.created_at > $1`];
+          const params = [since];
+          let p = 2;
+          if (s.category)   { conditions.push(`l.category=$${p}`);        params.push(s.category);  p++; }
+          if (s.state)      { conditions.push(`l.state=$${p}`);           params.push(s.state);     p++; }
+          if (s.min_price)  { conditions.push(`l.price>=$${p}`);          params.push(+s.min_price);p++; }
+          if (s.max_price)  { conditions.push(`l.price<=$${p}`);          params.push(+s.max_price);p++; }
+          if (s.min_weight) { conditions.push(`l.weight_lbs>=$${p}`);     params.push(+s.min_weight);p++; }
+          if (s.max_weight) { conditions.push(`l.weight_lbs<=$${p}`);     params.push(+s.max_weight);p++; }
+          if (s.keywords)   {
+            conditions.push(`l.search_vector @@ plainto_tsquery('english',$${p})`);
+            params.push(s.keywords); p++;
+          }
+
+          const { rows: matches } = await query(
+            `SELECT l.id, l.title, l.category, l.city, l.state, l.price, l.price_type
+             FROM listings l WHERE ${conditions.join(' AND ')}
+             ORDER BY l.created_at DESC LIMIT 5`,
+            params
+          );
+
+          if (!matches.length) continue;
+
+          // Send email
+          const listingRows = matches.map(l => {
+            const price = l.price ? `$${Number(l.price).toLocaleString()}` : 'Call';
+            return `<tr><td style="padding:10px 0;border-bottom:1px solid #e8dcc8">
+              <a href="https://theherdhub.com" style="color:#8b3214;font-weight:600;text-decoration:none">${l.title}</a>
+              <div style="font-size:12px;color:#888;margin-top:2px">${l.city||''}, ${l.state} · ${price}</div>
+            </td></tr>`;
+          }).join('');
+
+          const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body style="font-family:Georgia,serif;background:#f5efe0;margin:0;padding:20px">
+            <div style="max-width:560px;margin:0 auto;background:#fff;border-radius:6px;overflow:hidden">
+              <div style="background:#2c1a0e;padding:24px 32px;text-align:center">
+                <h1 style="font-family:Georgia,serif;color:#f5efe0;font-size:24px;margin:0">Herd <span style="color:#c9a96e">Hub</span></h1>
+              </div>
+              <div style="padding:32px">
+                <p style="color:#333;line-height:1.7">Hey ${s.user_name},</p>
+                <p style="color:#333;line-height:1.7">${matches.length} new listing${matches.length>1?'s':''} match your saved search <strong>"${s.name}"</strong>:</p>
+                <table style="width:100%;border-collapse:collapse">${listingRows}</table>
+                <div style="margin-top:20px;text-align:center">
+                  <a href="https://theherdhub.com" style="display:inline-block;background:#8b3214;color:#fff;padding:12px 28px;border-radius:4px;text-decoration:none;font-family:Arial,sans-serif;font-size:14px;font-weight:700">View All Listings →</a>
+                </div>
+              </div>
+              <div style="background:#f9f4ec;padding:16px 32px;text-align:center;font-size:12px;color:#888">
+                <a href="https://theherdhub.com" style="color:#8b3214">Manage saved searches</a> · Herd Hub American Cattle Marketplace
+              </div>
+            </div>
+          </body></html>`;
+
+          await sendEmail({
+            to: s.email,
+            subject: `${matches.length} new listing${matches.length>1?'s':''} match "${s.name}"`,
+            html,
+            text: `${matches.length} new listings match your saved search "${s.name}". View at https://theherdhub.com`
+          }).catch(() => {});
+
+          // Update last_alerted_at
+          await query(
+            'UPDATE saved_searches SET last_alerted_at=NOW() WHERE id=$1',
+            [s.id]
+          );
+        }
+        if (searches.length) console.log(`🔔  Saved search alerts checked (${searches.length} searches)`);
+      } catch(e) {
+        console.warn('Search alert cron error:', e.message);
+      }
+    }
+    // Run every 6 hours (offset by 1 hour from expiry cron)
+    setTimeout(() => {
+      runSearchAlertCron();
+      setInterval(runSearchAlertCron, 6 * 60 * 60 * 1000);
+    }, 3600000);
   } catch (err) {
     console.error('❌  Startup failed:', err.message);
     process.exit(1);

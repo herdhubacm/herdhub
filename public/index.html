@@ -563,9 +563,9 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
 <div class="stats-bar" aria-label="Herd Hub statistics">
   <div class="stats-inner">
     <div class="stat-item"><span class="num" id="stat-total">—</span><span class="label">Active Listings</span></div>
-    <div class="stat-item"><span class="num">1,200+</span><span class="label">Registered Members</span></div>
+    <div class="stat-item"><span class="num">350</span><span class="label">Registered Members</span></div>
     <div class="stat-item"><span class="num">50</span><span class="label">States Covered</span></div>
-    <div class="stat-item"><span class="num">$500K+</span><span class="label">In Sales</span></div>
+    <div class="stat-item"><span class="num">$25K+</span><span class="label">In Sales</span></div>
     <div class="stat-item"><span class="num">Since 2018</span><span class="label">Trusted Platform</span></div>
   </div>
 </div>
@@ -1056,9 +1056,41 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
   <div class="section">
     <div class="section-header">
       <h2 id="listings-title">All <span>Listings</span></h2>
-      <a class="see-all" data-action="page" data-page="home">← Back to Home</a>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button id="view-toggle-map" class="btn-secondary" style="padding:7px 14px;font-size:12px;display:flex;align-items:center;gap:6px" onclick="toggleMapView()">🗺️ Map View</button>
+        <a class="see-all" data-action="page" data-page="home">← Back to Home</a>
+      </div>
     </div>
-    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:24px;align-items:center">
+    <!-- Map view container (hidden by default) -->
+    <div id="map-view-container" style="display:none;margin-bottom:24px">
+      <div style="background:var(--dark-brown);border-radius:8px;padding:16px;margin-bottom:12px;display:flex;flex-wrap:wrap;gap:12px;align-items:center">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold)">Radius</span>
+          <select id="map-radius" onchange="updateMapListings()" style="padding:6px 10px;background:rgba(255,255,255,.1);border:1px solid rgba(201,169,110,.3);color:var(--cream);border-radius:4px;font-size:13px">
+            <option value="50">50 miles</option>
+            <option value="100" selected>100 miles</option>
+            <option value="200">200 miles</option>
+            <option value="500">500 miles</option>
+            <option value="">Nationwide</option>
+          </select>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold)">Center on</span>
+          <input type="text" id="map-center-input" placeholder="Enter city, state or zip…" style="padding:6px 12px;background:rgba(255,255,255,.1);border:1px solid rgba(201,169,110,.3);color:var(--cream);border-radius:4px;font-size:13px;width:200px" placeholder="Enter city, state or ZIP…">
+          <button onclick="geocodeAndCenter()" style="padding:6px 14px;background:var(--gold);color:var(--dark-brown);border:none;border-radius:4px;font-family:'Oswald',sans-serif;font-size:12px;font-weight:700;cursor:pointer">Go</button>
+        </div>
+        <button onclick="useMyLocation()" style="padding:6px 14px;background:rgba(255,255,255,.08);border:1px solid rgba(201,169,110,.2);color:var(--cream);border-radius:4px;font-family:'Oswald',sans-serif;font-size:12px;cursor:pointer">📍 Use My Location</button>
+        <span id="map-count" style="font-size:12px;color:rgba(245,239,224,.5);margin-left:auto"></span>
+      </div>
+      <div id="map-container" style="height:480px;border-radius:8px;overflow:hidden;background:#e8dcc8;position:relative">
+        <div id="map-placeholder" style="height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;color:#888">
+          <div style="font-size:40px">🗺️</div>
+          <div style="font-family:'Oswald',sans-serif;font-size:14px">Loading map…</div>
+        </div>
+      </div>
+      <div id="map-results" style="margin-top:16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px"></div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px;align-items:center;width:100%">
       <select id="f-category" onchange="loadListings()" aria-label="Filter by category" style="padding:8px 12px;border:1.5px solid var(--light-tan);border-radius:4px;font-family:'Source Serif 4',serif;font-size:14px;outline:none">
         <option value="">All Categories</option>
         <option value="beef_cattle">Beef Cattle</option>
@@ -1075,17 +1107,80 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
       </select>
       <select id="f-state" onchange="loadListings()" aria-label="Filter by state" style="padding:8px 12px;border:1.5px solid var(--light-tan);border-radius:4px;font-family:'Source Serif 4',serif;font-size:14px;outline:none">
         <option value="">All States</option>
-        <option>TX</option><option>KS</option><option>NE</option><option>OK</option>
-        <option>MT</option><option>WY</option><option>CO</option><option>IA</option>
+        <option value="AL">AL</option>
+        <option value="AK">AK</option>
+        <option value="AZ">AZ</option>
+        <option value="AR">AR</option>
+        <option value="CA">CA</option>
+        <option value="CO">CO</option>
+        <option value="CT">CT</option>
+        <option value="DE">DE</option>
+        <option value="FL">FL</option>
+        <option value="GA">GA</option>
+        <option value="HI">HI</option>
+        <option value="ID">ID</option>
+        <option value="IL">IL</option>
+        <option value="IN">IN</option>
+        <option value="IA">IA</option>
+        <option value="KS">KS</option>
+        <option value="KY">KY</option>
+        <option value="LA">LA</option>
+        <option value="ME">ME</option>
+        <option value="MD">MD</option>
+        <option value="MA">MA</option>
+        <option value="MI">MI</option>
+        <option value="MN">MN</option>
+        <option value="MS">MS</option>
+        <option value="MO">MO</option>
+        <option value="MT">MT</option>
+        <option value="NE">NE</option>
+        <option value="NV">NV</option>
+        <option value="NH">NH</option>
+        <option value="NJ">NJ</option>
+        <option value="NM">NM</option>
+        <option value="NY">NY</option>
+        <option value="NC">NC</option>
+        <option value="ND">ND</option>
+        <option value="OH">OH</option>
+        <option value="OK">OK</option>
+        <option value="OR">OR</option>
+        <option value="PA">PA</option>
+        <option value="RI">RI</option>
+        <option value="SC">SC</option>
+        <option value="SD">SD</option>
+        <option value="TN">TN</option>
+        <option value="TX">TX</option>
+        <option value="UT">UT</option>
+        <option value="VT">VT</option>
+        <option value="VA">VA</option>
+        <option value="WA">WA</option>
+        <option value="WV">WV</option>
+        <option value="WI">WI</option>
+        <option value="WY">WY</option>
       </select>
-      <input type="text" id="f-q" placeholder="Search keywords…" aria-label="Search listings by keyword" style="padding:8px 12px;border:1.5px solid var(--light-tan);border-radius:4px;font-family:'Source Serif 4',serif;font-size:14px;outline:none;width:220px" onkeydown="if(event.key==='Enter')loadListings()">
+      <input type="text" id="f-q" placeholder="Search keywords…" aria-label="Search listings by keyword" style="padding:8px 12px;border:1.5px solid var(--light-tan);border-radius:4px;font-family:'Source Serif 4',serif;font-size:14px;outline:none;width:180px" onkeydown="if(event.key==='Enter')loadListings()">
+      <div style="display:flex;align-items:center;gap:4px">
+        <span style="font-size:12px;color:#888;white-space:nowrap;font-family:'Oswald',sans-serif;letter-spacing:.05em">$ MIN</span>
+        <input type="number" id="f-price-min" placeholder="0" aria-label="Min price" min="0" style="padding:8px 10px;border:1.5px solid var(--light-tan);border-radius:4px;font-size:13px;outline:none;width:80px" onkeydown="if(event.key==='Enter')loadListings()">
+        <span style="font-size:12px;color:#888;font-family:'Oswald',sans-serif">—</span>
+        <input type="number" id="f-price-max" placeholder="Any" aria-label="Max price" min="0" style="padding:8px 10px;border:1.5px solid var(--light-tan);border-radius:4px;font-size:13px;outline:none;width:80px" onkeydown="if(event.key==='Enter')loadListings()">
+      </div>
+      <div style="display:flex;align-items:center;gap:4px">
+        <span style="font-size:12px;color:#888;white-space:nowrap;font-family:'Oswald',sans-serif;letter-spacing:.05em">LBS</span>
+        <input type="number" id="f-weight-min" placeholder="0" aria-label="Min weight lbs" min="0" style="padding:8px 10px;border:1.5px solid var(--light-tan);border-radius:4px;font-size:13px;outline:none;width:75px" onkeydown="if(event.key==='Enter')loadListings()">
+        <span style="font-size:12px;color:#888;font-family:'Oswald',sans-serif">—</span>
+        <input type="number" id="f-weight-max" placeholder="Any" aria-label="Max weight lbs" min="0" style="padding:8px 10px;border:1.5px solid var(--light-tan);border-radius:4px;font-size:13px;outline:none;width:75px" onkeydown="if(event.key==='Enter')loadListings()">
+      </div>
       <select id="f-sort" onchange="loadListings()" aria-label="Sort listings" style="padding:8px 12px;border:1.5px solid var(--light-tan);border-radius:4px;font-family:'Source Serif 4',serif;font-size:14px;outline:none">
         <option value="featured">Featured First</option>
         <option value="newest">Newest First</option>
-        <option value="price_asc">Price: Low to High</option>
-        <option value="price_desc">Price: High to Low</option>
+        <option value="price_asc">Price: Low → High</option>
+        <option value="price_desc">Price: High → Low</option>
+        <option value="weight_asc">Weight: Low → High</option>
+        <option value="weight_desc">Weight: High → Low</option>
       </select>
       <button class="btn-primary" style="padding:9px 20px;font-size:13px" data-action="search-listings">Search</button>
+      <button class="btn-secondary" style="padding:9px 14px;font-size:12px" onclick="clearFilters()">Clear</button>
     </div>
     <div class="listings-grid" id="all-listings"><div class="loading">Loading listings…</div></div>
     <div style="text-align:center;margin-top:30px" id="pagination"></div>
@@ -1120,6 +1215,7 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
       <button class="acct-tab active" data-action="acct-tab" data-tab="profile">👤 Profile</button>
       <button class="acct-tab" data-action="acct-tab" data-tab="listings">📋 My Listings</button>
       <button class="acct-tab" data-action="acct-tab" data-tab="saved">❤️ Saved</button>
+      <button class="acct-tab" data-action="acct-tab" data-tab="searches">🔔 Saved Searches</button>
       <button class="acct-tab" data-action="acct-tab" data-tab="messages">💬 Messages <span id="msg-badge" style="display:none;background:var(--rust);color:white;font-size:10px;padding:2px 6px;border-radius:10px;margin-left:4px">0</span></button>
       <button class="acct-tab" data-action="acct-tab" data-tab="post">+ Post New Listing</button>
     </div>
@@ -1180,6 +1276,63 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
     <div class="acct-panel" id="acct-panel-saved">
       <h3 style="font-family:'Playfair Display',serif;font-size:20px;color:var(--dark-brown);margin-bottom:20px">Saved Listings</h3>
       <div id="saved-listings-container"><div class="loading">Loading saved listings…</div></div>
+    </div>
+
+    <!-- Saved Searches Panel -->
+    <div class="acct-panel" id="acct-panel-searches">
+      <h3 style="font-family:'Playfair Display',serif;font-size:20px;color:var(--dark-brown);margin-bottom:8px">Saved Searches</h3>
+      <p style="font-size:13px;color:#888;margin-bottom:20px">Get email alerts when new listings match your search criteria.</p>
+
+      <!-- Save current search form -->
+      <div style="background:var(--cream);border:1.5px solid var(--light-tan);border-radius:6px;padding:18px;margin-bottom:20px">
+        <div style="font-family:'Oswald',sans-serif;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--dark-brown);margin-bottom:12px">+ Save a New Search Alert</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+          <div>
+            <label style="font-size:11px;color:#888;display:block;margin-bottom:4px">Alert Name *</label>
+            <input type="text" id="ss-name" placeholder="e.g. Angus Bulls in Texas" style="width:100%;padding:8px;border:1px solid var(--light-tan);border-radius:4px;font-size:13px;box-sizing:border-box">
+          </div>
+          <div>
+            <label style="font-size:11px;color:#888;display:block;margin-bottom:4px">Category</label>
+            <select id="ss-category" style="width:100%;padding:8px;border:1px solid var(--light-tan);border-radius:4px;font-size:13px">
+              <option value="">Any Category</option>
+              <option value="bulls">Bulls</option>
+              <option value="beef_cattle">Beef Cattle</option>
+              <option value="bred_heifers">Bred Heifers</option>
+              <option value="cow_calf_pairs">Cow/Calf Pairs</option>
+              <option value="feeder_stocker">Feeder Cattle</option>
+              <option value="dairy">Dairy</option>
+              <option value="equipment">Equipment</option>
+              <option value="trailers">Trailers</option>
+              <option value="working_dogs">Working Dogs</option>
+              <option value="feed_hay">Feed & Hay</option>
+              <option value="farm_to_table">Farm to Table</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:11px;color:#888;display:block;margin-bottom:4px">State</label>
+            <select id="ss-state" style="width:100%;padding:8px;border:1px solid var(--light-tan);border-radius:4px;font-size:13px">
+              <option value="">Any State</option>
+              ${['AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA','KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN','TX','UT','VT','VA','WA','WV','WI','WY'].map(s=>`<option value="${s}">${s}</option>`).join('')}
+            </select>
+          </div>
+          <div>
+            <label style="font-size:11px;color:#888;display:block;margin-bottom:4px">Keywords</label>
+            <input type="text" id="ss-keywords" placeholder="e.g. registered, angus, bred" style="width:100%;padding:8px;border:1px solid var(--light-tan);border-radius:4px;font-size:13px;box-sizing:border-box">
+          </div>
+          <div>
+            <label style="font-size:11px;color:#888;display:block;margin-bottom:4px">Min Price ($)</label>
+            <input type="number" id="ss-min-price" placeholder="0" min="0" style="width:100%;padding:8px;border:1px solid var(--light-tan);border-radius:4px;font-size:13px;box-sizing:border-box">
+          </div>
+          <div>
+            <label style="font-size:11px;color:#888;display:block;margin-bottom:4px">Max Price ($)</label>
+            <input type="number" id="ss-max-price" placeholder="Any" min="0" style="width:100%;padding:8px;border:1px solid var(--light-tan);border-radius:4px;font-size:13px;box-sizing:border-box">
+          </div>
+        </div>
+        <div id="ss-error" style="display:none;color:#991b1b;font-size:12px;margin-bottom:8px"></div>
+        <button class="btn-primary" style="padding:9px 20px;font-size:13px" onclick="saveSearch()">Save Alert →</button>
+      </div>
+
+      <div id="saved-searches-list"><div class="loading">Loading saved searches…</div></div>
     </div>
 
     <!-- Messages Panel -->
@@ -3097,7 +3250,11 @@ function renderCompactCard(l) {
     ? `<img src="${imgSrc}" alt="" loading="lazy" onerror="this.style.display='none'">`
     : `<span style="font-size:22px">${emoji}</span>`;
   const isFeatured = l.is_featured || ['t_bone','filet','sirloin','ribeye'].includes(l.tier);
-  const badge = isFeatured
+  const isSold = l.status === 'sold';
+  const soldRecently = isSold && l.sold_at && (Date.now() - new Date(l.sold_at)) < 7 * 86400000;
+  const badge = soldRecently
+    ? `<span class="cc-badge" style="background:rgba(0,0,0,.75);color:white;letter-spacing:.05em">SOLD</span>`
+    : isFeatured
     ? `<span class="cc-badge cc-badge-star">★</span>`
     : `<span class="cc-badge cc-badge-new">New</span>`;
   const price = l.price
@@ -3370,15 +3527,23 @@ function doHeroSearch() {
 
 async function loadListings(page=1) {
   listingsPage = page;
-  const cat   = document.getElementById('f-category').value;
-  const state = document.getElementById('f-state').value;
-  const q     = document.getElementById('f-q').value;
-  const sort  = document.getElementById('f-sort').value;
+  const cat       = document.getElementById('f-category').value;
+  const state     = document.getElementById('f-state').value;
+  const q         = document.getElementById('f-q').value;
+  const sort      = document.getElementById('f-sort').value;
+  const priceMin  = document.getElementById('f-price-min')?.value;
+  const priceMax  = document.getElementById('f-price-max')?.value;
+  const weightMin = document.getElementById('f-weight-min')?.value;
+  const weightMax = document.getElementById('f-weight-max')?.value;
 
   const params = new URLSearchParams({ page, limit:24, sort });
-  if (cat)   params.set('category', cat);
-  if (state) params.set('state', state);
-  if (q)     params.set('q', q);
+  if (cat)       params.set('category', cat);
+  if (state)     params.set('state', state);
+  if (q)         params.set('q', q);
+  if (priceMin)  params.set('min_price', priceMin);
+  if (priceMax)  params.set('max_price', priceMax);
+  if (weightMin) params.set('min_weight', weightMin);
+  if (weightMax) params.set('max_weight', weightMax);
 
   const el = document.getElementById('all-listings');
   el.innerHTML = '<div class="loading">Loading…</div>';
@@ -3386,12 +3551,22 @@ async function loadListings(page=1) {
   try {
     const r = await fetch(`${API}/api/listings?${params}`);
     const d = await r.json();
-    if (!d.listings.length) { el.innerHTML = '<p style="color:#888;padding:20px">No listings found.</p>'; document.getElementById('pagination').innerHTML = ''; return; }
+    if (!d.listings.length) { el.innerHTML = '<p style="color:#888;padding:20px">No listings found. <a href="javascript:void(0)" onclick="clearFilters()" style="color:var(--rust)">Clear filters →</a></p>'; document.getElementById('pagination').innerHTML = ''; return; }
     el.innerHTML = d.listings.map(renderListingCard).join('');
     renderPagination(d.pagination);
+    // Also update map if visible
+    if (document.getElementById('map-view-container')?.style.display !== 'none') {
+      renderMapListings(d.listings);
+    }
   } catch(e) {
-    el.innerHTML = '<p style="color:#888;padding:20px">Could not load listings — is the server running?</p>';
+    el.innerHTML = '<p style="color:#888;padding:20px">Could not load listings.</p>';
   }
+}
+
+function clearFilters() {
+  ['f-category','f-state','f-sort'].forEach(id => { const el = document.getElementById(id); if(el) el.value = id === 'f-sort' ? 'featured' : ''; });
+  ['f-q','f-price-min','f-price-max','f-weight-min','f-weight-max'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+  loadListings();
 }
 
 function renderPagination(p) {
@@ -3981,9 +4156,10 @@ function switchAcctTab(tab) {
   document.querySelectorAll('.acct-panel').forEach(p => p.classList.remove('active'));
   document.querySelector(`.acct-tab[data-tab="${tab}"]`).classList.add('active');
   document.getElementById('acct-panel-' + tab).classList.add('active');
-  if (tab === 'listings') loadMyListings();
-  if (tab === 'saved')    loadSavedListings();
-  if (tab === 'messages') loadMyMessages();
+  if (tab === 'listings')  loadMyListings();
+  if (tab === 'saved')     loadSavedListings();
+  if (tab === 'searches')  loadSavedSearches();
+  if (tab === 'messages')  loadMyMessages();
 }
 
 function daysUntilExpiry(expiresAt) {
@@ -4147,7 +4323,7 @@ async function markListingSold(id) {
     const r = await fetch(`${API}/api/listings/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type':'application/json', Authorization:`Bearer ${authToken}` },
-      body: JSON.stringify({ status: 'sold' })
+      body: JSON.stringify({ status: 'sold', sold_at: new Date().toISOString() })
     });
     if (r.ok) { loadMyListings(); showToast('🎉 Congrats on the sale! Listing marked as sold.'); }
     else showToast('Could not update listing');
@@ -4354,6 +4530,236 @@ async function sendListingMessage(listingId, listingTitle) {
     if (btn) { btn.textContent = 'Send Message →'; btn.disabled = false; }
   }
 }
+
+// ── Saved Searches ──────────────────────────────────────
+async function loadSavedSearches() {
+  const el = document.getElementById('saved-searches-list');
+  if (!el) return;
+  try {
+    const r = await fetch(`${API}/api/searches`, { headers: { Authorization: `Bearer ${authToken}` } });
+    const searches = await r.json();
+    if (!Array.isArray(searches) || !searches.length) {
+      el.innerHTML = '<p style="color:#888;font-size:13px">No saved searches yet. Create one above to get email alerts when matching listings are posted.</p>';
+      return;
+    }
+    el.innerHTML = `<div style="font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#888;margin-bottom:10px">${searches.length} Saved Alert${searches.length>1?'s':''}</div>` +
+      searches.map(s => {
+        const tags = [
+          s.category ? fmtCat(s.category) : null,
+          s.state || null,
+          s.keywords ? `"${s.keywords}"` : null,
+          s.min_price ? `$${Number(s.min_price).toLocaleString()}+` : null,
+          s.max_price ? `up to $${Number(s.max_price).toLocaleString()}` : null,
+        ].filter(Boolean);
+        return `<div style="background:white;border:1px solid var(--light-tan);border-radius:6px;padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+          <div style="min-width:0">
+            <div style="font-weight:700;font-size:14px;color:var(--dark-brown);margin-bottom:4px">🔔 ${s.name}</div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px">
+              ${tags.map(t => `<span style="background:var(--cream);border:1px solid var(--light-tan);border-radius:12px;padding:2px 10px;font-size:11px;font-family:'Oswald',sans-serif;color:#555">${t}</span>`).join('')}
+            </div>
+            ${s.last_alerted_at ? `<div style="font-size:11px;color:#aaa;margin-top:4px">Last alert: ${fmtDate(s.last_alerted_at)}</div>` : '<div style="font-size:11px;color:#aaa;margin-top:4px">No alerts sent yet</div>'}
+          </div>
+          <button onclick="deleteSavedSearch(${s.id}, this)" style="background:none;border:1px solid #ddd;border-radius:4px;padding:6px 12px;font-size:12px;cursor:pointer;color:#888;white-space:nowrap;flex-shrink:0">✕ Delete</button>
+        </div>`;
+      }).join('');
+  } catch(e) {
+    el.innerHTML = '<p style="color:#888">Could not load saved searches.</p>';
+  }
+}
+
+async function saveSearch() {
+  const name  = document.getElementById('ss-name')?.value?.trim();
+  const errEl = document.getElementById('ss-error');
+  errEl.style.display = 'none';
+  if (!name) { errEl.textContent = 'Please give this alert a name.'; errEl.style.display = 'block'; return; }
+  try {
+    const r = await fetch(`${API}/api/searches`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
+      body: JSON.stringify({
+        name,
+        category:  document.getElementById('ss-category')?.value || null,
+        state:     document.getElementById('ss-state')?.value || null,
+        keywords:  document.getElementById('ss-keywords')?.value?.trim() || null,
+        min_price: document.getElementById('ss-min-price')?.value || null,
+        max_price: document.getElementById('ss-max-price')?.value || null,
+      })
+    });
+    const d = await r.json();
+    if (!r.ok) { errEl.textContent = d.error; errEl.style.display = 'block'; return; }
+    showToast('Search alert saved! You\'ll get emails when new listings match.');
+    ['ss-name','ss-keywords','ss-min-price','ss-max-price'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+    loadSavedSearches();
+  } catch(e) { errEl.textContent = 'Connection error'; errEl.style.display = 'block'; }
+}
+
+async function deleteSavedSearch(id, btn) {
+  btn.textContent = 'Deleting…'; btn.disabled = true;
+  try {
+    await fetch(`${API}/api/searches/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${authToken}` } });
+    showToast('Alert deleted');
+    loadSavedSearches();
+  } catch(e) { btn.textContent = '✕ Delete'; btn.disabled = false; showToast('Could not delete'); }
+}
+
+// ── Map View ────────────────────────────────────────────
+let _map = null;
+let _mapMarkers = [];
+let _mapCenter = { lat: 39.5, lng: -98.35 };
+let _mapListings = [];
+
+function toggleMapView() {
+  const container = document.getElementById('map-view-container');
+  const btn       = document.getElementById('view-toggle-map');
+  const grid      = document.getElementById('all-listings');
+  const paging    = document.getElementById('pagination');
+  const isOpen    = container.style.display !== 'none';
+  if (isOpen) {
+    container.style.display = 'none';
+    grid.style.display = '';
+    paging.style.display = '';
+    btn.textContent = '🗺️ Map View';
+  } else {
+    container.style.display = 'block';
+    grid.style.display = 'none';
+    paging.style.display = 'none';
+    btn.textContent = '☰ List View';
+    initMap();
+  }
+}
+
+function initMap() {
+  if (_map) { updateMapListings(); return; }
+  if (!window.L) {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+    document.head.appendChild(link);
+    const script = document.createElement('script');
+    script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+    script.onload = () => createMap();
+    document.head.appendChild(script);
+  } else {
+    createMap();
+  }
+}
+
+function createMap() {
+  document.getElementById('map-placeholder').style.display = 'none';
+  _map = L.map('map-container').setView([_mapCenter.lat, _mapCenter.lng], 5);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    maxZoom: 18
+  }).addTo(_map);
+  updateMapListings();
+}
+
+async function updateMapListings() {
+  if (!_map) return;
+  const cat   = document.getElementById('f-category')?.value || '';
+  const state = document.getElementById('f-state')?.value || '';
+  const q     = document.getElementById('f-q')?.value || '';
+  const params = new URLSearchParams({ limit: 200, sort: 'newest' });
+  if (cat)   params.set('category', cat);
+  if (state) params.set('state', state);
+  if (q)     params.set('q', q);
+  try {
+    const r = await fetch(`${API}/api/listings?${params}`);
+    const d = await r.json();
+    _mapListings = (d.listings || []).filter(l => l.lat && l.lng);
+    renderMapMarkers(document.getElementById('map-radius')?.value || '');
+  } catch(e) {}
+}
+
+function renderMapMarkers(radius) {
+  _mapMarkers.forEach(m => m.remove());
+  _mapMarkers = [];
+  const mapResults = document.getElementById('map-results');
+  const mapCount   = document.getElementById('map-count');
+  let visible = _mapListings;
+  if (radius && _mapCenter) {
+    visible = _mapListings.filter(l => haversineDistance(_mapCenter.lat, _mapCenter.lng, l.lat, l.lng) <= parseFloat(radius));
+  }
+  mapCount.textContent = `${visible.length} listing${visible.length!==1?'s':''} in this area`;
+  const icon = L.divIcon({
+    className: '',
+    html: '<div style="width:14px;height:14px;background:#8b3214;border:2px solid white;border-radius:50%;box-shadow:0 1px 4px rgba(0,0,0,.4)"></div>',
+    iconSize: [14, 14], iconAnchor: [7, 7]
+  });
+  visible.forEach(l => {
+    const price = l.price ? `$${Number(l.price).toLocaleString()}` : 'Call';
+    const popup = L.popup({ maxWidth: 220 }).setContent(`
+      <div style="font-family:Georgia,serif;padding:4px">
+        <div style="font-size:13px;font-weight:700;color:#2c1a0e;margin-bottom:4px;line-height:1.3">${l.title}</div>
+        <div style="font-size:11px;color:#888;margin-bottom:6px">${l.city||''}, ${l.state} · ${price}</div>
+        <button onclick="window._openListingFromMap(${l.id})" style="background:#8b3214;color:white;border:none;padding:6px 12px;border-radius:3px;font-size:11px;cursor:pointer;width:100%">View Listing →</button>
+      </div>`);
+    const marker = L.marker([l.lat, l.lng], { icon }).addTo(_map).bindPopup(popup);
+    _mapMarkers.push(marker);
+  });
+  if (visible.length) {
+    mapResults.innerHTML = visible.slice(0,20).map(l => `
+      <div onclick="window._openListingFromMap(${l.id})" style="background:white;border:1px solid var(--light-tan);border-radius:6px;overflow:hidden;cursor:pointer;transition:box-shadow .2s" onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,.12)'" onmouseout="this.style.boxShadow=''">
+        ${l.thumb?`<img src="${l.thumb}" style="width:100%;height:100px;object-fit:cover;object-position:center top">`:`<div style="height:100px;background:var(--light-tan);display:flex;align-items:center;justify-content:center;font-size:28px">${catEmoji(l.category)}</div>`}
+        <div style="padding:10px">
+          <div style="font-size:12px;font-weight:700;color:var(--dark-brown);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${l.title}</div>
+          <div style="font-size:11px;color:#888">${l.city||''}, ${l.state} · ${l.price?'$'+Number(l.price).toLocaleString():'Call'}</div>
+        </div>
+      </div>`).join('');
+    if (visible.length > 20) mapResults.innerHTML += `<div style="grid-column:1/-1;text-align:center;padding:12px;font-size:13px;color:#888">+ ${visible.length-20} more — zoom in or add filters to narrow results</div>`;
+  } else {
+    mapResults.innerHTML = '<p style="color:#888;font-size:13px;grid-column:1/-1;text-align:center;padding:20px">No listings found in this area. Try a larger radius or clear filters.</p>';
+  }
+  if (_mapMarkers.length && _mapMarkers.length < 100) {
+    try { _map.fitBounds(L.featureGroup(_mapMarkers).getBounds().pad(0.1)); } catch(e) {}
+  }
+}
+
+window._openListingFromMap = function(id) {
+  if (_map) _map.closePopup();
+  openListing(id);
+};
+
+function haversineDistance(lat1, lng1, lat2, lng2) {
+  const R = 3958.8;
+  const dLat = (lat2-lat1)*Math.PI/180;
+  const dLng = (lng2-lng1)*Math.PI/180;
+  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+function useMyLocation() {
+  if (!navigator.geolocation) { showToast('Geolocation not supported'); return; }
+  navigator.geolocation.getCurrentPosition(pos => {
+    _mapCenter = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+    if (_map) _map.setView([_mapCenter.lat, _mapCenter.lng], 9);
+    else initMap();
+    renderMapMarkers(document.getElementById('map-radius')?.value || '');
+    showToast('📍 Centered on your location');
+  }, () => showToast('Could not get your location'));
+}
+
+async function geocodeAndCenter() {
+  const input = document.getElementById('map-center-input')?.value?.trim();
+  if (!input) return;
+  try {
+    const r = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(input+' USA')}&format=json&limit=1`);
+    const results = await r.json();
+    if (!results.length) { showToast('Location not found — try city, state or ZIP'); return; }
+    _mapCenter = { lat: parseFloat(results[0].lat), lng: parseFloat(results[0].lon) };
+    if (_map) _map.setView([_mapCenter.lat, _mapCenter.lng], 9);
+    else initMap();
+    renderMapMarkers(document.getElementById('map-radius')?.value || '');
+    showToast(`📍 ${results[0].display_name.split(',').slice(0,2).join(',')}`);
+  } catch(e) { showToast('Could not find location'); }
+}
+
+function renderMapListings(listings) {
+  if (!_map) return;
+  _mapListings = (listings||[]).filter(l => l.lat && l.lng);
+  renderMapMarkers(document.getElementById('map-radius')?.value || '');
+}
+
 function showForgotPassword() {
   const loginForm = document.getElementById('form-login');
   loginForm.innerHTML = `

@@ -53,6 +53,7 @@ router.get('/', optionalAuth, async (req, res) => {
   try {
     const {
       category, state, breed, sex, min_price, max_price,
+      min_weight, max_weight,
       q, page = 1, limit = 24, sort = 'featured',
       tier, status = 'active',
     } = req.query;
@@ -65,21 +66,25 @@ router.get('/', optionalAuth, async (req, res) => {
       conditions.push(`l.search_vector @@ plainto_tsquery('english', $${p})`);
       params.push(q); p++;
     }
-    if (category)  { conditions.push(`l.category = $${p}`);    params.push(category);       p++; }
-    if (state)     { conditions.push(`l.state = $${p}`);       params.push(state);          p++; }
-    if (breed)     { conditions.push(`l.breed ILIKE $${p}`);   params.push(`%${breed}%`);   p++; }
-    if (sex)       { conditions.push(`l.sex = $${p}`);         params.push(sex);            p++; }
-    if (tier)      { conditions.push(`l.tier = $${p}`);        params.push(tier);           p++; }
-    if (min_price) { conditions.push(`l.price >= $${p}`);      params.push(+min_price);     p++; }
-    if (max_price) { conditions.push(`l.price <= $${p}`);      params.push(+max_price);     p++; }
+    if (category)   { conditions.push(`l.category = $${p}`);        params.push(category);       p++; }
+    if (state)      { conditions.push(`l.state = $${p}`);           params.push(state);          p++; }
+    if (breed)      { conditions.push(`l.breed ILIKE $${p}`);       params.push(`%${breed}%`);   p++; }
+    if (sex)        { conditions.push(`l.sex = $${p}`);             params.push(sex);            p++; }
+    if (tier)       { conditions.push(`l.tier = $${p}`);            params.push(tier);           p++; }
+    if (min_price)  { conditions.push(`l.price >= $${p}`);          params.push(+min_price);     p++; }
+    if (max_price)  { conditions.push(`l.price <= $${p}`);          params.push(+max_price);     p++; }
+    if (min_weight) { conditions.push(`l.weight_lbs >= $${p}`);     params.push(+min_weight);    p++; }
+    if (max_weight) { conditions.push(`l.weight_lbs <= $${p}`);     params.push(+max_weight);    p++; }
 
     const where   = conditions.join(' AND ');
     const tsRank  = q ? `ts_rank(l.search_vector, plainto_tsquery('english', $2)) DESC, ` : '';
     const orderMap = {
-      featured:   'l.is_featured DESC, l.created_at DESC',
-      newest:     'l.created_at DESC',
-      price_asc:  'l.price ASC NULLS LAST',
-      price_desc: 'l.price DESC NULLS LAST',
+      featured:     'l.is_featured DESC, l.created_at DESC',
+      newest:       'l.created_at DESC',
+      price_asc:    'l.price ASC NULLS LAST',
+      price_desc:   'l.price DESC NULLS LAST',
+      weight_asc:   'l.weight_lbs ASC NULLS LAST',
+      weight_desc:  'l.weight_lbs DESC NULLS LAST',
     };
     const order  = tsRank + (orderMap[sort] || orderMap.featured);
     const safeLimit  = Math.min(Math.max(1, parseInt(limit)  || 24), 100); // max 100 per request
@@ -386,7 +391,7 @@ router.put('/:id', authenticateToken, async (req, res) => {
     if (rows[0].user_id !== req.user.id && req.user.role !== 'admin')
       return res.status(403).json({ error: 'Not authorized' });
 
-    const { title, description, breed, price, price_type, quantity, state, city, zip, status, category } = req.body;
+    const { title, description, breed, price, price_type, quantity, state, city, zip, status, category, sold_at } = req.body;
 
     // Validate category if provided
     const validCategories = [
@@ -401,17 +406,20 @@ router.put('/:id', authenticateToken, async (req, res) => {
     const safeCategory = category && validCategories.includes(category)
       ? category : rows[0].category;
 
+    const newStatus = status || 'active';
+    const soldAt = newStatus === 'sold' && sold_at ? new Date(sold_at) : (newStatus === 'sold' ? new Date() : null);
+
     await query(
       `UPDATE listings
        SET title=$1, description=$2, breed=$3, price=$4, price_type=$5,
            quantity=$6, state=$7, city=$8, zip=$9, status=$10, category=$11,
-           updated_at=NOW()
-       WHERE id=$12`,
+           sold_at=COALESCE($12, sold_at), updated_at=NOW()
+       WHERE id=$13`,
       [
         title, description, breed || null,
         price ? +price : null, price_type || 'fixed',
         +quantity || 1, state, city, zip || null,
-        status || 'active', safeCategory, req.params.id,
+        newStatus, safeCategory, soldAt, req.params.id,
       ]
     );
     res.json({ message: 'Listing updated' });
