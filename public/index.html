@@ -292,8 +292,8 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
 .compact-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;width:100%;box-sizing:border-box;padding:0 16px}
 .compact-card{background:white;border-radius:4px;overflow:hidden;border:1px solid var(--light-tan);cursor:pointer;transition:box-shadow .15s}
 .compact-card:hover{box-shadow:0 3px 12px rgba(44,26,14,.1)}
-.cc-img{height:80px;display:flex;align-items:center;justify-content:center;font-size:22px;background:var(--cream);position:relative;overflow:hidden}
-.cc-img img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}
+.cc-img{height:140px;display:flex;align-items:center;justify-content:center;font-size:22px;background:var(--cream);position:relative;overflow:hidden}
+.cc-img img{width:100%;height:100%;object-fit:cover;object-position:center top;position:absolute;inset:0}
 .cc-badge{position:absolute;top:5px;left:5px;font-family:'Oswald',sans-serif;font-size:8px;letter-spacing:.06em;text-transform:uppercase;padding:2px 5px;border-radius:2px;z-index:1}
 .cc-badge-star{background:var(--gold);color:var(--dark-brown)}
 .cc-badge-new{background:var(--rust);color:white}
@@ -1119,6 +1119,7 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
     <div class="account-tabs">
       <button class="acct-tab active" data-action="acct-tab" data-tab="profile">👤 Profile</button>
       <button class="acct-tab" data-action="acct-tab" data-tab="listings">📋 My Listings</button>
+      <button class="acct-tab" data-action="acct-tab" data-tab="saved">❤️ Saved</button>
       <button class="acct-tab" data-action="acct-tab" data-tab="messages">💬 Messages <span id="msg-badge" style="display:none;background:var(--rust);color:white;font-size:10px;padding:2px 6px;border-radius:10px;margin-left:4px">0</span></button>
       <button class="acct-tab" data-action="acct-tab" data-tab="post">+ Post New Listing</button>
     </div>
@@ -1175,8 +1176,14 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
       <div id="my-listings-container"><div class="loading">Loading your listings…</div></div>
     </div>
 
+    <!-- Saved Listings Panel -->
+    <div class="acct-panel" id="acct-panel-saved">
+      <h3 style="font-family:'Playfair Display',serif;font-size:20px;color:var(--dark-brown);margin-bottom:20px">Saved Listings</h3>
+      <div id="saved-listings-container"><div class="loading">Loading saved listings…</div></div>
+    </div>
+
     <!-- Messages Panel -->
-    <div class="acct-panel" id="acct-panel-messages" style="display:none">
+    <div class="acct-panel" id="acct-panel-messages">
       <h3 style="font-family:'Playfair Display',serif;font-size:20px;color:var(--dark-brown);margin-bottom:20px">Messages</h3>
       <div id="messages-container">
         <div class="loading">Loading messages…</div>
@@ -3429,7 +3436,7 @@ async function openListing(id) {
     let gallery = '';
     if (photos.length) {
       const mainImg = `<img id="ld-main-img" src="${photos[0].url}" alt="${l.title}"
-        style="width:100%;height:280px;object-fit:cover;display:block;cursor:${photos.length > 1 ? 'pointer' : 'default'}"
+        style="width:100%;height:280px;object-fit:cover;object-position:center top;display:block;cursor:${photos.length > 1 ? 'pointer' : 'default'}"
         ${photos.length > 1 ? `onclick="ldNextPhoto()"` : ''}>`;
       const dots = photos.length > 1
         ? `<div style="position:absolute;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:6px">
@@ -3975,6 +3982,7 @@ function switchAcctTab(tab) {
   document.querySelector(`.acct-tab[data-tab="${tab}"]`).classList.add('active');
   document.getElementById('acct-panel-' + tab).classList.add('active');
   if (tab === 'listings') loadMyListings();
+  if (tab === 'saved')    loadSavedListings();
   if (tab === 'messages') loadMyMessages();
 }
 
@@ -4022,8 +4030,53 @@ async function loadMyListings() {
   }
 }
 
+async function loadSavedListings() {
+  const container = document.getElementById('saved-listings-container');
+  if (!container) return;
+  container.innerHTML = '<div class="loading">Loading saved listings…</div>';
+  try {
+    const r = await fetch(`${API}/api/auth/saved-listings`, {
+      headers: { Authorization: `Bearer ${authToken}` }
+    });
+    const listings = await r.json();
+    if (!listings.length) {
+      container.innerHTML = '<p style="color:#888;padding:20px 0">No saved listings yet. Click the ♡ on any listing to save it.</p>';
+      return;
+    }
+    container.innerHTML = listings.map(l => {
+      const price = l.price ? '$' + Number(l.price).toLocaleString() : 'Call';
+      const thumb = l.thumb
+        ? `<img src="${l.thumb}" style="width:90px;height:72px;object-fit:cover;object-position:center top;border-radius:4px;flex-shrink:0">`
+        : `<div style="width:90px;height:72px;background:var(--light-tan);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0">${catEmoji(l.category)}</div>`;
+      return `<div class="my-listing-card" style="cursor:pointer" onclick="openListing(${l.id})">
+        ${thumb}
+        <div class="mlc-info">
+          <div class="mlc-title">${l.title}</div>
+          <div class="mlc-meta">${fmtCat(l.category)} · ${l.city || ''}, ${l.state || ''} · ${price}</div>
+          <div class="mlc-actions">
+            <button class="mlc-btn" onclick="event.stopPropagation();openListing(${l.id})">View Listing</button>
+            <button class="mlc-btn mlc-btn-delete" onclick="event.stopPropagation();unsaveListing(${l.id}, this)">✕ Remove</button>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    container.innerHTML = '<p style="color:#888">Could not load saved listings.</p>';
+  }
+}
+
+async function unsaveListing(id, btn) {
+  try {
+    await fetch(`${API}/api/listings/${id}/save`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${authToken}` }
+    });
+    showToast('Removed from saved');
+    loadSavedListings();
+  } catch(e) { showToast('Could not remove listing'); }
+}
+
 async function saveProfile() {
-  const errEl = document.getElementById('profile-error');
   const sucEl = document.getElementById('profile-success');
   errEl.style.display = 'none'; sucEl.style.display = 'none';
   try {
@@ -4227,7 +4280,74 @@ function showToast(msg, duration=3000) {
   setTimeout(() => t.classList.remove('show'), duration);
 }
 
-// ── Forgot Password ────────────────────────────────────
+// ── Message Seller ──────────────────────────────────────
+function openMessageModal(listingId, listingTitle) {
+  // Replace contact area with inline message form
+  const existing = document.getElementById('inline-msg-form');
+  if (existing) { existing.remove(); return; }
+
+  const container = document.createElement('div');
+  container.id = 'inline-msg-form';
+  container.style.cssText = 'margin-top:4px;padding:16px;background:#f9f4ec;border:1px solid var(--light-tan);border-radius:6px;box-sizing:border-box';
+  container.innerHTML = `
+    <div style="font-family:'Oswald',sans-serif;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--dark-brown);margin-bottom:10px">✉️ Message Seller</div>
+    <div id="msg-send-error" style="display:none;color:#991b1b;font-size:12px;margin-bottom:8px;padding:8px;background:#fee2e2;border-radius:4px"></div>
+    <textarea id="msg-body" rows="4" placeholder="Hi, I'm interested in this listing. Is it still available?" style="width:100%;padding:10px;border:1px solid var(--light-tan);border-radius:4px;font-family:'Source Serif 4',serif;font-size:14px;resize:vertical;box-sizing:border-box;margin-bottom:10px"></textarea>
+    <div style="display:flex;gap:8px">
+      <button class="btn-primary" style="flex:1;justify-content:center" onclick="sendListingMessage(${listingId}, '${listingTitle.replace(/'/g,"\\'")}')">Send Message →</button>
+      <button class="btn-secondary" style="padding:10px 16px" onclick="document.getElementById('inline-msg-form').remove()">Cancel</button>
+    </div>
+    <p style="font-size:11px;color:#aaa;margin-top:8px;text-align:center">The seller will be notified by email and can reply in their account.</p>
+  `;
+
+  // Insert after the message button
+  const msgBtn = document.querySelector('[onclick*="openMessageModal"]');
+  if (msgBtn) {
+    msgBtn.closest('div').insertAdjacentElement('afterend', container);
+    container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+}
+
+async function sendListingMessage(listingId, listingTitle) {
+  const body   = document.getElementById('msg-body')?.value?.trim();
+  const errEl  = document.getElementById('msg-send-error');
+  errEl.style.display = 'none';
+
+  if (!body) { errEl.textContent = 'Please write a message before sending.'; errEl.style.display = 'block'; return; }
+  if (!authToken) { closeModal('listing-detail'); openModal('auth'); return; }
+
+  const btn = document.querySelector('#inline-msg-form .btn-primary');
+  if (btn) { btn.textContent = 'Sending…'; btn.disabled = true; }
+
+  try {
+    const r = await fetch(`${API}/api/listings/${listingId}/contact`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
+      body: JSON.stringify({ body })
+    });
+    const d = await r.json();
+    if (!r.ok) {
+      errEl.textContent = d.error || 'Could not send message. Please try again.';
+      errEl.style.display = 'block';
+      if (btn) { btn.textContent = 'Send Message →'; btn.disabled = false; }
+      return;
+    }
+    // Show success inline
+    const form = document.getElementById('inline-msg-form');
+    if (form) {
+      form.innerHTML = `<div style="text-align:center;padding:16px">
+        <div style="font-size:28px;margin-bottom:8px">✅</div>
+        <div style="font-family:'Oswald',sans-serif;font-weight:700;color:var(--dark-brown);margin-bottom:4px">Message Sent!</div>
+        <div style="font-size:13px;color:#666">The seller has been notified. Check your <strong>Messages</strong> tab in your account for replies.</div>
+      </div>`;
+    }
+    if (window._trackEvent) window._trackEvent('listings', 'message_seller', 'success');
+  } catch(e) {
+    errEl.textContent = 'Connection error. Please try again.';
+    errEl.style.display = 'block';
+    if (btn) { btn.textContent = 'Send Message →'; btn.disabled = false; }
+  }
+}
 function showForgotPassword() {
   const loginForm = document.getElementById('form-login');
   loginForm.innerHTML = `
