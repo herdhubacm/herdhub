@@ -48,7 +48,7 @@ async function verifyTurnstile(token) {
   }
 }
 
-const { testConnection: testDb } = require('./db/database');
+const { testConnection: testDb, query } = require('./db/database');
 const { testConnection: testStorage } = require('./services/storage');
 
 const app  = express();
