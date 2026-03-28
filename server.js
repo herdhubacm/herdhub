@@ -213,6 +213,8 @@ app.use('/api/market',   limiter(60),  require('./routes/market'));
 app.use('/api/forum',    limiter(100), require('./routes/forum'));
 app.use('/api/payments', limiter(50),  require('./routes/payments'));
 app.use('/api/beefbox',  limiter(30),  require('./routes/beefbox'));
+app.use('/api/reviews',  limiter(60),  require('./routes/reviews'));
+app.use('/api/reports',  limiter(30),  require('./routes/reports'));
 
 // ── GET /api/csrf-token ───────────────────────────────
 // Frontend fetches this on page load — attached to state-changing requests
@@ -360,6 +362,41 @@ async function start() {
       await query(`ALTER TABLE listings ADD COLUMN IF NOT EXISTS website_url TEXT`);
       console.log('✅  website_url column ready');
 
+      // Reviews table
+      await query(`CREATE TABLE IF NOT EXISTS seller_reviews (
+        id          BIGSERIAL    PRIMARY KEY,
+        seller_id   BIGINT       NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        reviewer_id BIGINT       NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        listing_id  BIGINT       REFERENCES listings(id) ON DELETE SET NULL,
+        rating      SMALLINT     NOT NULL CHECK (rating BETWEEN 1 AND 5),
+        title       TEXT,
+        body        TEXT,
+        created_at  TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+        UNIQUE(seller_id, reviewer_id, listing_id)
+      )`);
+
+      // Password reset tokens
+      await query(`CREATE TABLE IF NOT EXISTS password_reset_tokens (
+        id         BIGSERIAL    PRIMARY KEY,
+        user_id    BIGINT       NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        token      TEXT         NOT NULL UNIQUE,
+        expires_at TIMESTAMPTZ  NOT NULL,
+        used       BOOLEAN      NOT NULL DEFAULT FALSE,
+        created_at TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+      )`);
+
+      // Listing reports
+      await query(`CREATE TABLE IF NOT EXISTS listing_reports (
+        id          BIGSERIAL    PRIMARY KEY,
+        listing_id  BIGINT       NOT NULL REFERENCES listings(id) ON DELETE CASCADE,
+        reporter_id BIGINT       REFERENCES users(id) ON DELETE SET NULL,
+        reason      TEXT         NOT NULL,
+        details     TEXT,
+        status      TEXT         NOT NULL DEFAULT 'open',
+        created_at  TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+      )`);
+      console.log('✅  Reviews, reset tokens, reports tables ready');
+
     } catch (migErr) {
       console.warn('⚠️  Migration warning:', migErr.message);
     }
@@ -392,6 +429,40 @@ async function start() {
       console.log(`📊  USDA feed: ${process.env.USDA_AMS_BASE_URL || 'https://marsapi.ams.usda.gov/services/v1.2'}`);
       console.log(`🌍  Environment: ${process.env.NODE_ENV || 'development'}\n`);
     });
+
+    // ── Listing expiry cron — runs every 6 hours ──────
+    const { sendEmail, listingExpiryEmail } = require('./services/email');
+    async function runExpiryCron() {
+      try {
+        // 1. Expire listings that have passed their expiry date
+        const { rows: expired } = await query(
+          `UPDATE listings SET status='expired'
+           WHERE status='active' AND expires_at IS NOT NULL AND expires_at < NOW()
+           RETURNING id, title`
+        );
+        if (expired.length) console.log(`⏰  Expired ${expired.length} listing(s)`);
+
+        // 2. Send expiry warnings for listings expiring in 3 days
+        const { rows: expiringSoon } = await query(
+          `SELECT l.id, l.title, l.expires_at, u.name, u.email
+           FROM listings l JOIN users u ON u.id = l.user_id
+           WHERE l.status='active'
+             AND l.expires_at IS NOT NULL
+             AND l.expires_at BETWEEN NOW() + INTERVAL '2 days 22 hours'
+                                   AND NOW() + INTERVAL '3 days 2 hours'`
+        );
+        for (const l of expiringSoon) {
+          const tmpl = listingExpiryEmail(l.name, l.title, l.expires_at, l.id);
+          await sendEmail({ to: l.email, ...tmpl }).catch(() => {});
+        }
+        if (expiringSoon.length) console.log(`📧  Sent ${expiringSoon.length} expiry warning(s)`);
+      } catch(e) {
+        console.warn('Expiry cron error:', e.message);
+      }
+    }
+    // Run immediately then every 6 hours
+    runExpiryCron();
+    setInterval(runExpiryCron, 6 * 60 * 60 * 1000);
   } catch (err) {
     console.error('❌  Startup failed:', err.message);
     process.exit(1);

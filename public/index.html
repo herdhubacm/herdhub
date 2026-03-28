@@ -1119,6 +1119,7 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
     <div class="account-tabs">
       <button class="acct-tab active" data-action="acct-tab" data-tab="profile">👤 Profile</button>
       <button class="acct-tab" data-action="acct-tab" data-tab="listings">📋 My Listings</button>
+      <button class="acct-tab" data-action="acct-tab" data-tab="messages">💬 Messages <span id="msg-badge" style="display:none;background:var(--rust);color:white;font-size:10px;padding:2px 6px;border-radius:10px;margin-left:4px">0</span></button>
       <button class="acct-tab" data-action="acct-tab" data-tab="post">+ Post New Listing</button>
     </div>
 
@@ -1172,6 +1173,14 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
         <button class="btn-primary" style="padding:9px 18px;font-size:13px" data-action="acct-tab" data-tab="post">+ Post New Listing</button>
       </div>
       <div id="my-listings-container"><div class="loading">Loading your listings…</div></div>
+    </div>
+
+    <!-- Messages Panel -->
+    <div class="acct-panel" id="acct-panel-messages" style="display:none">
+      <h3 style="font-family:'Playfair Display',serif;font-size:20px;color:var(--dark-brown);margin-bottom:20px">Messages</h3>
+      <div id="messages-container">
+        <div class="loading">Loading messages…</div>
+      </div>
     </div>
 
     <!-- Post New Listing Panel -->
@@ -1323,6 +1332,7 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
       <div class="form-group"><label for="login-email">Email</label><input type="email" id="login-email" placeholder="you@example.com" autocomplete="email" aria-label="Email address"></div>
       <div class="form-group"><label for="login-password">Password</label><input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password" aria-label="Password"></div>
       <button class="btn-primary" style="width:100%;justify-content:center;margin-top:8px" data-action="login">Sign In</button>
+      <p style="text-align:center;margin-top:10px;font-size:13px"><a href="javascript:void(0)" onclick="showForgotPassword()" style="color:var(--rust);text-decoration:none">Forgot your password?</a></p>
     </div>
     <div id="form-register" style="display:none">
       <h2>Create Account</h2><p>Join 1,200+ ranchers on Herd <span style="color:var(--rust)">Hub</span>. It's free.</p>
@@ -1547,7 +1557,7 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
   </div>
 </div>
 
-<div class="modal-overlay" id="modal-post-listing" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Post a new listing">
+<div class="modal-overlay" id="modal-post-listing" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Post a new listing" style="">
   <div class="modal" style="max-width:620px">
     <button class="modal-close" data-action="close-modal" data-modal="post-listing" aria-label="Close dialog">✕</button>
     <h2>Post a Listing</h2>
@@ -1743,7 +1753,8 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
       <label>Photos <span id="photo-count-hint" style="font-weight:400;color:#888;text-transform:none;letter-spacing:0"></span></label>
       <div class="photo-limit-hint" id="pl-photo-hint">📸 Your plan allows <strong id="pl-photo-limit-label">1 photo</strong> (Burger — Free)</div>
       <div class="photo-upload-area" id="photo-drop-area">
-        <input type="file" id="pl-photos" multiple accept="image/jpeg,image/png,image/webp">
+        <input type="file" id="pl-photos" multiple accept="image/jpeg,image/png,image/webp" required>
+        <div style="font-size:11px;color:var(--rust);margin-top:4px;font-weight:600">* At least 1 photo required to post a listing</div>
         <div>📸 <strong>Click to add photos</strong> or drag &amp; drop here<br>
         <span style="font-size:11px;color:#999">JPG, PNG or WEBP · Max 10MB each</span></div>
         <div class="photo-previews" id="photo-previews"></div>
@@ -2726,6 +2737,11 @@ function initEventDelegation() {
     else if (action === 'post-topic')  doPostTopic();
     else if (action === 'subscribe')   subscribeNewsletter();
     else if (action === 'bb-signup')   doBeefBoxSignup();
+    else if (action === 'report-listing') {
+      const listingId = document.querySelector('#modal-listing-detail [data-listing-id]')?.dataset?.listingId
+                     || window._currentListingId;
+      if (listingId) openReportModal(listingId);
+    }
     else if (action === 'logout')      logout();
     else if (action === 'save-profile') saveProfile();
     else if (action === 'change-password') changePassword();
@@ -2733,6 +2749,7 @@ function initEventDelegation() {
     else if (action === 'acct-post-listing') acctPostListing();
     else if (action === 'delete-listing') deleteMyListing(el.dataset.id);
     else if (action === 'edit-listing') openEditListing(el.dataset.id);
+    else if (action === 'mark-sold')    markListingSold(el.dataset.id);
     else if (action === 'listing-type') {
       const isAdvert = el.dataset.type === 'advertise';
       document.getElementById('lt-regular').classList.toggle('active', !isAdvert);
@@ -2897,6 +2914,7 @@ async function doLogin() {
     localStorage.setItem('hh_token', authToken);
     document.getElementById('auth-btn').style.display = 'none';
     document.getElementById('account-btn').style.display = 'inline-block';
+    loadUnreadCount();
     document.getElementById('account-name').textContent = d.user.name.split(' ')[0];
     closeModal('auth'); updateAuthUI(); showToast('Welcome back, ' + d.user.name.split(' ')[0] + '!');
   } catch(e) { errEl.textContent = 'Connection error'; errEl.style.display='block'; }
@@ -3394,6 +3412,7 @@ async function loadRecentListings() {
 
 // ── Listing Detail Modal ────────────────────────────────
 async function openListing(id) {
+  window._currentListingId = id;
   openModal('listing-detail');
   const body = document.getElementById('listing-detail-body');
   body.innerHTML = '<div class="loading" style="padding:60px;text-align:center">Loading…</div>';
@@ -3490,16 +3509,27 @@ async function openListing(id) {
             <button data-action="share-native" data-id="${l.id}" data-title="${encodeURIComponent(l.title)}" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:10px 8px;background:var(--sage);color:white;border:none;border-radius:4px;font-family:'Oswald',sans-serif;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;cursor:pointer">
               ↗ More
             </button>
-          </div>
+          
+          <button class="btn-secondary" style="font-size:11px;padding:7px 12px;border-color:var(--rust);color:var(--rust);margin-left:auto" data-action="report-listing" aria-label="Report this listing">⚠ Report</button></div>
           <button class="btn-secondary" style="width:100%;justify-content:center" onclick="toggleSave(${l.id}, this)">
             ${l.is_saved ? '❤️ Saved' : '♡ Save Listing'}
           </button>
         </div>
+
+        <!-- Seller Reviews -->
+        <div id="ld-reviews-${l.id}" style="margin-top:20px;border-top:1px solid var(--light-tan);padding-top:16px">
+          <div style="font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#888;margin-bottom:10px">Seller Reviews</div>
+          <div id="ld-reviews-body" style="color:#888;font-size:13px">Loading reviews…</div>
+        </div>
+
       </div>`;
 
     // Store photos for gallery navigation
     window._ldPhotos = photos;
     window._ldPhotoIdx = 0;
+
+    // Load seller reviews
+    if (l.user_id) loadSellerReviews(l.user_id);
 
   } catch(e) {
     body.innerHTML = `<div style="padding:40px;text-align:center;color:#888">Could not load listing.</div>`;
@@ -3669,6 +3699,10 @@ async function doPostListing() {
   // Enforce photo limit client-side
   const photos = document.getElementById('pl-photos').files;
   const limit = TIER_PHOTO_LIMITS[tier] || 1;
+  if (photos.length === 0) {
+    errEl.textContent = 'At least 1 photo is required. Listings with photos get 3x more views.';
+    errEl.style.display = 'block'; return;
+  }
   if (photos.length > limit) {
     errEl.textContent = `Your ${tier} plan allows ${limit} photo${limit>1?'s':''}. Please remove ${photos.length - limit} photo${photos.length-limit>1?'s':''}.`;
     errEl.style.display = 'block'; return;
@@ -3825,7 +3859,7 @@ function showPage(page) {
   const siteHeader = document.querySelector('header');
   if (siteHeader) siteHeader.style.display = page === 'about' ? 'none' : '';
   if (page === 'forum') loadForumPage();
-  if (page === 'account') loadAccountPage();
+  if (page === 'account') { loadAccountPage(); loadUnreadCount(); }
   if (page === 'articles') loadArticlesPage();
   if (page === 'beef-boxes') loadBeefBoxCount();
   if (page === 'merch' && window._initShopifyMerch) window._initShopifyMerch();
@@ -3935,6 +3969,7 @@ function switchAcctTab(tab) {
   document.querySelector(`.acct-tab[data-tab="${tab}"]`).classList.add('active');
   document.getElementById('acct-panel-' + tab).classList.add('active');
   if (tab === 'listings') loadMyListings();
+  if (tab === 'messages') loadMyMessages();
 }
 
 async function loadMyListings() {
@@ -3954,13 +3989,23 @@ async function loadMyListings() {
         : `<div style="width:90px;height:72px;background:var(--light-tan);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0">${catEmoji(l.category)}</div>`;
       const statusCls = l.status === 'active' ? 'active' : 'expired';
       const price = l.price ? '$' + Number(l.price).toLocaleString() : 'Call for price';
+      const days = daysUntilExpiry(l.expires_at);
+      const expiryBadge = days !== null
+        ? days <= 0
+          ? `<span style="background:#fee2e2;color:#991b1b;font-size:10px;padding:2px 7px;border-radius:10px;font-family:'Oswald',sans-serif;letter-spacing:.05em">EXPIRED</span>`
+          : days <= 7
+          ? `<span style="background:#fef3c7;color:#92400e;font-size:10px;padding:2px 7px;border-radius:10px;font-family:'Oswald',sans-serif;letter-spacing:.05em">Expires in ${days}d</span>`
+          : `<span style="font-size:11px;color:#aaa">Expires ${new Date(l.expires_at).toLocaleDateString('en-US',{month:'short',day:'numeric'})}</span>`
+        : '';
       return `<div class="my-listing-card">
         ${thumb}
         <div class="mlc-info">
           <div class="mlc-title">${l.title}<span class="mlc-status ${statusCls}">${l.status}</span></div>
           <div class="mlc-meta">${l.category.replace(/_/g,' ')} · ${l.city}, ${l.state} · ${price} · ${l.tier} tier</div>
+          ${expiryBadge ? `<div style="margin:4px 0">${expiryBadge}</div>` : ''}
           <div class="mlc-actions">
             <button class="mlc-btn mlc-btn-edit" data-action="edit-listing" data-id="${l.id}">✏️ Edit</button>
+            <button class="mlc-btn" style="background:#dcfce7;color:#166534;border:1px solid #bbf7d0" data-action="mark-sold" data-id="${l.id}">✓ Mark Sold</button>
             <button class="mlc-btn mlc-btn-delete" data-action="delete-listing" data-id="${l.id}">🗑️ Delete</button>
           </div>
         </div>
@@ -4030,6 +4075,20 @@ async function deleteMyListing(id) {
     showToast('Listing deleted');
   } catch(e) { showToast('Could not delete listing'); }
 }
+
+async function markListingSold(id) {
+  if (!confirm('Mark this listing as sold? It will be removed from active listings.')) return;
+  try {
+    const r = await fetch(`${API}/api/listings/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type':'application/json', Authorization:`Bearer ${authToken}` },
+      body: JSON.stringify({ status: 'sold' })
+    });
+    if (r.ok) { loadMyListings(); showToast('🎉 Congrats on the sale! Listing marked as sold.'); }
+    else showToast('Could not update listing');
+  } catch(e) { showToast('Connection error'); }
+}
+
 
 // Photo preview handler for both modal and account page
 function initPhotoUpload(inputId, previewId, dropAreaId) {
@@ -4160,6 +4219,280 @@ function showToast(msg, duration=3000) {
   t.textContent = msg;
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), duration);
+}
+
+// ── Forgot Password ────────────────────────────────────
+function showForgotPassword() {
+  const loginForm = document.getElementById('form-login');
+  loginForm.innerHTML = `
+    <h2>Reset Password</h2>
+    <p style="font-size:14px;color:#666;margin-bottom:16px">Enter your email address and we'll send you a reset link.</p>
+    <div id="forgot-msg" style="display:none;padding:10px;border-radius:4px;font-size:13px;margin-bottom:12px"></div>
+    <div class="form-group">
+      <label for="forgot-email">Email Address</label>
+      <input type="email" id="forgot-email" placeholder="you@example.com" autocomplete="email">
+    </div>
+    <button class="btn-primary" style="width:100%;justify-content:center;margin-top:8px" onclick="doForgotPassword()">Send Reset Link →</button>
+    <p style="text-align:center;margin-top:10px;font-size:13px"><a href="javascript:void(0)" onclick="switchTab('login')" style="color:var(--rust);text-decoration:none">← Back to Sign In</a></p>
+  `;
+}
+
+async function doForgotPassword() {
+  const email  = document.getElementById('forgot-email')?.value?.trim();
+  const msgEl  = document.getElementById('forgot-msg');
+  if (!email) { msgEl.textContent='Please enter your email address'; msgEl.style.background='#fee2e2'; msgEl.style.color='#991b1b'; msgEl.style.display='block'; return; }
+  try {
+    const r = await fetch(`${API}/api/auth/forgot-password`, {
+      method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ email })
+    });
+    const d = await r.json();
+    msgEl.textContent = d.message || 'Check your email for a reset link.';
+    msgEl.style.background = '#dcfce7'; msgEl.style.color = '#166534';
+    msgEl.style.display = 'block';
+  } catch(e) {
+    msgEl.textContent = 'Connection error. Please try again.';
+    msgEl.style.background = '#fee2e2'; msgEl.style.color = '#991b1b';
+    msgEl.style.display = 'block';
+  }
+}
+
+// Check for password reset token in URL on load
+(function checkResetToken() {
+  const params = new URLSearchParams(window.location.search);
+  const token  = params.get('reset');
+  if (!token) return;
+  // Show password reset form in auth modal
+  openModal('auth');
+  const loginForm = document.getElementById('form-login');
+  if (loginForm) {
+    loginForm.innerHTML = `
+      <h2>Set New Password</h2>
+      <p style="font-size:14px;color:#666;margin-bottom:16px">Enter your new password below.</p>
+      <div id="reset-msg" style="display:none;padding:10px;border-radius:4px;font-size:13px;margin-bottom:12px"></div>
+      <div class="form-group"><label for="reset-pw">New Password</label><input type="password" id="reset-pw" placeholder="Min 8 characters" autocomplete="new-password"></div>
+      <div class="form-group"><label for="reset-pw2">Confirm Password</label><input type="password" id="reset-pw2" placeholder="Match new password"></div>
+      <button class="btn-primary" style="width:100%;justify-content:center;margin-top:8px" onclick="doResetPassword('${token}')">Set New Password →</button>
+    `;
+  }
+})();
+
+async function doResetPassword(token) {
+  const pw   = document.getElementById('reset-pw')?.value;
+  const pw2  = document.getElementById('reset-pw2')?.value;
+  const msgEl = document.getElementById('reset-msg');
+  if (!pw || pw.length < 8) { msgEl.textContent='Password must be at least 8 characters'; msgEl.style.background='#fee2e2'; msgEl.style.color='#991b1b'; msgEl.style.display='block'; return; }
+  if (pw !== pw2) { msgEl.textContent='Passwords do not match'; msgEl.style.background='#fee2e2'; msgEl.style.color='#991b1b'; msgEl.style.display='block'; return; }
+  try {
+    const r = await fetch(`${API}/api/auth/reset-password`, {
+      method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ token, newPassword: pw })
+    });
+    const d = await r.json();
+    if (!r.ok) { msgEl.textContent=d.error; msgEl.style.background='#fee2e2'; msgEl.style.color='#991b1b'; msgEl.style.display='block'; return; }
+    msgEl.textContent = 'Password reset! You can now sign in.';
+    msgEl.style.background = '#dcfce7'; msgEl.style.color = '#166534';
+    msgEl.style.display = 'block';
+    window.history.replaceState({}, '', '/');
+    setTimeout(() => switchTab('login'), 2000);
+  } catch(e) {
+    msgEl.textContent = 'Connection error. Please try again.';
+    msgEl.style.background='#fee2e2'; msgEl.style.color='#991b1b'; msgEl.style.display='block';
+  }
+}
+
+// ── Messages ────────────────────────────────────────────
+async function loadMyMessages() {
+  const container = document.getElementById('messages-container');
+  container.innerHTML = '<div class="loading">Loading messages…</div>';
+  try {
+    const r = await fetch(`${API}/api/listings/messages`, { headers: { Authorization: `Bearer ${authToken}` } });
+    const msgs = await r.json();
+    const badge = document.getElementById('msg-badge');
+    const unread = msgs.filter(m => !m.is_read).length;
+    if (badge) { badge.textContent = unread; badge.style.display = unread > 0 ? 'inline' : 'none'; }
+    if (!msgs.length) { container.innerHTML = '<p style="color:#888;padding:20px 0">No messages yet.</p>'; return; }
+    container.innerHTML = msgs.map(m => `
+      <div style="background:white;border:1px solid var(--light-tan);border-radius:6px;padding:16px;margin-bottom:12px;${!m.is_read?'border-left:3px solid var(--rust)':''}">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:8px">
+          <div>
+            <div style="font-weight:600;font-size:14px;color:var(--dark-brown)">${m.subject || 'Message'}</div>
+            <div style="font-size:12px;color:#888;margin-top:2px">${m.from_id === (currentUser?.id) ? '→ To: ' + m.other_name : '← From: ' + m.other_name} · ${fmtDate(m.created_at)}</div>
+          </div>
+          ${!m.is_read ? '<span style="background:var(--rust);color:white;font-size:10px;padding:2px 7px;border-radius:10px;white-space:nowrap">NEW</span>' : ''}
+        </div>
+        <div style="font-size:13px;color:#444;line-height:1.6;white-space:pre-wrap">${m.body}</div>
+        ${m.listing_id ? `<div style="margin-top:10px"><a href="javascript:void(0)" onclick="openListing(${m.listing_id})" style="font-size:12px;color:var(--rust)">View Listing →</a></div>` : ''}
+        <div style="margin-top:10px">
+          <textarea placeholder="Reply…" id="reply-${m.id}" rows="2" style="width:100%;padding:8px;border:1px solid var(--light-tan);border-radius:4px;font-family:'Source Serif 4',serif;font-size:13px;resize:vertical;box-sizing:border-box"></textarea>
+          <button class="btn-primary" style="margin-top:6px;padding:8px 16px;font-size:12px" onclick="sendReply(${m.listing_id||0}, ${m.from_id === (currentUser?.id) ? m.to_id : m.from_id}, ${m.id})">Send Reply →</button>
+        </div>
+      </div>`).join('');
+  } catch(e) {
+    container.innerHTML = '<p style="color:#888">Could not load messages.</p>';
+  }
+}
+
+async function sendReply(listingId, toUserId, msgId) {
+  const textarea = document.getElementById('reply-' + msgId);
+  const body = textarea?.value?.trim();
+  if (!body) { showToast('Please write a reply first'); return; }
+  try {
+    const r = await fetch(`${API}/api/listings/${listingId}/contact`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
+      body: JSON.stringify({ body, to_user: toUserId })
+    });
+    if (r.ok) { showToast('Reply sent!'); textarea.value = ''; loadMyMessages(); }
+    else showToast('Failed to send reply');
+  } catch(e) { showToast('Connection error'); }
+}
+
+// ── Seller Reviews ──────────────────────────────────────
+async function loadSellerReviews(sellerId) {
+  const el = document.getElementById('ld-reviews-body');
+  if (!el) return;
+  try {
+    const r = await fetch(`${API}/api/reviews/seller/${sellerId}`);
+    const { reviews, stats } = await r.json();
+    if (!reviews.length) {
+      el.innerHTML = '<p style="color:#aaa;font-size:13px">No reviews yet for this seller.</p>';
+      return;
+    }
+    const stars = n => '★'.repeat(n) + '☆'.repeat(5-n);
+    el.innerHTML = `
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px;padding:12px;background:var(--cream);border-radius:6px">
+        <div style="text-align:center">
+          <div style="font-size:32px;font-weight:900;color:var(--dark-brown);font-family:'Playfair Display',serif">${stats.avg_rating || '—'}</div>
+          <div style="color:var(--gold);font-size:18px">${stars(Math.round(stats.avg_rating || 0))}</div>
+          <div style="font-size:11px;color:#888">${stats.count} review${stats.count != 1 ? 's' : ''}</div>
+        </div>
+      </div>
+      ${reviews.slice(0,5).map(rv => `
+        <div style="border-bottom:1px solid var(--light-tan);padding:12px 0">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+            <span style="color:var(--gold);font-size:14px">${stars(rv.rating)}</span>
+            <span style="font-size:11px;color:#aaa">${fmtDate(rv.created_at)}</span>
+          </div>
+          ${rv.title ? `<div style="font-weight:600;font-size:13px;color:var(--dark-brown);margin-bottom:4px">${rv.title}</div>` : ''}
+          <div style="font-size:13px;color:#555;line-height:1.6">${rv.body}</div>
+          <div style="font-size:11px;color:#aaa;margin-top:4px">— ${rv.reviewer_name}</div>
+        </div>`).join('')}
+      ${authToken ? `
+        <div style="margin-top:16px;padding:14px;background:var(--cream);border-radius:6px">
+          <div style="font-size:13px;font-weight:600;color:var(--dark-brown);margin-bottom:10px">Leave a Review</div>
+          <div style="display:flex;gap:6px;margin-bottom:10px" id="star-picker">
+            ${[1,2,3,4,5].map(n => `<button onclick="setReviewStar(${n})" id="star-${n}" style="background:none;border:none;font-size:24px;cursor:pointer;color:#ddd;padding:0">★</button>`).join('')}
+          </div>
+          <input type="text" id="rv-title" placeholder="Title (optional)" style="width:100%;padding:8px;border:1px solid var(--light-tan);border-radius:4px;font-size:13px;margin-bottom:8px;box-sizing:border-box">
+          <textarea id="rv-body" rows="3" placeholder="Share your experience with this seller…" style="width:100%;padding:8px;border:1px solid var(--light-tan);border-radius:4px;font-size:13px;resize:vertical;box-sizing:border-box"></textarea>
+          <button class="btn-primary" style="margin-top:8px;padding:9px 20px;font-size:12px" onclick="submitReview(${sellerId})">Submit Review</button>
+        </div>` : '<p style="font-size:12px;color:#aaa;margin-top:12px"><a href="javascript:void(0)" onclick="closeModal(\'listing-detail\');openModal(\'auth\')" style="color:var(--rust)">Sign in</a> to leave a review.</p>'}
+    `;
+  } catch(e) {
+    if (el) el.innerHTML = '<p style="color:#aaa;font-size:13px">Could not load reviews.</p>';
+  }
+}
+
+let _reviewStar = 0;
+function setReviewStar(n) {
+  _reviewStar = n;
+  for (let i = 1; i <= 5; i++) {
+    const btn = document.getElementById('star-' + i);
+    if (btn) btn.style.color = i <= n ? '#C9A96E' : '#ddd';
+  }
+}
+
+async function submitReview(sellerId) {
+  if (!_reviewStar) { showToast('Please select a star rating'); return; }
+  const body = document.getElementById('rv-body')?.value?.trim();
+  if (!body) { showToast('Please write a review'); return; }
+  try {
+    const r = await fetch(`${API}/api/reviews/seller/${sellerId}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
+      body: JSON.stringify({ rating: _reviewStar, title: document.getElementById('rv-title')?.value?.trim(), body })
+    });
+    const d = await r.json();
+    if (!r.ok) { showToast(d.error || 'Could not submit review'); return; }
+    showToast('Review submitted — thank you!');
+    loadSellerReviews(sellerId);
+  } catch(e) { showToast('Connection error'); }
+}
+
+// ── Report Listing ──────────────────────────────────────
+function openReportModal(listingId) {
+  const reasons = ['Fraudulent listing','Misrepresented animal/item','Duplicate listing','Wrong category','Spam or scam','Prohibited item','Price gouging','Other'];
+  const modal = document.createElement('div');
+  modal.className = 'modal-overlay';
+  modal.style.cssText = 'display:flex;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:2000;align-items:center;justify-content:center;padding:20px';
+  modal.innerHTML = `
+    <div style="background:white;border-radius:8px;padding:28px;max-width:420px;width:100%;position:relative;box-sizing:border-box">
+      <button onclick="this.closest('.modal-overlay').remove()" style="position:absolute;top:12px;right:12px;background:none;border:none;font-size:20px;cursor:pointer;color:#888">✕</button>
+      <h3 style="font-family:'Playfair Display',serif;font-size:18px;color:var(--dark-brown);margin-bottom:6px">Report Listing</h3>
+      <p style="font-size:13px;color:#666;margin-bottom:16px">Help keep Herd Hub trustworthy. Our team reviews all reports within 24 hours.</p>
+      <div id="report-msg" style="display:none;padding:10px;border-radius:4px;font-size:13px;margin-bottom:12px"></div>
+      <div style="margin-bottom:12px">
+        <label style="font-size:12px;font-weight:600;color:var(--dark-brown);display:block;margin-bottom:6px">Reason *</label>
+        <select id="report-reason" style="width:100%;padding:9px;border:1px solid var(--light-tan);border-radius:4px;font-size:13px">
+          <option value="">Select a reason…</option>
+          ${reasons.map(r => `<option value="${r}">${r}</option>`).join('')}
+        </select>
+      </div>
+      <div style="margin-bottom:16px">
+        <label style="font-size:12px;font-weight:600;color:var(--dark-brown);display:block;margin-bottom:6px">Additional details (optional)</label>
+        <textarea id="report-details" rows="3" placeholder="Describe the issue…" style="width:100%;padding:9px;border:1px solid var(--light-tan);border-radius:4px;font-size:13px;resize:vertical;box-sizing:border-box"></textarea>
+      </div>
+      <button class="btn-primary" style="width:100%;justify-content:center" onclick="submitReport(${listingId}, this)">Submit Report</button>
+    </div>`;
+  document.body.appendChild(modal);
+  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+}
+
+async function submitReport(listingId, btn) {
+  const reason  = document.getElementById('report-reason')?.value;
+  const details = document.getElementById('report-details')?.value?.trim();
+  const msgEl   = document.getElementById('report-msg');
+  if (!reason) { msgEl.textContent='Please select a reason'; msgEl.style.background='#fee2e2'; msgEl.style.color='#991b1b'; msgEl.style.display='block'; return; }
+  btn.textContent = 'Submitting…'; btn.disabled = true;
+  try {
+    const r = await fetch(`${API}/api/reports/listing/${listingId}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...(authToken ? {Authorization:`Bearer ${authToken}`} : {}) },
+      body: JSON.stringify({ reason, details })
+    });
+    const d = await r.json();
+    if (!r.ok) { msgEl.textContent=d.error; msgEl.style.background='#fee2e2'; msgEl.style.color='#991b1b'; msgEl.style.display='block'; btn.textContent='Submit Report'; btn.disabled=false; return; }
+    msgEl.textContent = d.message;
+    msgEl.style.background = '#dcfce7'; msgEl.style.color = '#166534';
+    msgEl.style.display = 'block';
+    setTimeout(() => btn.closest('.modal-overlay')?.remove(), 2000);
+  } catch(e) { msgEl.textContent='Connection error'; msgEl.style.background='#fee2e2'; msgEl.style.color='#991b1b'; msgEl.style.display='block'; btn.textContent='Submit Report'; btn.disabled=false; }
+}
+
+// ── Unread message count ────────────────────────────────
+async function loadUnreadCount() {
+  if (!authToken) return;
+  try {
+    const r = await fetch(`${API}/api/listings/messages/unread-count`, {
+      headers: { Authorization: `Bearer ${authToken}` }
+    });
+    const d = await r.json();
+    const badge = document.getElementById('msg-badge');
+    if (badge) {
+      badge.textContent = d.count;
+      badge.style.display = d.count > 0 ? 'inline' : 'none';
+    }
+    // Also show on account button
+    const acctBtn = document.getElementById('account-btn');
+    if (acctBtn && d.count > 0) {
+      const existing = document.getElementById('acct-msg-dot');
+      if (!existing) {
+        const dot = document.createElement('span');
+        dot.id = 'acct-msg-dot';
+        dot.style.cssText = 'display:inline-block;width:8px;height:8px;background:var(--rust);border-radius:50%;margin-left:4px;vertical-align:middle';
+        acctBtn.appendChild(dot);
+      }
+    }
+  } catch(e) {}
 }
 </script>
 <!-- Cloudflare Turnstile SDK -->

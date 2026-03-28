@@ -296,3 +296,40 @@ CREATE TABLE IF NOT EXISTS beefbox_waitlist (
   created_at TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS idx_beefbox_email ON beefbox_waitlist(email);
+
+-- ── SELLER RATINGS & REVIEWS ────────────────────────────
+CREATE TABLE IF NOT EXISTS seller_reviews (
+  id            BIGSERIAL    PRIMARY KEY,
+  seller_id     BIGINT       NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  reviewer_id   BIGINT       NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  listing_id    BIGINT       REFERENCES listings(id) ON DELETE SET NULL,
+  rating        SMALLINT     NOT NULL CHECK (rating BETWEEN 1 AND 5),
+  title         TEXT,
+  body          TEXT,
+  created_at    TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+  UNIQUE(seller_id, reviewer_id, listing_id)
+);
+CREATE INDEX IF NOT EXISTS idx_reviews_seller ON seller_reviews(seller_id);
+
+-- ── PASSWORD RESET TOKENS ───────────────────────────────
+CREATE TABLE IF NOT EXISTS password_reset_tokens (
+  id         BIGSERIAL    PRIMARY KEY,
+  user_id    BIGINT       NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  token      TEXT         NOT NULL UNIQUE,
+  expires_at TIMESTAMPTZ  NOT NULL,
+  used       BOOLEAN      NOT NULL DEFAULT FALSE,
+  created_at TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+);
+
+-- ── FRAUD/SCAM REPORTS ──────────────────────────────────
+CREATE TABLE IF NOT EXISTS listing_reports (
+  id          BIGSERIAL    PRIMARY KEY,
+  listing_id  BIGINT       NOT NULL REFERENCES listings(id) ON DELETE CASCADE,
+  reporter_id BIGINT       REFERENCES users(id) ON DELETE SET NULL,
+  reason      TEXT         NOT NULL,
+  details     TEXT,
+  status      TEXT         NOT NULL DEFAULT 'open' CHECK (status IN ('open','reviewed','dismissed')),
+  created_at  TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_reports_listing ON listing_reports(listing_id);
+CREATE INDEX IF NOT EXISTS idx_reports_status  ON listing_reports(status);

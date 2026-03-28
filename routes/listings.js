@@ -537,9 +537,67 @@ router.post('/:id/contact', authenticateToken, async (req, res) => {
       'INSERT INTO messages (listing_id, from_user, to_user, subject, body) VALUES ($1,$2,$3,$4,$5)',
       [req.params.id, req.user.id, rows[0].user_id, `Re: ${rows[0].title}`, body]
     );
+
+    // Email notification to seller (non-blocking)
+    try {
+      const { rows: seller } = await query(
+        'SELECT name, email FROM users WHERE id=$1', [rows[0].user_id]
+      );
+      const { rows: sender } = await query(
+        'SELECT name FROM users WHERE id=$1', [req.user.id]
+      );
+      if (seller.length && sender.length) {
+        const { sendEmail, newMessageEmail } = require('../services/email');
+        const tmpl = newMessageEmail(seller[0].name, sender[0].name, rows[0].title, body);
+        sendEmail({ to: seller[0].email, ...tmpl }).catch(() => {});
+      }
+    } catch(e) {}
+
     res.json({ message: 'Message sent' });
   } catch (err) {
     res.status(500).json({ error: 'Failed to send message' });
+  }
+});
+
+// ── GET /api/listings/messages ─────────────────────────
+// Returns all messages for the logged-in user (sent + received)
+router.get('/messages', authenticateToken, async (req, res) => {
+  try {
+    const { rows } = await query(
+      `SELECT m.id, m.subject, m.body, m.is_read, m.created_at,
+              m.listing_id, m.from_user AS from_id, m.to_user AS to_id,
+              CASE WHEN m.from_user=$1 THEN r.name ELSE s.name END AS other_name,
+              l.title AS listing_title
+       FROM messages m
+       JOIN users s ON s.id = m.from_user
+       JOIN users r ON r.id = m.to_user
+       LEFT JOIN listings l ON l.id = m.listing_id
+       WHERE m.from_user=$1 OR m.to_user=$1
+       ORDER BY m.created_at DESC
+       LIMIT 100`,
+      [req.user.id]
+    );
+    // Mark all received messages as read
+    await query(
+      'UPDATE messages SET is_read=TRUE WHERE to_user=$1 AND is_read=FALSE',
+      [req.user.id]
+    );
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch messages' });
+  }
+});
+
+// ── GET /api/listings/messages/unread-count ────────────
+router.get('/messages/unread-count', authenticateToken, async (req, res) => {
+  try {
+    const { rows } = await query(
+      'SELECT COUNT(*) AS c FROM messages WHERE to_user=$1 AND is_read=FALSE',
+      [req.user.id]
+    );
+    res.json({ count: parseInt(rows[0].c) });
+  } catch (err) {
+    res.status(500).json({ count: 0 });
   }
 });
 
