@@ -3986,12 +3986,18 @@ function switchAcctTab(tab) {
   if (tab === 'messages') loadMyMessages();
 }
 
+function daysUntilExpiry(expiresAt) {
+  if (!expiresAt) return null;
+  return Math.ceil((new Date(expiresAt) - new Date()) / 86400000);
+}
+
 async function loadMyListings() {
   const container = document.getElementById('my-listings-container');
   container.innerHTML = '<div class="loading">Loading your listings…</div>';
   try {
     const r = await fetch(`${API}/api/listings/user/me`, { headers: { Authorization: `Bearer ${authToken}` } });
     const listings = await r.json();
+    if (!Array.isArray(listings)) throw new Error('Bad response');
     if (!listings.length) {
       container.innerHTML = '<p style="color:#888;padding:20px 0">You have no listings yet. <a href="javascript:void(0)" data-action="acct-tab" data-tab="post" style="color:var(--rust)">Post your first listing →</a></p>';
       return;
