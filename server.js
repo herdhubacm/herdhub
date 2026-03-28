@@ -83,7 +83,8 @@ app.use(helmet({
                        "https://*.shopify.com",
                        "https://static.cloudflareinsights.com",
                        "https://www.googletagmanager.com",
-                       "https://www.google-analytics.com"],
+                       "https://www.google-analytics.com",
+                       "https://challenges.cloudflare.com"],
       scriptSrcAttr:  ["'unsafe-inline'"],
       styleSrc:       ["'self'", "'unsafe-inline'",
                        "https://fonts.googleapis.com",
@@ -109,7 +110,8 @@ app.use(helmet({
                        "https://*.myshopify.com",
                        "https://*.shopify.com",
                        "https://checkout.shopify.com",
-                       "https://button.app.shopify.com"],
+                       "https://button.app.shopify.com",
+                       "https://challenges.cloudflare.com"],
       frameAncestors: ["'none'"],
     }
   }
