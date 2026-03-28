@@ -3429,16 +3429,16 @@ async function openListing(id) {
     let gallery = '';
     if (photos.length) {
       const mainImg = `<img id="ld-main-img" src="${photos[0].url}" alt="${l.title}"
-        style="width:100%;height:340px;object-fit:cover;display:block;cursor:${photos.length > 1 ? 'pointer' : 'default'}"
+        style="width:100%;height:280px;object-fit:cover;display:block;cursor:${photos.length > 1 ? 'pointer' : 'default'}"
         ${photos.length > 1 ? `onclick="ldNextPhoto()"` : ''}>`;
       const dots = photos.length > 1
         ? `<div style="position:absolute;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:6px">
             ${photos.map((_,i) => `<div id="ld-dot-${i}" style="width:7px;height:7px;border-radius:50%;background:${i===0?'white':'rgba(255,255,255,.5)'}"></div>`).join('')}
            </div>`
         : '';
-      gallery = `<div style="position:relative">${mainImg}${dots}</div>`;
+      gallery = `<div style="position:relative;flex-shrink:0">${mainImg}${dots}</div>`;
     } else {
-      gallery = `<div style="height:220px;background:var(--light-tan);display:flex;align-items:center;justify-content:center;font-size:64px">${catEmoji(l.category)}</div>`;
+      gallery = `<div style="height:180px;background:var(--light-tan);display:flex;align-items:center;justify-content:center;font-size:64px;flex-shrink:0">${catEmoji(l.category)}</div>`;
     }
 
     // Price display
@@ -3460,13 +3460,15 @@ async function openListing(id) {
 
     // Contact section — show phone only if logged in
     let contactHtml = '';
-    if (authToken && l.seller_phone) {
+    if (authToken) {
       contactHtml = `
-        <a href="tel:${l.seller_phone}" style="display:flex;align-items:center;gap:8px;padding:12px 16px;background:var(--rust);color:white;border-radius:4px;font-family:'Oswald',sans-serif;font-weight:600;letter-spacing:.06em;text-decoration:none;justify-content:center">
-          📞 ${l.seller_phone}
-        </a>`;
-    } else if (authToken) {
-      contactHtml = `<button class="btn-primary" style="width:100%;justify-content:center" onclick="openMessageModal(${l.id}, '${(l.title||'').replace(/'/g,"\\'")}')">✉️ Message Seller</button>`;
+        <div style="display:flex;flex-direction:column;gap:8px">
+          ${l.seller_phone ? `
+          <a href="tel:${l.seller_phone}" style="display:flex;align-items:center;gap:8px;padding:12px 16px;background:var(--rust);color:white;border-radius:4px;font-family:'Oswald',sans-serif;font-weight:600;letter-spacing:.06em;text-decoration:none;justify-content:center">
+            📞 ${l.seller_phone}
+          </a>` : ''}
+          <button class="btn-primary" style="width:100%;justify-content:center;background:var(--dark-brown);border-color:var(--dark-brown)" onclick="openMessageModal(${l.id}, '${(l.title||'').replace(/'/g,"\\'")}')">✉️ Message Seller</button>
+        </div>`;
     } else {
       contactHtml = `<button class="btn-primary" style="width:100%;justify-content:center" onclick="closeModal('listing-detail');openModal('auth')">🔒 Sign In to Contact Seller</button>`;
     }
@@ -3527,6 +3529,10 @@ async function openListing(id) {
     // Store photos for gallery navigation
     window._ldPhotos = photos;
     window._ldPhotoIdx = 0;
+
+    // Scroll to top of modal body
+    const bodyEl = document.getElementById('listing-detail-body');
+    if (bodyEl) bodyEl.scrollTop = 0;
 
     // Load seller reviews
     if (l.user_id) loadSellerReviews(l.user_id);
