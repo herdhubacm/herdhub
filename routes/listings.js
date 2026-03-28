@@ -187,6 +187,48 @@ router.get('/user/me', authenticateToken, async (req, res) => {
 });
 
 // ── GET /api/listings/:id ─────────────────────────────
+// ── GET /api/listings/messages ─────────────────────────
+// Returns all messages for the logged-in user (sent + received)
+router.get('/messages', authenticateToken, async (req, res) => {
+  try {
+    const { rows } = await query(
+      `SELECT m.id, m.subject, m.body, m.is_read, m.created_at,
+              m.listing_id, m.from_user AS from_id, m.to_user AS to_id,
+              CASE WHEN m.from_user=$1 THEN r.name ELSE s.name END AS other_name,
+              l.title AS listing_title
+       FROM messages m
+       JOIN users s ON s.id = m.from_user
+       JOIN users r ON r.id = m.to_user
+       LEFT JOIN listings l ON l.id = m.listing_id
+       WHERE m.from_user=$1 OR m.to_user=$1
+       ORDER BY m.created_at DESC
+       LIMIT 100`,
+      [req.user.id]
+    );
+    // Mark all received messages as read
+    await query(
+      'UPDATE messages SET is_read=TRUE WHERE to_user=$1 AND is_read=FALSE',
+      [req.user.id]
+    );
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch messages' });
+  }
+});
+
+// ── GET /api/listings/messages/unread-count ────────────
+router.get('/messages/unread-count', authenticateToken, async (req, res) => {
+  try {
+    const { rows } = await query(
+      'SELECT COUNT(*) AS c FROM messages WHERE to_user=$1 AND is_read=FALSE',
+      [req.user.id]
+    );
+    res.json({ count: parseInt(rows[0].c) });
+  } catch (err) {
+    res.status(500).json({ count: 0 });
+  }
+});
+
 router.get('/:id', optionalAuth, async (req, res) => {
   try {
     const id = parseInt(req.params.id);
@@ -556,48 +598,6 @@ router.post('/:id/contact', authenticateToken, async (req, res) => {
     res.json({ message: 'Message sent' });
   } catch (err) {
     res.status(500).json({ error: 'Failed to send message' });
-  }
-});
-
-// ── GET /api/listings/messages ─────────────────────────
-// Returns all messages for the logged-in user (sent + received)
-router.get('/messages', authenticateToken, async (req, res) => {
-  try {
-    const { rows } = await query(
-      `SELECT m.id, m.subject, m.body, m.is_read, m.created_at,
-              m.listing_id, m.from_user AS from_id, m.to_user AS to_id,
-              CASE WHEN m.from_user=$1 THEN r.name ELSE s.name END AS other_name,
-              l.title AS listing_title
-       FROM messages m
-       JOIN users s ON s.id = m.from_user
-       JOIN users r ON r.id = m.to_user
-       LEFT JOIN listings l ON l.id = m.listing_id
-       WHERE m.from_user=$1 OR m.to_user=$1
-       ORDER BY m.created_at DESC
-       LIMIT 100`,
-      [req.user.id]
-    );
-    // Mark all received messages as read
-    await query(
-      'UPDATE messages SET is_read=TRUE WHERE to_user=$1 AND is_read=FALSE',
-      [req.user.id]
-    );
-    res.json(rows);
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to fetch messages' });
-  }
-});
-
-// ── GET /api/listings/messages/unread-count ────────────
-router.get('/messages/unread-count', authenticateToken, async (req, res) => {
-  try {
-    const { rows } = await query(
-      'SELECT COUNT(*) AS c FROM messages WHERE to_user=$1 AND is_read=FALSE',
-      [req.user.id]
-    );
-    res.json({ count: parseInt(rows[0].c) });
-  } catch (err) {
-    res.status(500).json({ count: 0 });
   }
 });
 

@@ -1383,9 +1383,9 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
 <!-- POST LISTING -->
 <!-- LISTING DETAIL MODAL -->
 <div class="modal-overlay" id="modal-listing-detail" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Listing details">
-  <div class="modal" style="max-width:720px;padding:0;overflow:hidden;display:flex;flex-direction:column;max-height:92vh">
-    <button class="modal-close" data-action="close-modal" data-modal="listing-detail" style="z-index:2;position:absolute;top:12px;right:12px;background:rgba(0,0,0,.5);color:white;border:none;width:32px;height:32px;border-radius:50%;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
-    <div id="listing-detail-body" style="overflow-y:auto;flex:1;-webkit-overflow-scrolling:touch"><div class="loading" style="padding:60px;text-align:center">Loading…</div></div>
+  <div class="modal" style="max-width:720px;padding:0;display:flex;flex-direction:column;max-height:92vh;width:calc(100% - 24px);overflow:hidden">
+    <button class="modal-close" data-action="close-modal" data-modal="listing-detail" style="z-index:2;position:absolute;top:12px;right:12px;background:rgba(0,0,0,.5);color:white;border:none;width:32px;height:32px;border-radius:50%;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center" aria-label="Close dialog">✕</button>
+    <div id="listing-detail-body" style="overflow-y:auto;overflow-x:hidden;flex:1;min-height:0;-webkit-overflow-scrolling:touch"><div class="loading" style="padding:60px;text-align:center">Loading…</div></div>
     <div style="padding:10px 20px;background:#f9f6f0;border-top:1px solid var(--light-tan)">
       <p style="font-size:10px;color:#aaa;line-height:1.6;margin:0;font-family:'Oswald',sans-serif;letter-spacing:.03em">
         ⚠️ <strong>DISCLAIMER:</strong> Herd Hub is a listing platform only. All transactions are between buyer and seller. Herd Hub does not verify listing accuracy, guarantee animal health or condition, or participate in any transaction. Buyers are responsible for independent inspection prior to purchase. <a href="javascript:void(0)" data-action="page" data-page="terms" style="color:var(--rust)">Terms of Service</a>
