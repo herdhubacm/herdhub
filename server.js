@@ -222,6 +222,16 @@ app.use('/api/reports',  limiter(30),  require('./routes/reports'));
 app.use('/api/searches', limiter(60),  require('./routes/searches'));
 app.use('/api/sellers',  limiter(60),  require('./routes/sellers'));
 
+// ── GET /api/settings (public — stats bar) ───────────
+app.get('/api/settings', async (req, res) => {
+  try {
+    const { rows } = await query('SELECT key, value FROM site_settings');
+    const s = {};
+    rows.forEach(r => { s[r.key] = r.value; });
+    res.json(s);
+  } catch(e) { res.json({}); }
+});
+
 // ── GET /api/csrf-token ───────────────────────────────
 // Frontend fetches this on page load — attached to state-changing requests
 app.get('/api/csrf-token', (req, res) => {
@@ -434,6 +444,20 @@ async function start() {
         UNIQUE(user_id, drip_day)
       )`);
       console.log('✅  Email drip log table ready');
+
+      // Site settings table
+      await query(`CREATE TABLE IF NOT EXISTS site_settings (
+        key    TEXT PRIMARY KEY,
+        value  TEXT NOT NULL,
+        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      )`);
+      // Seed defaults if empty
+      await query(`INSERT INTO site_settings (key, value) VALUES
+        ('stat_members', '350'),
+        ('stat_sales',   '$25K+'),
+        ('stat_since',   'Since 2018')
+        ON CONFLICT (key) DO NOTHING`);
+      console.log('✅  Site settings table ready');
 
     } catch (migErr) {
       console.warn('⚠️  Migration warning:', migErr.message);

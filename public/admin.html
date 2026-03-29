@@ -475,10 +475,11 @@ tr:hover td{background:rgba(255,255,255,.02)}
 
             <div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:20px">
               <h3 style="font-size:14px;color:var(--gold);margin-bottom:16px">🏷 Stats Bar</h3>
-              <div style="margin-bottom:12px"><label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px">Active Listings Count</label><input id="setting-listings-count" type="text" placeholder="41+" style="width:100%;padding:8px;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:5px;font-size:13px"></div>
-              <div style="margin-bottom:12px"><label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px">Members Count</label><input id="setting-members-count" type="text" placeholder="1,200+" style="width:100%;padding:8px;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:5px;font-size:13px"></div>
-              <div style="margin-bottom:12px"><label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px">Total Sales</label><input id="setting-sales-total" type="text" placeholder="$500K+" style="width:100%;padding:8px;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:5px;font-size:13px"></div>
-              <button class="btn btn-success" onclick="showToast('Stats bar settings saved (requires code deploy to reflect)')">Save</button>
+              <div style="margin-bottom:12px"><label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px">Members Count</label><input id="setting-members-count" type="text" placeholder="350" style="width:100%;padding:8px;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:5px;font-size:13px"></div>
+              <div style="margin-bottom:12px"><label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px">Total Sales</label><input id="setting-sales-total" type="text" placeholder="$25K+" style="width:100%;padding:8px;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:5px;font-size:13px"></div>
+              <div style="margin-bottom:16px"><label style="font-size:12px;color:var(--muted);display:block;margin-bottom:4px">Trusted Since</label><input id="setting-since" type="text" placeholder="Since 2018" style="width:100%;padding:8px;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:5px;font-size:13px"></div>
+              <div id="settings-msg" style="display:none;font-size:12px;margin-bottom:10px;padding:8px;border-radius:4px"></div>
+              <button class="btn btn-success" onclick="saveSettings()">💾 Save Stats Bar</button>
             </div>
 
             <div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:20px">
@@ -703,6 +704,7 @@ function switchPanel(name) {
   if (name === 'forum')    { forumPage = 1;    loadAdminForum(); }
   if (name === 'waitlists') { loadWaitlists(); }
   if (name === 'payments')  { loadPayments(); }
+  if (name === 'settings')  { loadSettings(); }
 }
 
 // ── Dashboard ─────────────────────────────────────────
@@ -1325,6 +1327,56 @@ async function loadWaitlists() {
     if (countEl) countEl.textContent = rows.length;
   } catch(e) {
     tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:16px">Could not load waitlist.</td></tr>';
+  }
+}
+
+// ── Site Settings ──────────────────────────────────────
+async function loadSettings() {
+  try {
+    const r = await fetch(`${API}/api/admin/settings`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const s = await r.json();
+    const membersEl = document.getElementById('setting-members-count');
+    const salesEl   = document.getElementById('setting-sales-total');
+    const sinceEl   = document.getElementById('setting-since');
+    if (membersEl) membersEl.value = s.stat_members || '';
+    if (salesEl)   salesEl.value   = s.stat_sales   || '';
+    if (sinceEl)   sinceEl.value   = s.stat_since   || '';
+  } catch(e) { showToast('Could not load settings'); }
+}
+
+async function saveSettings() {
+  const members = document.getElementById('setting-members-count')?.value?.trim();
+  const sales   = document.getElementById('setting-sales-total')?.value?.trim();
+  const since   = document.getElementById('setting-since')?.value?.trim();
+  const msgEl   = document.getElementById('settings-msg');
+
+  try {
+    const r = await fetch(`${API}/api/admin/settings`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({
+        stat_members: members,
+        stat_sales:   sales,
+        stat_since:   since,
+      })
+    });
+    if (r.ok) {
+      msgEl.textContent = '✅ Stats bar updated — changes are live immediately.';
+      msgEl.style.background = 'rgba(74,222,128,.12)';
+      msgEl.style.color = '#4ade80';
+      msgEl.style.display = 'block';
+      setTimeout(() => { msgEl.style.display = 'none'; }, 3000);
+      showToast('Stats bar saved!');
+    } else {
+      throw new Error('Save failed');
+    }
+  } catch(e) {
+    msgEl.textContent = '❌ Could not save settings. Try again.';
+    msgEl.style.background = 'rgba(248,113,113,.12)';
+    msgEl.style.color = '#f87171';
+    msgEl.style.display = 'block';
   }
 }
 

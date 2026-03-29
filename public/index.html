@@ -563,10 +563,10 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
 <div class="stats-bar" aria-label="Herd Hub statistics">
   <div class="stats-inner">
     <div class="stat-item"><span class="num" id="stat-total">—</span><span class="label">Active Listings</span></div>
-    <div class="stat-item"><span class="num">350</span><span class="label">Registered Members</span></div>
+    <div class="stat-item"><span class="num" id="stat-members">350</span><span class="label">Registered Members</span></div>
     <div class="stat-item"><span class="num">50</span><span class="label">States Covered</span></div>
-    <div class="stat-item"><span class="num">$25K+</span><span class="label">In Sales</span></div>
-    <div class="stat-item"><span class="num">Since 2018</span><span class="label">Trusted Platform</span></div>
+    <div class="stat-item"><span class="num" id="stat-sales">$25K+</span><span class="label">In Sales</span></div>
+    <div class="stat-item"><span class="num" id="stat-since">Since 2018</span><span class="label">Trusted Platform</span></div>
   </div>
 </div>
 
@@ -3277,9 +3277,22 @@ function renderMarketPrices(data) {
 // ── Listings ───────────────────────────────────────────
 async function loadStats() {
   try {
-    const r = await fetch(`${API}/api/listings/stats`);
-    const d = await r.json();
+    const [statsRes, settingsRes] = await Promise.all([
+      fetch(`${API}/api/listings/stats`),
+      fetch(`${API}/api/settings`)
+    ]);
+    const d = await statsRes.json();
+    const s = await settingsRes.json();
+
     document.getElementById('stat-total').textContent = d.total_active.toLocaleString() + '+';
+
+    // Stats from settings (admin-controlled)
+    const membersEl = document.getElementById('stat-members');
+    const salesEl   = document.getElementById('stat-sales');
+    const sinceEl   = document.getElementById('stat-since');
+    if (membersEl) membersEl.textContent = s.stat_members || '350';
+    if (salesEl)   salesEl.textContent   = s.stat_sales   || '$25K+';
+    if (sinceEl)   sinceEl.textContent   = s.stat_since   || 'Since 2018';
 
     // Category counts
     const catMap = {

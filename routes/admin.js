@@ -403,5 +403,35 @@ router.delete('/articles/:id', async (req, res) => {
   } catch (e) { res.status(500).json({ error: 'Failed to delete article' }); }
 });
 
+// ── GET /api/admin/settings ───────────────────────────
+router.get('/settings', async (req, res) => {
+  try {
+    const { rows } = await query('SELECT key, value FROM site_settings');
+    const settings = {};
+    rows.forEach(r => { settings[r.key] = r.value; });
+    res.json(settings);
+  } catch(e) { res.status(500).json({ error: 'Failed to load settings' }); }
+});
+
+// ── PUT /api/admin/settings ───────────────────────────
+router.put('/settings', async (req, res) => {
+  try {
+    const allowed = ['stat_members', 'stat_sales', 'stat_since'];
+    for (const key of allowed) {
+      if (req.body[key] !== undefined) {
+        await query(
+          `INSERT INTO site_settings (key, value, updated_at)
+           VALUES ($1, $2, NOW())
+           ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW()`,
+          [key, String(req.body[key]).slice(0, 50)]
+        );
+      }
+    }
+    res.json({ ok: true });
+  } catch(e) { res.status(500).json({ error: 'Failed to save settings' }); }
+});
+
+// ── GET /api/settings (public — for frontend stats bar) ─
+// Mounted separately in server.js as /api/settings
 
 module.exports = router;
