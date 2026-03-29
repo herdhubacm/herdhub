@@ -4420,7 +4420,7 @@ function showPage(page) {
   document.querySelectorAll('nav a[data-page], nav a[data-cat]').forEach(a => {
     a.removeAttribute('aria-current');
   });
-  ['home','listings','forum','account','about','pricing','articles','article-detail','privacy','terms','user-agreement','beef-boxes','merch'].forEach(p => {
+  ['home','listings','forum','account','about','pricing','articles','article-detail','privacy','terms','user-agreement','beef-boxes','merch','contact','seller'].forEach(p => {
     const el = document.getElementById('page-' + p);
     if (el) el.style.display = p === page ? 'block' : 'none';
   });

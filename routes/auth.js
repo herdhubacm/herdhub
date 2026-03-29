@@ -231,51 +231,73 @@ router.post('/reset-password', async (req, res) => {
 });
 
 // ── POST /api/auth/newsletter ──────────────────────────
-// Saves email to DB + syncs to Mailchimp if configured
+// Saves email to DB + sends welcome email via Resend (already configured)
 router.post('/newsletter', async (req, res) => {
   try {
     const { email } = req.body;
     if (!email || !email.includes('@'))
       return res.status(400).json({ error: 'Valid email required' });
 
-    // Save/update in users table if they exist
-    await query(
-      `UPDATE users SET newsletter_opt_in=TRUE WHERE email=$1`,
-      [email.toLowerCase()]
+    const emailLower = email.toLowerCase();
+
+    // Check if already subscribed in users table
+    const { rows: existing } = await query(
+      'SELECT id, newsletter_opt_in FROM users WHERE email=$1',
+      [emailLower]
     );
 
-    // Sync to Mailchimp if API key configured
-    const mcKey  = process.env.MAILCHIMP_API_KEY;
-    const mcList = process.env.MAILCHIMP_LIST_ID;
-    if (mcKey && mcList) {
-      const dc = mcKey.split('-').pop(); // datacenter e.g. us21
-      try {
-        const mcRes = await fetch(
-          `https://${dc}.api.mailchimp.com/3.0/lists/${mcList}/members`,
-          {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${mcKey}`,
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              email_address: email.toLowerCase(),
-              status: 'subscribed',
-              tags: ['website-signup'],
-            }),
-          }
-        );
-        const mcData = await mcRes.json();
-        if (!mcRes.ok && mcData.title !== 'Member Exists') {
-          console.warn('Mailchimp error:', mcData.detail);
-        }
-      } catch(e) {
-        console.warn('Mailchimp sync error:', e.message);
+    if (existing.length) {
+      if (existing[0].newsletter_opt_in) {
+        return res.json({ ok: true, message: "You're already subscribed!" });
       }
+      await query(
+        'UPDATE users SET newsletter_opt_in=TRUE WHERE email=$1',
+        [emailLower]
+      );
+    }
+    // If not a registered user, still send welcome email
+    // and store in beefbox_waitlist as a newsletter-only signup
+    else {
+      try {
+        await query(
+          `INSERT INTO beefbox_waitlist (name, email, type)
+           VALUES ($1, $2, 'newsletter')
+           ON CONFLICT (email) DO NOTHING`,
+          [emailLower.split('@')[0], emailLower]
+        );
+      } catch(e) { /* ignore duplicate */ }
     }
 
-    res.json({ ok: true, message: "You're subscribed!" });
+    // Send welcome newsletter email via Resend (already configured)
+    try {
+      const { sendEmail } = require('../services/email');
+      await sendEmail({
+        to: emailLower,
+        subject: 'Welcome to the Herd Hub Newsletter!',
+        html: `<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
+          <body style="font-family:Georgia,serif;background:#f5efe0;margin:0;padding:20px">
+          <div style="max-width:560px;margin:0 auto;background:#fff;border-radius:6px;overflow:hidden">
+            <div style="background:#2c1a0e;padding:24px 32px;text-align:center">
+              <h1 style="font-family:Georgia,serif;color:#f5efe0;font-size:24px;margin:0">Herd <span style="color:#c9a96e">Hub</span> Newsletter</h1>
+            </div>
+            <div style="padding:32px">
+              <p style="color:#333;line-height:1.7">You're on the list!</p>
+              <p style="color:#333;line-height:1.7">Every month you'll get cattle market prices, featured listings, ranch news, and exclusive deals — straight to your inbox.</p>
+              <div style="text-align:center;margin:24px 0">
+                <a href="https://theherdhub.com" style="display:inline-block;background:#8b3214;color:#fff;padding:12px 28px;border-radius:4px;text-decoration:none;font-family:Arial,sans-serif;font-size:14px;font-weight:700">Browse Latest Listings &rarr;</a>
+              </div>
+            </div>
+            <div style="background:#f9f4ec;padding:16px 32px;text-align:center;font-size:12px;color:#888">
+              Herd Hub &middot; American Cattle Marketplace &middot; <a href="https://theherdhub.com" style="color:#8b3214">theherdhub.com</a>
+            </div>
+          </div></body></html>`,
+        text: `Welcome to the Herd Hub Newsletter! Visit https://theherdhub.com for the latest listings.`,
+      }).catch(() => {});
+    } catch(e) {}
+
+    res.json({ ok: true, message: "You're subscribed! Check your inbox for a welcome email." });
   } catch(e) {
+    console.error('Newsletter error:', e);
     res.status(500).json({ error: 'Subscription failed' });
   }
 });
