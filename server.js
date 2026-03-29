@@ -220,6 +220,7 @@ app.use('/api/beefbox',  limiter(30),  require('./routes/beefbox'));
 app.use('/api/reviews',  limiter(60),  require('./routes/reviews'));
 app.use('/api/reports',  limiter(30),  require('./routes/reports'));
 app.use('/api/searches', limiter(60),  require('./routes/searches'));
+app.use('/api/sellers',  limiter(60),  require('./routes/sellers'));
 
 // ── GET /api/csrf-token ───────────────────────────────
 // Frontend fetches this on page load — attached to state-changing requests
@@ -424,6 +425,16 @@ async function start() {
       )`);
       console.log('✅  Geo columns, sold_at, saved_searches ready');
 
+      // Email drip log table
+      await query(`CREATE TABLE IF NOT EXISTS email_drip_log (
+        id         BIGSERIAL    PRIMARY KEY,
+        user_id    BIGINT       NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        drip_day   INTEGER      NOT NULL,
+        sent_at    TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+        UNIQUE(user_id, drip_day)
+      )`);
+      console.log('✅  Email drip log table ready');
+
     } catch (migErr) {
       console.warn('⚠️  Migration warning:', migErr.message);
     }
@@ -578,6 +589,132 @@ async function start() {
       runSearchAlertCron();
       setInterval(runSearchAlertCron, 6 * 60 * 60 * 1000);
     }, 3600000);
+
+    // ── Email drip cron — runs every 12 hours ─────────
+    async function runDripCron() {
+      try {
+        const { sendEmail } = require('./services/email');
+
+        // Day 3 — "Have you posted your first listing?"
+        const { rows: day3 } = await query(`
+          SELECT u.id, u.name, u.email, u.state
+          FROM users u
+          WHERE u.created_at BETWEEN NOW() - INTERVAL '3 days 12 hours'
+                                  AND NOW() - INTERVAL '2 days 12 hours'
+            AND u.newsletter_opt_in = TRUE
+            AND NOT EXISTS (SELECT 1 FROM email_drip_log d WHERE d.user_id=u.id AND d.drip_day=3)
+            AND NOT EXISTS (SELECT 1 FROM listings l WHERE l.user_id=u.id)
+        `);
+
+        for (const u of day3) {
+          const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
+            <body style="font-family:Georgia,serif;background:#f5efe0;margin:0;padding:20px">
+            <div style="max-width:560px;margin:0 auto;background:#fff;border-radius:6px;overflow:hidden">
+              <div style="background:#2c1a0e;padding:24px 32px;text-align:center">
+                <h1 style="font-family:Georgia,serif;color:#f5efe0;font-size:24px;margin:0">Herd <span style="color:#c9a96e">Hub</span></h1>
+              </div>
+              <div style="padding:32px">
+                <p style="color:#333;line-height:1.7">Hey ${u.name},</p>
+                <p style="color:#333;line-height:1.7">You joined Herd Hub a few days ago — have you had a chance to post your first listing yet?</p>
+                <p style="color:#333;line-height:1.7">It only takes 2 minutes. Add a photo, a description, and a price — and your listing goes live in front of buyers across all 50 states.</p>
+                <div style="text-align:center;margin:24px 0">
+                  <a href="https://theherdhub.com" style="display:inline-block;background:#8b3214;color:#fff;padding:14px 32px;border-radius:4px;text-decoration:none;font-family:Arial,sans-serif;font-size:15px;font-weight:700">Post My First Listing →</a>
+                </div>
+                <p style="color:#888;font-size:13px;line-height:1.7">Listings are free to post. Upgrade anytime for featured placement.</p>
+              </div>
+              <div style="background:#f9f4ec;padding:16px 32px;text-align:center;font-size:12px;color:#888">
+                <a href="https://theherdhub.com" style="color:#8b3214">theherdhub.com</a>
+              </div>
+            </div></body></html>`;
+
+          await sendEmail({
+            to: u.email,
+            subject: `${u.name}, ready to post your first listing?`,
+            html,
+            text: `Hey ${u.name}, you joined Herd Hub a few days ago. Post your first listing at https://theherdhub.com — it takes 2 minutes.`
+          }).catch(() => {});
+
+          await query(
+            'INSERT INTO email_drip_log (user_id, drip_day) VALUES ($1, 3) ON CONFLICT DO NOTHING',
+            [u.id]
+          );
+        }
+        if (day3.length) console.log(`💧 Drip Day 3: sent to ${day3.length} user(s)`);
+
+        // Day 7 — "Here's what's new in your state"
+        const { rows: day7 } = await query(`
+          SELECT u.id, u.name, u.email, u.state
+          FROM users u
+          WHERE u.created_at BETWEEN NOW() - INTERVAL '7 days 12 hours'
+                                  AND NOW() - INTERVAL '6 days 12 hours'
+            AND u.newsletter_opt_in = TRUE
+            AND u.state IS NOT NULL
+            AND NOT EXISTS (SELECT 1 FROM email_drip_log d WHERE d.user_id=u.id AND d.drip_day=7)
+        `);
+
+        for (const u of day7) {
+          // Find recent listings in their state
+          const { rows: stateListings } = await query(
+            `SELECT l.id, l.title, l.category, l.city, l.price, l.price_type
+             FROM listings l
+             WHERE l.state=$1 AND l.status='active'
+               AND l.created_at > NOW() - INTERVAL '7 days'
+             ORDER BY l.created_at DESC LIMIT 5`,
+            [u.state]
+          );
+
+          const listingRows = stateListings.length
+            ? stateListings.map(l => {
+                const price = l.price ? `$${Number(l.price).toLocaleString()}` : 'Call';
+                return `<tr><td style="padding:10px 0;border-bottom:1px solid #e8dcc8">
+                  <div style="font-weight:600;color:#2c1a0e">${l.title}</div>
+                  <div style="font-size:12px;color:#888;margin-top:2px">${l.city} · ${price}</div>
+                </td></tr>`;
+              }).join('')
+            : `<tr><td style="padding:16px 0;color:#888;font-size:13px">No new listings in ${u.state} this week yet — check back soon.</td></tr>`;
+
+          const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
+            <body style="font-family:Georgia,serif;background:#f5efe0;margin:0;padding:20px">
+            <div style="max-width:560px;margin:0 auto;background:#fff;border-radius:6px;overflow:hidden">
+              <div style="background:#2c1a0e;padding:24px 32px;text-align:center">
+                <h1 style="font-family:Georgia,serif;color:#f5efe0;font-size:24px;margin:0">Herd <span style="color:#c9a96e">Hub</span></h1>
+              </div>
+              <div style="padding:32px">
+                <p style="color:#333;line-height:1.7">Hey ${u.name},</p>
+                <p style="color:#333;line-height:1.7">Here's what's been listed in <strong>${u.state}</strong> this week:</p>
+                <table style="width:100%;border-collapse:collapse">${listingRows}</table>
+                <div style="text-align:center;margin:24px 0">
+                  <a href="https://theherdhub.com" style="display:inline-block;background:#8b3214;color:#fff;padding:14px 32px;border-radius:4px;text-decoration:none;font-family:Arial,sans-serif;font-size:15px;font-weight:700">Browse All Listings →</a>
+                </div>
+              </div>
+              <div style="background:#f9f4ec;padding:16px 32px;text-align:center;font-size:12px;color:#888">
+                <a href="https://theherdhub.com" style="color:#8b3214">theherdhub.com</a>
+              </div>
+            </div></body></html>`;
+
+          await sendEmail({
+            to: u.email,
+            subject: `New listings in ${u.state} this week — Herd Hub`,
+            html,
+            text: `Hey ${u.name}, see what's been listed in ${u.state} this week at https://theherdhub.com`
+          }).catch(() => {});
+
+          await query(
+            'INSERT INTO email_drip_log (user_id, drip_day) VALUES ($1, 7) ON CONFLICT DO NOTHING',
+            [u.id]
+          );
+        }
+        if (day7.length) console.log(`💧 Drip Day 7: sent to ${day7.length} user(s)`);
+
+      } catch(e) {
+        console.warn('Drip cron error:', e.message);
+      }
+    }
+    // Run every 12 hours
+    setTimeout(() => {
+      runDripCron();
+      setInterval(runDripCron, 12 * 60 * 60 * 1000);
+    }, 7200000);
   } catch (err) {
     console.error('❌  Startup failed:', err.message);
     process.exit(1);

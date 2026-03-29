@@ -52,3 +52,17 @@ router.get('/list', authenticateToken, requireAdmin, async (req, res) => {
 });
 
 module.exports = router;
+
+// ── DELETE /api/beefbox/:id (admin only) ──────────────
+router.delete('/:id', authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { rows } = await query(
+      'DELETE FROM beefbox_waitlist WHERE id=$1 RETURNING id',
+      [req.params.id]
+    );
+    if (!rows.length) return res.status(404).json({ error: 'Entry not found' });
+    res.json({ deleted: true, id: rows[0].id });
+  } catch(e) {
+    res.status(500).json({ error: 'Failed to delete entry' });
+  }
+});

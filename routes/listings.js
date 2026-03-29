@@ -338,6 +338,25 @@ router.post('/', authenticateToken, upload.array('photos', 20), async (req, res)
     );
     const listingId = rows[0].id;
 
+    // Geocode city+state → lat/lng (non-blocking)
+    if (city && state) {
+      (async () => {
+        try {
+          const geo = await fetch(
+            `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(city+', '+state+', USA')}&format=json&limit=1`,
+            { headers: { 'User-Agent': 'HerdHub/1.0 (ad@theherdhub.com)' } }
+          );
+          const geoData = await geo.json();
+          if (geoData.length) {
+            await query(
+              'UPDATE listings SET lat=$1, lng=$2 WHERE id=$3',
+              [parseFloat(geoData[0].lat), parseFloat(geoData[0].lon), listingId]
+            );
+          }
+        } catch(e) { /* geocoding is best-effort */ }
+      })();
+    }
+
     // 2. Upload photos to cloud storage (in parallel, up to tier limit)
     if (req.files && req.files.length) {
       const { succeeded, failed } = await storage.uploadMany(

@@ -427,7 +427,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
           <div style="margin-bottom:20px">
             <h3 style="font-size:14px;color:var(--gold);margin-bottom:12px">📦 Beef Box Waitlist</h3>
             <table>
-              <thead><tr><th>Name</th><th>Email</th><th>State</th><th>Type</th><th>Signed Up</th></tr></thead>
+              <thead><tr><th>Name</th><th>Email</th><th>State</th><th>Type</th><th>Signed Up</th><th>Actions</th></tr></thead>
               <tbody id="beefbox-waitlist-tbody"><tr><td colspan="5" style="text-align:center;color:var(--muted);padding:16px">Loading…</td></tr></tbody>
             </table>
             <div style="margin-top:8px;font-size:12px;color:var(--muted)">Total: <strong id="beefbox-waitlist-count" style="color:var(--gold)">—</strong></div>
@@ -1312,7 +1312,7 @@ async function loadWaitlists() {
       headers: { Authorization: `Bearer ${token}` }
     });
     const rows = await r.json();
-    if (!rows.length) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:16px">No signups yet.</td></tr>'; return; }
+    if (!rows.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:16px">No signups yet.</td></tr>'; return; }
     tbody.innerHTML = rows.map(row => `
       <tr>
         <td>${escHtml(row.name)}</td>
@@ -1320,11 +1320,25 @@ async function loadWaitlists() {
         <td>${escHtml(row.state || '—')}</td>
         <td>${escHtml(row.type || '—')}</td>
         <td>${fmtDate(row.created_at)}</td>
+        <td><button class="btn-action danger" onclick="deleteWaitlistEntry(${row.id}, this)">🗑 Delete</button></td>
       </tr>`).join('');
     if (countEl) countEl.textContent = rows.length;
   } catch(e) {
     tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:16px">Could not load waitlist.</td></tr>';
   }
+}
+
+async function deleteWaitlistEntry(id, btn) {
+  if (!confirm('Delete this waitlist entry? This cannot be undone.')) return;
+  btn.textContent = '…'; btn.disabled = true;
+  try {
+    const r = await fetch(`${API}/api/beefbox/${id}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    if (r.ok) { showToast('Entry deleted'); loadWaitlists(); }
+    else { showToast('Delete failed'); btn.textContent = '🗑 Delete'; btn.disabled = false; }
+  } catch(e) { showToast('Connection error'); btn.textContent = '🗑 Delete'; btn.disabled = false; }
 }
 
 function exportWaitlist() {

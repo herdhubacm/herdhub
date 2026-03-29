@@ -354,3 +354,13 @@ CREATE TABLE IF NOT EXISTS saved_searches (
   created_at  TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS idx_saved_searches_user ON saved_searches(user_id);
+
+-- ── EMAIL DRIP TRACKING ─────────────────────────────────
+CREATE TABLE IF NOT EXISTS email_drip_log (
+  id         BIGSERIAL    PRIMARY KEY,
+  user_id    BIGINT       NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  drip_day   INTEGER      NOT NULL,
+  sent_at    TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+  UNIQUE(user_id, drip_day)
+);
+CREATE INDEX IF NOT EXISTS idx_drip_user ON email_drip_log(user_id);
