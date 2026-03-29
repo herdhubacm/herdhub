@@ -1,6 +1,7 @@
 const express = require('express');
 const router  = express.Router();
 const { query } = require('../db/database');
+const { authenticateToken, requireAdmin } = require('../middleware/auth');
 
 // ── POST /api/beefbox/signup ───────────────────────────
 router.post('/signup', async (req, res) => {
@@ -9,26 +10,22 @@ router.post('/signup', async (req, res) => {
     if (!name || !email) return res.status(400).json({ error: 'Name and email are required.' });
     if (!email.includes('@')) return res.status(400).json({ error: 'Please enter a valid email address.' });
 
-    // Check for duplicate
     const { rows: existing } = await query(
       'SELECT id FROM beefbox_waitlist WHERE email = $1', [email.toLowerCase()]
     );
     if (existing.length) return res.status(409).json({ error: "You're already on the list! We'll be in touch at launch." });
 
     await query(
-      `INSERT INTO beefbox_waitlist (name, email, state, type)
-       VALUES ($1, $2, $3, $4)`,
+      'INSERT INTO beefbox_waitlist (name, email, state, type) VALUES ($1, $2, $3, $4)',
       [name, email.toLowerCase(), state || null, type || null]
     );
-
     res.status(201).json({ success: true, message: "You're on the list!" });
   } catch (err) {
-    console.error('Beef box signup error:', err);
     res.status(500).json({ error: 'Signup failed. Please try again.' });
   }
 });
 
-// ── GET /api/beefbox/count (public — for display) ─────
+// ── GET /api/beefbox/count (public) ───────────────────
 router.get('/count', async (_req, res) => {
   try {
     const { rows } = await query('SELECT COUNT(*) AS c FROM beefbox_waitlist');
@@ -39,19 +36,16 @@ router.get('/count', async (_req, res) => {
 });
 
 // ── GET /api/beefbox/list (admin only) ────────────────
-const { authenticateToken, requireAdmin } = require('../middleware/auth');
 router.get('/list', authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { rows } = await query(
-      'SELECT name, email, state, type, created_at FROM beefbox_waitlist ORDER BY created_at DESC'
+      'SELECT id, name, email, state, type, created_at FROM beefbox_waitlist ORDER BY created_at DESC'
     );
     res.json(rows);
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch list' });
   }
 });
-
-module.exports = router;
 
 // ── DELETE /api/beefbox/:id (admin only) ──────────────
 router.delete('/:id', authenticateToken, requireAdmin, async (req, res) => {
@@ -66,3 +60,5 @@ router.delete('/:id', authenticateToken, requireAdmin, async (req, res) => {
     res.status(500).json({ error: 'Failed to delete entry' });
   }
 });
+
+module.exports = router;
