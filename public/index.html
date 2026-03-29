@@ -625,6 +625,57 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
       </div>
 
       <!-- JOIN CTA -->
+
+      <!-- ══ TESTIMONIALS ══ -->
+      <div class="home-center-section" style="background:var(--cream);border-top:1px solid var(--light-tan)">
+        <div style="padding:32px 24px">
+          <div style="font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:var(--rust);margin-bottom:8px;text-align:center">What Ranchers Are Saying</div>
+          <h2 style="font-family:'Playfair Display',serif;font-size:26px;font-weight:900;color:var(--dark-brown);text-align:center;margin-bottom:24px">Real Ranchers. Real Results.</h2>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px">
+
+            <div style="background:white;border:1px solid var(--light-tan);border-radius:8px;padding:20px;position:relative">
+              <div style="color:var(--gold);font-size:28px;line-height:1;margin-bottom:10px">&ldquo;</div>
+              <p style="font-size:14px;color:#444;line-height:1.7;margin-bottom:14px;font-style:italic">Sold 15 bred heifers in 4 days. Had 3 serious inquiries within the first hour of posting. This is the easiest sale I&apos;ve ever made.</p>
+              <div style="display:flex;align-items:center;gap:10px">
+                <div style="width:38px;height:38px;background:var(--rust);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-weight:700;color:white;font-size:16px;flex-shrink:0">M</div>
+                <div>
+                  <div style="font-weight:700;font-size:13px;color:var(--dark-brown)">Mae C.</div>
+                  <div style="font-size:11px;color:#888;font-family:'Oswald',sans-serif;letter-spacing:.04em">Ogallala, Nebraska</div>
+                </div>
+                <div style="margin-left:auto;color:var(--gold);font-size:13px">★★★★★</div>
+              </div>
+            </div>
+
+            <div style="background:white;border:1px solid var(--light-tan);border-radius:8px;padding:20px;position:relative">
+              <div style="color:var(--gold);font-size:28px;line-height:1;margin-bottom:10px">&ldquo;</div>
+              <p style="font-size:14px;color:#444;line-height:1.7;margin-bottom:14px;font-style:italic">Found exactly the feeder steers I was looking for — right weight, right genetics, right price. The seller had photos and full health history. Couldn&apos;t ask for more.</p>
+              <div style="display:flex;align-items:center;gap:10px">
+                <div style="width:38px;height:38px;background:var(--sage);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-weight:700;color:white;font-size:16px;flex-shrink:0">T</div>
+                <div>
+                  <div style="font-weight:700;font-size:13px;color:var(--dark-brown)">Travis D.</div>
+                  <div style="font-size:11px;color:#888;font-family:'Oswald',sans-serif;letter-spacing:.04em">Tipton, Indiana</div>
+                </div>
+                <div style="margin-left:auto;color:var(--gold);font-size:13px">★★★★★</div>
+              </div>
+            </div>
+
+            <div style="background:white;border:1px solid var(--light-tan);border-radius:8px;padding:20px;position:relative">
+              <div style="color:var(--gold);font-size:28px;line-height:1;margin-bottom:10px">&ldquo;</div>
+              <p style="font-size:14px;color:#444;line-height:1.7;margin-bottom:14px;font-style:italic">Finally a cattle marketplace that doesn&apos;t look like it was built in 2003. Clean, easy to use, and the buyers are serious. Listed my herd bull on a Tuesday — hauled out Friday.</p>
+              <div style="display:flex;align-items:center;gap:10px">
+                <div style="width:38px;height:38px;background:var(--dark-brown);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-weight:700;color:white;font-size:16px;flex-shrink:0">J</div>
+                <div>
+                  <div style="font-weight:700;font-size:13px;color:var(--dark-brown)">Jake H.</div>
+                  <div style="font-size:11px;color:#888;font-family:'Oswald',sans-serif;letter-spacing:.04em">Amarillo, Texas</div>
+                </div>
+                <div style="margin-left:auto;color:var(--gold);font-size:13px">★★★★★</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
       <div class="home-join-cta">
         <h2>Join America's Cattle Marketplace</h2>
         <p>Thousands of producers and buyers active daily.<br>List your livestock, equipment, or services today.</p>
@@ -1671,6 +1722,50 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
 
 <!-- ── MODALS ── -->
 <!-- AUTH -->
+<div class="modal-overlay" id="modal-onboarding" role="dialog" aria-modal="true" aria-label="Get started on Herd Hub" style="align-items:center">
+  <div class="modal" style="max-width:520px;padding:0;overflow:hidden">
+    <div style="background:var(--dark-brown);padding:24px 28px;position:relative">
+      <button class="modal-close" data-action="close-modal" data-modal="onboarding" style="position:absolute;top:12px;right:12px;background:rgba(255,255,255,.1);color:white;border:none;width:30px;height:30px;border-radius:50%;font-size:16px;cursor:pointer">✕</button>
+      <div style="font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:6px">Welcome to Herd Hub</div>
+      <h2 style="font-family:'Playfair Display',serif;font-size:24px;font-weight:900;color:var(--cream);margin:0">You are in, <span id="onboard-name" style="color:var(--gold)">Rancher</span>! 🤠</h2>
+      <p style="font-size:13px;color:rgba(245,239,224,.65);margin-top:6px;line-height:1.6">Here is how to get the most out of Herd Hub in the first 5 minutes.</p>
+    </div>
+    <div style="padding:24px 28px;background:var(--warm-white)">
+      <div id="onboard-checklist" style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px">
+
+        <div class="onboard-item" id="ob-profile" style="display:flex;align-items:center;gap:12px;background:white;border:1.5px solid var(--light-tan);border-radius:6px;padding:12px 14px;cursor:pointer" onclick="completeOnboardStep('ob-profile','account','profile')">
+          <div class="ob-check" style="width:24px;height:24px;border-radius:50%;border:2px solid var(--light-tan);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px;color:transparent">✓</div>
+          <div style="flex:1"><div style="font-weight:700;font-size:13px;color:var(--dark-brown)">Complete your profile</div><div style="font-size:12px;color:#888">Add phone, state, and bio — buyers trust verified sellers</div></div>
+          <span style="font-size:11px;color:var(--rust);font-family:'Oswald',sans-serif;letter-spacing:.05em;white-space:nowrap">Go →</span>
+        </div>
+
+        <div class="onboard-item" id="ob-listing" style="display:flex;align-items:center;gap:12px;background:white;border:1.5px solid var(--light-tan);border-radius:6px;padding:12px 14px;cursor:pointer" onclick="completeOnboardStep('ob-listing',null,null,true)">
+          <div class="ob-check" style="width:24px;height:24px;border-radius:50%;border:2px solid var(--light-tan);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px;color:transparent">✓</div>
+          <div style="flex:1"><div style="font-weight:700;font-size:13px;color:var(--dark-brown)">Post your first listing</div><div style="font-size:12px;color:#888">Free — reaches buyers in all 50 states. Add at least 1 photo</div></div>
+          <span style="font-size:11px;color:var(--rust);font-family:'Oswald',sans-serif;letter-spacing:.05em;white-space:nowrap">Post →</span>
+        </div>
+
+        <div class="onboard-item" id="ob-search" style="display:flex;align-items:center;gap:12px;background:white;border:1.5px solid var(--light-tan);border-radius:6px;padding:12px 14px;cursor:pointer" onclick="completeOnboardStep('ob-search','account','searches')">
+          <div class="ob-check" style="width:24px;height:24px;border-radius:50%;border:2px solid var(--light-tan);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px;color:transparent">✓</div>
+          <div style="flex:1"><div style="font-weight:700;font-size:13px;color:var(--dark-brown)">Save a search alert</div><div style="font-size:12px;color:#888">Get emailed when new listings match what you are looking for</div></div>
+          <span style="font-size:11px;color:var(--rust);font-family:'Oswald',sans-serif;letter-spacing:.05em;white-space:nowrap">Set up →</span>
+        </div>
+
+        <div class="onboard-item" id="ob-verify" style="display:flex;align-items:center;gap:12px;background:white;border:1.5px solid var(--light-tan);border-radius:6px;padding:12px 14px;cursor:pointer" onclick="completeOnboardStep('ob-verify',null,null,false,true)">
+          <div class="ob-check" style="width:24px;height:24px;border-radius:50%;border:2px solid var(--light-tan);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px;color:transparent">✓</div>
+          <div style="flex:1"><div style="font-weight:700;font-size:13px;color:var(--dark-brown)">Request Verified badge</div><div style="font-size:12px;color:#888">Get a ✓ Verified badge — free, takes 24 hours</div></div>
+          <span style="font-size:11px;color:var(--rust);font-family:'Oswald',sans-serif;letter-spacing:.05em;white-space:nowrap">Request →</span>
+        </div>
+
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <button class="btn-secondary" style="font-size:12px;padding:8px 16px" data-action="close-modal" data-modal="onboarding">Skip for now</button>
+        <div style="font-size:12px;color:#aaa" id="ob-progress">0 of 4 complete</div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="modal-auth" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Sign in or register">
   <div class="modal">
     <button class="modal-close" data-action="close-modal" data-modal="auth" aria-label="Close dialog">✕</button>
@@ -2736,6 +2831,70 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
 
 <script>
 // ── State ──────────────────────────────────────────────
+
+// ── SEO Landing Page Router ─────────────────────────────
+const SEO_ROUTES = {
+  '/angus-bulls-for-sale':         { cat:'bulls',          breed:'Angus',      title:'Angus Bulls for Sale',        desc:'Browse registered and commercial Angus bulls for sale across the United States. Direct from ranchers.' },
+  '/hereford-bulls-for-sale':      { cat:'bulls',          breed:'Hereford',   title:'Hereford Bulls for Sale',     desc:'Find Hereford bulls for sale from top ranches. Calving ease sires, herd bulls, and yearlings.' },
+  '/simmental-bulls-for-sale':     { cat:'bulls',          breed:'Simmental',  title:'Simmental Bulls for Sale',    desc:'Simmental and SimAngus bulls for sale. High-growth genetics from proven producers.' },
+  '/charolais-bulls-for-sale':     { cat:'bulls',          breed:'Charolais',  title:'Charolais Bulls for Sale',    desc:'Charolais bulls for sale — terminal sires with exceptional muscling and growth.' },
+  '/red-angus-bulls-for-sale':     { cat:'bulls',          breed:'Red Angus',  title:'Red Angus Bulls for Sale',   desc:'Registered Red Angus bulls for sale. Calving ease genetics from top-performing herds.' },
+  '/bred-heifers-for-sale':        { cat:'bred_heifers',   breed:'',           title:'Bred Heifers for Sale',      desc:'Bred heifers for sale across all breeds. Spring and fall calvers, preg-checked, ready to work.' },
+  '/angus-heifers-for-sale':       { cat:'bred_heifers',   breed:'Angus',      title:'Angus Heifers for Sale',     desc:'Angus bred heifers and open heifers for sale direct from ranchers across the USA.' },
+  '/cow-calf-pairs-for-sale':      { cat:'cow_calf_pairs', breed:'',           title:'Cow Calf Pairs for Sale',    desc:'Cow calf pairs for sale — all ages, all breeds. Quality pairs from verified ranchers.' },
+  '/feeder-cattle-for-sale':       { cat:'feeder_stocker', breed:'',           title:'Feeder Cattle for Sale',     desc:'Feeder and stocker cattle for sale. Preconditioned, weaned, ready for the feedlot or grass.' },
+  '/stocker-cattle-for-sale':      { cat:'feeder_stocker', breed:'',           title:'Stocker Cattle for Sale',    desc:'Stocker calves for sale. Black, BWF, and mixed-breed stockers from trusted producers.' },
+  '/angus-cattle-for-sale':        { cat:'bulls',          breed:'Angus',      title:'Angus Cattle for Sale',      desc:'All Angus cattle for sale including bulls, heifers, pairs, and feeder calves.' },
+  '/grass-fed-beef-for-sale':      { cat:'farm_to_table',  breed:'',           title:'Grass-Fed Beef for Sale',    desc:'Buy grass-fed beef direct from the farm. Halves, quarters, and whole beef from American ranchers.' },
+  '/wagyu-beef-for-sale':          { cat:'farm_to_table',  breed:'Wagyu',      title:'Wagyu Beef for Sale',        desc:'American Wagyu beef for sale direct from producers. Exceptional marbling, farm-raised quality.' },
+  '/farm-fresh-beef':              { cat:'farm_to_table',  breed:'',           title:'Farm Fresh Beef for Sale',   desc:'Buy beef direct from the farm. Know your rancher, know your beef. Available nationwide.' },
+  '/cattle-trailers-for-sale':     { cat:'trailers',       breed:'',           title:'Cattle Trailers for Sale',   desc:'New and used cattle trailers for sale. Stock trailers, goosenecks, and bumper pulls.' },
+  '/cattle-equipment-for-sale':    { cat:'equipment',      breed:'',           title:'Cattle Equipment for Sale',  desc:'Used cattle equipment for sale — squeeze chutes, sweep systems, creep feeders, and more.' },
+  '/working-cattle-dogs-for-sale': { cat:'working_dogs',   breed:'',           title:'Working Cattle Dogs for Sale', desc:'Trained and started working cattle dogs for sale. Border Collies, Australian Shepherds, Heelers.' },
+  '/border-collies-for-sale':      { cat:'working_dogs',   breed:'Border Collie', title:'Border Collies for Sale', desc:'Trained Border Collies for sale. Cattle dogs, sheep dogs, and started pups from proven working lines.' },
+  '/show-cattle-for-sale':         { cat:'showstock',      breed:'',           title:'Show Cattle for Sale',       desc:'Club calves and show cattle for sale. Steers, heifers, and bulls from top show genetics.' },
+  '/dairy-cattle-for-sale':        { cat:'dairy',          breed:'',           title:'Dairy Cattle for Sale',      desc:'Dairy cattle for sale including Holstein springers, Jersey nurse cows, and dairy heifers.' },
+  '/bottle-calves-for-sale':       { cat:'bottle_calves',  breed:'',           title:'Bottle Calves for Sale',     desc:'Bottle calves for sale — dairy pulls and beef calves available weekly from trusted producers.' },
+  '/hay-for-sale':                 { cat:'feed_hay',       breed:'',           title:'Hay for Sale',               desc:'Hay and feed for sale direct from producers. Round bales, square bales, alfalfa, and grass hay.' },
+};
+
+// On page load, check if URL matches an SEO route
+(function handleSeoRoute() {
+  const path = window.location.pathname;
+  const route = SEO_ROUTES[path];
+  if (!route) return;
+
+  // Update page title and meta for SEO
+  document.title = route.title + ' — Herd Hub | American Cattle Marketplace';
+  const metaDesc = document.querySelector('meta[name="description"]');
+  if (metaDesc) metaDesc.setAttribute('content', route.desc);
+
+  // Set canonical URL
+  let canonical = document.querySelector('link[rel="canonical"]');
+  if (!canonical) {
+    canonical = document.createElement('link');
+    canonical.rel = 'canonical';
+    document.head.appendChild(canonical);
+  }
+  canonical.href = 'https://theherdhub.com' + path;
+
+  // Wait for page to init then load filtered listings
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      showPage('listings');
+      const catEl = document.getElementById('f-category');
+      const qEl   = document.getElementById('f-q');
+      if (catEl) catEl.value = route.cat || '';
+      if (qEl)   qEl.value  = route.breed || '';
+      document.getElementById('listings-title').innerHTML =
+        route.title.replace(' for Sale','') + ' <span>for Sale</span>';
+      loadListings();
+      // Track as page view
+      if (window._trackPage) window._trackPage(path);
+    }, 100);
+  });
+})();
+
 const API = '';  // same-origin
 let csrfToken = null;
 // Fetch CSRF token on load
@@ -3382,7 +3541,7 @@ async function doRegister() {
     document.getElementById('auth-btn').style.display = 'none';
     document.getElementById('account-btn').style.display = 'inline-block';
     document.getElementById('account-name').textContent = d.user.name.split(' ')[0];
-    turnstileToken = null; if(window.turnstile){try{window.turnstile.reset('#reg-turnstile');}catch(e){}} if(window._trackEvent) window._trackEvent('auth','register','new_user'); closeModal('auth'); updateAuthUI(); showToast('Welcome to Herd Hub, ' + d.user.name.split(' ')[0] + '!');
+    turnstileToken = null; if(window.turnstile){try{window.turnstile.reset('#reg-turnstile');}catch(e){}} if(window._trackEvent) window._trackEvent('auth','register','new_user'); closeModal('auth'); updateAuthUI(); setTimeout(() => showOnboarding(d.user.name), 600); showToast('Welcome to Herd Hub, ' + d.user.name.split(' ')[0] + '!');
   } catch(e) { errEl.textContent = 'Connection error'; errEl.style.display='block'; }
 }
 
@@ -5401,6 +5560,63 @@ function loadSeoPage(category, breed, label) {
   if (qEl) qEl.value = breed || '';
   document.getElementById('listings-title').innerHTML = label + ' <span>For Sale</span>';
   loadListings();
+}
+
+
+// ── Seller Onboarding ───────────────────────────────────
+let _obCompleted = new Set(JSON.parse(localStorage.getItem('hh_ob') || '[]'));
+
+function showOnboarding(name) {
+  const el = document.getElementById('onboard-name');
+  if (el) el.textContent = name?.split(' ')[0] || 'Rancher';
+  // Restore previously completed steps
+  _obCompleted.forEach(id => markObStep(id));
+  updateObProgress();
+  openModal('onboarding');
+}
+
+function markObStep(id) {
+  const item = document.getElementById(id);
+  if (!item) return;
+  const check = item.querySelector('.ob-check');
+  if (check) {
+    check.style.background = 'var(--sage)';
+    check.style.borderColor = 'var(--sage)';
+    check.style.color = 'white';
+  }
+  item.style.borderColor = 'var(--sage)';
+  item.style.opacity = '0.7';
+}
+
+function updateObProgress() {
+  const el = document.getElementById('ob-progress');
+  if (el) el.textContent = _obCompleted.size + ' of 4 complete';
+  if (_obCompleted.size >= 4) {
+    setTimeout(() => {
+      closeModal('onboarding');
+      showToast('All set! Happy ranching.');
+    }, 800);
+  }
+}
+
+function completeOnboardStep(id, page, tab, postListing, verify) {
+  _obCompleted.add(id);
+  localStorage.setItem('hh_ob', JSON.stringify([..._obCompleted]));
+  markObStep(id);
+  updateObProgress();
+
+  if (postListing) {
+    closeModal('onboarding');
+    setTimeout(() => openModal('post-listing'), 300);
+  } else if (verify) {
+    requestVerification();
+  } else if (page) {
+    closeModal('onboarding');
+    setTimeout(() => {
+      showPage(page);
+      if (tab) switchAcctTab(tab);
+    }, 300);
+  }
 }
 
 function showForgotPassword() {

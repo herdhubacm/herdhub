@@ -1,53 +1,48 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>https://theherdhub.com/</loc>
-    <changefreq>daily</changefreq>
-    <priority>1.0</priority>
-  </url>
-  <url>
-    <loc>https://theherdhub.com/#listings</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://theherdhub.com/#about</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://theherdhub.com/#articles</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://theherdhub.com/#merch</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://theherdhub.com/#beef-boxes</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://theherdhub.com/#forum</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://theherdhub.com/#pricing</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://theherdhub.com/#privacy</loc>
-    <changefreq>yearly</changefreq>
-    <priority>0.3</priority>
-  </url>
-  <url>
-    <loc>https://theherdhub.com/#terms</loc>
-    <changefreq>yearly</changefreq>
-    <priority>0.3</priority>
-  </url>
+
+  <!-- Core pages -->
+  <url><loc>https://theherdhub.com/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>
+  <url><loc>https://theherdhub.com/#listings</loc><changefreq>daily</changefreq><priority>0.9</priority></url>
+  <url><loc>https://theherdhub.com/#forum</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
+  <url><loc>https://theherdhub.com/#articles</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://theherdhub.com/#pricing</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://theherdhub.com/#about</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://theherdhub.com/#merch</loc><changefreq>weekly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://theherdhub.com/#beef-boxes</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+
+  <!-- SEO Landing Pages — Breed-Specific -->
+  <url><loc>https://theherdhub.com/angus-bulls-for-sale</loc><changefreq>daily</changefreq><priority>0.9</priority></url>
+  <url><loc>https://theherdhub.com/hereford-bulls-for-sale</loc><changefreq>daily</changefreq><priority>0.9</priority></url>
+  <url><loc>https://theherdhub.com/simmental-bulls-for-sale</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
+  <url><loc>https://theherdhub.com/charolais-bulls-for-sale</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
+  <url><loc>https://theherdhub.com/red-angus-bulls-for-sale</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
+  <url><loc>https://theherdhub.com/angus-cattle-for-sale</loc><changefreq>daily</changefreq><priority>0.9</priority></url>
+
+  <!-- SEO Landing Pages — Category -->
+  <url><loc>https://theherdhub.com/bred-heifers-for-sale</loc><changefreq>daily</changefreq><priority>0.9</priority></url>
+  <url><loc>https://theherdhub.com/angus-heifers-for-sale</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
+  <url><loc>https://theherdhub.com/cow-calf-pairs-for-sale</loc><changefreq>daily</changefreq><priority>0.9</priority></url>
+  <url><loc>https://theherdhub.com/feeder-cattle-for-sale</loc><changefreq>daily</changefreq><priority>0.9</priority></url>
+  <url><loc>https://theherdhub.com/stocker-cattle-for-sale</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
+
+  <!-- SEO Landing Pages — Farm to Table -->
+  <url><loc>https://theherdhub.com/grass-fed-beef-for-sale</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://theherdhub.com/wagyu-beef-for-sale</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://theherdhub.com/farm-fresh-beef</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+
+  <!-- SEO Landing Pages — Equipment & Dogs -->
+  <url><loc>https://theherdhub.com/cattle-trailers-for-sale</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
+  <url><loc>https://theherdhub.com/cattle-equipment-for-sale</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
+  <url><loc>https://theherdhub.com/working-cattle-dogs-for-sale</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
+  <url><loc>https://theherdhub.com/border-collies-for-sale</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
+  <url><loc>https://theherdhub.com/show-cattle-for-sale</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
+  <url><loc>https://theherdhub.com/dairy-cattle-for-sale</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
+  <url><loc>https://theherdhub.com/bottle-calves-for-sale</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
+  <url><loc>https://theherdhub.com/hay-for-sale</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
+
+  <!-- Legal -->
+  <url><loc>https://theherdhub.com/#privacy</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://theherdhub.com/#terms</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
+
 </urlset>

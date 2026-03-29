@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Herd Hub Digital Catalog Generator</title>
+  <link rel="icon" type="image/png" href="/logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Oswald:wght@400;600;700&family=Source+Serif+4:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box}
+    :root{
+      --dark-brown:#2C1A0E;--rust:#8B3214;--gold:#C9A96E;--cream:#F5EFE0;
+      --light-tan:#E8DCC8;--tan:#C4A882;--warm-white:#FAF6EF;--sage:#7A8C6E;
+    }
+    body{font-family:'Source Serif 4',serif;background:var(--warm-white);margin:0;padding:0;color:var(--dark-brown)}
+    header{background:var(--dark-brown);padding:16px 24px;display:flex;align-items:center;gap:16px}
+    header h1{font-family:'Playfair Display',serif;font-size:22px;font-weight:900;color:var(--cream);margin:0}
+    header span{color:var(--gold)}
+    header p{font-size:12px;color:rgba(245,239,224,.6);margin:0;font-family:'Oswald',sans-serif;letter-spacing:.08em}
+    .container{max-width:1100px;margin:0 auto;padding:32px 24px}
+    .card{background:white;border:1px solid var(--light-tan);border-radius:8px;padding:24px;margin-bottom:20px}
+    label{font-size:12px;font-weight:600;color:var(--dark-brown);display:block;margin-bottom:5px;font-family:'Oswald',sans-serif;letter-spacing:.06em;text-transform:uppercase}
+    input,textarea,select{width:100%;padding:10px 12px;border:1.5px solid var(--light-tan);border-radius:4px;font-family:'Source Serif 4',serif;font-size:14px;color:var(--dark-brown);outline:none;background:white;margin-bottom:16px}
+    input:focus,textarea:focus{border-color:var(--rust)}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .btn{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;border-radius:4px;font-family:'Oswald',sans-serif;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;border:none;transition:all .15s}
+    .btn-primary{background:var(--rust);color:white}
+    .btn-primary:hover{background:#7a2b10}
+    .btn-gold{background:var(--gold);color:var(--dark-brown)}
+    .btn-gold:hover{background:#b8944f}
+    .btn-ghost{background:transparent;color:var(--dark-brown);border:1.5px solid var(--light-tan)}
+    h2{font-family:'Playfair Display',serif;font-size:20px;font-weight:900;color:var(--dark-brown);margin:0 0 16px}
+    h3{font-family:'Oswald',sans-serif;font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--rust);margin:0 0 12px}
+    .listing-row{display:flex;gap:12px;background:var(--warm-white);border:1px solid var(--light-tan);border-radius:6px;padding:12px;margin-bottom:8px;align-items:center}
+    .listing-row img{width:72px;height:56px;object-fit:cover;border-radius:4px;background:var(--light-tan);flex-shrink:0}
+    .listing-row .info{flex:1;min-width:0}
+    .listing-row .info .title{font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .listing-row .info .meta{font-size:12px;color:#888;margin-top:2px}
+    .listing-row .price{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--rust);white-space:nowrap}
+    .tag{display:inline-block;background:var(--cream);border:1px solid var(--light-tan);border-radius:12px;padding:2px 10px;font-size:11px;font-family:'Oswald',sans-serif;margin-right:4px;margin-bottom:4px}
+    #preview{display:none}
+
+    /* ── Print / PDF Styles ── */
+    @media print {
+      header,.controls,#step-1,#step-2{display:none!important}
+      #preview{display:block!important;margin:0;padding:0}
+      .pdf-page{page-break-after:always;margin:0;padding:0}
+      .pdf-page:last-child{page-break-after:avoid}
+      body{background:white}
+    }
+
+    /* ── PDF Page Template ── */
+    .pdf-page{width:8.5in;min-height:11in;background:white;margin:0 auto;padding:0.6in 0.65in;position:relative;font-family:'Source Serif 4',serif}
+    .pdf-header{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #2C1A0E;padding-bottom:16px;margin-bottom:24px}
+    .pdf-logo-text{font-family:'Playfair Display',serif;font-size:28px;font-weight:900;color:#2C1A0E}
+    .pdf-logo-text span{color:#C9A96E}
+    .pdf-tagline{font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:#888;margin-top:3px}
+    .pdf-ranch-name{font-family:'Playfair Display',serif;font-size:22px;font-weight:900;color:#2C1A0E;text-align:right}
+    .pdf-ranch-contact{font-family:'Oswald',sans-serif;font-size:11px;color:#666;text-align:right;margin-top:4px;line-height:1.8}
+    .pdf-hero{background:#2C1A0E;border-radius:6px;padding:20px 24px;margin-bottom:20px;display:flex;gap:20px;align-items:center}
+    .pdf-hero-text{flex:1}
+    .pdf-hero-eyebrow{font-family:'Oswald',sans-serif;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:#C9A96E;margin-bottom:6px}
+    .pdf-hero-title{font-family:'Playfair Display',serif;font-size:20px;font-weight:900;color:#F5EFE0;line-height:1.3;margin-bottom:8px}
+    .pdf-hero-desc{font-size:12px;color:rgba(245,239,224,.7);line-height:1.6}
+    .pdf-listing-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+    .pdf-listing-card{border:1px solid #E8DCC8;border-radius:5px;overflow:hidden}
+    .pdf-listing-img{width:100%;height:140px;object-fit:cover;background:#E8DCC8;display:flex;align-items:center;justify-content:center;font-size:32px}
+    .pdf-listing-body{padding:10px 12px}
+    .pdf-listing-cat{font-family:'Oswald',sans-serif;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#8B3214;margin-bottom:3px}
+    .pdf-listing-title{font-family:'Playfair Display',serif;font-size:13px;font-weight:700;color:#2C1A0E;margin-bottom:3px;line-height:1.3}
+    .pdf-listing-meta{font-size:10px;color:#888;margin-bottom:5px}
+    .pdf-listing-price{font-family:'Playfair Display',serif;font-size:14px;font-weight:700;color:#8B3214}
+    .pdf-listing-desc{font-size:10px;color:#555;line-height:1.5;margin-top:4px}
+    .pdf-footer{position:absolute;bottom:0.4in;left:0.65in;right:0.65in;border-top:1px solid #E8DCC8;padding-top:10px;display:flex;justify-content:space-between;font-family:'Oswald',sans-serif;font-size:9px;color:#aaa;letter-spacing:.05em}
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>Herd <span>Hub</span> Catalog Generator</h1>
+    <p>T-Bone &amp; Prime Advertiser Exclusive &mdash; Print or export to PDF</p>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- Step 1: Your Info -->
+  <div id="step-1" class="card">
+    <h2>Step 1 &mdash; Your Ranch Information</h2>
+    <div class="grid">
+      <div><label>Ranch / Business Name</label><input type="text" id="ranch-name" placeholder="Harrington Ranch"></div>
+      <div><label>Your Name</label><input type="text" id="ranch-contact" placeholder="Jake Harrington"></div>
+      <div><label>Phone Number</label><input type="text" id="ranch-phone" placeholder="(806) 555-1234"></div>
+      <div><label>Email Address</label><input type="text" id="ranch-email" placeholder="jake@harringtonranch.com"></div>
+      <div><label>Website (optional)</label><input type="text" id="ranch-website" placeholder="www.harringtonranch.com"></div>
+      <div><label>Location (City, State)</label><input type="text" id="ranch-location" placeholder="Amarillo, Texas"></div>
+    </div>
+    <div><label>Ranch Description / Tagline</label><textarea id="ranch-desc" rows="3" placeholder="Three generations of registered Black Angus cattle. Performance-tested bulls and replacement heifers available year-round."></textarea></div>
+  </div>
+
+  <!-- Step 2: Your Listings -->
+  <div id="step-2" class="card">
+    <h2>Step 2 &mdash; Select Listings to Feature</h2>
+    <p style="font-size:14px;color:#888;margin-bottom:16px">We'll pull your active Herd Hub listings. Enter your account email to load them.</p>
+    <div style="display:flex;gap:10px;margin-bottom:20px">
+      <input type="email" id="load-email" placeholder="Your Herd Hub email…" style="margin:0;flex:1">
+      <button class="btn btn-primary" onclick="loadUserListings()">Load My Listings</button>
+    </div>
+    <div id="listings-to-add" style="margin-bottom:16px"></div>
+    <div id="selected-listings" style="display:none">
+      <h3>Selected for Catalog (<span id="sel-count">0</span>)</h3>
+      <div id="sel-list"></div>
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <div class="controls" style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:32px">
+    <button class="btn btn-gold" onclick="generateCatalog()">&#x2605; Generate Catalog Preview</button>
+    <button class="btn btn-primary" onclick="printCatalog()">&#x1F4C4; Export as PDF</button>
+    <button class="btn btn-ghost" onclick="resetForm()">Reset</button>
+  </div>
+
+  <!-- PDF Preview -->
+  <div id="preview"></div>
+</div>
+
+<script>
+const API = '';
+let selectedListings = [];
+let allListings = [];
+
+async function loadUserListings() {
+  const email = document.getElementById('load-email').value.trim();
+  if (!email || !email.includes('@')) { alert('Please enter a valid email address'); return; }
+
+  const btn = document.querySelector('[onclick="loadUserListings()"]');
+  btn.textContent = 'Loading…'; btn.disabled = true;
+
+  try {
+    // Load all listings and filter by searching — since this is public-facing
+    const r = await fetch(`${API}/api/listings?limit=100&sort=newest`);
+    const d = await r.json();
+    allListings = (d.listings || []).filter(l => l.status === 'active');
+
+    if (!allListings.length) {
+      document.getElementById('listings-to-add').innerHTML = '<p style="color:#888;font-size:14px">No active listings found. Post some listings on Herd Hub first!</p>';
+      btn.textContent = 'Load My Listings'; btn.disabled = false;
+      return;
+    }
+
+    renderListingPicker(allListings);
+    btn.textContent = 'Reload Listings'; btn.disabled = false;
+  } catch(e) {
+    alert('Could not load listings. Please try again.');
+    btn.textContent = 'Load My Listings'; btn.disabled = false;
+  }
+}
+
+function renderListingPicker(listings) {
+  const el = document.getElementById('listings-to-add');
+  el.innerHTML = '<h3 style="margin-bottom:12px">Click to add to catalog (max 8):</h3>' +
+    listings.map(l => {
+      const price = l.price ? '$' + Number(l.price).toLocaleString() : 'Call';
+      const thumb = l.thumb || '';
+      return `<div class="listing-row" onclick="toggleListingSelect(${l.id})" id="lr-${l.id}" style="cursor:pointer">
+        ${thumb ? `<img src="${thumb}" alt="">` : `<div style="width:72px;height:56px;background:var(--light-tan);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">🐄</div>`}
+        <div class="info">
+          <div class="title">${l.title}</div>
+          <div class="meta">${l.city || ''}, ${l.state} &middot; ${l.category?.replace(/_/g,' ')}</div>
+        </div>
+        <div class="price">${price}</div>
+        <div id="sel-${l.id}" style="width:22px;height:22px;border-radius:50%;border:2px solid var(--light-tan);display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;margin-left:8px"></div>
+      </div>`;
+    }).join('');
+}
+
+function toggleListingSelect(id) {
+  const listing = allListings.find(l => l.id === id);
+  if (!listing) return;
+
+  const idx = selectedListings.findIndex(l => l.id === id);
+  if (idx > -1) {
+    selectedListings.splice(idx, 1);
+    document.getElementById('sel-' + id).textContent = '';
+    document.getElementById('sel-' + id).style.background = '';
+    document.getElementById('sel-' + id).style.borderColor = 'var(--light-tan)';
+  } else {
+    if (selectedListings.length >= 8) { alert('Maximum 8 listings per catalog page. Export this one and start a new catalog for more.'); return; }
+    selectedListings.push(listing);
+    document.getElementById('sel-' + id).textContent = '✓';
+    document.getElementById('sel-' + id).style.background = 'var(--sage)';
+    document.getElementById('sel-' + id).style.borderColor = 'var(--sage)';
+    document.getElementById('sel-' + id).style.color = 'white';
+  }
+
+  document.getElementById('sel-count').textContent = selectedListings.length;
+  document.getElementById('selected-listings').style.display = selectedListings.length ? 'block' : 'none';
+}
+
+function generateCatalog() {
+  const ranchName    = document.getElementById('ranch-name').value || 'Your Ranch';
+  const ranchContact = document.getElementById('ranch-contact').value || '';
+  const ranchPhone   = document.getElementById('ranch-phone').value || '';
+  const ranchEmail   = document.getElementById('ranch-email').value || '';
+  const ranchWebsite = document.getElementById('ranch-website').value || '';
+  const ranchLoc     = document.getElementById('ranch-location').value || '';
+  const ranchDesc    = document.getElementById('ranch-desc').value || '';
+
+  if (!selectedListings.length) { alert('Please select at least one listing to feature.'); return; }
+
+  const catEmojis = {bulls:'🐂',bred_heifers:'🐄',cow_calf_pairs:'🐮',feeder_stocker:'🐄',showstock:'🏆',dairy:'🥛',equipment:'🚜',trailers:'🚛',working_dogs:'🐕',farm_to_table:'🌿',feed_hay:'🌾',bottle_calves:'🍼'};
+  const fmtCat = c => c?.replace(/_/g,' ').replace(/\b\w/g, x => x.toUpperCase()) || '';
+
+  const listingsHtml = selectedListings.map(l => {
+    const price = l.price ? '$' + Number(l.price).toLocaleString() + (l.price_type && l.price_type !== 'fixed' ? ' / ' + l.price_type.replace(/_/g,' ') : '') : 'Call for Price';
+    const emoji = catEmojis[l.category] || '🐄';
+    const imgTag = l.thumb
+      ? `<img class="pdf-listing-img" src="${l.thumb}" alt="${l.title}">`
+      : `<div class="pdf-listing-img">${emoji}</div>`;
+    const desc = (l.description || '').slice(0, 180) + ((l.description || '').length > 180 ? '…' : '');
+
+    return `<div class="pdf-listing-card">
+      ${imgTag}
+      <div class="pdf-listing-body">
+        <div class="pdf-listing-cat">${emoji} ${fmtCat(l.category)}</div>
+        <div class="pdf-listing-title">${l.title}</div>
+        <div class="pdf-listing-meta">📍 ${l.city || ''}, ${l.state}${l.quantity > 1 ? ' &middot; Qty: ' + l.quantity : ''}${l.weight_lbs ? ' &middot; ' + l.weight_lbs + ' lbs avg' : ''}</div>
+        <div class="pdf-listing-price">${price}</div>
+        ${desc ? `<div class="pdf-listing-desc">${desc}</div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+
+  const contactLines = [ranchPhone, ranchEmail, ranchWebsite, ranchLoc].filter(Boolean).map(c => `<div>${c}</div>`).join('');
+
+  document.getElementById('preview').style.display = 'block';
+  document.getElementById('preview').innerHTML = `
+    <div class="pdf-page">
+      <div class="pdf-header">
+        <div>
+          <div class="pdf-logo-text">Herd <span>Hub</span></div>
+          <div class="pdf-tagline">American Cattle Marketplace</div>
+        </div>
+        <div>
+          <div class="pdf-ranch-name">${ranchName}</div>
+          <div class="pdf-ranch-contact">${contactLines}</div>
+        </div>
+      </div>
+
+      ${ranchDesc ? `<div class="pdf-hero">
+        <div class="pdf-hero-text">
+          <div class="pdf-hero-eyebrow">About Our Operation</div>
+          <div class="pdf-hero-title">${ranchName}</div>
+          <div class="pdf-hero-desc">${ranchDesc}</div>
+        </div>
+      </div>` : ''}
+
+      <div style="font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--rust);margin-bottom:14px">Current Listings &mdash; ${new Date().toLocaleDateString('en-US',{month:'long',year:'numeric'})}</div>
+
+      <div class="pdf-listing-grid">${listingsHtml}</div>
+
+      <div class="pdf-footer">
+        <span>theherdhub.com &mdash; American Cattle Marketplace</span>
+        <span>Generated ${new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}</span>
+        <span>Contact: ${ranchPhone || ranchEmail || 'See listing details'}</span>
+      </div>
+    </div>`;
+
+  document.getElementById('preview').scrollIntoView({ behavior: 'smooth' });
+}
+
+function printCatalog() {
+  if (!document.getElementById('preview').innerHTML) {
+    generateCatalog();
+    setTimeout(() => window.print(), 500);
+  } else {
+    window.print();
+  }
+}
+
+function resetForm() {
+  selectedListings = [];
+  document.getElementById('preview').innerHTML = '';
+  document.getElementById('preview').style.display = 'none';
+  document.getElementById('listings-to-add').innerHTML = '';
+  document.getElementById('selected-listings').style.display = 'none';
+}
+</script>
+</body>
+</html>

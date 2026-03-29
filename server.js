@@ -360,6 +360,43 @@ if (process.env.ADMIN_PATH_SECRET) {
 }
 
 // ── SPA fallback ──────────────────────────────────────
+// ── Catalog generator page ────────────────────────────
+app.get('/catalog', (_req, res) =>
+  res.sendFile(require('path').join(__dirname, 'public', 'catalog.html'))
+);
+
+// ── SEO Landing Pages — real URLs Google can index ───
+const SEO_PAGES = [
+  '/angus-bulls-for-sale',
+  '/hereford-bulls-for-sale',
+  '/simmental-bulls-for-sale',
+  '/charolais-bulls-for-sale',
+  '/red-angus-bulls-for-sale',
+  '/bred-heifers-for-sale',
+  '/angus-heifers-for-sale',
+  '/cow-calf-pairs-for-sale',
+  '/feeder-cattle-for-sale',
+  '/stocker-cattle-for-sale',
+  '/angus-cattle-for-sale',
+  '/grass-fed-beef-for-sale',
+  '/wagyu-beef-for-sale',
+  '/farm-fresh-beef',
+  '/cattle-trailers-for-sale',
+  '/cattle-equipment-for-sale',
+  '/working-cattle-dogs-for-sale',
+  '/border-collies-for-sale',
+  '/show-cattle-for-sale',
+  '/dairy-cattle-for-sale',
+  '/bottle-calves-for-sale',
+  '/hay-for-sale',
+];
+
+SEO_PAGES.forEach(path => {
+  app.get(path, (_req, res) =>
+    res.sendFile(require('path').join(__dirname, 'public', 'index.html'))
+  );
+});
+
 app.get('*', (_req, res) =>
   res.sendFile(path.join(__dirname, 'public', 'index.html'))
 );
