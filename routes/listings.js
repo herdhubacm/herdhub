@@ -32,6 +32,23 @@ const upload = multer({
   },
 });
 
+// ── Magic bytes file validation ───────────────────────
+// Checks actual file content, not just MIME type (spoofing protection)
+function validateImageBytes(buffer) {
+  if (!buffer || buffer.length < 4) return false;
+  const b = buffer;
+  // JPEG: FF D8 FF
+  if (b[0] === 0xFF && b[1] === 0xD8 && b[2] === 0xFF) return true;
+  // PNG: 89 50 4E 47 0D 0A 1A 0A
+  if (b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4E && b[3] === 0x47) return true;
+  // GIF: 47 49 46 38
+  if (b[0] === 0x47 && b[1] === 0x49 && b[2] === 0x46 && b[3] === 0x38) return true;
+  // WEBP: 52 49 46 46 (RIFF) then WEBP at offset 8
+  if (b[0] === 0x52 && b[1] === 0x49 && b[2] === 0x46 && b[3] === 0x46 &&
+      buffer.length > 11 && b[8] === 0x57 && b[9] === 0x45 && b[10] === 0x42 && b[11] === 0x50) return true;
+  return false;
+}
+
 // ── Helpers ────────────────────────────────────────────
 function tierPhotoLimit(tier) {
   if (tier === 'filet')        return parseInt(process.env.MAX_PHOTOS_FILET)  || 5;
@@ -374,6 +391,14 @@ router.post('/', authenticateToken, upload.array('photos', 20), async (req, res)
 
     // 2. Upload photos to cloud storage (in parallel, up to tier limit)
     if (req.files && req.files.length) {
+      // Validate magic bytes on every file
+      for (const file of req.files) {
+        if (!validateImageBytes(file.buffer)) {
+          await client.query('ROLLBACK');
+          client.release();
+          return res.status(415).json({ error: 'Invalid image file. Only real JPEG, PNG, WEBP, or GIF files are accepted.' });
+        }
+      }
       const { succeeded, failed } = await storage.uploadMany(
         req.files, `listings/${listingId}`, photoLimit
       );

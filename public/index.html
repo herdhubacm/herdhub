@@ -2740,8 +2740,24 @@ const API = '';  // same-origin
 let csrfToken = null;
 // Fetch CSRF token on load
 fetch('/api/csrf-token').then(r=>r.json()).then(d=>{ csrfToken=d.token; }).catch(()=>{});
-let authToken = localStorage.getItem('hh_token');
+// Auth token stored in MEMORY only — set via httpOnly cookie server-side
+// Never stored in localStorage (XSS-proof)
+let authToken = null;
 let currentUser = null;
+
+// On page load: ping /api/auth/refresh to restore session from httpOnly cookie
+(async function restoreSession() {
+  try {
+    const r = await fetch('/api/auth/refresh', { credentials: 'include' });
+    if (r.ok) {
+      const d = await r.json();
+      authToken = d.token;
+      currentUser = d.user;
+      updateAuthUI();
+      loadUnreadCount();
+    }
+  } catch(e) { /* no session — stay logged out */ }
+})();
 let currentPage = 'home';
 let listingsPage = 1;
 
@@ -3260,7 +3276,7 @@ function updateAuthUI() {
           acctBtn.style.display = 'inline-block';
           document.getElementById('account-name').textContent = u.name.split(' ')[0];
         }
-        else { authToken = null; localStorage.removeItem('hh_token'); btn.style.display=''; acctBtn.style.display='none'; }
+        else { authToken = null; currentUser = null; fetch('/api/auth/logout',{method:'POST',credentials:'include'}).catch(()=>{}); btn.style.display=''; acctBtn.style.display='none'; }
       }).catch(() => {});
   }
 }
@@ -3273,9 +3289,17 @@ async function doLogin() {
   try {
     const r = await fetch(`${API}/api/auth/login`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({email,password}) });
     const d = await r.json();
-    if (!r.ok) { errEl.textContent = d.error; errEl.style.display='block'; return; }
+    if (!r.ok) {
+      errEl.textContent = d.error || 'Login failed';
+      // Show reset link on too many attempts
+      if (r.status === 429) {
+        errEl.innerHTML = d.error + ' <a href="javascript:void(0)" onclick="showForgotPassword()" style="color:var(--rust)">Reset password →</a>';
+      }
+      errEl.style.display = 'block';
+      return;
+    }
     authToken = d.token; currentUser = d.user;
-    localStorage.setItem('hh_token', authToken);
+    // token stored in httpOnly cookie set by server
     document.getElementById('auth-btn').style.display = 'none';
     document.getElementById('account-btn').style.display = 'inline-block';
     loadUnreadCount();
@@ -3297,6 +3321,16 @@ function onTurnstileError() {
   if (err) { err.textContent = 'Security check failed. Please refresh and try again.'; err.style.display = 'block'; }
 }
 
+// Password strength check
+function checkPasswordStrength(pw) {
+  if (pw.length < 8) return { ok: false, msg: 'Password must be at least 8 characters' };
+  if (pw.length < 10 && !/[0-9]/.test(pw)) return { ok: false, msg: 'Add a number or make it longer (10+ chars)' };
+  // Common weak passwords
+  const weak = ['password','12345678','password1','qwerty123','cattle123','herdhub1'];
+  if (weak.includes(pw.toLowerCase())) return { ok: false, msg: 'That password is too common. Please choose a stronger one.' };
+  return { ok: true };
+}
+
 async function doRegister() {
   const errEl = document.getElementById('register-error');
   errEl.style.display = 'none';
@@ -3305,6 +3339,15 @@ async function doRegister() {
   const termsCheck = document.getElementById('reg-terms-check');
   if (!termsCheck || !termsCheck.checked) {
     errEl.textContent = 'You must agree to the Terms of Service, Privacy Policy, and User Agreement to create an account.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  // Password strength check
+  const pwVal = document.getElementById('reg-password')?.value || '';
+  const pwCheck = checkPasswordStrength(pwVal);
+  if (!pwCheck.ok) {
+    errEl.textContent = pwCheck.msg;
     errEl.style.display = 'block';
     return;
   }
@@ -3335,7 +3378,7 @@ async function doRegister() {
     const d = await r.json();
     if (!r.ok) { errEl.textContent = d.error; errEl.style.display='block'; return; }
     authToken = d.token; currentUser = d.user;
-    localStorage.setItem('hh_token', authToken);
+    // token stored in httpOnly cookie set by server
     document.getElementById('auth-btn').style.display = 'none';
     document.getElementById('account-btn').style.display = 'inline-block';
     document.getElementById('account-name').textContent = d.user.name.split(' ')[0];
@@ -4830,7 +4873,8 @@ async function acctPostListing() {
 
 function logout() {
   authToken = null; currentUser = null;
-  localStorage.removeItem('hh_token');
+  // Clear httpOnly cookie server-side
+  fetch('/api/auth/logout', { method: 'POST', credentials: 'include' }).catch(() => {});
   document.getElementById('auth-btn').style.display = 'inline-block';
   document.getElementById('account-btn').style.display = 'none';
   showPage('home');

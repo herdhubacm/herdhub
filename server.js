@@ -7,6 +7,7 @@
 require('dotenv').config();
 
 const express   = require('express');
+const cookieParser = require('cookie-parser');
 const cors      = require('cors');
 const helmet    = require('helmet');
 const path      = require('path');
@@ -138,7 +139,7 @@ app.use(cors({
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Session-ID'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Session-ID', 'X-CSRF-Token'],
 }));
 
 // ── Rate limiting ─────────────────────────────────────
@@ -166,6 +167,27 @@ const strictLimiter = rateLimit({
 // ── Body parsing ──────────────────────────────────────
 app.use('/api/payments/webhook', express.raw({ type: 'application/json' }));
 app.use(express.json({ limit: '2mb' }));
+app.use(cookieParser());
+
+// ── Global input sanitizer ────────────────────────────
+// Strips null bytes and enforces length caps on all API inputs
+function sanitizeValue(v, depth) {
+  if (depth > 5) return v;
+  if (typeof v === 'string') return v.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '').slice(0, 50000);
+  if (Array.isArray(v)) return v.slice(0, 100).map(i => sanitizeValue(i, depth + 1));
+  if (v && typeof v === 'object') {
+    const out = {};
+    for (const [k, val] of Object.entries(v)) {
+      if (typeof k === 'string' && k.length < 100) out[k] = sanitizeValue(val, depth + 1);
+    }
+    return out;
+  }
+  return v;
+}
+app.use((req, _res, next) => {
+  if (req.body) req.body = sanitizeValue(req.body, 0);
+  next();
+});
 // Sanitize query strings — prevent basic injection via URL params
 app.use((req, res, next) => {
   for (const key in req.query) {
@@ -189,6 +211,14 @@ app.use((req, res, next) => {
   // Add security headers not covered by helmet
   if (req.path.startsWith('/api')) res.setHeader('X-Robots-Tag', 'noindex, nofollow');
   res.setHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  // Prevent caching of sensitive API responses
+  if (req.path.startsWith('/api/auth')) {
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+    res.setHeader('Pragma', 'no-cache');
+  }
   next();
 });
 
@@ -308,12 +338,26 @@ app.use('/api/*', (req, res) =>
 );
 
 // ── Admin panel ───────────────────────────────────────
-app.get('/admin', (_req, res) =>
+// Admin panel — protected by a secret URL token to prevent discovery
+// Set ADMIN_PATH_SECRET in Railway env vars (any random string)
+const adminPath = process.env.ADMIN_PATH_SECRET
+  ? `/admin-${process.env.ADMIN_PATH_SECRET}`
+  : '/admin';
+
+app.get(adminPath, (_req, res) =>
   res.sendFile(path.join(__dirname, 'public', 'admin.html'))
 );
-app.get('/admin/*', (_req, res) =>
+app.get(adminPath + '/*', (_req, res) =>
   res.sendFile(path.join(__dirname, 'public', 'admin.html'))
 );
+// Old /admin path — return 404 if secret is set (security through obscurity layer)
+if (process.env.ADMIN_PATH_SECRET) {
+  app.get('/admin', (_req, res) => res.status(404).send('Not found'));
+  app.get('/admin/*', (_req, res) => res.status(404).send('Not found'));
+} else {
+  app.get('/admin', (_req, res) => res.sendFile(path.join(__dirname, 'public', 'admin.html')));
+  app.get('/admin/*', (_req, res) => res.sendFile(path.join(__dirname, 'public', 'admin.html')));
+}
 
 // ── SPA fallback ──────────────────────────────────────
 app.get('*', (_req, res) =>
@@ -444,6 +488,19 @@ async function start() {
         UNIQUE(user_id, drip_day)
       )`);
       console.log('✅  Email drip log table ready');
+
+      // Login attempt tracking for brute force protection
+      await query(`CREATE TABLE IF NOT EXISTS login_attempts (
+        id         BIGSERIAL    PRIMARY KEY,
+        identifier TEXT         NOT NULL,
+        success    BOOLEAN      NOT NULL DEFAULT FALSE,
+        ip         TEXT,
+        created_at TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+      )`);
+      await query(`CREATE INDEX IF NOT EXISTS idx_login_attempts_ident ON login_attempts(identifier, created_at)`);
+      // Clean old attempts hourly
+      await query(`DELETE FROM login_attempts WHERE created_at < NOW() - INTERVAL '24 hours'`);
+      console.log('✅  Login attempts table ready');
 
       // Site settings table
       await query(`CREATE TABLE IF NOT EXISTS site_settings (

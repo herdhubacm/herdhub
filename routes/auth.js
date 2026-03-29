@@ -12,6 +12,21 @@ function signToken(payload) {
   });
 }
 
+// Set secure httpOnly cookie — XSS-proof token storage
+function setAuthCookie(res, token) {
+  res.cookie('hh_auth', token, {
+    httpOnly: true,           // JS cannot read this — blocks XSS token theft
+    secure: process.env.NODE_ENV === 'production', // HTTPS only in prod
+    sameSite: 'strict',       // CSRF protection
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    path: '/',
+  });
+}
+
+function clearAuthCookie(res) {
+  res.clearCookie('hh_auth', { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'strict', path: '/' });
+}
+
 // ── POST /api/auth/register ────────────────────────────
 router.post('/register', async (req, res) => {
   try {
@@ -48,6 +63,7 @@ router.post('/register', async (req, res) => {
 
     const user  = rows[0];
     const token = signToken({ id: user.id, email: user.email, name: user.name, role: user.role });
+    setAuthCookie(res, token);
     // Send welcome email (non-blocking)
     try {
       const { sendEmail, welcomeEmail } = require('../services/email');
@@ -68,18 +84,42 @@ router.post('/login', async (req, res) => {
     if (!email || !password)
       return res.status(400).json({ error: 'email and password required' });
 
+    const identifier = email.toLowerCase().trim();
+    const ip = req.ip;
+
+    // ── Brute force check — max 8 failed attempts per 15 min ────────────
+    const { rows: attempts } = await query(
+      `SELECT COUNT(*) AS c FROM login_attempts
+       WHERE identifier=$1 AND success=FALSE
+         AND created_at > NOW() - INTERVAL '15 minutes'`,
+      [identifier]
+    );
+    if (parseInt(attempts[0].c) >= 8) {
+      await query('INSERT INTO login_attempts (identifier, success, ip) VALUES ($1, false, $2)', [identifier, ip]);
+      return res.status(429).json({
+        error: 'Too many failed login attempts. Please wait 15 minutes or reset your password.'
+      });
+    }
+
     const { rows } = await query(
       'SELECT id, email, name, role, password_hash FROM users WHERE email = $1',
-      [email.toLowerCase()]
+      [identifier]
     );
-    if (!rows.length) return res.status(401).json({ error: 'Invalid credentials' });
 
-    const user  = rows[0];
-    const valid = await bcrypt.compare(password, user.password_hash);
-    if (!valid) return res.status(401).json({ error: 'Invalid credentials' });
+    // Record attempt before checking password (timing-safe)
+    const user  = rows[0] || null;
+    const valid = user ? await bcrypt.compare(password, user.password_hash) : false;
+
+    await query(
+      'INSERT INTO login_attempts (identifier, success, ip) VALUES ($1, $2, $3)',
+      [identifier, valid, ip]
+    );
+
+    if (!user || !valid) return res.status(401).json({ error: 'Invalid credentials' });
 
     const payload = { id: user.id, email: user.email, name: user.name, role: user.role };
     const token   = signToken(payload);
+    setAuthCookie(res, token);
     res.json({ token, user: payload });
   } catch (err) {
     console.error('Login error:', err);
@@ -351,6 +391,32 @@ router.post('/contact', async (req, res) => {
     console.error('Contact form error:', e);
     res.status(500).json({ error: 'Failed to send message' });
   }
+});
+
+// ── GET /api/auth/refresh ──────────────────────────────
+// Called on page load — reads httpOnly cookie, returns token to memory
+router.get('/refresh', (req, res) => {
+  const token = req.cookies?.hh_auth;
+  if (!token) return res.status(401).json({ error: 'No session' });
+  try {
+    const payload = require('jsonwebtoken').verify(token, process.env.JWT_SECRET);
+    // Rotate cookie to extend session
+    setAuthCookie(res, require('jsonwebtoken').sign(
+      { id: payload.id, email: payload.email, name: payload.name, role: payload.role },
+      process.env.JWT_SECRET,
+      { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
+    ));
+    res.json({ token, user: { id: payload.id, email: payload.email, name: payload.name, role: payload.role } });
+  } catch(e) {
+    clearAuthCookie(res);
+    res.status(401).json({ error: 'Session expired' });
+  }
+});
+
+// ── POST /api/auth/logout ──────────────────────────────
+router.post('/logout', (req, res) => {
+  clearAuthCookie(res);
+  res.json({ ok: true });
 });
 
 // ── POST /api/auth/verify-request ─────────────────────
