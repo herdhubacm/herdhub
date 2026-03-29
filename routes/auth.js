@@ -229,3 +229,137 @@ router.post('/reset-password', async (req, res) => {
     res.status(500).json({ error: 'Failed to reset password' });
   }
 });
+
+// ── POST /api/auth/newsletter ──────────────────────────
+// Saves email to DB + syncs to Mailchimp if configured
+router.post('/newsletter', async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email || !email.includes('@'))
+      return res.status(400).json({ error: 'Valid email required' });
+
+    // Save/update in users table if they exist
+    await query(
+      `UPDATE users SET newsletter_opt_in=TRUE WHERE email=$1`,
+      [email.toLowerCase()]
+    );
+
+    // Sync to Mailchimp if API key configured
+    const mcKey  = process.env.MAILCHIMP_API_KEY;
+    const mcList = process.env.MAILCHIMP_LIST_ID;
+    if (mcKey && mcList) {
+      const dc = mcKey.split('-').pop(); // datacenter e.g. us21
+      try {
+        const mcRes = await fetch(
+          `https://${dc}.api.mailchimp.com/3.0/lists/${mcList}/members`,
+          {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${mcKey}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              email_address: email.toLowerCase(),
+              status: 'subscribed',
+              tags: ['website-signup'],
+            }),
+          }
+        );
+        const mcData = await mcRes.json();
+        if (!mcRes.ok && mcData.title !== 'Member Exists') {
+          console.warn('Mailchimp error:', mcData.detail);
+        }
+      } catch(e) {
+        console.warn('Mailchimp sync error:', e.message);
+      }
+    }
+
+    res.json({ ok: true, message: "You're subscribed!" });
+  } catch(e) {
+    res.status(500).json({ error: 'Subscription failed' });
+  }
+});
+
+// ── POST /api/auth/contact ─────────────────────────────
+// Support contact form — emails ad@theherdhub.com
+router.post('/contact', async (req, res) => {
+  try {
+    const { name, email, subject, message } = req.body;
+    if (!name || !email || !subject || !message)
+      return res.status(400).json({ error: 'All fields are required' });
+    if (!email.includes('@'))
+      return res.status(400).json({ error: 'Valid email required' });
+
+    const { sendEmail } = require('../services/email');
+    await sendEmail({
+      to: process.env.SUPPORT_EMAIL || 'ad@theherdhub.com',
+      subject: `[Support] ${subject} — from ${name}`,
+      html: `
+        <div style="font-family:Arial,sans-serif;max-width:600px">
+          <h2 style="color:#2c1a0e">Support Request</h2>
+          <table style="border-collapse:collapse;width:100%">
+            <tr><td style="padding:8px;border:1px solid #ddd;font-weight:700;width:120px">Name</td><td style="padding:8px;border:1px solid #ddd">${name}</td></tr>
+            <tr><td style="padding:8px;border:1px solid #ddd;font-weight:700">Email</td><td style="padding:8px;border:1px solid #ddd"><a href="mailto:${email}">${email}</a></td></tr>
+            <tr><td style="padding:8px;border:1px solid #ddd;font-weight:700">Subject</td><td style="padding:8px;border:1px solid #ddd">${subject}</td></tr>
+            <tr><td style="padding:8px;border:1px solid #ddd;font-weight:700;vertical-align:top">Message</td><td style="padding:8px;border:1px solid #ddd;white-space:pre-wrap">${message}</td></tr>
+          </table>
+        </div>`,
+      text: `Support request from ${name} (${email})\nSubject: ${subject}\n\n${message}`,
+    });
+
+    // Auto-reply to sender
+    await sendEmail({
+      to: email,
+      subject: 'We received your message — Herd Hub Support',
+      html: `<div style="font-family:Georgia,serif;max-width:560px;margin:0 auto">
+        <div style="background:#2c1a0e;padding:20px;text-align:center">
+          <h1 style="color:#f5efe0;margin:0;font-size:22px">Herd <span style="color:#c9a96e">Hub</span></h1>
+        </div>
+        <div style="padding:28px;background:#fff">
+          <p style="color:#333;line-height:1.7">Hey ${name},</p>
+          <p style="color:#333;line-height:1.7">Thanks for reaching out! We received your message about <strong>"${subject}"</strong> and will get back to you within 24 hours.</p>
+          <p style="color:#888;font-size:13px">If this is urgent, you can also reach us directly at <a href="mailto:ad@theherdhub.com" style="color:#8b3214">ad@theherdhub.com</a>.</p>
+        </div>
+      </div>`,
+      text: `Hi ${name}, we received your message and will respond within 24 hours. — Herd Hub Support`,
+    }).catch(() => {});
+
+    res.json({ ok: true });
+  } catch(e) {
+    console.error('Contact form error:', e);
+    res.status(500).json({ error: 'Failed to send message' });
+  }
+});
+
+// ── POST /api/auth/verify-request ─────────────────────
+// Seller requests verification — emails admin
+router.post('/verify-request', authenticateToken, async (req, res) => {
+  try {
+    const { sendEmail } = require('../services/email');
+    const { rows } = await query('SELECT name, email, phone, state, city FROM users WHERE id=$1', [req.user.id]);
+    if (!rows.length) return res.status(404).json({ error: 'User not found' });
+    const user = rows[0];
+
+    await sendEmail({
+      to: process.env.SUPPORT_EMAIL || 'ad@theherdhub.com',
+      subject: `Verification Request — ${user.name}`,
+      html: `<p>${user.name} (${user.email}, ${user.phone}) from ${user.city}, ${user.state} has requested seller verification.</p>
+             <p>User ID: ${req.user.id}</p>
+             <p>To verify: UPDATE users SET is_verified=TRUE WHERE id=${req.user.id};</p>`,
+      text: `Verification request from ${user.name} (ID: ${req.user.id})`,
+    });
+
+    res.json({ ok: true, message: "Verification request sent! We'll review your account within 24 hours." });
+  } catch(e) {
+    res.status(500).json({ error: 'Failed to send verification request' });
+  }
+});
+
+// ── PUT /api/admin/users/:id/verify ───────────────────
+router.put('/admin-verify/:id', authenticateToken, async (req, res) => {
+  if (req.user.role !== 'admin') return res.status(403).json({ error: 'Admin only' });
+  try {
+    await query('UPDATE users SET is_verified=TRUE WHERE id=$1', [req.params.id]);
+    res.json({ ok: true });
+  } catch(e) { res.status(500).json({ error: 'Failed to verify user' }); }
+});

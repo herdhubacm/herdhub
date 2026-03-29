@@ -821,6 +821,71 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
   </div>
 </div>
 
+<!-- ── CONTACT / SUPPORT PAGE ── -->
+<div id="page-contact" style="display:none">
+  <div style="background:var(--dark-brown);padding:48px 0 36px;border-bottom:2px solid var(--rust)">
+    <div style="max-width:700px;margin:0 auto;padding:0 24px;text-align:center">
+      <div style="font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--tan);margin-bottom:10px">We're Here to Help</div>
+      <h1 style="font-family:'Playfair Display',serif;font-size:40px;font-weight:900;color:var(--cream);margin-bottom:10px">Contact <span style="color:var(--gold)">Support</span></h1>
+      <p style="font-size:15px;color:rgba(245,239,224,.7);line-height:1.7">Got a question, problem, or feedback? We respond to every message within 24 hours.</p>
+    </div>
+  </div>
+  <div style="max-width:700px;margin:0 auto;padding:48px 24px">
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:40px">
+      <div style="background:white;border:1px solid var(--light-tan);border-radius:8px;padding:24px;text-align:center">
+        <div style="font-size:32px;margin-bottom:10px">&#128231;</div>
+        <div style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--dark-brown);margin-bottom:6px">Email Us</div>
+        <a href="mailto:ad@theherdhub.com" style="color:var(--rust);font-size:14px;text-decoration:none;font-weight:600">ad@theherdhub.com</a>
+        <p style="font-size:12px;color:#888;margin-top:6px">Response within 24 hours</p>
+      </div>
+      <div style="background:white;border:1px solid var(--light-tan);border-radius:8px;padding:24px;text-align:center">
+        <div style="font-size:32px;margin-bottom:10px">&#8987;</div>
+        <div style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--dark-brown);margin-bottom:6px">Support Hours</div>
+        <p style="font-size:14px;color:#555;margin:0">Mon &ndash; Fri &middot; 8am &ndash; 6pm CST</p>
+        <p style="font-size:12px;color:#888;margin-top:4px">Weekend messages answered Monday</p>
+      </div>
+    </div>
+
+    <div style="background:white;border:1px solid var(--light-tan);border-radius:8px;padding:32px;margin-bottom:32px">
+      <h2 style="font-family:'Playfair Display',serif;font-size:22px;font-weight:900;color:var(--dark-brown);margin-bottom:6px">Send a Message</h2>
+      <p style="font-size:13px;color:#888;margin-bottom:24px">Fill out the form below and we'll get back to you shortly.</p>
+      <div id="contact-success" style="display:none;background:#dcfce7;border:1px solid #bbf7d0;border-radius:6px;padding:16px;margin-bottom:20px;color:#166534;font-size:14px">
+        &#10003; Message sent! We'll get back to you within 24 hours.
+      </div>
+      <div id="contact-error" style="display:none;background:#fee2e2;border:1px solid #fecaca;border-radius:6px;padding:16px;margin-bottom:20px;color:#991b1b;font-size:14px"></div>
+      <div class="form-row" style="margin-bottom:16px">
+        <div class="form-group"><label style="font-size:12px;font-weight:600;color:var(--dark-brown);display:block;margin-bottom:4px">Your Name *</label><input type="text" id="ct-name" placeholder="Jake Harrington" style="width:100%;padding:10px;border:1.5px solid var(--light-tan);border-radius:4px;font-size:14px;box-sizing:border-box"></div>
+        <div class="form-group"><label style="font-size:12px;font-weight:600;color:var(--dark-brown);display:block;margin-bottom:4px">Email Address *</label><input type="email" id="ct-email" placeholder="you@example.com" style="width:100%;padding:10px;border:1.5px solid var(--light-tan);border-radius:4px;font-size:14px;box-sizing:border-box"></div>
+      </div>
+      <div style="margin-bottom:16px">
+        <label style="font-size:12px;font-weight:600;color:var(--dark-brown);display:block;margin-bottom:4px">Subject *</label>
+        <select id="ct-subject" style="width:100%;padding:10px;border:1.5px solid var(--light-tan);border-radius:4px;font-size:14px">
+          <option value="">Select a topic&hellip;</option>
+          <option value="Listing Question">Listing Question</option>
+          <option value="Account Issue">Account Issue</option>
+          <option value="Payment / Billing">Payment / Billing</option>
+          <option value="Report a Scam">Report a Scam or Fraud</option>
+          <option value="Technical Problem">Technical Problem</option>
+          <option value="Feature Request">Feature Request</option>
+          <option value="Partnership / Advertising">Partnership / Advertising</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div style="margin-bottom:20px">
+        <label style="font-size:12px;font-weight:600;color:var(--dark-brown);display:block;margin-bottom:4px">Message *</label>
+        <textarea id="ct-message" rows="5" placeholder="Describe your question or issue in detail&hellip;" style="width:100%;padding:10px;border:1.5px solid var(--light-tan);border-radius:4px;font-size:14px;resize:vertical;box-sizing:border-box;line-height:1.6"></textarea>
+      </div>
+      <button class="btn-primary" style="padding:12px 32px;font-size:14px" onclick="submitContactForm()">Send Message &rarr;</button>
+    </div>
+
+    <div>
+      <h2 style="font-family:'Playfair Display',serif;font-size:22px;font-weight:900;color:var(--dark-brown);margin-bottom:20px">Common Questions</h2>
+      <div id="faq-list" style="display:flex;flex-direction:column;gap:10px"></div>
+    </div>
+  </div>
+</div>
+
 <!-- ARTICLES LIST PAGE -->
 <div id="page-articles" style="display:none">
   <div style="background:var(--dark-brown);padding:48px 0 36px;border-bottom:2px solid var(--rust)">
@@ -962,131 +1027,190 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
 
 <!-- PRICING PAGE -->
 <div id="page-pricing" style="display:none">
+  <!-- Header -->
   <div style="background:var(--dark-brown);padding:56px 0 40px;border-bottom:3px solid var(--gold)">
     <div style="max-width:900px;margin:0 auto;padding:0 24px;text-align:center">
       <div style="font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--tan);margin-bottom:12px">Transparent Pricing</div>
       <h1 style="font-family:'Playfair Display',serif;font-size:44px;font-weight:900;color:var(--cream);margin-bottom:12px">Simple, <span style="color:var(--gold)">Honest</span> Plans</h1>
-      <p style="font-size:15px;color:rgba(245,239,224,.7);line-height:1.7;max-width:580px;margin:0 auto">No hidden fees. No fine print. Pick the plan that fits your operation and start reaching buyers today.</p>
+      <p style="font-size:15px;color:rgba(245,239,224,.7);line-height:1.7;max-width:560px;margin:0 auto">No hidden fees. No fine print. Pay only for the visibility you need. Free listings stay free forever.</p>
     </div>
   </div>
 
   <div style="max-width:1100px;margin:0 auto;padding:56px 24px">
 
-    <!-- SELLER PLANS -->
+    <!-- ROI Banner -->
+    <div style="background:linear-gradient(135deg,var(--rust),var(--dark-rust));border-radius:8px;padding:24px 32px;margin-bottom:48px;display:flex;align-items:center;gap:24px;flex-wrap:wrap">
+      <div style="flex:1;min-width:200px">
+        <div style="font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.7);margin-bottom:6px">The math is simple</div>
+        <div style="font-family:'Playfair Display',serif;font-size:22px;font-weight:900;color:white;line-height:1.3">A $5.99/mo listing that sells one $1,500 heifer pays for itself <span style="color:var(--gold)">25 years over.</span></div>
+      </div>
+      <button class="btn-primary" style="background:white;color:var(--rust);border-color:white;font-weight:700;white-space:nowrap;padding:12px 28px" data-action="modal" data-modal="post-listing">Start Free &rarr;</button>
+    </div>
+
+    <!-- Individual Seller Plans -->
     <div style="text-align:center;margin-bottom:36px">
       <div style="font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--rust);margin-bottom:8px">Individual Sellers</div>
-      <h2 style="font-family:'Playfair Display',serif;font-size:32px;font-weight:700;color:var(--dark-brown)">🐄 Sell Your Stock</h2>
+      <h2 style="font-family:'Playfair Display',serif;font-size:32px;font-weight:700;color:var(--dark-brown)">&#x1F404; List Your Cattle</h2>
     </div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;margin-bottom:64px">
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:24px;margin-bottom:20px">
 
       <!-- Burger -->
-      <div style="border:2px solid #e5e7eb;border-radius:8px;padding:32px;background:white">
-        <div style="font-size:32px;margin-bottom:8px">🍔</div>
-        <div style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:var(--dark-brown);margin-bottom:4px">Burger</div>
-        <div style="font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#6b7280;margin-bottom:20px">Always Free · No Credit Card</div>
-        <div style="font-family:'Playfair Display',serif;font-size:40px;font-weight:900;color:#16a34a;margin-bottom:20px">$0</div>
-        <ul style="list-style:none;padding:0;margin-bottom:28px">
-          <li style="padding:8px 0;border-bottom:1px solid #f3f4f6;font-size:14px;display:flex;align-items:center;gap:8px"><span style="color:#16a34a;font-weight:700">✓</span> 1 photo upload</li>
-          <li style="padding:8px 0;border-bottom:1px solid #f3f4f6;font-size:14px;display:flex;align-items:center;gap:8px"><span style="color:#16a34a;font-weight:700">✓</span> 30-day listing run</li>
-          <li style="padding:8px 0;border-bottom:1px solid #f3f4f6;font-size:14px;display:flex;align-items:center;gap:8px"><span style="color:#16a34a;font-weight:700">✓</span> All cattle categories</li>
-          <li style="padding:8px 0;border-bottom:1px solid #f3f4f6;font-size:14px;display:flex;align-items:center;gap:8px"><span style="color:#16a34a;font-weight:700">✓</span> Equipment &amp; supplies</li>
-          <li style="padding:8px 0;font-size:14px;display:flex;align-items:center;gap:8px;color:#9ca3af"><span>✗</span> No featured placement</li>
+      <div style="border:2px solid #e5e7eb;border-radius:8px;padding:28px;background:white;position:relative">
+        <div style="font-size:28px;margin-bottom:8px">&#x1F354;</div>
+        <div style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--dark-brown);margin-bottom:2px">Burger</div>
+        <div style="font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#6b7280;margin-bottom:16px">Always Free &middot; No Card Needed</div>
+        <div style="font-family:'Playfair Display',serif;font-size:36px;font-weight:900;color:#16a34a;margin-bottom:4px">$0</div>
+        <div style="font-size:12px;color:#9ca3af;margin-bottom:20px">forever free</div>
+        <ul style="list-style:none;padding:0;margin-bottom:24px">
+          <li style="padding:7px 0;border-bottom:1px solid #f3f4f6;font-size:13px;display:flex;align-items:center;gap:8px"><span style="color:#16a34a;font-weight:700;font-size:15px">&#10003;</span>1 photo per listing</li>
+          <li style="padding:7px 0;border-bottom:1px solid #f3f4f6;font-size:13px;display:flex;align-items:center;gap:8px"><span style="color:#16a34a;font-weight:700;font-size:15px">&#10003;</span>30-day listing run</li>
+          <li style="padding:7px 0;border-bottom:1px solid #f3f4f6;font-size:13px;display:flex;align-items:center;gap:8px"><span style="color:#16a34a;font-weight:700;font-size:15px">&#10003;</span>All cattle &amp; equipment categories</li>
+          <li style="padding:7px 0;border-bottom:1px solid #f3f4f6;font-size:13px;display:flex;align-items:center;gap:8px;color:#9ca3af"><span style="font-size:15px">&#10007;</span>No featured placement</li>
+          <li style="padding:7px 0;font-size:13px;display:flex;align-items:center;gap:8px;color:#9ca3af"><span style="font-size:15px">&#10007;</span>Listing expires after 30 days</li>
         </ul>
-        <button class="btn-primary" style="width:100%;justify-content:center;background:#16a34a;border-color:#16a34a" data-action="modal" data-modal="post-listing">Post Free →</button>
+        <button class="btn-primary" style="width:100%;justify-content:center;background:#16a34a;border-color:#16a34a;font-size:13px" data-action="modal" data-modal="post-listing">Post Free &rarr;</button>
       </div>
 
-      <!-- Sirloin -->
-      <div style="border:2px solid var(--rust);border-radius:8px;padding:32px;background:white">
-        <div style="font-size:32px;margin-bottom:8px">🥩</div>
-        <div style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:var(--dark-brown);margin-bottom:4px">Sirloin</div>
-        <div style="font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--rust);margin-bottom:20px">Billed Yearly · Cancel Anytime</div>
-        <div style="margin-bottom:20px"><span style="font-family:'Playfair Display',serif;font-size:40px;font-weight:900;color:var(--dark-brown)">$5.99</span><span style="font-size:14px;color:#6b7280">/mo · billed yearly</span></div>
-        <ul style="list-style:none;padding:0;margin-bottom:28px">
-          <li style="padding:8px 0;border-bottom:1px solid #f3f4f6;font-size:14px;display:flex;align-items:center;gap:8px"><span style="color:var(--rust);font-weight:700">✓</span> 3 photo uploads</li>
-          <li style="padding:8px 0;border-bottom:1px solid #f3f4f6;font-size:14px;display:flex;align-items:center;gap:8px"><span style="color:var(--rust);font-weight:700">✓</span> Runs until canceled</li>
-          <li style="padding:8px 0;border-bottom:1px solid #f3f4f6;font-size:14px;display:flex;align-items:center;gap:8px"><span style="color:var(--rust);font-weight:700">✓</span> Featured on homepage</li>
-          <li style="padding:8px 0;border-bottom:1px solid #f3f4f6;font-size:14px;display:flex;align-items:center;gap:8px"><span style="color:var(--rust);font-weight:700">✓</span> Monthly newsletter inclusion</li>
-          <li style="padding:8px 0;border-bottom:1px solid #f3f4f6;font-size:14px;display:flex;align-items:center;gap:8px"><span style="color:var(--rust);font-weight:700">✓</span> All categories</li>
-          <li style="padding:8px 0;border-bottom:1px solid #f3f4f6;font-size:14px;display:flex;align-items:center;gap:8px"><span style="color:var(--rust);font-weight:700">✓</span> Set listing private anytime</li>
-          <li style="padding:8px 0;font-size:14px;display:flex;align-items:center;gap:8px"><span style="color:var(--rust);font-weight:700">✓</span> Resume listing anytime (ex. Bull→Heifer)</li>
+      <!-- Sirloin — MOST POPULAR -->
+      <div style="border:3px solid var(--rust);border-radius:8px;padding:28px;background:white;position:relative;box-shadow:0 8px 32px rgba(139,50,20,.15)">
+        <div style="position:absolute;top:-14px;left:50%;transform:translateX(-50%);background:var(--rust);color:white;font-family:'Oswald',sans-serif;font-size:10px;font-weight:700;letter-spacing:.15em;padding:4px 18px;border-radius:3px;white-space:nowrap">&#9733; MOST POPULAR</div>
+        <div style="font-size:28px;margin-bottom:8px">&#x1F969;</div>
+        <div style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--dark-brown);margin-bottom:2px">Sirloin</div>
+        <div style="font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--rust);margin-bottom:16px">Billed Yearly &middot; Cancel Anytime</div>
+        <div style="margin-bottom:4px"><span style="font-family:'Playfair Display',serif;font-size:36px;font-weight:900;color:var(--dark-brown)">$5.99</span><span style="font-size:13px;color:#6b7280">/mo</span></div>
+        <div style="font-size:12px;color:#9ca3af;margin-bottom:20px">billed $71.88/year</div>
+        <ul style="list-style:none;padding:0;margin-bottom:24px">
+          <li style="padding:7px 0;border-bottom:1px solid #f3f4f6;font-size:13px;display:flex;align-items:center;gap:8px"><span style="color:var(--rust);font-weight:700;font-size:15px">&#10003;</span>3 photos per listing</li>
+          <li style="padding:7px 0;border-bottom:1px solid #f3f4f6;font-size:13px;display:flex;align-items:center;gap:8px"><span style="color:var(--rust);font-weight:700;font-size:15px">&#10003;</span><strong>Runs until canceled</strong> &mdash; never expires</li>
+          <li style="padding:7px 0;border-bottom:1px solid #f3f4f6;font-size:13px;display:flex;align-items:center;gap:8px"><span style="color:var(--rust);font-weight:700;font-size:15px">&#10003;</span>Featured on homepage sidebar</li>
+          <li style="padding:7px 0;border-bottom:1px solid #f3f4f6;font-size:13px;display:flex;align-items:center;gap:8px"><span style="color:var(--rust);font-weight:700;font-size:15px">&#10003;</span>Monthly newsletter inclusion</li>
+          <li style="padding:7px 0;border-bottom:1px solid #f3f4f6;font-size:13px;display:flex;align-items:center;gap:8px"><span style="color:var(--rust);font-weight:700;font-size:15px">&#10003;</span>Pause &amp; resume anytime</li>
+          <li style="padding:7px 0;font-size:13px;display:flex;align-items:center;gap:8px"><span style="color:var(--rust);font-weight:700;font-size:15px">&#10003;</span>Priority in search results</li>
         </ul>
-        <button class="btn-primary" style="width:100%;justify-content:center" data-action="modal" data-modal="post-listing">Get Sirloin →</button>
+        <button class="btn-primary" style="width:100%;justify-content:center;font-size:13px;font-weight:700" data-action="modal" data-modal="post-listing">Get Sirloin &rarr;</button>
+        <div style="text-align:center;font-size:11px;color:#9ca3af;margin-top:8px">Most ranchers choose this plan</div>
       </div>
 
       <!-- Ribeye -->
-      <div style="border:2px solid var(--tan);border-radius:8px;padding:32px;background:white">
-        <div style="font-size:32px;margin-bottom:8px">🥩</div>
-        <div style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:var(--dark-brown);margin-bottom:4px">Ribeye</div>
-        <div style="font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--tan);margin-bottom:20px">One-Time · 30 Days Featured</div>
-        <div style="margin-bottom:20px"><span style="font-family:'Playfair Display',serif;font-size:40px;font-weight:900;color:var(--dark-brown)">$9.99</span><span style="font-size:14px;color:#6b7280"> one-time · 30 days</span></div>
-        <ul style="list-style:none;padding:0;margin-bottom:28px">
-          <li style="padding:8px 0;border-bottom:1px solid #f3f4f6;font-size:14px;display:flex;align-items:center;gap:8px"><span style="color:var(--tan);font-weight:700">✓</span> 3 photo uploads</li>
-          <li style="padding:8px 0;border-bottom:1px solid #f3f4f6;font-size:14px;display:flex;align-items:center;gap:8px"><span style="color:var(--tan);font-weight:700">✓</span> 30-day featured listing</li>
-          <li style="padding:8px 0;border-bottom:1px solid #f3f4f6;font-size:14px;display:flex;align-items:center;gap:8px"><span style="color:var(--tan);font-weight:700">✓</span> Homepage placement</li>
-          <li style="padding:8px 0;border-bottom:1px solid #f3f4f6;font-size:14px;display:flex;align-items:center;gap:8px"><span style="color:var(--tan);font-weight:700">✓</span> All categories</li>
-          <li style="padding:8px 0;font-size:14px;display:flex;align-items:center;gap:8px;color:#9ca3af"><span>✗</span> No recurring commitment</li>
+      <div style="border:2px solid var(--tan);border-radius:8px;padding:28px;background:white;position:relative">
+        <div style="font-size:28px;margin-bottom:8px">&#x1F969;</div>
+        <div style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--dark-brown);margin-bottom:2px">Ribeye</div>
+        <div style="font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--tan);margin-bottom:16px">One-Time &middot; 30 Days Featured</div>
+        <div style="margin-bottom:4px"><span style="font-family:'Playfair Display',serif;font-size:36px;font-weight:900;color:var(--dark-brown)">$9.99</span></div>
+        <div style="font-size:12px;color:#9ca3af;margin-bottom:20px">one-time payment</div>
+        <ul style="list-style:none;padding:0;margin-bottom:24px">
+          <li style="padding:7px 0;border-bottom:1px solid #f3f4f6;font-size:13px;display:flex;align-items:center;gap:8px"><span style="color:var(--tan);font-weight:700;font-size:15px">&#10003;</span>3 photos per listing</li>
+          <li style="padding:7px 0;border-bottom:1px solid #f3f4f6;font-size:13px;display:flex;align-items:center;gap:8px"><span style="color:var(--tan);font-weight:700;font-size:15px">&#10003;</span>30-day featured listing</li>
+          <li style="padding:7px 0;border-bottom:1px solid #f3f4f6;font-size:13px;display:flex;align-items:center;gap:8px"><span style="color:var(--tan);font-weight:700;font-size:15px">&#10003;</span>Homepage placement</li>
+          <li style="padding:7px 0;border-bottom:1px solid #f3f4f6;font-size:13px;display:flex;align-items:center;gap:8px"><span style="color:var(--tan);font-weight:700;font-size:15px">&#10003;</span>No recurring commitment</li>
+          <li style="padding:7px 0;font-size:13px;display:flex;align-items:center;gap:8px"><span style="color:var(--tan);font-weight:700;font-size:15px">&#10003;</span>Great for one-time sales</li>
         </ul>
-        <button class="btn-primary" style="width:100%;justify-content:center" data-action="modal" data-modal="post-listing">Get Ribeye →</button>
+        <button class="btn-primary" style="width:100%;justify-content:center;font-size:13px" data-action="modal" data-modal="post-listing">Get Ribeye &rarr;</button>
       </div>
     </div>
 
-    <!-- ADVERTISER PLANS -->
+    <!-- Feature Comparison Table -->
+    <div style="background:white;border:1px solid var(--light-tan);border-radius:8px;overflow:hidden;margin-bottom:56px">
+      <div style="background:var(--dark-brown);padding:16px 24px">
+        <h3 style="font-family:'Oswald',sans-serif;font-size:14px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin:0">Full Feature Comparison</h3>
+      </div>
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;min-width:500px">
+          <thead>
+            <tr style="border-bottom:2px solid var(--light-tan)">
+              <th style="text-align:left;padding:14px 20px;font-size:13px;color:#888;font-weight:600;width:40%">Feature</th>
+              <th style="text-align:center;padding:14px;font-size:13px;color:#16a34a;font-weight:700">Burger<br><span style="font-weight:400">Free</span></th>
+              <th style="text-align:center;padding:14px;font-size:13px;color:var(--rust);font-weight:700;background:rgba(139,50,20,.04)">Sirloin<br><span style="font-weight:400">$5.99/mo</span></th>
+              <th style="text-align:center;padding:14px;font-size:13px;color:#92400e;font-weight:700">Ribeye<br><span style="font-weight:400">$9.99</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom:1px solid #f3f4f6"><td style="padding:12px 20px;font-size:13px">Photos per listing</td><td style="text-align:center;font-size:13px">1</td><td style="text-align:center;font-size:13px;background:rgba(139,50,20,.03)">3</td><td style="text-align:center;font-size:13px">3</td></tr>
+            <tr style="border-bottom:1px solid #f3f4f6"><td style="padding:12px 20px;font-size:13px">Listing duration</td><td style="text-align:center;font-size:13px">30 days</td><td style="text-align:center;font-size:13px;background:rgba(139,50,20,.03)"><strong style="color:var(--rust)">Never expires</strong></td><td style="text-align:center;font-size:13px">30 days</td></tr>
+            <tr style="border-bottom:1px solid #f3f4f6"><td style="padding:12px 20px;font-size:13px">Featured on homepage</td><td style="text-align:center;color:#d1d5db;font-size:16px">&#10007;</td><td style="text-align:center;color:var(--rust);font-size:16px;background:rgba(139,50,20,.03)"><strong>&#10003;</strong></td><td style="text-align:center;color:var(--tan);font-size:16px"><strong>&#10003;</strong></td></tr>
+            <tr style="border-bottom:1px solid #f3f4f6"><td style="padding:12px 20px;font-size:13px">Priority in search results</td><td style="text-align:center;color:#d1d5db;font-size:16px">&#10007;</td><td style="text-align:center;color:var(--rust);font-size:16px;background:rgba(139,50,20,.03)"><strong>&#10003;</strong></td><td style="text-align:center;color:var(--tan);font-size:16px"><strong>&#10003;</strong></td></tr>
+            <tr style="border-bottom:1px solid #f3f4f6"><td style="padding:12px 20px;font-size:13px">Newsletter inclusion</td><td style="text-align:center;color:#d1d5db;font-size:16px">&#10007;</td><td style="text-align:center;color:var(--rust);font-size:16px;background:rgba(139,50,20,.03)"><strong>&#10003;</strong></td><td style="text-align:center;color:#d1d5db;font-size:16px">&#10007;</td></tr>
+            <tr style="border-bottom:1px solid #f3f4f6"><td style="padding:12px 20px;font-size:13px">Pause &amp; resume listing</td><td style="text-align:center;color:#d1d5db;font-size:16px">&#10007;</td><td style="text-align:center;color:var(--rust);font-size:16px;background:rgba(139,50,20,.03)"><strong>&#10003;</strong></td><td style="text-align:center;color:#d1d5db;font-size:16px">&#10007;</td></tr>
+            <tr><td style="padding:12px 20px;font-size:13px">Buyer messaging</td><td style="text-align:center;color:#16a34a;font-size:16px"><strong>&#10003;</strong></td><td style="text-align:center;color:var(--rust);font-size:16px;background:rgba(139,50,20,.03)"><strong>&#10003;</strong></td><td style="text-align:center;color:var(--tan);font-size:16px"><strong>&#10003;</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Advertiser Plans -->
     <div style="text-align:center;margin-bottom:36px">
       <div style="font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--gold);margin-bottom:8px">Businesses &amp; Brands</div>
-      <h2 style="font-family:'Playfair Display',serif;font-size:32px;font-weight:700;color:var(--dark-brown)">📢 Advertiser Plans</h2>
+      <h2 style="font-family:'Playfair Display',serif;font-size:32px;font-weight:700;color:var(--dark-brown)">&#x1F4E2; Advertiser Plans</h2>
+      <p style="font-size:14px;color:#888;max-width:540px;margin:8px auto 0">For sale barns, feed stores, breed associations, veterinary services, and ranch suppliers.</p>
     </div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px">
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:24px;margin-bottom:56px">
 
       <!-- Farm to Table -->
-      <div style="border:2px solid #86efac;border-radius:8px;padding:32px;background:white">
-        <div style="font-size:32px;margin-bottom:8px">🌿</div>
-        <div style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:var(--dark-brown);margin-bottom:4px">Farm to Table</div>
-        <div style="font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#16a34a;margin-bottom:20px">Always Free · Farm Products</div>
-        <div style="font-family:'Playfair Display',serif;font-size:40px;font-weight:900;color:#16a34a;margin-bottom:20px">$0</div>
-        <ul style="list-style:none;padding:0;margin-bottom:28px">
-          <li style="padding:8px 0;border-bottom:1px solid #f3f4f6;font-size:14px;display:flex;align-items:center;gap:8px"><span style="color:#16a34a;font-weight:700">✓</span> 3 photo uploads</li>
-          <li style="padding:8px 0;border-bottom:1px solid #f3f4f6;font-size:14px;display:flex;align-items:center;gap:8px"><span style="color:#16a34a;font-weight:700">✓</span> Farm-raised beef &amp; products</li>
-          <li style="padding:8px 0;border-bottom:1px solid #f3f4f6;font-size:14px;display:flex;align-items:center;gap:8px"><span style="color:#16a34a;font-weight:700">✓</span> Scrolling homepage section</li>
-          <li style="padding:8px 0;font-size:14px;display:flex;align-items:center;gap:8px"><span style="color:#16a34a;font-weight:700">✓</span> Custom beef products welcome</li>
+      <div style="border:2px solid #86efac;border-radius:8px;padding:28px;background:white">
+        <div style="font-size:28px;margin-bottom:8px">&#x1F331;</div>
+        <div style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--dark-brown);margin-bottom:2px">Farm to Table</div>
+        <div style="font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#16a34a;margin-bottom:16px">Always Free &middot; Farm Products</div>
+        <div style="font-family:'Playfair Display',serif;font-size:36px;font-weight:900;color:#16a34a;margin-bottom:20px">$0</div>
+        <ul style="list-style:none;padding:0;margin-bottom:24px">
+          <li style="padding:7px 0;border-bottom:1px solid #f3f4f6;font-size:13px;display:flex;align-items:center;gap:8px"><span style="color:#16a34a;font-weight:700;font-size:15px">&#10003;</span>3 photos per listing</li>
+          <li style="padding:7px 0;border-bottom:1px solid #f3f4f6;font-size:13px;display:flex;align-items:center;gap:8px"><span style="color:#16a34a;font-weight:700;font-size:15px">&#10003;</span>Farm-raised beef &amp; products</li>
+          <li style="padding:7px 0;border-bottom:1px solid #f3f4f6;font-size:13px;display:flex;align-items:center;gap:8px"><span style="color:#16a34a;font-weight:700;font-size:15px">&#10003;</span>Dedicated homepage section</li>
+          <li style="padding:7px 0;font-size:13px;display:flex;align-items:center;gap:8px"><span style="color:#16a34a;font-weight:700;font-size:15px">&#10003;</span>Custom beef products welcome</li>
         </ul>
-        <button class="btn-primary" style="width:100%;justify-content:center;background:#16a34a;border-color:#16a34a" data-action="modal" data-modal="post-listing">Post Farm to Table →</button>
+        <button class="btn-primary" style="width:100%;justify-content:center;background:#16a34a;border-color:#16a34a;font-size:13px" data-action="modal" data-modal="post-listing">Post Farm to Table &rarr;</button>
       </div>
 
-      <!-- Filet -->
-      <div style="border:2px solid var(--gold);border-radius:8px;padding:32px;background:white">
-        <div style="font-size:32px;margin-bottom:8px">🥩</div>
-        <div style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:var(--dark-brown);margin-bottom:4px">Choice</div>
-        <div style="font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#92400e;margin-bottom:20px">One-Time · 30 Days</div>
-        <div style="margin-bottom:20px"><span style="font-family:'Playfair Display',serif;font-size:40px;font-weight:900;color:var(--dark-brown)">$49.99</span><span style="font-size:14px;color:#6b7280"> one-time</span></div>
-        <ul style="list-style:none;padding:0;margin-bottom:28px">
-          <li style="padding:8px 0;border-bottom:1px solid #f3f4f6;font-size:14px;display:flex;align-items:center;gap:8px"><span style="color:var(--gold);font-weight:700">✓</span> 5 photo uploads</li>
-          <li style="padding:8px 0;border-bottom:1px solid #f3f4f6;font-size:14px;display:flex;align-items:center;gap:8px"><span style="color:var(--gold);font-weight:700">✓</span> Featured on homepage</li>
-          <li style="padding:8px 0;border-bottom:1px solid #f3f4f6;font-size:14px;display:flex;align-items:center;gap:8px"><span style="color:var(--gold);font-weight:700">✓</span> Sale barns, ranches, associations</li>
-          <li style="padding:8px 0;border-bottom:1px solid #f3f4f6;font-size:14px;display:flex;align-items:center;gap:8px"><span style="color:var(--gold);font-weight:700">✓</span> Added to PR selection pool</li>
-          <li style="padding:8px 0;font-size:14px;display:flex;align-items:center;gap:8px"><span style="color:var(--gold);font-weight:700">✓</span> Livestock services welcome</li>
+      <!-- Choice (Filet) -->
+      <div style="border:2px solid var(--gold);border-radius:8px;padding:28px;background:white">
+        <div style="font-size:28px;margin-bottom:8px">&#x1F969;</div>
+        <div style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--dark-brown);margin-bottom:2px">Choice</div>
+        <div style="font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#92400e;margin-bottom:16px">One-Time &middot; 30 Days</div>
+        <div style="margin-bottom:4px"><span style="font-family:'Playfair Display',serif;font-size:36px;font-weight:900;color:var(--dark-brown)">$49.99</span></div>
+        <div style="font-size:12px;color:#9ca3af;margin-bottom:20px">one-time payment</div>
+        <ul style="list-style:none;padding:0;margin-bottom:24px">
+          <li style="padding:7px 0;border-bottom:1px solid #f3f4f6;font-size:13px;display:flex;align-items:center;gap:8px"><span style="color:var(--gold);font-weight:700;font-size:15px">&#10003;</span>5 photos per listing</li>
+          <li style="padding:7px 0;border-bottom:1px solid #f3f4f6;font-size:13px;display:flex;align-items:center;gap:8px"><span style="color:var(--gold);font-weight:700;font-size:15px">&#10003;</span>Featured on homepage</li>
+          <li style="padding:7px 0;border-bottom:1px solid #f3f4f6;font-size:13px;display:flex;align-items:center;gap:8px"><span style="color:var(--gold);font-weight:700;font-size:15px">&#10003;</span>Sale barns, ranches, associations</li>
+          <li style="padding:7px 0;border-bottom:1px solid #f3f4f6;font-size:13px;display:flex;align-items:center;gap:8px"><span style="color:var(--gold);font-weight:700;font-size:15px">&#10003;</span>Added to editorial pool</li>
+          <li style="padding:7px 0;font-size:13px;display:flex;align-items:center;gap:8px"><span style="color:var(--gold);font-weight:700;font-size:15px">&#10003;</span>Livestock services welcome</li>
         </ul>
-        <button class="btn-primary" style="width:100%;justify-content:center" data-action="modal" data-modal="post-listing">Get Choice →</button>
+        <button class="btn-primary" style="width:100%;justify-content:center;font-size:13px" data-action="modal" data-modal="post-listing">Get Choice &rarr;</button>
       </div>
 
-      <!-- T-Bone -->
-      <div style="border:3px solid var(--gold);border-radius:8px;padding:32px;background:linear-gradient(135deg,#fffbeb,#fef3c7);position:relative">
-        <div style="position:absolute;top:-14px;left:50%;transform:translateX(-50%);background:var(--gold);color:var(--dark-brown);font-family:'Oswald',sans-serif;font-size:10px;font-weight:700;letter-spacing:.15em;padding:4px 16px;border-radius:3px;white-space:nowrap">★ BEST VALUE FOR BUSINESSES</div>
-        <div style="font-size:32px;margin-bottom:8px">🥩</div>
-        <div style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:var(--dark-brown);margin-bottom:4px">Prime</div>
-        <div style="font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#92400e;margin-bottom:20px">Recurring · Billed Yearly</div>
-        <div style="margin-bottom:20px"><span style="font-family:'Playfair Display',serif;font-size:40px;font-weight:900;color:var(--dark-brown)">$39.99</span><span style="font-size:14px;color:#6b7280">/mo · billed yearly</span></div>
-        <ul style="list-style:none;padding:0;margin-bottom:28px">
-          <li style="padding:8px 0;border-bottom:1px solid rgba(0,0,0,.06);font-size:14px;display:flex;align-items:center;gap:8px"><span style="color:#d97706;font-weight:700">✓</span> 5 photo uploads</li>
-          <li style="padding:8px 0;border-bottom:1px solid rgba(0,0,0,.06);font-size:14px;display:flex;align-items:center;gap:8px"><span style="color:#d97706;font-weight:700">✓</span> Featured on Homepage year-round</li>
-          <li style="padding:8px 0;border-bottom:1px solid rgba(0,0,0,.06);font-size:14px;display:flex;align-items:center;gap:8px"><span style="color:#d97706;font-weight:700">✓</span> Year Partner Package</li>
-          <li style="padding:8px 0;border-bottom:1px solid rgba(0,0,0,.06);font-size:14px;display:flex;align-items:center;gap:8px"><span style="color:#d97706;font-weight:700">✓</span> Showcased in Herd <span style="color:var(--gold)">Hub</span> Catalog</li>
-          <li style="padding:8px 0;border-bottom:1px solid rgba(0,0,0,.06);font-size:14px;display:flex;align-items:center;gap:8px"><span style="color:#d97706;font-weight:700">✓</span> Featured in digital newsletter</li>
+      <!-- Prime (T-Bone) — Best Value -->
+      <div style="border:3px solid var(--gold);border-radius:8px;padding:28px;background:linear-gradient(135deg,#fffbeb,#fef3c7);position:relative">
+        <div style="position:absolute;top:-14px;left:50%;transform:translateX(-50%);background:var(--gold);color:var(--dark-brown);font-family:'Oswald',sans-serif;font-size:10px;font-weight:700;letter-spacing:.15em;padding:4px 18px;border-radius:3px;white-space:nowrap">&#9733; BEST VALUE FOR BUSINESSES</div>
+        <div style="font-size:28px;margin-bottom:8px">&#x1F969;</div>
+        <div style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--dark-brown);margin-bottom:2px">Prime</div>
+        <div style="font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#92400e;margin-bottom:16px">Recurring &middot; Billed Yearly</div>
+        <div style="margin-bottom:4px"><span style="font-family:'Playfair Display',serif;font-size:36px;font-weight:900;color:var(--dark-brown)">$39.99</span><span style="font-size:13px;color:#6b7280">/mo</span></div>
+        <div style="font-size:12px;color:#9ca3af;margin-bottom:20px">billed $479.88/year</div>
+        <ul style="list-style:none;padding:0;margin-bottom:24px">
+          <li style="padding:7px 0;border-bottom:1px solid rgba(0,0,0,.06);font-size:13px;display:flex;align-items:center;gap:8px"><span style="color:#d97706;font-weight:700;font-size:15px">&#10003;</span>5 photos per listing</li>
+          <li style="padding:7px 0;border-bottom:1px solid rgba(0,0,0,.06);font-size:13px;display:flex;align-items:center;gap:8px"><span style="color:#d97706;font-weight:700;font-size:15px">&#10003;</span><strong>Featured year-round</strong> on homepage</li>
+          <li style="padding:7px 0;border-bottom:1px solid rgba(0,0,0,.06);font-size:13px;display:flex;align-items:center;gap:8px"><span style="color:#d97706;font-weight:700;font-size:15px">&#10003;</span>Annual Partner badge on profile</li>
+          <li style="padding:7px 0;border-bottom:1px solid rgba(0,0,0,.06);font-size:13px;display:flex;align-items:center;gap:8px"><span style="color:#d97706;font-weight:700;font-size:15px">&#10003;</span>Featured in monthly newsletter</li>
+          <li style="padding:7px 0;border-bottom:1px solid rgba(0,0,0,.06);font-size:13px;display:flex;align-items:center;gap:8px"><span style="color:#d97706;font-weight:700;font-size:15px">&#10003;</span>Listed in Herd Hub digital catalog</li>
+          <li style="padding:7px 0;font-size:13px;display:flex;align-items:center;gap:8px"><span style="color:#d97706;font-weight:700;font-size:15px">&#10003;</span>Priority customer support</li>
         </ul>
-        <button class="btn-primary" style="width:100%;justify-content:center;background:var(--gold);color:var(--dark-brown);border-color:var(--gold);font-size:14px;font-weight:700" data-action="modal" data-modal="post-listing">Get Prime →</button>
+        <button class="btn-primary" style="width:100%;justify-content:center;background:var(--gold);color:var(--dark-brown);border-color:var(--gold);font-size:14px;font-weight:700" data-action="modal" data-modal="post-listing">Get Prime &rarr;</button>
       </div>
     </div>
-    <div style="text-align:center;margin-top:48px">
-      <button class="btn-secondary" data-action="page" data-page="home">← Back to Marketplace</button>
+
+    <!-- Trust signals -->
+    <div style="background:var(--cream);border:1px solid var(--light-tan);border-radius:8px;padding:32px;text-align:center;margin-bottom:32px">
+      <div style="display:flex;justify-content:center;gap:40px;flex-wrap:wrap">
+        <div><div style="font-size:24px;margin-bottom:6px">&#x1F512;</div><div style="font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--dark-brown);font-weight:700">Secure Checkout</div><div style="font-size:12px;color:#888;margin-top:2px">Powered by Stripe</div></div>
+        <div><div style="font-size:24px;margin-bottom:6px">&#x1F1FA;&#x1F1F8;</div><div style="font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--dark-brown);font-weight:700">100% American Owned</div><div style="font-size:12px;color:#888;margin-top:2px">Supporting ranchers since 2018</div></div>
+        <div><div style="font-size:24px;margin-bottom:6px">&#x1F504;</div><div style="font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--dark-brown);font-weight:700">Cancel Anytime</div><div style="font-size:12px;color:#888;margin-top:2px">No contracts. No hassle.</div></div>
+        <div><div style="font-size:24px;margin-bottom:6px">&#x1F4AC;</div><div style="font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--dark-brown);font-weight:700">Real Support</div><div style="font-size:12px;color:#888;margin-top:2px">Response within 24 hours</div></div>
+      </div>
+    </div>
+
+    <div style="text-align:center">
+      <button class="btn-secondary" data-action="page" data-page="home">&larr; Back to Marketplace</button>
     </div>
   </div>
 </div>
@@ -1313,6 +1437,7 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
         </div>
         <div class="form-group"><label for="acct-bio">Bio</label><textarea id="acct-bio" rows="3" placeholder="Tell buyers about your operation…"></textarea></div>
         <button class="btn-primary" data-action="save-profile" style="margin-top:4px">Save Changes</button>
+        <button class="btn-secondary" style="padding:9px 16px;font-size:13px;margin-top:4px;margin-left:8px" onclick="requestVerification()" title="Request a verified seller badge">&#10003; Get Verified</button>
         <div style="margin-top:28px;padding-top:20px;border-top:1px solid var(--light-tan)">
           <h4 style="font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--mid-brown);margin-bottom:14px">Change Password</h4>
           <div id="pw-error" class="form-error" style="display:none"></div>
@@ -2594,11 +2719,16 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
     <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.27 6.27 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.19 8.19 0 004.79 1.53V6.77a4.85 4.85 0 01-1.02-.08z"/></svg>
   </a>
 </div></div>
-      <div class="footer-col"><h4>Cattle</h4><ul><li><a data-action="category" data-cat="beef_cattle">Beef Cattle for Sale</a></li><li><a data-action="category" data-cat="dairy">Dairy Cattle</a></li><li><a data-action="category" data-cat="bulls">Bulls for Sale</a></li>
+      <div class="footer-col"><h4>Cattle</h4><ul>
+        <li><a href="javascript:void(0)" onclick="loadSeoPage('bulls','Angus','Angus Bulls')">Angus Bulls for Sale</a></li>
+        <li><a href="javascript:void(0)" onclick="loadSeoPage('bulls','Hereford','Hereford Bulls')">Hereford Bulls for Sale</a></li>
+        <li><a href="javascript:void(0)" onclick="loadSeoPage('feeder_stocker','','Feeder Cattle')">Feeder Cattle for Sale</a></li>
+        <li><a href="javascript:void(0)" onclick="loadSeoPage('bred_heifers','','Bred Heifers')">Bred Heifers for Sale</a></li>
+        <li><a href="javascript:void(0)" onclick="loadSeoPage('cow_calf_pairs','','Cow Calf Pairs')">Cow Calf Pairs</a></li>
 <li><a data-action="category" data-cat="bucking_bulls">Bucking Bulls</a></li><li><a data-action="category" data-cat="heifers">Bred Heifers</a></li><li><a data-action="category" data-cat="calves">Calves</a></li></ul></div>
       <div class="footer-col"><h4>Equipment</h4><ul><li><a data-action="category" data-cat="equipment">Tractors & Equipment</a></li><li><a data-action="category" data-cat="trucks_trailers">Trucks & Trailers</a></li><li><a data-action="category" data-cat="working_dogs">Working Dogs</a></li><li><a data-action="category" data-cat="farm_to_table">Farm to Table</a></li><li><a data-action="category" data-cat="feed_hay">Feed & Hay</a></li></ul></div>
       <div class="footer-col"><h4>Resources</h4><ul><li><a href="javascript:void(0)" data-action="scroll" data-target="market">Cattle Prices</a></li><li><a href="https://www.ams.usda.gov/market-news/cattle" target="_blank" rel="noopener">Market Reports ↗</a></li><li><a>Ranch News</a></li><li><a data-action="page" data-page="forum">Community Forum</a></li><li><a data-action="page" data-page="merch">Merch Store</a></li><li><a data-action="page" data-page="beef-boxes">Beef Boxes</a></li></ul></div>
-      <div class="footer-col"><h4>Account</h4><ul><li><a data-action="modal" data-modal="auth">Sign In</a></li><li><a data-action="modal" data-modal="auth">Register Free</a></li><li><a data-action="modal" data-modal="post-listing">Post a Listing</a></li><li><a>Contact Support</a></li></ul></div>
+      <div class="footer-col"><h4>Account</h4><ul><li><a data-action="modal" data-modal="auth">Sign In</a></li><li><a data-action="modal" data-modal="auth">Register Free</a></li><li><a data-action="modal" data-modal="post-listing">Post a Listing</a></li><li><a href="javascript:void(0)" data-action="page" data-page="contact">Contact Support</a></li></ul></div>
     </div>
     <div class="footer-bottom"><span>© 2026 Herd <span style="color:var(--gold)">Hub</span> · American Cattle Marketplace. All rights reserved.</span><span><a href="javascript:void(0)" data-action="page" data-page="privacy">Privacy Policy</a> · <a href="javascript:void(0)" data-action="page" data-page="terms">Terms of Service</a> · <a href="javascript:void(0)" data-action="page" data-page="user-agreement">User Agreement</a> · <a href="javascript:void(0)" data-action="modal" data-modal="auth" data-tab="register">Advertise</a></span></div>
   </div>
@@ -3762,7 +3892,7 @@ async function openListing(id) {
 
         <div style="border-top:1px solid var(--light-tan);padding-top:16px;margin-bottom:16px">
           <div style="font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#888;margin-bottom:8px">Seller</div>
-          <div style="font-size:15px;font-weight:600;color:var(--dark-brown)"><a href="javascript:void(0)" onclick="openSellerProfile(${l.user_id})" style="color:var(--rust);text-decoration:none;font-weight:700">👤 ${l.seller_name}</a></div>
+          <div style="font-size:15px;font-weight:600;color:var(--dark-brown)"><a href="javascript:void(0)" onclick="openSellerProfile(${l.user_id})" style="color:var(--rust);text-decoration:none;font-weight:700">👤 ${l.seller_name}</a>${l.seller_verified ? '<span style="display:inline-block;background:#dcfce7;color:#166534;font-family:\'Oswald\',sans-serif;font-size:10px;font-weight:700;letter-spacing:.08em;padding:2px 7px;border-radius:10px;margin-left:6px">✓ VERIFIED</span>' : ''}</div>
         </div>
 
         <div style="display:flex;flex-direction:column;gap:10px">
@@ -4300,6 +4430,7 @@ function showPage(page) {
   if (page === 'forum')   loadForumPage();
   if (page === 'account') { loadAccountPage(); loadUnreadCount(); }
   if (page === 'seller')  {} // loaded by openSellerProfile directly
+  if (page === 'contact') buildFAQ();
   if (page === 'articles') loadArticlesPage();
   if (page === 'beef-boxes') loadBeefBoxCount();
   if (page === 'merch' && window._initShopifyMerch) window._initShopifyMerch();
@@ -5104,8 +5235,128 @@ async function openSellerProfile(sellerId) {
 }
 
 function openListingContact(sellerId) {
-  // Navigate back and open a message modal — for now scroll to contact
   showToast('Use the message button on any listing to contact this seller.');
+}
+
+// ── Contact Form ────────────────────────────────────────
+async function submitContactForm() {
+  const name    = document.getElementById('ct-name')?.value?.trim();
+  const email   = document.getElementById('ct-email')?.value?.trim();
+  const subject = document.getElementById('ct-subject')?.value;
+  const message = document.getElementById('ct-message')?.value?.trim();
+  const errEl   = document.getElementById('contact-error');
+  const sucEl   = document.getElementById('contact-success');
+  errEl.style.display = 'none';
+  if (!name || !email || !subject || !message) {
+    errEl.textContent = 'Please fill in all fields.';
+    errEl.style.display = 'block'; return;
+  }
+  const btn = document.querySelector('[onclick="submitContactForm()"]');
+  btn.textContent = 'Sending…'; btn.disabled = true;
+  try {
+    const r = await fetch(`${API}/api/auth/contact`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, subject, message })
+    });
+    const d = await r.json();
+    if (!r.ok) { errEl.textContent = d.error || 'Failed to send'; errEl.style.display='block'; btn.textContent='Send Message →'; btn.disabled=false; return; }
+    sucEl.style.display = 'block';
+    ['ct-name','ct-email','ct-message'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+    document.getElementById('ct-subject').value = '';
+    btn.textContent = 'Send Message →'; btn.disabled = false;
+    buildFAQ();
+  } catch(e) {
+    errEl.textContent = 'Connection error. Email us directly at ad@theherdhub.com';
+    errEl.style.display = 'block';
+    btn.textContent = 'Send Message →'; btn.disabled = false;
+  }
+}
+
+function buildFAQ() {
+  const el = document.getElementById('faq-list');
+  if (!el) return;
+  const faqs = [
+    ['How do I post a listing?', 'Click the "+ Post Ad" button in the nav bar. You need a free account to post. Listings go live within a few hours of submission.'],
+    ['How do I get a Verified badge?', 'Email us at ad@theherdhub.com with your name and phone number. We will verify your account within 24 hours at no charge.'],
+    ['Can I edit my listing after posting?', 'Yes - go to your Account page, click My Listings, and click Edit on any active listing.'],
+    ['What payment methods do you accept?', 'All major credit and debit cards through Stripe. We never store your card information.'],
+    ['How do I report a fraudulent listing?', 'Click the Report button on any listing. Our team reviews all reports within 24 hours. For urgent fraud, email us directly.'],
+    ['Can I cancel my subscription anytime?', 'Yes - cancel anytime from your account settings. No cancellation fees.'],
+  ];
+  el.innerHTML = faqs.map(([q, a]) => `
+    <div style="background:white;border:1px solid var(--light-tan);border-radius:6px;overflow:hidden;margin-bottom:8px">
+      <div style="padding:14px 18px;font-weight:700;font-size:14px;color:var(--dark-brown);cursor:pointer;display:flex;justify-content:space-between;align-items:center"
+           onclick="const b=this.nextElementSibling;b.style.display=b.style.display==='none'?'block':'none';this.querySelector('.fi').textContent=b.style.display==='block'?'-':'+'">
+        ${q}<span class="fi" style="color:var(--rust);font-size:18px;font-weight:400;flex-shrink:0;margin-left:8px">+</span>
+      </div>
+      <div style="display:none;padding:0 18px 14px;font-size:14px;color:#555;line-height:1.7">${a}</div>
+    </div>`).join('');
+}
+
+// ── Newsletter Mailchimp ────────────────────────────────
+async function subscribeNewsletter() {
+  const email = document.getElementById('nl-email')?.value?.trim();
+  if (!email || !email.includes('@')) { showToast('Please enter a valid email address'); return; }
+  try {
+    const r = await fetch(`${API}/api/auth/newsletter`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
+    const d = await r.json();
+    if (r.ok) { showToast('You are subscribed! Welcome to the herd.'); document.getElementById('nl-email').value = ''; }
+    else showToast(d.error || 'Subscription failed');
+  } catch(e) { showToast('Connection error'); }
+}
+
+// ── Recent Sales Ticker ─────────────────────────────────
+async function loadRecentSalesTicker() {
+  try {
+    const r = await fetch(`${API}/api/listings/recent-sales`);
+    const sales = await r.json();
+    if (!sales.length) return;
+    const ticker = document.getElementById('recent-sales-ticker');
+    const track  = document.getElementById('ticker-track');
+    if (!ticker || !track) return;
+    const items = sales.map(s => {
+      const qty   = s.quantity > 1 ? s.quantity + ' Head - ' : '';
+      const price = s.price ? '$' + Number(s.price).toLocaleString() : '';
+      const loc   = [s.city, s.state].filter(Boolean).join(', ');
+      const when  = timeAgo(s.sold_at);
+      return '<span style="display:inline-flex;align-items:center;gap:8px;padding:0 28px;color:rgba(245,239,224,.8);font-family:Source Serif 4,serif;font-size:12px;border-right:1px solid rgba(201,169,110,.15)">'
+        + '<span style="color:var(--gold);font-family:Oswald,sans-serif;font-size:10px;letter-spacing:.06em">' + fmtCat(s.category).toUpperCase() + '</span>'
+        + qty + s.title.slice(0,40) + (s.title.length>40?'...':'')
+        + (price ? ' - <span style="color:var(--gold)">' + price + '</span>' : '')
+        + ' - ' + loc + ' - ' + when
+        + '</span>';
+    }).join('');
+    track.innerHTML = items + items;
+    ticker.style.display = 'block';
+  } catch(e) {}
+}
+
+// ── Seller Verification ─────────────────────────────────
+async function requestVerification() {
+  if (!authToken) { openModal('auth'); return; }
+  try {
+    const r = await fetch(`${API}/api/auth/verify-request`, {
+      method: 'POST', headers: { Authorization: `Bearer ${authToken}` }
+    });
+    const d = await r.json();
+    showToast(d.message || d.error || 'Request sent');
+  } catch(e) { showToast('Connection error'); }
+}
+
+// ── SEO Landing Pages ───────────────────────────────────
+function loadSeoPage(category, breed, label) {
+  showPage('listings');
+  const catEl = document.getElementById('f-category');
+  if (catEl) catEl.value = category || '';
+  const qEl = document.getElementById('f-q');
+  if (qEl) qEl.value = breed || '';
+  document.getElementById('listings-title').innerHTML = label + ' <span>For Sale</span>';
+  loadListings();
 }
 
 function showForgotPassword() {

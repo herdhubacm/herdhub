@@ -96,7 +96,7 @@ router.get('/', optionalAuth, async (req, res) => {
       query(
         `SELECT l.id, l.title, l.category, l.breed, l.price, l.price_type,
                 l.quantity, l.state, l.city, l.tier, l.is_featured,
-                l.views, l.created_at, u.name AS seller_name,
+                l.views, l.created_at, u.name AS seller_name, u.is_verified AS seller_verified,
                 (SELECT url FROM listing_photos WHERE listing_id=l.id ORDER BY sort_order LIMIT 1) AS thumb,
                 (SELECT thumb_url FROM listing_photos WHERE listing_id=l.id ORDER BY sort_order LIMIT 1) AS thumb_small
          FROM listings l
@@ -125,7 +125,7 @@ router.get('/featured', async (_req, res) => {
     const { rows } = await query(
       `SELECT l.id, l.title, l.category, l.breed, l.price, l.price_type,
               l.quantity, l.state, l.city, l.tier, l.is_featured, l.created_at,
-              u.name AS seller_name,
+              u.name AS seller_name, u.is_verified AS seller_verified,
               (SELECT url FROM listing_photos WHERE listing_id=l.id ORDER BY sort_order LIMIT 1) AS thumb,
               (SELECT thumb_url FROM listing_photos WHERE listing_id=l.id ORDER BY sort_order LIMIT 1) AS thumb_small
        FROM listings l
@@ -234,13 +234,28 @@ router.get('/messages/unread-count', authenticateToken, async (req, res) => {
   }
 });
 
+
+// ── GET /api/listings/recent-sales ────────────────────
+router.get('/recent-sales', async (req, res) => {
+  try {
+    const { rows } = await query(
+      `SELECT l.title, l.category, l.state, l.city, l.price, l.price_type,
+              l.quantity, l.sold_at
+       FROM listings l
+       WHERE l.status='sold' AND l.sold_at IS NOT NULL
+       ORDER BY l.sold_at DESC LIMIT 20`
+    );
+    res.json(rows);
+  } catch(e) { res.json([]); }
+});
+
 router.get('/:id', optionalAuth, async (req, res) => {
   try {
     const id = parseInt(req.params.id);
     if (isNaN(id)) return res.status(400).json({ error: 'Invalid listing ID' });
 
     const { rows } = await query(
-      `SELECT l.*, u.name AS seller_name,
+      `SELECT l.*, u.name AS seller_name, u.is_verified AS seller_verified,
               u.state AS seller_state, u.city AS seller_city
        FROM listings l
        JOIN users u ON u.id = l.user_id
