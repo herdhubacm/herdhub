@@ -5529,8 +5529,7 @@ async function loadRecentSalesTicker() {
       const when  = timeAgo(s.sold_at);
       return '<span style="display:inline-flex;align-items:center;gap:8px;padding:0 28px;color:rgba(245,239,224,.8);font-family:Source Serif 4,serif;font-size:12px;border-right:1px solid rgba(201,169,110,.15)">'
         + '<span style="color:var(--gold);font-family:Oswald,sans-serif;font-size:10px;letter-spacing:.06em">' + fmtCat(s.category).toUpperCase() + '</span>'
-        + qty + s.title.slice(0,40) + (s.title.length>40?'...':'')
-        + (price ? ' - <span style="color:var(--gold)">' + price + '</span>' : '')
+        + qty + escHtml(s.title.slice(0,40)) + (s.title.length>40?'...':'')        + (price ? ' - <span style="color:var(--gold)">' + price + '</span>' : '')
         + ' - ' + loc + ' - ' + when
         + '</span>';
     }).join('');
