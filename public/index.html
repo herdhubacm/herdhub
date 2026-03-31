@@ -5427,8 +5427,7 @@ async function openSellerProfile(sellerId) {
             <span style="font-size:11px;color:#aaa">${fmtDate(rv.created_at)}</span>
           </div>
           ${rv.title ? `<div style="font-weight:700;font-size:13px;color:var(--dark-brown);margin-bottom:4px">${rv.title}</div>` : ''}
-          <div style="font-size:13px;color:#555;line-height:1.6">${rv.body}</div>
-          <div style="font-size:11px;color:#aaa;margin-top:6px">— ${rv.reviewer_name}</div>
+          <div style="font-size:13px;color:#555;line-height:1.6">${escHtml(rv.body)}</div>          <div style="font-size:11px;color:#aaa;margin-top:6px">— ${rv.reviewer_name}</div>
         </div>`).join('');
     }
 
