@@ -251,6 +251,7 @@ app.use('/api/reviews',  limiter(60),  require('./routes/reviews'));
 app.use('/api/reports',  limiter(30),  require('./routes/reports'));
 app.use('/api/searches', limiter(60),  require('./routes/searches'));
 app.use('/api/sellers',  limiter(60),  require('./routes/sellers'));
+app.use('/api/cattle',   limiter(100), require('./routes/cattle'));
 
 // ── GET /api/settings (public — stats bar) ───────────
 app.get('/api/settings', async (req, res) => {
@@ -552,6 +553,21 @@ async function start() {
         ('stat_since',   'Since 2018')
         ON CONFLICT (key) DO NOTHING`);
       console.log('✅  Site settings table ready');
+
+      // Calving records table
+      await query(`CREATE TABLE IF NOT EXISTS calving_records (
+        id             BIGSERIAL    PRIMARY KEY,
+        user_id        BIGINT       NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        cow_name       VARCHAR(100),
+        breed          VARCHAR(50),
+        breeding_date  DATE         NOT NULL,
+        due_date       DATE         NOT NULL,
+        gestation_days INTEGER,
+        notes          TEXT,
+        created_at     TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+      )`);
+      await query(`CREATE INDEX IF NOT EXISTS idx_calving_user ON calving_records(user_id)`);
+      console.log('✅  Calving records table ready');
 
     } catch (migErr) {
       console.warn('⚠️  Migration warning:', migErr.message);

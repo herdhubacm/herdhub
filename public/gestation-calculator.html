@@ -242,7 +242,7 @@ body::before {
   color: var(--tan);
   margin-bottom: 6px;
 }
-.field input, .field select {
+.field input, .field select, .field textarea {
   width: 100%;
   padding: 12px 14px;
   background: rgba(28,15,6,.6);
@@ -253,11 +253,12 @@ body::before {
   font-size: 15px;
   transition: border-color .2s;
 }
-.field input:focus, .field select:focus {
+.field input:focus, .field select:focus, .field textarea:focus {
   outline: none;
   border-color: var(--gold);
 }
 .field select option { background: var(--brown); color: var(--cream); }
+.field textarea { resize: vertical; min-height: 60px; }
 
 /* ── Buttons ── */
 .btn {
@@ -279,6 +280,41 @@ body::before {
 .btn-sm { padding: 8px 16px; font-size: 11px; }
 .btn-danger { background: var(--danger); color: white; }
 .btn-danger:hover { background: #a93226; }
+
+/* ── Auth Banner ── */
+.auth-banner {
+  background: rgba(139,50,20,.2);
+  border: 1px solid rgba(139,50,20,.4);
+  border-radius: 6px;
+  padding: 16px 24px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.auth-banner p {
+  font-family: 'Oswald', sans-serif;
+  font-size: 13px;
+  letter-spacing: .05em;
+  color: var(--cream);
+}
+.auth-banner a {
+  font-family: 'Oswald', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  background: var(--rust);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 4px;
+  text-decoration: none;
+  transition: background .2s;
+  white-space: nowrap;
+}
+.auth-banner a:hover { background: var(--rust2); }
 
 /* ── Progress Bar ── */
 .progress-wrap {
@@ -433,7 +469,7 @@ body::before {
   padding: 3px 6px;
   border-radius: 3px;
   margin-bottom: 2px;
-  cursor: default;
+  cursor: pointer;
   line-height: 1.4;
   white-space: nowrap;
   overflow: hidden;
@@ -467,6 +503,61 @@ body::before {
 }
 .herd-table tr:hover td { background: rgba(201,169,110,.04); }
 
+/* ── Detail Modal ── */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.7);
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+.modal-box {
+  background: var(--brown);
+  border: 1px solid rgba(201,169,110,.2);
+  border-radius: 10px;
+  padding: 32px;
+  max-width: 440px;
+  width: 90%;
+  position: relative;
+}
+.modal-box .close-btn {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 22px;
+  cursor: pointer;
+}
+.modal-box .close-btn:hover { color: var(--cream); }
+.modal-box h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--cream);
+  margin-bottom: 16px;
+}
+.modal-detail {
+  font-family: 'Oswald', sans-serif;
+  font-size: 12px;
+  letter-spacing: .08em;
+  color: var(--tan);
+  margin-bottom: 8px;
+}
+.modal-detail strong { color: var(--cream); font-weight: 600; }
+
+/* ── Add-entry form row ── */
+.add-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+  align-items: end;
+}
+
 /* ── Disclaimer ── */
 .disclaimer {
   margin-top: 60px;
@@ -479,13 +570,15 @@ body::before {
   color: var(--muted);
 }
 
-/* ── Add-entry form row ── */
-.add-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr auto;
-  gap: 12px;
-  align-items: end;
-  margin-bottom: 24px;
+/* ── Loading spinner ── */
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: var(--muted);
+  font-family: 'Oswald', sans-serif;
+  font-size: 13px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
 }
 
 /* ── Responsive ── */
@@ -497,6 +590,7 @@ body::before {
   .add-row { grid-template-columns: 1fr; }
   .cal-cell { min-height: 60px; }
   .cal-entry { font-size: 9px; }
+  .auth-banner { flex-direction: column; text-align: center; }
 }
 </style>
 </head>
@@ -511,10 +605,10 @@ body::before {
   <div class="hero-eyebrow">Herd Hub Rancher Tools</div>
   <h1>Gestation <em>Calculator</em></h1>
   <div class="hero-sub">Track every pregnancy from pasture to calving pen</div>
-  <p class="hero-desc">Enter a breeding date and breed to see the expected calving date, days remaining, and what's happening with the calf right now. Add multiple cows to the calving calendar to plan your whole season.</p>
+  <p class="hero-desc">Enter a breeding date and breed to see the expected calving date, days remaining, and fetal development stage. Save entries to your calving calendar — synced across all your devices when signed in.</p>
   <div class="tool-tabs">
-    <button class="tool-tab active" onclick="switchTool('calc')">🐄 Gestation Calculator</button>
-    <button class="tool-tab" onclick="switchTool('calendar')">📅 Calving Calendar</button>
+    <button class="tool-tab active" onclick="switchTool('calc')">&#x1f404; Gestation Calculator</button>
+    <button class="tool-tab" onclick="switchTool('calendar')">&#x1f4c5; Calving Calendar</button>
   </div>
 </section>
 
@@ -530,8 +624,12 @@ body::before {
     <div class="section-desc">Select a breed and enter the breeding date. The calculator accounts for breed-specific gestation lengths and shows you exactly where the pregnancy stands today.</div>
 
     <div class="card">
-      <div class="card-title">🐄 Breeding Details</div>
+      <div class="card-title">&#x1f404; Breeding Details</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div class="field">
+          <label for="calc-name">Cow Name / ID (optional)</label>
+          <input type="text" id="calc-name" placeholder="e.g. 442T or Daisy">
+        </div>
         <div class="field">
           <label for="breed">Breed</label>
           <select id="breed">
@@ -541,19 +639,25 @@ body::before {
             <option value="charolais">Charolais (289 days)</option>
             <option value="red_angus">Red Angus (283 days)</option>
             <option value="limousin">Limousin (288 days)</option>
-            <option value="gelbvieh">Gelbvieh (283 days)</option>
+            <option value="gelbvieh">Gelbvieh (284 days)</option>
             <option value="shorthorn">Shorthorn (283 days)</option>
-            <option value="brangus">Brangus (283 days)</option>
+            <option value="brangus">Brangus (285 days)</option>
             <option value="longhorn">Longhorn (283 days)</option>
-            <option value="holstein">Dairy / Holstein (280 days)</option>
+            <option value="holstein">Dairy / Holstein (279 days)</option>
           </select>
         </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
         <div class="field">
           <label for="breed-date">Breeding Date</label>
           <input type="date" id="breed-date">
         </div>
+        <div class="field">
+          <label for="calc-notes">Notes (optional)</label>
+          <input type="text" id="calc-notes" placeholder="e.g. AI bred, cleanup bull">
+        </div>
       </div>
-      <div style="margin-top:12px">
+      <div style="margin-top:12px;display:flex;gap:12px;flex-wrap:wrap">
         <button class="btn btn-primary" onclick="calculate()">Calculate Due Date</button>
       </div>
     </div>
@@ -595,7 +699,7 @@ body::before {
       </div>
 
       <div style="text-align:center;margin-top:20px">
-        <button class="btn btn-ghost" onclick="addToCalendar()">+ Add to Calving Calendar</button>
+        <button class="btn btn-primary" onclick="addToCalendar()">+ Add to My Calving Calendar</button>
       </div>
     </div>
   </div>
@@ -607,10 +711,15 @@ body::before {
 
     <div class="section-label">Tool 2 of 2</div>
     <div class="section-title">Calving Calendar</div>
-    <div class="section-desc">Add your bred cows and heifers below to see all expected calving dates on a monthly calendar. Entries are saved in your browser so they persist between visits.</div>
+    <div class="section-desc">Add your bred cows and heifers below. When signed in, entries save to your Herd Hub account and sync across devices. Color-coded by urgency so you never miss a calving.</div>
+
+    <div id="auth-banner" class="auth-banner" style="display:none">
+      <p>&#x1f512; Sign in to save your calving calendar and access it from any device.</p>
+      <a href="/">Sign In on Herd Hub</a>
+    </div>
 
     <div class="card">
-      <div class="card-title">➕ Add Cow</div>
+      <div class="card-title">&#x2795; Add Cow</div>
       <div class="add-row">
         <div class="field" style="margin:0">
           <label for="cow-id">Cow ID / Name</label>
@@ -625,18 +734,24 @@ body::before {
             <option value="charolais">Charolais (289 d)</option>
             <option value="red_angus">Red Angus (283 d)</option>
             <option value="limousin">Limousin (288 d)</option>
-            <option value="gelbvieh">Gelbvieh (283 d)</option>
+            <option value="gelbvieh">Gelbvieh (284 d)</option>
             <option value="shorthorn">Shorthorn (283 d)</option>
-            <option value="brangus">Brangus (283 d)</option>
+            <option value="brangus">Brangus (285 d)</option>
             <option value="longhorn">Longhorn (283 d)</option>
-            <option value="holstein">Dairy / Holstein (280 d)</option>
+            <option value="holstein">Dairy / Holstein (279 d)</option>
           </select>
         </div>
         <div class="field" style="margin:0">
           <label for="cow-date">Breeding Date</label>
           <input type="date" id="cow-date">
         </div>
-        <button class="btn btn-primary" onclick="addCow()" style="height:44px;margin-top:auto">Add</button>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr auto;gap:12px;margin-top:12px;align-items:end">
+        <div class="field" style="margin:0">
+          <label for="cow-notes">Notes (optional)</label>
+          <input type="text" id="cow-notes" placeholder="e.g. first-calf heifer, AI sire XYZ">
+        </div>
+        <button class="btn btn-primary" onclick="addCow()" style="height:44px">Add to Calendar</button>
       </div>
     </div>
 
@@ -644,27 +759,31 @@ body::before {
     <div id="herd-list" style="display:none">
       <div class="card">
         <div class="card-title" style="display:flex;justify-content:space-between;align-items:center">
-          📋 Your Herd
+          &#x1f4cb; Your Herd
           <button class="btn btn-sm btn-ghost" onclick="clearAll()" style="font-size:10px">Clear All</button>
         </div>
+        <div style="overflow-x:auto">
         <table class="herd-table">
           <thead>
             <tr><th>Cow</th><th>Breed</th><th>Bred</th><th>Due</th><th>Days Left</th><th></th></tr>
           </thead>
           <tbody id="herd-tbody"></tbody>
         </table>
+        </div>
       </div>
     </div>
+
+    <div id="cal-loading" class="loading" style="display:none">Loading your calving records...</div>
 
     <!-- Calendar -->
     <div id="cal-wrap" style="margin-top:32px;display:none">
       <div class="cal-header">
         <div class="cal-nav">
-          <button onclick="calNav(-1)">← Prev</button>
+          <button onclick="calNav(-1)">&larr; Prev</button>
         </div>
         <h3 id="cal-month-label"></h3>
         <div class="cal-nav">
-          <button onclick="calNav(1)">Next →</button>
+          <button onclick="calNav(1)">Next &rarr;</button>
         </div>
       </div>
       <div class="cal-grid" id="cal-grid"></div>
@@ -672,9 +791,26 @@ body::before {
 
   </div>
 
+  <!-- Detail Modal -->
+  <div class="modal-overlay" id="detail-modal">
+    <div class="modal-box">
+      <button class="close-btn" onclick="closeModal()">&times;</button>
+      <h3 id="modal-name"></h3>
+      <div class="modal-detail"><strong>Breed:</strong> <span id="modal-breed"></span></div>
+      <div class="modal-detail"><strong>Breeding Date:</strong> <span id="modal-bred"></span></div>
+      <div class="modal-detail"><strong>Due Date:</strong> <span id="modal-due"></span></div>
+      <div class="modal-detail"><strong>Days Remaining:</strong> <span id="modal-remaining"></span></div>
+      <div class="modal-detail" id="modal-notes-row"><strong>Notes:</strong> <span id="modal-notes"></span></div>
+      <div style="margin-top:20px;display:flex;gap:12px">
+        <button class="btn btn-danger btn-sm" id="modal-delete-btn">Delete Entry</button>
+        <button class="btn btn-ghost btn-sm" onclick="closeModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
   <div class="disclaimer">
     <strong style="color:var(--tan)">About gestation estimates:</strong> Average gestation lengths vary by breed and individual animal.
-    The values used here are breed averages — actual calving can occur 5–10 days before or after the estimated date.
+    The values used here are breed averages — actual calving can occur 5-10 days before or after the estimated date.
     Heifers often calve a few days earlier than mature cows. Always watch for signs of labor and have your calving supplies ready
     at least two weeks before the estimated due date. This tool is for planning purposes only.
   </div>
@@ -684,48 +820,90 @@ body::before {
 <script>
 // ── Breed gestation lengths (days) ────────────────────────────────────────────
 const BREEDS = {
-  angus:      { name: 'Angus',           days: 283 },
-  hereford:   { name: 'Hereford',        days: 285 },
-  simmental:  { name: 'Simmental',       days: 289 },
-  charolais:  { name: 'Charolais',       days: 289 },
-  red_angus:  { name: 'Red Angus',       days: 283 },
-  limousin:   { name: 'Limousin',        days: 288 },
-  gelbvieh:   { name: 'Gelbvieh',        days: 283 },
-  shorthorn:  { name: 'Shorthorn',       days: 283 },
-  brangus:    { name: 'Brangus',         days: 283 },
-  longhorn:   { name: 'Longhorn',        days: 283 },
-  holstein:   { name: 'Dairy / Holstein', days: 280 }
+  angus:      { name: 'Angus',            days: 283 },
+  hereford:   { name: 'Hereford',         days: 285 },
+  simmental:  { name: 'Simmental',        days: 289 },
+  charolais:  { name: 'Charolais',        days: 289 },
+  red_angus:  { name: 'Red Angus',        days: 283 },
+  limousin:   { name: 'Limousin',         days: 288 },
+  gelbvieh:   { name: 'Gelbvieh',         days: 284 },
+  shorthorn:  { name: 'Shorthorn',        days: 283 },
+  brangus:    { name: 'Brangus',          days: 285 },
+  longhorn:   { name: 'Longhorn',         days: 283 },
+  holstein:   { name: 'Dairy / Holstein',  days: 279 }
 };
 
 // ── Pregnancy stages ─────────────────────────────────────────────────────────
 const STAGES = [
-  { maxDay: 14,  name: 'Embryonic Stage — Week 1–2',
+  { maxDay: 14,  name: 'Embryonic Stage — Week 1\u20132',
     desc: 'The fertilized egg is traveling down the oviduct and into the uterus. Cell division is underway but the embryo has not yet attached to the uterine wall. The embryo is microscopic at this point.' },
-  { maxDay: 28,  name: 'Embryonic Attachment — Week 2–4',
-    desc: 'The embryo attaches to the uterine wall and the placenta begins forming. This is a critical period — stress, poor nutrition, or heat can cause early embryonic loss. The embryo is about the size of a grain of rice.' },
-  { maxDay: 45,  name: 'Early Organogenesis — Week 4–6',
-    desc: 'Major organs are beginning to form: heart, brain, spinal cord, and limb buds appear. The embryo is about 1 inch long. A veterinarian can confirm pregnancy via rectal palpation or ultrasound around day 30–35.' },
-  { maxDay: 60,  name: 'Organ Development — Week 6–9',
-    desc: 'The fetus now has recognizable features — eyes, ears, and hooves are forming. The heart is beating. Fetal sex can be determined by ultrasound around day 55–60. The fetus is about 2–3 inches long.' },
-  { maxDay: 90,  name: 'First Trimester Complete — Month 2–3',
+  { maxDay: 28,  name: 'Embryonic Attachment — Week 2\u20134',
+    desc: 'The embryo attaches to the uterine wall and the placenta begins forming. This is a critical period \u2014 stress, poor nutrition, or heat can cause early embryonic loss. The embryo is about the size of a grain of rice.' },
+  { maxDay: 45,  name: 'Early Organogenesis — Week 4\u20136',
+    desc: 'Major organs are beginning to form: heart, brain, spinal cord, and limb buds appear. The embryo is about 1 inch long. A veterinarian can confirm pregnancy via rectal palpation or ultrasound around day 30\u201335.' },
+  { maxDay: 60,  name: 'Organ Development — Week 6\u20139',
+    desc: 'The fetus now has recognizable features \u2014 eyes, ears, and hooves are forming. The heart is beating. Fetal sex can be determined by ultrasound around day 55\u201360. The fetus is about 2\u20133 inches long.' },
+  { maxDay: 90,  name: 'First Trimester Complete — Month 2\u20133',
     desc: 'All major organ systems are in place. The fetus is about 6 inches long and weighs a few ounces. Hair follicles and teeth buds are developing. The cow may begin to show subtle body condition changes.' },
-  { maxDay: 150, name: 'Second Trimester — Month 3–5',
-    desc: 'Rapid growth phase. The fetus is developing muscle, bone density increases, and the coat begins to form. By day 150 the calf weighs about 5–8 lbs and is roughly 12–15 inches long. The cow\'s nutritional needs are increasing.' },
-  { maxDay: 210, name: 'Late Second Trimester — Month 5–7',
-    desc: 'The calf is growing rapidly — gaining about half a pound per day. Organs are maturing and the calf is becoming more active (you may see the cow\'s flank move). The cow needs increased protein and energy in her diet.' },
-  { maxDay: 250, name: 'Third Trimester — Month 7–8',
-    desc: 'The calf is gaining 1–1.5 lbs per day now. Lungs are maturing in preparation for breathing. The cow should be on an increasing plane of nutrition. Body condition score should be 5–6 heading into the final stretch.' },
-  { maxDay: 270, name: 'Pre-Calving — Month 8–9',
-    desc: 'The calf weighs 50–70 lbs and is nearly fully developed. The cow\'s udder is beginning to bag up (develop). Move her to the calving pasture. Have calving supplies ready. Watch for relaxation of the pelvic ligaments and vulva.' },
+  { maxDay: 150, name: 'Second Trimester — Month 3\u20135',
+    desc: 'Rapid growth phase. The fetus is developing muscle, bone density increases, and the coat begins to form. By day 150 the calf weighs about 5\u20138 lbs and is roughly 12\u201315 inches long. The cow\'s nutritional needs are increasing.' },
+  { maxDay: 210, name: 'Late Second Trimester — Month 5\u20137',
+    desc: 'The calf is growing rapidly \u2014 gaining about half a pound per day. Organs are maturing and the calf is becoming more active (you may see the cow\'s flank move). The cow needs increased protein and energy in her diet.' },
+  { maxDay: 250, name: 'Third Trimester — Month 7\u20138',
+    desc: 'The calf is gaining 1\u20131.5 lbs per day now. Lungs are maturing in preparation for breathing. The cow should be on an increasing plane of nutrition. Body condition score should be 5\u20136 heading into the final stretch.' },
+  { maxDay: 270, name: 'Pre-Calving — Month 8\u20139',
+    desc: 'The calf weighs 50\u201370 lbs and is nearly fully developed. The cow\'s udder is beginning to bag up (develop). Move her to the calving pasture. Have calving supplies ready. Watch for relaxation of the pelvic ligaments and vulva.' },
   { maxDay: 999, name: 'Due Any Time — Final Days',
     desc: 'The cow is at or near her due date. Watch closely for signs of labor: restlessness, tail raising, mucus discharge, and separation from the herd. The water bag should appear first, followed by the calf\'s front feet and nose. Have your vet\'s number handy.' }
 ];
 
-function getStage(dayOfPregnancy) {
-  for (const s of STAGES) {
-    if (dayOfPregnancy <= s.maxDay) return s;
-  }
+function getStage(day) {
+  for (const s of STAGES) { if (day <= s.maxDay) return s; }
   return STAGES[STAGES.length - 1];
+}
+
+// ── Auth state ───────────────────────────────────────────────────────────────
+let authToken = null;
+
+async function initAuth() {
+  try {
+    const r = await fetch('/api/auth/refresh', { credentials: 'include' });
+    if (r.ok) {
+      const d = await r.json();
+      if (d.token) authToken = d.token;
+    }
+  } catch (e) { /* not logged in */ }
+  updateAuthUI();
+}
+
+function updateAuthUI() {
+  const banner = document.getElementById('auth-banner');
+  if (authToken) {
+    banner.style.display = 'none';
+  } else {
+    banner.style.display = 'flex';
+  }
+}
+
+// ── API helpers ──────────────────────────────────────────────────────────────
+async function apiGet(url) {
+  const r = await fetch(url, { headers: { Authorization: 'Bearer ' + authToken } });
+  if (!r.ok) throw new Error('API error ' + r.status);
+  return r.json();
+}
+async function apiPost(url, body) {
+  const r = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + authToken },
+    body: JSON.stringify(body)
+  });
+  if (!r.ok) { const e = await r.json().catch(() => ({})); throw new Error(e.error || 'API error'); }
+  return r.json();
+}
+async function apiDelete(url) {
+  const r = await fetch(url, { method: 'DELETE', headers: { Authorization: 'Bearer ' + authToken } });
+  if (!r.ok) throw new Error('API error ' + r.status);
+  return r.json();
 }
 
 // ── Tool switching ───────────────────────────────────────────────────────────
@@ -736,21 +914,19 @@ function switchTool(id) {
   const tabs = document.querySelectorAll('.tool-tab');
   if (id === 'calc') tabs[0].classList.add('active');
   else tabs[1].classList.add('active');
-  if (id === 'calendar') renderCalendar();
+  if (id === 'calendar') loadAndRender();
 }
 
 // ── Date helpers ─────────────────────────────────────────────────────────────
 function fmt(d) {
-  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  return months[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+  const m = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return m[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
 }
 function fmtDay(d) {
-  const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-  return days[d.getDay()];
+  return ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][d.getDay()];
 }
-function daysBetween(a, b) {
-  return Math.round((b - a) / 86400000);
-}
+function daysBetween(a, b) { return Math.round((b - a) / 86400000); }
+function toDateStr(d) { return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); }
 
 // ── Calculator ───────────────────────────────────────────────────────────────
 function calculate() {
@@ -782,15 +958,12 @@ function calculate() {
   }
 
   document.getElementById('r-elapsed').textContent = Math.max(0, elapsed);
-  const months = (elapsed / 30.4).toFixed(1);
-  document.getElementById('r-elapsed-sub').textContent = elapsed > 0 ? '≈ ' + months + ' months' : 'not yet bred';
+  document.getElementById('r-elapsed-sub').textContent = elapsed > 0 ? '\u2248 ' + (elapsed / 30.4).toFixed(1) + ' months' : 'not yet bred';
   document.getElementById('r-total').textContent = breed.days + 'd';
   document.getElementById('r-breed-name').textContent = breed.name;
 
-  const bar = document.getElementById('r-bar');
-  const barText = document.getElementById('r-bar-text');
-  bar.style.width = pct.toFixed(1) + '%';
-  barText.textContent = pct.toFixed(0) + '%';
+  document.getElementById('r-bar').style.width = pct.toFixed(1) + '%';
+  document.getElementById('r-bar-text').textContent = pct.toFixed(0) + '%';
 
   const stage = getStage(Math.max(0, elapsed));
   document.getElementById('r-stage-name').textContent = stage.name;
@@ -798,90 +971,169 @@ function calculate() {
 
   document.getElementById('calc-result').style.display = 'block';
 
-  // Store last calc for quick add to calendar
-  window._lastCalc = { breed: breedKey, date: dateStr };
+  window._lastCalc = { breed: breedKey, date: dateStr, dueDate: toDateStr(dueDate), days: breed.days };
 }
 
-function addToCalendar() {
+async function addToCalendar() {
   if (!window._lastCalc) return;
-  const id = prompt('Enter a cow ID or name for this entry:');
-  if (!id) return;
-  const entry = { id: id.trim(), breed: window._lastCalc.breed, date: window._lastCalc.date };
-  const herd = getHerd();
-  herd.push(entry);
-  saveHerd(herd);
+  const cowName = document.getElementById('calc-name').value.trim() || prompt('Enter a cow ID or name:');
+  if (!cowName) return;
+  const notes = document.getElementById('calc-notes').value.trim();
+  const lc = window._lastCalc;
+
+  if (authToken) {
+    try {
+      await apiPost('/api/cattle/calving', {
+        cow_name: cowName,
+        breed: lc.breed,
+        breeding_date: lc.date,
+        due_date: lc.dueDate,
+        gestation_days: lc.days,
+        notes: notes || null
+      });
+    } catch (e) { alert('Failed to save: ' + e.message); return; }
+  } else {
+    // Fallback to localStorage
+    const herd = getLocalHerd();
+    herd.push({ cow_name: cowName, breed: lc.breed, breeding_date: lc.date, due_date: lc.dueDate, gestation_days: lc.days, notes });
+    saveLocalHerd(herd);
+  }
   switchTool('calendar');
 }
 
-// ── Herd persistence (localStorage) ──────────────────────────────────────────
-function getHerd() {
-  try { return JSON.parse(localStorage.getItem('herdhub_calving_herd')) || []; }
-  catch { return []; }
+// ── Local storage fallback ───────────────────────────────────────────────────
+function getLocalHerd() {
+  try { return JSON.parse(localStorage.getItem('herdhub_calving_herd')) || []; } catch { return []; }
 }
-function saveHerd(herd) {
-  localStorage.setItem('herdhub_calving_herd', JSON.stringify(herd));
-}
+function saveLocalHerd(h) { localStorage.setItem('herdhub_calving_herd', JSON.stringify(h)); }
 
-// ── Add cow to calendar ──────────────────────────────────────────────────────
-function addCow() {
-  const id = document.getElementById('cow-id').value.trim();
-  const breed = document.getElementById('cow-breed').value;
-  const date = document.getElementById('cow-date').value;
-  if (!id) { alert('Please enter a cow ID or name.'); return; }
-  if (!date) { alert('Please enter a breeding date.'); return; }
+// ── Add cow from calendar panel ──────────────────────────────────────────────
+async function addCow() {
+  const cowName = document.getElementById('cow-id').value.trim();
+  const breedKey = document.getElementById('cow-breed').value;
+  const dateStr = document.getElementById('cow-date').value;
+  const notes = document.getElementById('cow-notes').value.trim();
+  if (!cowName) { alert('Please enter a cow ID or name.'); return; }
+  if (!dateStr) { alert('Please enter a breeding date.'); return; }
 
-  const herd = getHerd();
-  herd.push({ id, breed, date });
-  saveHerd(herd);
+  const breed = BREEDS[breedKey];
+  const breedDate = new Date(dateStr + 'T00:00:00');
+  const dueDate = new Date(breedDate.getTime() + breed.days * 86400000);
+
+  if (authToken) {
+    try {
+      await apiPost('/api/cattle/calving', {
+        cow_name: cowName,
+        breed: breedKey,
+        breeding_date: dateStr,
+        due_date: toDateStr(dueDate),
+        gestation_days: breed.days,
+        notes: notes || null
+      });
+    } catch (e) { alert('Failed to save: ' + e.message); return; }
+  } else {
+    const herd = getLocalHerd();
+    herd.push({ cow_name: cowName, breed: breedKey, breeding_date: dateStr, due_date: toDateStr(dueDate), gestation_days: breed.days, notes });
+    saveLocalHerd(herd);
+  }
 
   document.getElementById('cow-id').value = '';
   document.getElementById('cow-date').value = '';
-
-  renderCalendar();
+  document.getElementById('cow-notes').value = '';
+  loadAndRender();
 }
 
-function removeCow(idx) {
-  const herd = getHerd();
-  herd.splice(idx, 1);
-  saveHerd(herd);
-  renderCalendar();
+async function removeCow(id, isLocal) {
+  if (isLocal) {
+    const herd = getLocalHerd();
+    herd.splice(id, 1);
+    saveLocalHerd(herd);
+  } else {
+    try { await apiDelete('/api/cattle/calving/' + id); }
+    catch (e) { alert('Failed to delete: ' + e.message); return; }
+  }
+  closeModal();
+  loadAndRender();
 }
 
-function clearAll() {
+async function clearAll() {
   if (!confirm('Remove all entries from your calving calendar?')) return;
-  saveHerd([]);
-  renderCalendar();
+  if (authToken) {
+    const entries = await apiGet('/api/cattle/calving');
+    await Promise.all(entries.map(e => apiDelete('/api/cattle/calving/' + e.id)));
+  } else {
+    saveLocalHerd([]);
+  }
+  loadAndRender();
 }
 
-// ── Render herd table + calendar ─────────────────────────────────────────────
+// ── Load entries (DB or localStorage) ────────────────────────────────────────
+let cachedEntries = [];
+
+async function loadEntries() {
+  if (authToken) {
+    const rows = await apiGet('/api/cattle/calving');
+    return rows.map(r => ({
+      id: r.id,
+      cow_name: r.cow_name,
+      breed: r.breed,
+      breedName: (BREEDS[r.breed] || {}).name || r.breed,
+      breeding_date: r.breeding_date.slice(0, 10),
+      due_date: r.due_date.slice(0, 10),
+      notes: r.notes,
+      isLocal: false
+    }));
+  } else {
+    return getLocalHerd().map((h, i) => ({
+      id: i,
+      cow_name: h.cow_name,
+      breed: h.breed,
+      breedName: (BREEDS[h.breed] || {}).name || h.breed,
+      breeding_date: h.breeding_date,
+      due_date: h.due_date,
+      notes: h.notes,
+      isLocal: true
+    }));
+  }
+}
+
+async function loadAndRender() {
+  const loading = document.getElementById('cal-loading');
+  loading.style.display = 'block';
+  try {
+    cachedEntries = await loadEntries();
+  } catch (e) {
+    cachedEntries = getLocalHerd().map((h, i) => ({
+      id: i, cow_name: h.cow_name, breed: h.breed,
+      breedName: (BREEDS[h.breed] || {}).name || h.breed,
+      breeding_date: h.breeding_date, due_date: h.due_date, notes: h.notes, isLocal: true
+    }));
+  }
+  loading.style.display = 'none';
+  renderAll();
+}
+
+// ── Calendar state ───────────────────────────────────────────────────────────
 let calYear, calMonth;
-(function initCal() {
-  const now = new Date();
-  calYear = now.getFullYear();
-  calMonth = now.getMonth();
-})();
+(function() { const n = new Date(); calYear = n.getFullYear(); calMonth = n.getMonth(); })();
 
 function calNav(dir) {
   calMonth += dir;
   if (calMonth > 11) { calMonth = 0; calYear++; }
-  if (calMonth < 0)  { calMonth = 11; calYear--; }
-  renderCalendar();
+  if (calMonth < 0) { calMonth = 11; calYear--; }
+  renderAll();
 }
 
-function renderCalendar() {
-  const herd = getHerd();
+function renderAll() {
   const today = new Date(); today.setHours(0,0,0,0);
-
-  // Compute due dates
-  const entries = herd.map((h, i) => {
-    const breed = BREEDS[h.breed] || { name: h.breed, days: 283 };
-    const bred = new Date(h.date + 'T00:00:00');
-    const due = new Date(bred.getTime() + breed.days * 86400000);
+  const entries = cachedEntries.map(e => {
+    const due = new Date(e.due_date + 'T00:00:00');
     const remaining = daysBetween(today, due);
-    return { ...h, breedName: breed.name, due, remaining, idx: i };
+    return { ...e, dueObj: due, remaining };
   });
+  entries.sort((a, b) => a.dueObj - b.dueObj);
 
-  // Render herd table
+  // Herd table
   const tbody = document.getElementById('herd-tbody');
   const herdList = document.getElementById('herd-list');
   const calWrap = document.getElementById('cal-wrap');
@@ -891,27 +1143,25 @@ function renderCalendar() {
     calWrap.style.display = 'none';
     return;
   }
-
   herdList.style.display = 'block';
   calWrap.style.display = 'block';
 
-  entries.sort((a, b) => a.due - b.due);
   tbody.innerHTML = entries.map(e => {
     const status = e.remaining <= 0 ? '<span style="color:var(--danger);font-weight:600">OVERDUE</span>'
                  : e.remaining <= 7  ? '<span style="color:var(--danger);font-weight:600">' + e.remaining + 'd</span>'
                  : e.remaining <= 14 ? '<span style="color:var(--warn);font-weight:600">' + e.remaining + 'd</span>'
                  : e.remaining + 'd';
-    return '<tr>' +
-      '<td style="font-weight:600;color:var(--cream)">' + esc(e.id) + '</td>' +
+    return '<tr style="cursor:pointer" onclick="showDetail(' + e.id + ',' + e.isLocal + ')">' +
+      '<td style="font-weight:600;color:var(--cream)">' + esc(e.cow_name || 'Unnamed') + '</td>' +
       '<td>' + esc(e.breedName) + '</td>' +
-      '<td>' + fmt(new Date(e.date + 'T00:00:00')) + '</td>' +
-      '<td>' + fmt(e.due) + '</td>' +
+      '<td>' + fmt(new Date(e.breeding_date + 'T00:00:00')) + '</td>' +
+      '<td>' + fmt(e.dueObj) + '</td>' +
       '<td>' + status + '</td>' +
-      '<td><button class="btn btn-sm btn-danger" onclick="removeCow(' + e.idx + ')">✕</button></td>' +
+      '<td><button class="btn btn-sm btn-danger" onclick="event.stopPropagation();removeCow(' + e.id + ',' + e.isLocal + ')">&#x2715;</button></td>' +
       '</tr>';
   }).join('');
 
-  // Render calendar
+  // Calendar grid
   const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
   document.getElementById('cal-month-label').textContent = months[calMonth] + ' ' + calYear;
 
@@ -930,21 +1180,49 @@ function renderCalendar() {
     html += '<div class="cal-cell' + (isToday ? ' today' : '') + '">';
     html += '<div class="cal-date">' + d + '</div>';
 
-    // Find entries due on this day
     entries.forEach(e => {
-      const ed = e.due;
-      if (ed.getFullYear() === calYear && ed.getMonth() === calMonth && ed.getDate() === d) {
+      if (e.dueObj.getFullYear() === calYear && e.dueObj.getMonth() === calMonth && e.dueObj.getDate() === d) {
         let cls = 'due-later';
         if (e.remaining <= 7) cls = 'due-now';
-        else if (e.remaining <= 21) cls = 'due-soon';
-        html += '<div class="cal-entry ' + cls + '" title="' + esc(e.id) + ' — ' + esc(e.breedName) + '\nBred: ' + fmt(new Date(e.date + 'T00:00:00')) + '\nDue: ' + fmt(e.due) + '">' + esc(e.id) + '</div>';
+        else if (e.remaining <= 14) cls = 'due-soon';
+        html += '<div class="cal-entry ' + cls + '" onclick="showDetail(' + e.id + ',' + e.isLocal + ')" title="' + esc(e.cow_name || 'Unnamed') + '">' + esc(e.cow_name || '?') + '</div>';
       }
     });
-
     html += '</div>';
   }
-
   grid.innerHTML = html;
+}
+
+// ── Detail modal ─────────────────────────────────────────────────────────────
+function showDetail(id, isLocal) {
+  const e = cachedEntries.find(x => x.id === id && x.isLocal === isLocal);
+  if (!e) return;
+  const today = new Date(); today.setHours(0,0,0,0);
+  const due = new Date(e.due_date + 'T00:00:00');
+  const remaining = daysBetween(today, due);
+
+  document.getElementById('modal-name').textContent = e.cow_name || 'Unnamed';
+  document.getElementById('modal-breed').textContent = e.breedName;
+  document.getElementById('modal-bred').textContent = fmt(new Date(e.breeding_date + 'T00:00:00'));
+  document.getElementById('modal-due').textContent = fmt(due);
+  document.getElementById('modal-remaining').textContent = remaining <= 0 ? 'Overdue by ' + Math.abs(remaining) + ' days' : remaining + ' days';
+
+  const notesRow = document.getElementById('modal-notes-row');
+  if (e.notes) {
+    document.getElementById('modal-notes').textContent = e.notes;
+    notesRow.style.display = '';
+  } else {
+    notesRow.style.display = 'none';
+  }
+
+  const delBtn = document.getElementById('modal-delete-btn');
+  delBtn.onclick = () => removeCow(id, isLocal);
+
+  document.getElementById('detail-modal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('detail-modal').classList.remove('open');
 }
 
 function esc(s) {
@@ -953,9 +1231,16 @@ function esc(s) {
   return d.innerHTML;
 }
 
-// Initial render if on calendar tab
-document.addEventListener('DOMContentLoaded', () => {
-  if (getHerd().length > 0) renderCalendar();
+// ── Init ─────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', async () => {
+  await initAuth();
+  // Pre-load entries if any exist
+  cachedEntries = await loadEntries().catch(() => []);
+});
+
+// Close modal on overlay click
+document.getElementById('detail-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
 });
 </script>
 </body>
