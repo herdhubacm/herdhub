@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Gestation Calculator &amp; Calving Calendar | Herd Hub</title>
+<meta name="description" content="Free cattle gestation calculator and calving calendar. Enter breeding dates, track pregnancies by breed, and plan your calving season with Herd Hub.">
+<meta name="theme-color" content="#2C1A0E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="icon" type="image/png" href="/logo.png">
+<link rel="apple-touch-icon" href="/logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Oswald:wght@300;400;500;600;700&family=Source+Serif+4:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root {
+  --dark:    #1C0F06;
+  --brown:   #2C1A0E;
+  --rust:    #8B3214;
+  --rust2:   #A63D1A;
+  --gold:    #C9A96E;
+  --gold2:   #E8C87A;
+  --cream:   #F5EFE0;
+  --tan:     #C4A882;
+  --muted:   #8C7560;
+  --light:   #E8DCC8;
+  --sage:    #6B7C5E;
+  --danger:  #C0392B;
+  --warn:    #D4820A;
+  --good:    #2E7D4F;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Source Serif 4', serif;
+  background: var(--dark);
+  color: var(--cream);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.6;
+}
+
+/* ── Header ── */
+.site-header {
+  background: var(--brown);
+  border-bottom: 2px solid var(--rust);
+  padding: 0 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px;
+  font-weight: 900;
+  color: var(--cream);
+  text-decoration: none;
+}
+.logo span { color: var(--gold); }
+.back-link {
+  font-family: 'Oswald', sans-serif;
+  font-size: 12px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--tan);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: color .2s;
+}
+.back-link:hover { color: var(--gold); }
+
+/* ── Hero ── */
+.hero {
+  position: relative;
+  padding: 80px 40px 60px;
+  text-align: center;
+  overflow: hidden;
+  z-index: 1;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(139,50,20,.25) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-eyebrow {
+  font-family: 'Oswald', sans-serif;
+  font-size: 11px;
+  letter-spacing: .25em;
+  text-transform: uppercase;
+  color: var(--rust2);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+.hero-eyebrow::before,
+.hero-eyebrow::after {
+  content: '';
+  display: block;
+  width: 40px;
+  height: 1px;
+  background: var(--rust);
+}
+.hero h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(48px, 7vw, 80px);
+  font-weight: 900;
+  line-height: 1;
+  color: var(--cream);
+  margin-bottom: 8px;
+}
+.hero h1 em {
+  font-style: italic;
+  color: var(--gold);
+}
+.hero-sub {
+  font-family: 'Oswald', sans-serif;
+  font-size: 14px;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  color: var(--tan);
+  margin-bottom: 16px;
+}
+.hero-desc {
+  font-size: 16px;
+  color: var(--muted);
+  max-width: 600px;
+  margin: 0 auto 30px;
+  line-height: 1.7;
+}
+
+/* ── Tool Tabs ── */
+.tool-tabs {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.tool-tab {
+  font-family: 'Oswald', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  padding: 12px 28px;
+  border-radius: 4px;
+  border: 1px solid rgba(201,169,110,.2);
+  background: transparent;
+  color: var(--tan);
+  cursor: pointer;
+  transition: all .2s;
+}
+.tool-tab:hover { border-color: var(--gold); color: var(--gold); }
+.tool-tab.active {
+  background: var(--rust);
+  border-color: var(--rust);
+  color: white;
+}
+
+/* ── Container ── */
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 40px 80px;
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Tool Panels ── */
+.tool-panel { display: none; }
+.tool-panel.active { display: block; }
+
+/* ── Section Labels ── */
+.section-label {
+  font-family: 'Oswald', sans-serif;
+  font-size: 10px;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--rust2);
+  margin-bottom: 8px;
+}
+.section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 32px;
+  font-weight: 900;
+  color: var(--cream);
+  margin-bottom: 8px;
+}
+.section-desc {
+  font-size: 15px;
+  color: var(--muted);
+  line-height: 1.7;
+  max-width: 700px;
+  margin-bottom: 32px;
+}
+
+/* ── Cards ── */
+.card {
+  background: rgba(44,26,14,.6);
+  border: 1px solid rgba(201,169,110,.12);
+  border-radius: 8px;
+  padding: 28px;
+  margin-bottom: 20px;
+}
+.card-title {
+  font-family: 'Oswald', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 20px;
+}
+
+/* ── Fields ── */
+.field { margin-bottom: 16px; }
+.field label {
+  display: block;
+  font-family: 'Oswald', sans-serif;
+  font-size: 11px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--tan);
+  margin-bottom: 6px;
+}
+.field input, .field select {
+  width: 100%;
+  padding: 12px 14px;
+  background: rgba(28,15,6,.6);
+  border: 1px solid rgba(201,169,110,.2);
+  border-radius: 4px;
+  color: var(--cream);
+  font-family: 'Source Serif 4', serif;
+  font-size: 15px;
+  transition: border-color .2s;
+}
+.field input:focus, .field select:focus {
+  outline: none;
+  border-color: var(--gold);
+}
+.field select option { background: var(--brown); color: var(--cream); }
+
+/* ── Buttons ── */
+.btn {
+  font-family: 'Oswald', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  padding: 14px 32px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  transition: all .2s;
+}
+.btn-primary { background: var(--rust); color: white; }
+.btn-primary:hover { background: var(--rust2); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(139,50,20,.4); }
+.btn-ghost { background: transparent; color: var(--tan); border: 1px solid rgba(201,169,110,.3); }
+.btn-ghost:hover { border-color: var(--gold); color: var(--gold); }
+.btn-sm { padding: 8px 16px; font-size: 11px; }
+.btn-danger { background: var(--danger); color: white; }
+.btn-danger:hover { background: #a93226; }
+
+/* ── Progress Bar ── */
+.progress-wrap {
+  background: rgba(28,15,6,.6);
+  border: 1px solid rgba(201,169,110,.15);
+  border-radius: 6px;
+  overflow: hidden;
+  height: 28px;
+  position: relative;
+  margin: 16px 0;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--rust), var(--gold));
+  border-radius: 6px;
+  transition: width .6s ease;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 10px;
+  min-width: 40px;
+}
+.progress-text {
+  font-family: 'Oswald', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: white;
+  letter-spacing: .05em;
+}
+
+/* ── Result Cards ── */
+.result-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin: 24px 0;
+}
+.result-stat {
+  background: rgba(28,15,6,.5);
+  border: 1px solid rgba(201,169,110,.12);
+  border-radius: 6px;
+  padding: 20px;
+  text-align: center;
+}
+.result-stat .label {
+  font-family: 'Oswald', sans-serif;
+  font-size: 10px;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.result-stat .value {
+  font-family: 'Playfair Display', serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--gold);
+}
+.result-stat .sub {
+  font-size: 13px;
+  color: var(--tan);
+  margin-top: 4px;
+}
+
+/* ── Stage Info ── */
+.stage-card {
+  background: rgba(44,26,14,.6);
+  border: 1px solid rgba(201,169,110,.15);
+  border-radius: 8px;
+  padding: 24px;
+  margin: 24px 0;
+}
+.stage-card .stage-name {
+  font-family: 'Oswald', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--gold);
+  margin-bottom: 8px;
+}
+.stage-card .stage-desc {
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--light);
+}
+
+/* ── Calendar ── */
+.cal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+.cal-header h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--cream);
+}
+.cal-nav {
+  display: flex;
+  gap: 8px;
+}
+.cal-nav button {
+  background: rgba(44,26,14,.6);
+  border: 1px solid rgba(201,169,110,.2);
+  color: var(--tan);
+  font-family: 'Oswald', sans-serif;
+  font-size: 14px;
+  padding: 8px 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all .2s;
+}
+.cal-nav button:hover { border-color: var(--gold); color: var(--gold); }
+
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+.cal-day-label {
+  font-family: 'Oswald', sans-serif;
+  font-size: 11px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-align: center;
+  padding: 8px 0;
+}
+.cal-cell {
+  background: rgba(28,15,6,.4);
+  border: 1px solid rgba(201,169,110,.06);
+  border-radius: 4px;
+  min-height: 90px;
+  padding: 6px;
+  position: relative;
+}
+.cal-cell.empty { background: transparent; border-color: transparent; }
+.cal-cell.today { border-color: var(--gold); }
+.cal-date {
+  font-family: 'Oswald', sans-serif;
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+.cal-entry {
+  font-family: 'Oswald', sans-serif;
+  font-size: 10px;
+  letter-spacing: .04em;
+  padding: 3px 6px;
+  border-radius: 3px;
+  margin-bottom: 2px;
+  cursor: default;
+  line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cal-entry.due-now { background: rgba(192,57,43,.35); color: #f5b7b1; border-left: 3px solid var(--danger); }
+.cal-entry.due-soon { background: rgba(201,169,110,.2); color: var(--gold2); border-left: 3px solid var(--gold); }
+.cal-entry.due-later { background: rgba(245,239,224,.08); color: var(--light); border-left: 3px solid var(--muted); }
+
+/* ── Herd Table ── */
+.herd-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+}
+.herd-table th {
+  font-family: 'Oswald', sans-serif;
+  font-size: 10px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-align: left;
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(201,169,110,.15);
+}
+.herd-table td {
+  padding: 10px 12px;
+  font-size: 14px;
+  border-bottom: 1px solid rgba(201,169,110,.06);
+  color: var(--light);
+}
+.herd-table tr:hover td { background: rgba(201,169,110,.04); }
+
+/* ── Disclaimer ── */
+.disclaimer {
+  margin-top: 60px;
+  padding: 20px 24px;
+  background: rgba(44,26,14,.4);
+  border: 1px solid rgba(201,169,110,.08);
+  border-radius: 6px;
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--muted);
+}
+
+/* ── Add-entry form row ── */
+.add-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr auto;
+  gap: 12px;
+  align-items: end;
+  margin-bottom: 24px;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .hero { padding: 50px 20px 40px; }
+  .container { padding: 0 20px 60px; }
+  .site-header { padding: 0 20px; }
+  .result-grid { grid-template-columns: 1fr 1fr; }
+  .add-row { grid-template-columns: 1fr; }
+  .cal-cell { min-height: 60px; }
+  .cal-entry { font-size: 9px; }
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <a href="/" class="logo">Herd <span>Hub</span></a>
+  <a href="/" class="back-link">← Back to Marketplace</a>
+</header>
+
+<section class="hero">
+  <div class="hero-eyebrow">Herd Hub Rancher Tools</div>
+  <h1>Gestation <em>Calculator</em></h1>
+  <div class="hero-sub">Track every pregnancy from pasture to calving pen</div>
+  <p class="hero-desc">Enter a breeding date and breed to see the expected calving date, days remaining, and what's happening with the calf right now. Add multiple cows to the calving calendar to plan your whole season.</p>
+  <div class="tool-tabs">
+    <button class="tool-tab active" onclick="switchTool('calc')">🐄 Gestation Calculator</button>
+    <button class="tool-tab" onclick="switchTool('calendar')">📅 Calving Calendar</button>
+  </div>
+</section>
+
+<div class="container">
+
+  <!-- ══════════════════════════════════════════════
+       TOOL 1: GESTATION CALCULATOR
+  ══════════════════════════════════════════════ -->
+  <div class="tool-panel active" id="panel-calc">
+
+    <div class="section-label">Tool 1 of 2</div>
+    <div class="section-title">Gestation Calculator</div>
+    <div class="section-desc">Select a breed and enter the breeding date. The calculator accounts for breed-specific gestation lengths and shows you exactly where the pregnancy stands today.</div>
+
+    <div class="card">
+      <div class="card-title">🐄 Breeding Details</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div class="field">
+          <label for="breed">Breed</label>
+          <select id="breed">
+            <option value="angus">Angus (283 days)</option>
+            <option value="hereford">Hereford (285 days)</option>
+            <option value="simmental">Simmental (289 days)</option>
+            <option value="charolais">Charolais (289 days)</option>
+            <option value="red_angus">Red Angus (283 days)</option>
+            <option value="limousin">Limousin (288 days)</option>
+            <option value="gelbvieh">Gelbvieh (283 days)</option>
+            <option value="shorthorn">Shorthorn (283 days)</option>
+            <option value="brangus">Brangus (283 days)</option>
+            <option value="longhorn">Longhorn (283 days)</option>
+            <option value="holstein">Dairy / Holstein (280 days)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="breed-date">Breeding Date</label>
+          <input type="date" id="breed-date">
+        </div>
+      </div>
+      <div style="margin-top:12px">
+        <button class="btn btn-primary" onclick="calculate()">Calculate Due Date</button>
+      </div>
+    </div>
+
+    <div id="calc-result" style="display:none">
+
+      <div class="result-grid">
+        <div class="result-stat">
+          <div class="label">Expected Calving Date</div>
+          <div class="value" id="r-due"></div>
+          <div class="sub" id="r-due-day"></div>
+        </div>
+        <div class="result-stat">
+          <div class="label">Days Remaining</div>
+          <div class="value" id="r-remaining"></div>
+          <div class="sub" id="r-remaining-sub"></div>
+        </div>
+        <div class="result-stat">
+          <div class="label">Days Pregnant</div>
+          <div class="value" id="r-elapsed"></div>
+          <div class="sub" id="r-elapsed-sub"></div>
+        </div>
+        <div class="result-stat">
+          <div class="label">Gestation Length</div>
+          <div class="value" id="r-total"></div>
+          <div class="sub" id="r-breed-name"></div>
+        </div>
+      </div>
+
+      <div class="progress-wrap">
+        <div class="progress-fill" id="r-bar" style="width:0%">
+          <span class="progress-text" id="r-bar-text">0%</span>
+        </div>
+      </div>
+
+      <div class="stage-card" id="r-stage">
+        <div class="stage-name" id="r-stage-name"></div>
+        <div class="stage-desc" id="r-stage-desc"></div>
+      </div>
+
+      <div style="text-align:center;margin-top:20px">
+        <button class="btn btn-ghost" onclick="addToCalendar()">+ Add to Calving Calendar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       TOOL 2: CALVING CALENDAR
+  ══════════════════════════════════════════════ -->
+  <div class="tool-panel" id="panel-calendar">
+
+    <div class="section-label">Tool 2 of 2</div>
+    <div class="section-title">Calving Calendar</div>
+    <div class="section-desc">Add your bred cows and heifers below to see all expected calving dates on a monthly calendar. Entries are saved in your browser so they persist between visits.</div>
+
+    <div class="card">
+      <div class="card-title">➕ Add Cow</div>
+      <div class="add-row">
+        <div class="field" style="margin:0">
+          <label for="cow-id">Cow ID / Name</label>
+          <input type="text" id="cow-id" placeholder="e.g. 442T or Daisy">
+        </div>
+        <div class="field" style="margin:0">
+          <label for="cow-breed">Breed</label>
+          <select id="cow-breed">
+            <option value="angus">Angus (283 d)</option>
+            <option value="hereford">Hereford (285 d)</option>
+            <option value="simmental">Simmental (289 d)</option>
+            <option value="charolais">Charolais (289 d)</option>
+            <option value="red_angus">Red Angus (283 d)</option>
+            <option value="limousin">Limousin (288 d)</option>
+            <option value="gelbvieh">Gelbvieh (283 d)</option>
+            <option value="shorthorn">Shorthorn (283 d)</option>
+            <option value="brangus">Brangus (283 d)</option>
+            <option value="longhorn">Longhorn (283 d)</option>
+            <option value="holstein">Dairy / Holstein (280 d)</option>
+          </select>
+        </div>
+        <div class="field" style="margin:0">
+          <label for="cow-date">Breeding Date</label>
+          <input type="date" id="cow-date">
+        </div>
+        <button class="btn btn-primary" onclick="addCow()" style="height:44px;margin-top:auto">Add</button>
+      </div>
+    </div>
+
+    <!-- Herd list -->
+    <div id="herd-list" style="display:none">
+      <div class="card">
+        <div class="card-title" style="display:flex;justify-content:space-between;align-items:center">
+          📋 Your Herd
+          <button class="btn btn-sm btn-ghost" onclick="clearAll()" style="font-size:10px">Clear All</button>
+        </div>
+        <table class="herd-table">
+          <thead>
+            <tr><th>Cow</th><th>Breed</th><th>Bred</th><th>Due</th><th>Days Left</th><th></th></tr>
+          </thead>
+          <tbody id="herd-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Calendar -->
+    <div id="cal-wrap" style="margin-top:32px;display:none">
+      <div class="cal-header">
+        <div class="cal-nav">
+          <button onclick="calNav(-1)">← Prev</button>
+        </div>
+        <h3 id="cal-month-label"></h3>
+        <div class="cal-nav">
+          <button onclick="calNav(1)">Next →</button>
+        </div>
+      </div>
+      <div class="cal-grid" id="cal-grid"></div>
+    </div>
+
+  </div>
+
+  <div class="disclaimer">
+    <strong style="color:var(--tan)">About gestation estimates:</strong> Average gestation lengths vary by breed and individual animal.
+    The values used here are breed averages — actual calving can occur 5–10 days before or after the estimated date.
+    Heifers often calve a few days earlier than mature cows. Always watch for signs of labor and have your calving supplies ready
+    at least two weeks before the estimated due date. This tool is for planning purposes only.
+  </div>
+
+</div>
+
+<script>
+// ── Breed gestation lengths (days) ────────────────────────────────────────────
+const BREEDS = {
+  angus:      { name: 'Angus',           days: 283 },
+  hereford:   { name: 'Hereford',        days: 285 },
+  simmental:  { name: 'Simmental',       days: 289 },
+  charolais:  { name: 'Charolais',       days: 289 },
+  red_angus:  { name: 'Red Angus',       days: 283 },
+  limousin:   { name: 'Limousin',        days: 288 },
+  gelbvieh:   { name: 'Gelbvieh',        days: 283 },
+  shorthorn:  { name: 'Shorthorn',       days: 283 },
+  brangus:    { name: 'Brangus',         days: 283 },
+  longhorn:   { name: 'Longhorn',        days: 283 },
+  holstein:   { name: 'Dairy / Holstein', days: 280 }
+};
+
+// ── Pregnancy stages ─────────────────────────────────────────────────────────
+const STAGES = [
+  { maxDay: 14,  name: 'Embryonic Stage — Week 1–2',
+    desc: 'The fertilized egg is traveling down the oviduct and into the uterus. Cell division is underway but the embryo has not yet attached to the uterine wall. The embryo is microscopic at this point.' },
+  { maxDay: 28,  name: 'Embryonic Attachment — Week 2–4',
+    desc: 'The embryo attaches to the uterine wall and the placenta begins forming. This is a critical period — stress, poor nutrition, or heat can cause early embryonic loss. The embryo is about the size of a grain of rice.' },
+  { maxDay: 45,  name: 'Early Organogenesis — Week 4–6',
+    desc: 'Major organs are beginning to form: heart, brain, spinal cord, and limb buds appear. The embryo is about 1 inch long. A veterinarian can confirm pregnancy via rectal palpation or ultrasound around day 30–35.' },
+  { maxDay: 60,  name: 'Organ Development — Week 6–9',
+    desc: 'The fetus now has recognizable features — eyes, ears, and hooves are forming. The heart is beating. Fetal sex can be determined by ultrasound around day 55–60. The fetus is about 2–3 inches long.' },
+  { maxDay: 90,  name: 'First Trimester Complete — Month 2–3',
+    desc: 'All major organ systems are in place. The fetus is about 6 inches long and weighs a few ounces. Hair follicles and teeth buds are developing. The cow may begin to show subtle body condition changes.' },
+  { maxDay: 150, name: 'Second Trimester — Month 3–5',
+    desc: 'Rapid growth phase. The fetus is developing muscle, bone density increases, and the coat begins to form. By day 150 the calf weighs about 5–8 lbs and is roughly 12–15 inches long. The cow\'s nutritional needs are increasing.' },
+  { maxDay: 210, name: 'Late Second Trimester — Month 5–7',
+    desc: 'The calf is growing rapidly — gaining about half a pound per day. Organs are maturing and the calf is becoming more active (you may see the cow\'s flank move). The cow needs increased protein and energy in her diet.' },
+  { maxDay: 250, name: 'Third Trimester — Month 7–8',
+    desc: 'The calf is gaining 1–1.5 lbs per day now. Lungs are maturing in preparation for breathing. The cow should be on an increasing plane of nutrition. Body condition score should be 5–6 heading into the final stretch.' },
+  { maxDay: 270, name: 'Pre-Calving — Month 8–9',
+    desc: 'The calf weighs 50–70 lbs and is nearly fully developed. The cow\'s udder is beginning to bag up (develop). Move her to the calving pasture. Have calving supplies ready. Watch for relaxation of the pelvic ligaments and vulva.' },
+  { maxDay: 999, name: 'Due Any Time — Final Days',
+    desc: 'The cow is at or near her due date. Watch closely for signs of labor: restlessness, tail raising, mucus discharge, and separation from the herd. The water bag should appear first, followed by the calf\'s front feet and nose. Have your vet\'s number handy.' }
+];
+
+function getStage(dayOfPregnancy) {
+  for (const s of STAGES) {
+    if (dayOfPregnancy <= s.maxDay) return s;
+  }
+  return STAGES[STAGES.length - 1];
+}
+
+// ── Tool switching ───────────────────────────────────────────────────────────
+function switchTool(id) {
+  document.querySelectorAll('.tool-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tool-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  const tabs = document.querySelectorAll('.tool-tab');
+  if (id === 'calc') tabs[0].classList.add('active');
+  else tabs[1].classList.add('active');
+  if (id === 'calendar') renderCalendar();
+}
+
+// ── Date helpers ─────────────────────────────────────────────────────────────
+function fmt(d) {
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return months[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+}
+function fmtDay(d) {
+  const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  return days[d.getDay()];
+}
+function daysBetween(a, b) {
+  return Math.round((b - a) / 86400000);
+}
+
+// ── Calculator ───────────────────────────────────────────────────────────────
+function calculate() {
+  const breedKey = document.getElementById('breed').value;
+  const dateStr = document.getElementById('breed-date').value;
+  if (!dateStr) { alert('Please enter a breeding date.'); return; }
+
+  const breed = BREEDS[breedKey];
+  const breedDate = new Date(dateStr + 'T00:00:00');
+  const dueDate = new Date(breedDate.getTime() + breed.days * 86400000);
+  const today = new Date(); today.setHours(0,0,0,0);
+
+  const elapsed = daysBetween(breedDate, today);
+  const remaining = daysBetween(today, dueDate);
+  const pct = Math.min(100, Math.max(0, (elapsed / breed.days) * 100));
+
+  document.getElementById('r-due').textContent = fmt(dueDate);
+  document.getElementById('r-due-day').textContent = fmtDay(dueDate);
+
+  if (remaining > 0) {
+    document.getElementById('r-remaining').textContent = remaining;
+    document.getElementById('r-remaining-sub').textContent = remaining <= 14 ? 'Get ready!' : 'to go';
+  } else if (remaining === 0) {
+    document.getElementById('r-remaining').textContent = 'Today!';
+    document.getElementById('r-remaining-sub').textContent = 'Due date is today';
+  } else {
+    document.getElementById('r-remaining').textContent = Math.abs(remaining) + ' over';
+    document.getElementById('r-remaining-sub').textContent = 'days past due';
+  }
+
+  document.getElementById('r-elapsed').textContent = Math.max(0, elapsed);
+  const months = (elapsed / 30.4).toFixed(1);
+  document.getElementById('r-elapsed-sub').textContent = elapsed > 0 ? '≈ ' + months + ' months' : 'not yet bred';
+  document.getElementById('r-total').textContent = breed.days + 'd';
+  document.getElementById('r-breed-name').textContent = breed.name;
+
+  const bar = document.getElementById('r-bar');
+  const barText = document.getElementById('r-bar-text');
+  bar.style.width = pct.toFixed(1) + '%';
+  barText.textContent = pct.toFixed(0) + '%';
+
+  const stage = getStage(Math.max(0, elapsed));
+  document.getElementById('r-stage-name').textContent = stage.name;
+  document.getElementById('r-stage-desc').textContent = stage.desc;
+
+  document.getElementById('calc-result').style.display = 'block';
+
+  // Store last calc for quick add to calendar
+  window._lastCalc = { breed: breedKey, date: dateStr };
+}
+
+function addToCalendar() {
+  if (!window._lastCalc) return;
+  const id = prompt('Enter a cow ID or name for this entry:');
+  if (!id) return;
+  const entry = { id: id.trim(), breed: window._lastCalc.breed, date: window._lastCalc.date };
+  const herd = getHerd();
+  herd.push(entry);
+  saveHerd(herd);
+  switchTool('calendar');
+}
+
+// ── Herd persistence (localStorage) ──────────────────────────────────────────
+function getHerd() {
+  try { return JSON.parse(localStorage.getItem('herdhub_calving_herd')) || []; }
+  catch { return []; }
+}
+function saveHerd(herd) {
+  localStorage.setItem('herdhub_calving_herd', JSON.stringify(herd));
+}
+
+// ── Add cow to calendar ──────────────────────────────────────────────────────
+function addCow() {
+  const id = document.getElementById('cow-id').value.trim();
+  const breed = document.getElementById('cow-breed').value;
+  const date = document.getElementById('cow-date').value;
+  if (!id) { alert('Please enter a cow ID or name.'); return; }
+  if (!date) { alert('Please enter a breeding date.'); return; }
+
+  const herd = getHerd();
+  herd.push({ id, breed, date });
+  saveHerd(herd);
+
+  document.getElementById('cow-id').value = '';
+  document.getElementById('cow-date').value = '';
+
+  renderCalendar();
+}
+
+function removeCow(idx) {
+  const herd = getHerd();
+  herd.splice(idx, 1);
+  saveHerd(herd);
+  renderCalendar();
+}
+
+function clearAll() {
+  if (!confirm('Remove all entries from your calving calendar?')) return;
+  saveHerd([]);
+  renderCalendar();
+}
+
+// ── Render herd table + calendar ─────────────────────────────────────────────
+let calYear, calMonth;
+(function initCal() {
+  const now = new Date();
+  calYear = now.getFullYear();
+  calMonth = now.getMonth();
+})();
+
+function calNav(dir) {
+  calMonth += dir;
+  if (calMonth > 11) { calMonth = 0; calYear++; }
+  if (calMonth < 0)  { calMonth = 11; calYear--; }
+  renderCalendar();
+}
+
+function renderCalendar() {
+  const herd = getHerd();
+  const today = new Date(); today.setHours(0,0,0,0);
+
+  // Compute due dates
+  const entries = herd.map((h, i) => {
+    const breed = BREEDS[h.breed] || { name: h.breed, days: 283 };
+    const bred = new Date(h.date + 'T00:00:00');
+    const due = new Date(bred.getTime() + breed.days * 86400000);
+    const remaining = daysBetween(today, due);
+    return { ...h, breedName: breed.name, due, remaining, idx: i };
+  });
+
+  // Render herd table
+  const tbody = document.getElementById('herd-tbody');
+  const herdList = document.getElementById('herd-list');
+  const calWrap = document.getElementById('cal-wrap');
+
+  if (entries.length === 0) {
+    herdList.style.display = 'none';
+    calWrap.style.display = 'none';
+    return;
+  }
+
+  herdList.style.display = 'block';
+  calWrap.style.display = 'block';
+
+  entries.sort((a, b) => a.due - b.due);
+  tbody.innerHTML = entries.map(e => {
+    const status = e.remaining <= 0 ? '<span style="color:var(--danger);font-weight:600">OVERDUE</span>'
+                 : e.remaining <= 7  ? '<span style="color:var(--danger);font-weight:600">' + e.remaining + 'd</span>'
+                 : e.remaining <= 14 ? '<span style="color:var(--warn);font-weight:600">' + e.remaining + 'd</span>'
+                 : e.remaining + 'd';
+    return '<tr>' +
+      '<td style="font-weight:600;color:var(--cream)">' + esc(e.id) + '</td>' +
+      '<td>' + esc(e.breedName) + '</td>' +
+      '<td>' + fmt(new Date(e.date + 'T00:00:00')) + '</td>' +
+      '<td>' + fmt(e.due) + '</td>' +
+      '<td>' + status + '</td>' +
+      '<td><button class="btn btn-sm btn-danger" onclick="removeCow(' + e.idx + ')">✕</button></td>' +
+      '</tr>';
+  }).join('');
+
+  // Render calendar
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('cal-month-label').textContent = months[calMonth] + ' ' + calYear;
+
+  const grid = document.getElementById('cal-grid');
+  const dayLabels = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  let html = dayLabels.map(d => '<div class="cal-day-label">' + d + '</div>').join('');
+
+  const firstDay = new Date(calYear, calMonth, 1).getDay();
+  const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+
+  for (let i = 0; i < firstDay; i++) html += '<div class="cal-cell empty"></div>';
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const cellDate = new Date(calYear, calMonth, d);
+    const isToday = cellDate.getTime() === today.getTime();
+    html += '<div class="cal-cell' + (isToday ? ' today' : '') + '">';
+    html += '<div class="cal-date">' + d + '</div>';
+
+    // Find entries due on this day
+    entries.forEach(e => {
+      const ed = e.due;
+      if (ed.getFullYear() === calYear && ed.getMonth() === calMonth && ed.getDate() === d) {
+        let cls = 'due-later';
+        if (e.remaining <= 7) cls = 'due-now';
+        else if (e.remaining <= 21) cls = 'due-soon';
+        html += '<div class="cal-entry ' + cls + '" title="' + esc(e.id) + ' — ' + esc(e.breedName) + '\nBred: ' + fmt(new Date(e.date + 'T00:00:00')) + '\nDue: ' + fmt(e.due) + '">' + esc(e.id) + '</div>';
+      }
+    });
+
+    html += '</div>';
+  }
+
+  grid.innerHTML = html;
+}
+
+function esc(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+// Initial render if on calendar tab
+document.addEventListener('DOMContentLoaded', () => {
+  if (getHerd().length > 0) renderCalendar();
+});
+</script>
+</body>
+</html>
