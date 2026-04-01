@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Herd Manager | Herd Hub</title>
+<meta name="description" content="Free herd management for cattle ranchers. Track animals, weights, health records, breeding, and calving — all synced to your Herd Hub account.">
+<meta name="theme-color" content="#2C1A0E">
+<link rel="icon" type="image/png" href="/logo.png">
+<link rel="apple-touch-icon" href="/logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Oswald:wght@300;400;500;600;700&family=Source+Serif+4:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--dark:#1C0F06;--brown:#2C1A0E;--rust:#8B3214;--rust2:#A63D1A;--gold:#C9A96E;--gold2:#E8C87A;--cream:#F5EFE0;--tan:#C4A882;--muted:#8C7560;--light:#E8DCC8;--sage:#6B7C5E;--danger:#C0392B;--warn:#D4820A;--good:#2E7D4F}
+html{scroll-behavior:smooth}
+body{font-family:'Source Serif 4',serif;background:var(--dark);color:var(--cream);min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:0;opacity:.6}
+
+/* Header */
+.site-header{background:var(--brown);border-bottom:2px solid var(--rust);padding:0 40px;display:flex;align-items:center;justify-content:space-between;height:64px;position:sticky;top:0;z-index:100}
+.logo{font-family:'Playfair Display',serif;font-size:22px;font-weight:900;color:var(--cream);text-decoration:none}
+.logo span{color:var(--gold)}
+.back-link{font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--tan);text-decoration:none;display:flex;align-items:center;gap:6px;transition:color .2s}
+.back-link:hover{color:var(--gold)}
+
+/* Container */
+.container{max-width:1100px;margin:0 auto;padding:24px 40px 80px;position:relative;z-index:1}
+
+/* Auth gate */
+.auth-gate{text-align:center;padding:120px 40px;position:relative;z-index:1}
+.auth-gate h1{font-family:'Playfair Display',serif;font-size:48px;font-weight:900;color:var(--cream);margin-bottom:12px}
+.auth-gate h1 em{font-style:italic;color:var(--gold)}
+.auth-gate p{font-size:16px;color:var(--muted);margin-bottom:32px}
+.auth-gate a{display:inline-block;font-family:'Oswald',sans-serif;font-size:14px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;background:var(--rust);color:white;padding:16px 40px;border-radius:4px;text-decoration:none;transition:background .2s}
+.auth-gate a:hover{background:var(--rust2)}
+
+/* Buttons */
+.btn{font-family:'Oswald',sans-serif;font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:10px 20px;border-radius:4px;border:none;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:6px}
+.btn-primary{background:var(--rust);color:white}
+.btn-primary:hover{background:var(--rust2);transform:translateY(-1px)}
+.btn-ghost{background:transparent;color:var(--tan);border:1px solid rgba(201,169,110,.3)}
+.btn-ghost:hover{border-color:var(--gold);color:var(--gold)}
+.btn-sm{padding:6px 12px;font-size:11px}
+.btn-danger{background:var(--danger);color:white}
+.btn-danger:hover{background:#a93226}
+.btn-good{background:var(--good);color:white}
+.btn-good:hover{background:#246840}
+
+/* Cards */
+.card{background:rgba(44,26,14,.6);border:1px solid rgba(201,169,110,.12);border-radius:8px;padding:24px;margin-bottom:16px}
+.card-title{font-family:'Oswald',sans-serif;font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:16px}
+
+/* Stats bar */
+.stats-bar{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:24px}
+.stat-card{background:rgba(44,26,14,.6);border:1px solid rgba(201,169,110,.12);border-radius:8px;padding:16px;text-align:center}
+.stat-card .num{font-family:'Playfair Display',serif;font-size:32px;font-weight:700;color:var(--gold)}
+.stat-card .lbl{font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-top:4px}
+
+/* Quick actions */
+.quick-actions{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:24px}
+
+/* Alerts */
+.alert-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:4px;font-size:13px;margin-bottom:6px;cursor:pointer}
+.alert-item.warn{background:rgba(212,130,10,.12);border-left:3px solid var(--warn);color:var(--gold2)}
+.alert-item.danger{background:rgba(192,57,43,.12);border-left:3px solid var(--danger);color:#f5b7b1}
+.alert-item.info{background:rgba(201,169,110,.08);border-left:3px solid var(--muted);color:var(--tan)}
+
+/* Activity */
+.activity-item{padding:8px 0;border-bottom:1px solid rgba(201,169,110,.06);font-size:13px;display:flex;gap:10px;align-items:center}
+.activity-item:last-child{border:none}
+.activity-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.activity-dot.weight{background:var(--gold)}
+.activity-dot.health{background:var(--sage)}
+
+/* Herd list */
+.list-toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+.search-box{padding:10px 14px;background:rgba(28,15,6,.6);border:1px solid rgba(201,169,110,.2);border-radius:4px;color:var(--cream);font-family:'Source Serif 4',serif;font-size:14px;width:260px;transition:border-color .2s}
+.search-box:focus{outline:none;border-color:var(--gold)}
+.filter-group{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.filter-select{padding:8px 12px;background:rgba(28,15,6,.6);border:1px solid rgba(201,169,110,.2);border-radius:4px;color:var(--cream);font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:.06em;text-transform:uppercase}
+.filter-select option{background:var(--brown);color:var(--cream)}
+
+/* Animal table */
+.animal-table{width:100%;border-collapse:collapse}
+.animal-table th{font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);text-align:left;padding:10px 10px;border-bottom:1px solid rgba(201,169,110,.15);white-space:nowrap;cursor:pointer;user-select:none}
+.animal-table th:hover{color:var(--gold)}
+.animal-table td{padding:10px;font-size:13px;border-bottom:1px solid rgba(201,169,110,.06);color:var(--light)}
+.animal-table tr:hover td{background:rgba(201,169,110,.04)}
+.animal-table tr{cursor:pointer}
+.animal-thumb{width:36px;height:36px;border-radius:4px;object-fit:cover;background:rgba(201,169,110,.1);border:1px solid rgba(201,169,110,.15)}
+.status-badge{font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;border-radius:3px;font-weight:600}
+.status-active{background:rgba(46,125,79,.2);color:#6ee7a0}
+.status-sold{background:rgba(201,169,110,.15);color:var(--gold)}
+.status-deceased{background:rgba(192,57,43,.15);color:#f5b7b1}
+.status-culled{background:rgba(140,117,96,.15);color:var(--muted)}
+
+/* Profile */
+.profile-hero{display:flex;gap:24px;align-items:flex-start;margin-bottom:24px;flex-wrap:wrap}
+.profile-photo{width:200px;height:200px;border-radius:8px;object-fit:cover;background:rgba(201,169,110,.1);border:2px solid rgba(201,169,110,.15);flex-shrink:0}
+.profile-info h2{font-family:'Playfair Display',serif;font-size:36px;font-weight:900;color:var(--cream);margin-bottom:4px}
+.profile-info .tag{font-family:'Oswald',sans-serif;font-size:14px;color:var(--gold);letter-spacing:.1em;margin-bottom:12px}
+.profile-stats{display:flex;gap:20px;flex-wrap:wrap;margin-bottom:16px}
+.profile-stat{text-align:center}
+.profile-stat .val{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--gold)}
+.profile-stat .lbl{font-family:'Oswald',sans-serif;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.profile-actions{display:flex;gap:8px;flex-wrap:wrap}
+
+/* Tabs */
+.tab-bar{display:flex;gap:4px;margin-bottom:20px;border-bottom:1px solid rgba(201,169,110,.12);padding-bottom:0;overflow-x:auto}
+.tab-btn{font-family:'Oswald',sans-serif;font-size:12px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;padding:10px 18px;background:transparent;border:none;border-bottom:2px solid transparent;color:var(--muted);cursor:pointer;transition:all .2s;white-space:nowrap}
+.tab-btn:hover{color:var(--cream)}
+.tab-btn.active{color:var(--gold);border-bottom-color:var(--gold)}
+.tab-content{display:none}
+.tab-content.active{display:block}
+
+/* Fields */
+.field{margin-bottom:14px}
+.field label{display:block;font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--tan);margin-bottom:5px}
+.field input,.field select,.field textarea{width:100%;padding:10px 12px;background:rgba(28,15,6,.6);border:1px solid rgba(201,169,110,.2);border-radius:4px;color:var(--cream);font-family:'Source Serif 4',serif;font-size:14px;transition:border-color .2s}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--gold)}
+.field select option{background:var(--brown);color:var(--cream)}
+.field textarea{resize:vertical;min-height:60px}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.field-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+
+/* Weight chart placeholder */
+.weight-chart{background:rgba(28,15,6,.4);border:1px solid rgba(201,169,110,.1);border-radius:6px;padding:20px;margin-bottom:16px;position:relative;height:250px;overflow:hidden}
+.chart-bar-wrap{display:flex;align-items:flex-end;gap:4px;height:200px;padding:0 10px}
+.chart-bar{background:linear-gradient(180deg,var(--gold),var(--rust));border-radius:3px 3px 0 0;min-width:20px;flex:1;position:relative;transition:height .4s}
+.chart-bar:hover{opacity:.8}
+.chart-bar .tip{position:absolute;top:-24px;left:50%;transform:translateX(-50%);font-family:'Oswald',sans-serif;font-size:10px;color:var(--gold);white-space:nowrap;opacity:0;transition:opacity .2s}
+.chart-bar:hover .tip{opacity:1}
+.chart-label{font-family:'Oswald',sans-serif;font-size:9px;color:var(--muted);text-align:center;margin-top:4px}
+
+/* Timeline */
+.timeline-item{position:relative;padding:0 0 20px 28px;border-left:2px solid rgba(201,169,110,.12)}
+.timeline-item:last-child{border-left-color:transparent}
+.timeline-item::before{content:'';position:absolute;left:-5px;top:4px;width:10px;height:10px;border-radius:50%;background:var(--rust);border:2px solid var(--dark)}
+.timeline-item.withdrawal-active::before{background:var(--danger);box-shadow:0 0 8px rgba(192,57,43,.5)}
+.timeline-date{font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.timeline-title{font-size:14px;font-weight:600;color:var(--cream);margin-bottom:4px}
+.timeline-detail{font-size:13px;color:var(--tan)}
+.withdrawal-badge{display:inline-block;font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border-radius:3px;background:rgba(192,57,43,.2);color:#f5b7b1;margin-left:8px}
+
+/* Modal */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;align-items:flex-start;justify-content:center;padding:40px 20px;overflow-y:auto}
+.modal-overlay.open{display:flex}
+.modal-box{background:var(--brown);border:1px solid rgba(201,169,110,.2);border-radius:10px;padding:32px;max-width:600px;width:100%;position:relative;margin:auto}
+.modal-box h3{font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:var(--cream);margin-bottom:20px}
+.modal-close{position:absolute;top:12px;right:16px;background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer}
+.modal-close:hover{color:var(--cream)}
+
+/* Nav panels */
+.view{display:none}
+.view.active{display:block}
+
+/* Batch weight */
+.batch-row{display:grid;grid-template-columns:1fr 120px 140px;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid rgba(201,169,110,.06)}
+.batch-row .animal-label{font-family:'Oswald',sans-serif;font-size:12px;color:var(--cream)}
+.batch-row .prev-weight{font-size:11px;color:var(--muted)}
+.batch-input{padding:8px 10px;background:rgba(28,15,6,.6);border:1px solid rgba(201,169,110,.2);border-radius:4px;color:var(--cream);font-family:'Source Serif 4',serif;font-size:14px;width:100%}
+.batch-input:focus{outline:none;border-color:var(--gold)}
+
+/* Responsive */
+@media(max-width:768px){
+  .container{padding:16px 16px 60px}
+  .site-header{padding:0 16px}
+  .stats-bar{grid-template-columns:repeat(3,1fr)}
+  .field-row,.field-row-3{grid-template-columns:1fr}
+  .profile-hero{flex-direction:column}
+  .profile-photo{width:100%;height:200px}
+  .animal-table{font-size:12px}
+  .search-box{width:100%}
+  .list-toolbar{flex-direction:column;align-items:stretch}
+  .batch-row{grid-template-columns:1fr 80px 100px}
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <a href="/" class="logo">Herd <span>Hub</span></a>
+  <a href="/" class="back-link">&larr; Back to Marketplace</a>
+</header>
+
+<!-- Auth Gate -->
+<div id="auth-gate" class="auth-gate" style="display:none">
+  <h1>Herd <em>Manager</em></h1>
+  <p>Sign in to access your Herd Manager — track animals, weights, health records, breeding, and calving all in one place.</p>
+  <a href="/">Sign In on Herd Hub</a>
+</div>
+
+<!-- App -->
+<div id="app" style="display:none">
+<div class="container">
+
+<!-- ═══ DASHBOARD ═══ -->
+<div class="view active" id="view-dashboard">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px">
+    <h2 style="font-family:'Playfair Display',serif;font-size:28px;font-weight:900">Herd <span style="color:var(--gold)">Manager</span></h2>
+    <div class="quick-actions" style="margin:0">
+      <button class="btn btn-primary" onclick="showAddAnimal()">+ Add Animal</button>
+      <button class="btn btn-ghost" onclick="showQuickWeight()">Record Weight</button>
+      <button class="btn btn-ghost" onclick="showQuickHealth()">Log Health Event</button>
+    </div>
+  </div>
+
+  <div class="stats-bar" id="stats-bar"></div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+    <div class="card">
+      <div class="card-title">Alerts</div>
+      <div id="alerts-panel"><span style="color:var(--muted);font-size:13px">Loading...</span></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Recent Activity</div>
+      <div id="activity-panel"><span style="color:var(--muted);font-size:13px">Loading...</span></div>
+    </div>
+  </div>
+
+  <div style="margin-top:16px">
+    <button class="btn btn-ghost" onclick="showView('list')">View Full Herd List &rarr;</button>
+  </div>
+</div>
+
+<!-- ═══ HERD LIST ═══ -->
+<div class="view" id="view-list">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px">
+    <h2 style="font-family:'Playfair Display',serif;font-size:24px;font-weight:900;cursor:pointer" onclick="showView('dashboard')">&larr; <span style="color:var(--gold)">Herd</span> List</h2>
+    <button class="btn btn-primary" onclick="showAddAnimal()">+ Add Animal</button>
+  </div>
+
+  <div class="list-toolbar">
+    <input type="text" class="search-box" id="search-input" placeholder="Search by name or tag..." oninput="renderList()">
+    <div class="filter-group">
+      <select class="filter-select" id="filter-sex" onchange="renderList()">
+        <option value="">All Sex</option>
+        <option value="cow">Cows</option>
+        <option value="bull">Bulls</option>
+        <option value="heifer">Heifers</option>
+        <option value="steer">Steers</option>
+        <option value="calf">Calves</option>
+      </select>
+      <select class="filter-select" id="filter-status" onchange="renderList()">
+        <option value="active">Active</option>
+        <option value="">All Status</option>
+        <option value="sold">Sold</option>
+        <option value="deceased">Deceased</option>
+        <option value="culled">Culled</option>
+      </select>
+      <select class="filter-select" id="sort-by" onchange="renderList()">
+        <option value="tag">Sort: Tag</option>
+        <option value="name">Sort: Name</option>
+        <option value="breed">Sort: Breed</option>
+        <option value="birth">Sort: Birth Date</option>
+        <option value="weight">Sort: Last Weight</option>
+      </select>
+    </div>
+  </div>
+
+  <div style="overflow-x:auto">
+    <table class="animal-table" id="herd-table">
+      <thead>
+        <tr>
+          <th></th><th>Tag / Name</th><th>Breed</th><th>Sex</th><th>Age</th><th>Last Weight</th><th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="herd-tbody"></tbody>
+    </table>
+  </div>
+  <div id="herd-empty" style="display:none;text-align:center;padding:60px 20px;color:var(--muted)">
+    <p style="font-size:16px;margin-bottom:16px">No animals in your herd yet.</p>
+    <button class="btn btn-primary" onclick="showAddAnimal()">+ Add Your First Animal</button>
+  </div>
+</div>
+
+<!-- ═══ ANIMAL PROFILE ═══ -->
+<div class="view" id="view-profile">
+  <div style="margin-bottom:16px">
+    <button class="btn btn-ghost btn-sm" onclick="showView('list')">&larr; Back to Herd</button>
+  </div>
+  <div id="profile-content"></div>
+</div>
+
+</div><!-- /container -->
+</div><!-- /app -->
+
+<!-- ═══ ADD/EDIT MODAL ═══ -->
+<div class="modal-overlay" id="animal-modal">
+  <div class="modal-box" style="max-width:640px">
+    <button class="modal-close" onclick="closeModal('animal-modal')">&times;</button>
+    <h3 id="animal-modal-title">Add Animal</h3>
+    <form id="animal-form" onsubmit="saveAnimal(event)">
+      <input type="hidden" id="af-id">
+      <div class="field-row">
+        <div class="field"><label>Tag ID</label><input type="text" id="af-tag" placeholder="e.g. 442T"></div>
+        <div class="field"><label>Name</label><input type="text" id="af-name" placeholder="e.g. Daisy"></div>
+      </div>
+      <div class="field-row-3">
+        <div class="field"><label>Sex</label>
+          <select id="af-sex"><option value="">Select...</option><option value="cow">Cow</option><option value="bull">Bull</option><option value="heifer">Heifer</option><option value="steer">Steer</option><option value="calf">Calf</option></select>
+        </div>
+        <div class="field"><label>Breed</label><input type="text" id="af-breed" placeholder="e.g. Angus"></div>
+        <div class="field"><label>Color/Markings</label><input type="text" id="af-color" placeholder="e.g. Black"></div>
+      </div>
+      <div class="field-row-3">
+        <div class="field"><label>Birth Date</label><input type="date" id="af-birth"></div>
+        <div class="field"><label>Birth Weight (lbs)</label><input type="number" id="af-bw" step="0.1"></div>
+        <div class="field"><label>Status</label>
+          <select id="af-status"><option value="active">Active</option><option value="sold">Sold</option><option value="deceased">Deceased</option><option value="culled">Culled</option></select>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Sire Name</label><input type="text" id="af-sire" placeholder="Sire tag or name"></div>
+        <div class="field"><label>Dam Name</label><input type="text" id="af-dam" placeholder="Dam tag or name"></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Purchase Date</label><input type="date" id="af-pdate"></div>
+        <div class="field"><label>Purchase Price ($)</label><input type="number" id="af-pprice" step="0.01"></div>
+      </div>
+      <div class="field"><label>Notes</label><textarea id="af-notes" rows="2"></textarea></div>
+      <div class="field"><label>Photo</label><input type="file" id="af-photo" accept="image/*" style="padding:8px"></div>
+      <div style="display:flex;gap:10px;margin-top:16px">
+        <button type="submit" class="btn btn-primary">Save Animal</button>
+        <button type="button" class="btn btn-ghost" onclick="closeModal('animal-modal')">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ═══ QUICK WEIGHT MODAL ═══ -->
+<div class="modal-overlay" id="weight-modal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('weight-modal')">&times;</button>
+    <h3>Record Weights</h3>
+    <div class="field"><label>Weigh Date</label><input type="date" id="wm-date"></div>
+    <div id="weight-batch"></div>
+    <div style="margin-top:16px"><button class="btn btn-primary" onclick="saveBatchWeights()">Save Weights</button></div>
+  </div>
+</div>
+
+<!-- ═══ QUICK HEALTH MODAL ═══ -->
+<div class="modal-overlay" id="health-modal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('health-modal')">&times;</button>
+    <h3>Log Health Event</h3>
+    <div class="field"><label>Animal</label><select id="hm-animal"></select></div>
+    <div class="field"><label>Event Type</label>
+      <select id="hm-type"><option value="vaccination">Vaccination</option><option value="treatment">Treatment</option><option value="deworming">Deworming</option><option value="preg_check">Preg Check</option><option value="vet_visit">Vet Visit</option><option value="surgery">Surgery</option><option value="other">Other</option></select>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Date</label><input type="date" id="hm-date"></div>
+      <div class="field"><label>Product</label><input type="text" id="hm-product" placeholder="e.g. Ivermectin"></div>
+    </div>
+    <div class="field-row-3">
+      <div class="field"><label>Dosage</label><input type="text" id="hm-dosage" placeholder="e.g. 10ml"></div>
+      <div class="field"><label>Withdrawal (days)</label><input type="number" id="hm-withdrawal"></div>
+      <div class="field"><label>Cost ($)</label><input type="number" id="hm-cost" step="0.01"></div>
+    </div>
+    <div class="field"><label>Administered By</label><input type="text" id="hm-admin"></div>
+    <div class="field"><label>Notes</label><textarea id="hm-notes" rows="2"></textarea></div>
+    <div style="margin-top:16px"><button class="btn btn-primary" onclick="saveHealthEvent()">Save</button></div>
+  </div>
+</div>
+
+<script>
+// ── Auth ──────────────────────────────────────────────────────────────────────
+let authToken = null;
+let herdData = [];
+
+async function initAuth() {
+  try {
+    const r = await fetch('/api/auth/refresh', { credentials: 'include' });
+    if (r.ok) { const d = await r.json(); if (d.token) authToken = d.token; }
+  } catch {}
+  if (authToken) {
+    document.getElementById('app').style.display = '';
+    document.getElementById('auth-gate').style.display = 'none';
+    await loadDashboard();
+  } else {
+    document.getElementById('auth-gate').style.display = '';
+    document.getElementById('app').style.display = 'none';
+  }
+}
+
+async function api(method, url, body) {
+  const opts = { method, headers: { Authorization: 'Bearer ' + authToken } };
+  if (body instanceof FormData) { opts.body = body; }
+  else if (body) { opts.headers['Content-Type'] = 'application/json'; opts.body = JSON.stringify(body); }
+  const r = await fetch(url, opts);
+  if (!r.ok) { const e = await r.json().catch(()=>({})); throw new Error(e.error || 'Error ' + r.status); }
+  return r.json();
+}
+
+// ── Views ────────────────────────────────────────────────────────────────────
+function showView(id) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-' + id).classList.add('active');
+  if (id === 'list') loadHerd();
+  if (id === 'dashboard') loadDashboard();
+}
+
+// ── Dashboard ────────────────────────────────────────────────────────────────
+async function loadDashboard() {
+  try {
+    const stats = await api('GET', '/api/herd/stats/overview');
+    const c = stats.counts;
+    document.getElementById('stats-bar').innerHTML =
+      statCard(c.total, 'Total Head') + statCard(c.cows, 'Cows') + statCard(c.bulls, 'Bulls') +
+      statCard(c.heifers, 'Heifers') + statCard(c.steers_calves, 'Steers/Calves') +
+      statCard(stats.avg_weight ? stats.avg_weight + ' lbs' : '—', 'Avg Weight');
+
+    // Alerts
+    let alerts = '';
+    stats.withdrawals.forEach(w => {
+      alerts += '<div class="alert-item danger" onclick="openProfile(' + w.animal_id + ')">&#x26A0; <strong>' + esc(w.tag_id||w.name) + '</strong> — ' + esc(w.product) + ' withdrawal until ' + fmtDate(w.withdrawal_clear_date) + '</div>';
+    });
+    stats.upcoming_calvings.forEach(c => {
+      const due = new Date(new Date(c.event_date).getTime() + 283*86400000);
+      alerts += '<div class="alert-item warn" onclick="openProfile(' + c.animal_id + ')">&#x1F404; <strong>' + esc(c.tag_id||c.name) + '</strong> — due to calve ~' + fmtDate(due) + '</div>';
+    });
+    stats.stale_weights.forEach(s => {
+      alerts += '<div class="alert-item info" onclick="openProfile(' + s.animal_id + ')">&#x2696; <strong>' + esc(s.tag_id||s.name) + '</strong> — last weighed ' + fmtDate(s.last_weighed) + '</div>';
+    });
+    if (!alerts) alerts = '<span style="color:var(--muted);font-size:13px">No alerts right now.</span>';
+    document.getElementById('alerts-panel').innerHTML = alerts;
+
+    // Activity
+    let act = '';
+    stats.recent_activity.forEach(a => {
+      act += '<div class="activity-item"><div class="activity-dot ' + a.type + '"></div><span style="color:var(--cream);font-weight:600">' + esc(a.tag_id||a.name||'?') + '</span><span style="color:var(--muted)">' + esc(a.detail) + '</span><span style="color:var(--muted);font-size:11px;margin-left:auto">' + fmtDate(a.event_date) + '</span></div>';
+    });
+    if (!act) act = '<span style="color:var(--muted);font-size:13px">No recent activity.</span>';
+    document.getElementById('activity-panel').innerHTML = act;
+  } catch (err) {
+    document.getElementById('stats-bar').innerHTML = '<div class="card" style="grid-column:1/-1;text-align:center;color:var(--muted)">Failed to load stats</div>';
+  }
+}
+
+function statCard(num, lbl) {
+  return '<div class="stat-card"><div class="num">' + num + '</div><div class="lbl">' + lbl + '</div></div>';
+}
+
+// ── Herd List ────────────────────────────────────────────────────────────────
+async function loadHerd() {
+  try {
+    herdData = await api('GET', '/api/herd');
+    renderList();
+  } catch (err) {
+    document.getElementById('herd-tbody').innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--muted)">Failed to load</td></tr>';
+  }
+}
+
+function renderList() {
+  const search = document.getElementById('search-input').value.toLowerCase();
+  const sexF = document.getElementById('filter-sex').value;
+  const statusF = document.getElementById('filter-status').value;
+  const sortBy = document.getElementById('sort-by').value;
+
+  let list = herdData.filter(a => {
+    if (sexF && a.sex !== sexF) return false;
+    if (statusF && a.status !== statusF) return false;
+    if (search && !(a.tag_id||'').toLowerCase().includes(search) && !(a.name||'').toLowerCase().includes(search)) return false;
+    return true;
+  });
+
+  list.sort((a, b) => {
+    if (sortBy === 'tag') return (a.tag_id||'').localeCompare(b.tag_id||'');
+    if (sortBy === 'name') return (a.name||'').localeCompare(b.name||'');
+    if (sortBy === 'breed') return (a.breed||'').localeCompare(b.breed||'');
+    if (sortBy === 'birth') return (a.birth_date||'').localeCompare(b.birth_date||'');
+    if (sortBy === 'weight') return (parseFloat(b.last_weight)||0) - (parseFloat(a.last_weight)||0);
+    return 0;
+  });
+
+  const tbody = document.getElementById('herd-tbody');
+  const empty = document.getElementById('herd-empty');
+
+  if (!list.length && !herdData.length) { empty.style.display=''; tbody.parentElement.style.display='none'; return; }
+  empty.style.display='none'; tbody.parentElement.style.display='';
+
+  tbody.innerHTML = list.map(a => {
+    const age = a.birth_date ? calcAge(a.birth_date) : '—';
+    const cls = 'status-' + (a.status||'active');
+    const img = a.photo_url ? '<img class="animal-thumb" src="' + esc(a.photo_url) + '" alt="">' : '<div class="animal-thumb" style="display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:16px">&#x1F404;</div>';
+    return '<tr onclick="openProfile(' + a.id + ')">' +
+      '<td>' + img + '</td>' +
+      '<td><strong style="color:var(--cream)">' + esc(a.tag_id||'') + '</strong>' + (a.name ? ' <span style="color:var(--muted)">' + esc(a.name) + '</span>' : '') + '</td>' +
+      '<td>' + esc(a.breed||'—') + '</td>' +
+      '<td style="text-transform:capitalize">' + esc(a.sex||'—') + '</td>' +
+      '<td>' + age + '</td>' +
+      '<td>' + (a.last_weight ? parseFloat(a.last_weight).toLocaleString() + ' lbs' : '—') + '</td>' +
+      '<td><span class="status-badge ' + cls + '">' + esc(a.status||'active') + '</span></td>' +
+      '</tr>';
+  }).join('');
+}
+
+function calcAge(bd) {
+  const b = new Date(bd);
+  const now = new Date();
+  const months = (now.getFullYear() - b.getFullYear()) * 12 + (now.getMonth() - b.getMonth());
+  if (months < 1) return '<1mo';
+  if (months < 12) return months + 'mo';
+  const y = Math.floor(months / 12);
+  const m = months % 12;
+  return y + 'yr' + (m ? ' ' + m + 'mo' : '');
+}
+
+// ── Animal Profile ───────────────────────────────────────────────────────────
+async function openProfile(id) {
+  showView('profile');
+  const el = document.getElementById('profile-content');
+  el.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted)">Loading...</div>';
+
+  try {
+    const a = await api('GET', '/api/herd/' + id);
+    const age = a.birth_date ? calcAge(a.birth_date) : '—';
+    const lastW = a.weights.length ? parseFloat(a.weights[0].weight).toLocaleString() + ' lbs' : '—';
+    const photoSrc = a.photo_url || '';
+    const photoEl = photoSrc ? '<img class="profile-photo" src="' + esc(photoSrc) + '" alt="">' : '<div class="profile-photo" style="display:flex;align-items:center;justify-content:center;font-size:64px;color:var(--muted)">&#x1F404;</div>';
+
+    let html = '<div class="profile-hero">' + photoEl + '<div class="profile-info">' +
+      '<h2>' + esc(a.name || a.tag_id || 'Unnamed') + '</h2>' +
+      '<div class="tag">' + (a.tag_id ? 'Tag: ' + esc(a.tag_id) : '') + (a.breed ? ' &middot; ' + esc(a.breed) : '') + (a.sex ? ' &middot; ' + esc(a.sex) : '') + '</div>' +
+      '<div class="profile-stats">' +
+        '<div class="profile-stat"><div class="val">' + age + '</div><div class="lbl">Age</div></div>' +
+        '<div class="profile-stat"><div class="val">' + lastW + '</div><div class="lbl">Last Weight</div></div>' +
+        '<div class="profile-stat"><div class="val">' + esc(a.status||'active') + '</div><div class="lbl">Status</div></div>' +
+        (a.weights.length >= 2 ? '<div class="profile-stat"><div class="val">' + calcADG(a.weights) + '</div><div class="lbl">ADG (lbs/day)</div></div>' : '') +
+      '</div>' +
+      '<div class="profile-actions">' +
+        '<button class="btn btn-ghost btn-sm" onclick="showAddAnimal(' + a.id + ')">Edit</button>' +
+        '<button class="btn btn-ghost btn-sm" onclick="showSingleWeight(' + a.id + ')">+ Weight</button>' +
+        '<button class="btn btn-ghost btn-sm" onclick="showSingleHealth(' + a.id + ')">+ Health</button>' +
+        '<button class="btn btn-ghost btn-sm" onclick="showSingleProduction(' + a.id + ')">+ Production</button>' +
+        '<button class="btn btn-danger btn-sm" onclick="deleteAnimal(' + a.id + ')">Delete</button>' +
+      '</div></div></div>';
+
+    // Tabs
+    html += '<div class="tab-bar">' +
+      '<button class="tab-btn active" onclick="switchTab(this,\'t-overview\')">Overview</button>' +
+      '<button class="tab-btn" onclick="switchTab(this,\'t-weights\')">Weights</button>' +
+      '<button class="tab-btn" onclick="switchTab(this,\'t-health\')">Health</button>' +
+      '<button class="tab-btn" onclick="switchTab(this,\'t-production\')">Production</button>' +
+      '<button class="tab-btn" onclick="switchTab(this,\'t-progeny\')">Progeny</button>' +
+      '</div>';
+
+    // Overview tab
+    html += '<div class="tab-content active" id="t-overview"><div class="card">';
+    const details = [
+      ['Birth Date', a.birth_date ? fmtDate(a.birth_date) : '—'],
+      ['Birth Weight', a.birth_weight ? a.birth_weight + ' lbs' : '—'],
+      ['Color', a.color || '—'],
+      ['Sire', a.sire_name || '—'],
+      ['Dam', a.dam_name || '—'],
+      ['Purchase Date', a.purchase_date ? fmtDate(a.purchase_date) : '—'],
+      ['Purchase Price', a.purchase_price ? '$' + parseFloat(a.purchase_price).toLocaleString() : '—'],
+    ];
+    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">';
+    details.forEach(([l,v]) => {
+      html += '<div style="padding:8px 0;border-bottom:1px solid rgba(201,169,110,.06)"><span style="font-family:Oswald,sans-serif;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)">' + l + '</span><div style="color:var(--cream);margin-top:2px">' + esc(v) + '</div></div>';
+    });
+    html += '</div>';
+    if (a.notes) html += '<div style="margin-top:16px;padding:12px;background:rgba(28,15,6,.4);border-radius:4px;font-size:13px;color:var(--tan)">' + esc(a.notes) + '</div>';
+    html += '</div></div>';
+
+    // Weights tab
+    html += '<div class="tab-content" id="t-weights">';
+    if (a.weights.length) {
+      html += renderWeightChart(a.weights);
+      html += '<div class="card"><div class="card-title">Weight History</div><table class="animal-table"><thead><tr><th>Date</th><th>Weight</th><th>Gain</th><th>ADG</th><th>Notes</th></tr></thead><tbody>';
+      for (let i = 0; i < a.weights.length; i++) {
+        const w = a.weights[i];
+        const prev = a.weights[i+1];
+        let gain = '—', adg = '—';
+        if (prev) {
+          const g = parseFloat(w.weight) - parseFloat(prev.weight);
+          gain = (g >= 0 ? '+' : '') + g.toFixed(1) + ' lbs';
+          const days = daysBetween(new Date(prev.weigh_date), new Date(w.weigh_date));
+          if (days > 0) adg = (g / days).toFixed(2) + ' lbs/d';
+        }
+        html += '<tr><td>' + fmtDate(w.weigh_date) + '</td><td style="font-weight:600;color:var(--cream)">' + parseFloat(w.weight).toLocaleString() + ' lbs</td><td>' + gain + '</td><td>' + adg + '</td><td style="color:var(--muted)">' + esc(w.notes||'') + '</td></tr>';
+      }
+      html += '</tbody></table></div>';
+    } else { html += '<div class="card" style="text-align:center;color:var(--muted);padding:40px">No weight records yet.<br><button class="btn btn-ghost btn-sm" style="margin-top:12px" onclick="showSingleWeight(' + a.id + ')">+ Record Weight</button></div>'; }
+    html += '</div>';
+
+    // Health tab
+    html += '<div class="tab-content" id="t-health">';
+    if (a.health.length) {
+      html += '<div class="card"><div class="card-title">Health Timeline</div>';
+      const today = new Date(); today.setHours(0,0,0,0);
+      a.health.forEach(h => {
+        const isActive = h.withdrawal_clear_date && new Date(h.withdrawal_clear_date) >= today;
+        html += '<div class="timeline-item' + (isActive ? ' withdrawal-active' : '') + '">';
+        html += '<div class="timeline-date">' + fmtDate(h.event_date) + '</div>';
+        html += '<div class="timeline-title">' + esc(h.event_type||'Event') + (isActive ? '<span class="withdrawal-badge">Withdrawal until ' + fmtDate(h.withdrawal_clear_date) + '</span>' : '') + '</div>';
+        const parts = [];
+        if (h.product) parts.push(esc(h.product));
+        if (h.dosage) parts.push(esc(h.dosage));
+        if (h.administered_by) parts.push('by ' + esc(h.administered_by));
+        if (h.cost) parts.push('$' + parseFloat(h.cost).toFixed(2));
+        if (h.notes) parts.push(esc(h.notes));
+        html += '<div class="timeline-detail">' + parts.join(' &middot; ') + '</div></div>';
+      });
+      html += '</div>';
+    } else { html += '<div class="card" style="text-align:center;color:var(--muted);padding:40px">No health records yet.<br><button class="btn btn-ghost btn-sm" style="margin-top:12px" onclick="showSingleHealth(' + a.id + ')">+ Log Health Event</button></div>'; }
+    html += '</div>';
+
+    // Production tab
+    html += '<div class="tab-content" id="t-production">';
+    if (a.production.length) {
+      html += '<div class="card"><div class="card-title">Production History</div>';
+      a.production.forEach(p => {
+        html += '<div class="timeline-item">';
+        html += '<div class="timeline-date">' + fmtDate(p.event_date) + '</div>';
+        html += '<div class="timeline-title" style="text-transform:capitalize">' + esc(p.event_type||'Event') + '</div>';
+        const parts = [];
+        if (p.bull_name) parts.push('Bull: ' + esc(p.bull_name));
+        if (p.calving_ease) parts.push('CE: ' + p.calving_ease);
+        if (p.notes) parts.push(esc(p.notes));
+        html += '<div class="timeline-detail">' + parts.join(' &middot; ') + '</div></div>';
+      });
+      html += '</div>';
+    } else { html += '<div class="card" style="text-align:center;color:var(--muted);padding:40px">No production records yet.<br><button class="btn btn-ghost btn-sm" style="margin-top:12px" onclick="showSingleProduction(' + a.id + ')">+ Add Production Event</button></div>'; }
+    html += '</div>';
+
+    // Progeny tab
+    html += '<div class="tab-content" id="t-progeny">';
+    if (a.progeny.length) {
+      html += '<div class="card"><div class="card-title">Progeny (' + a.progeny.length + ')</div><table class="animal-table"><thead><tr><th>Tag / Name</th><th>Sex</th><th>Breed</th><th>Born</th><th>Status</th></tr></thead><tbody>';
+      a.progeny.forEach(p => {
+        html += '<tr onclick="openProfile(' + p.id + ')" style="cursor:pointer"><td style="font-weight:600;color:var(--cream)">' + esc(p.tag_id||'') + ' ' + esc(p.name||'') + '</td><td style="text-transform:capitalize">' + esc(p.sex||'—') + '</td><td>' + esc(p.breed||'—') + '</td><td>' + (p.birth_date?fmtDate(p.birth_date):'—') + '</td><td><span class="status-badge status-' + (p.status||'active') + '">' + esc(p.status||'active') + '</span></td></tr>';
+      });
+      html += '</tbody></table></div>';
+    } else { html += '<div class="card" style="text-align:center;color:var(--muted);padding:40px">No progeny records linked.</div>'; }
+    html += '</div>';
+
+    el.innerHTML = html;
+  } catch (err) {
+    el.innerHTML = '<div class="card" style="text-align:center;color:var(--danger)">Failed to load animal: ' + esc(err.message) + '</div>';
+  }
+}
+
+function switchTab(btn, tabId) {
+  btn.closest('.view').querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  btn.closest('.view').querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.getElementById(tabId).classList.add('active');
+}
+
+function calcADG(weights) {
+  if (weights.length < 2) return '—';
+  const newest = weights[0], oldest = weights[weights.length - 1];
+  const days = daysBetween(new Date(oldest.weigh_date), new Date(newest.weigh_date));
+  if (days <= 0) return '—';
+  return ((parseFloat(newest.weight) - parseFloat(oldest.weight)) / days).toFixed(2);
+}
+
+function renderWeightChart(weights) {
+  const sorted = [...weights].reverse();
+  if (sorted.length < 2) return '';
+  const vals = sorted.map(w => parseFloat(w.weight));
+  const min = Math.min(...vals) * 0.9;
+  const max = Math.max(...vals);
+  const range = max - min || 1;
+  let html = '<div class="weight-chart"><div class="chart-bar-wrap">';
+  sorted.forEach(w => {
+    const v = parseFloat(w.weight);
+    const pct = ((v - min) / range) * 100;
+    html += '<div class="chart-bar" style="height:' + Math.max(5, pct) + '%"><div class="tip">' + v + ' lbs</div></div>';
+  });
+  html += '</div><div style="display:flex;justify-content:space-between;padding:0 10px"><span class="chart-label">' + fmtDateShort(sorted[0].weigh_date) + '</span><span class="chart-label">' + fmtDateShort(sorted[sorted.length-1].weigh_date) + '</span></div></div>';
+  return html;
+}
+
+// ── Add/Edit Animal ──────────────────────────────────────────────────────────
+async function showAddAnimal(editId) {
+  document.getElementById('animal-modal-title').textContent = editId ? 'Edit Animal' : 'Add Animal';
+  const form = document.getElementById('animal-form');
+  form.reset();
+  document.getElementById('af-id').value = editId || '';
+
+  if (editId) {
+    try {
+      const a = await api('GET', '/api/herd/' + editId);
+      document.getElementById('af-tag').value = a.tag_id || '';
+      document.getElementById('af-name').value = a.name || '';
+      document.getElementById('af-sex').value = a.sex || '';
+      document.getElementById('af-breed').value = a.breed || '';
+      document.getElementById('af-color').value = a.color || '';
+      document.getElementById('af-birth').value = a.birth_date ? a.birth_date.slice(0,10) : '';
+      document.getElementById('af-bw').value = a.birth_weight || '';
+      document.getElementById('af-status').value = a.status || 'active';
+      document.getElementById('af-sire').value = a.sire_name || '';
+      document.getElementById('af-dam').value = a.dam_name || '';
+      document.getElementById('af-pdate').value = a.purchase_date ? a.purchase_date.slice(0,10) : '';
+      document.getElementById('af-pprice').value = a.purchase_price || '';
+      document.getElementById('af-notes').value = a.notes || '';
+    } catch {}
+  }
+  openModal('animal-modal');
+}
+
+async function saveAnimal(e) {
+  e.preventDefault();
+  const id = document.getElementById('af-id').value;
+  const fd = new FormData();
+  fd.append('tag_id', document.getElementById('af-tag').value);
+  fd.append('name', document.getElementById('af-name').value);
+  fd.append('sex', document.getElementById('af-sex').value);
+  fd.append('breed', document.getElementById('af-breed').value);
+  fd.append('color', document.getElementById('af-color').value);
+  fd.append('birth_date', document.getElementById('af-birth').value);
+  fd.append('birth_weight', document.getElementById('af-bw').value);
+  fd.append('status', document.getElementById('af-status').value);
+  fd.append('sire_name', document.getElementById('af-sire').value);
+  fd.append('dam_name', document.getElementById('af-dam').value);
+  fd.append('purchase_date', document.getElementById('af-pdate').value);
+  fd.append('purchase_price', document.getElementById('af-pprice').value);
+  fd.append('notes', document.getElementById('af-notes').value);
+  const photo = document.getElementById('af-photo').files[0];
+  if (photo) fd.append('photo', photo);
+
+  try {
+    if (id) await api('PUT', '/api/herd/' + id, fd);
+    else await api('POST', '/api/herd', fd);
+    closeModal('animal-modal');
+    if (id) openProfile(parseInt(id));
+    else { showView('list'); }
+  } catch (err) { alert('Failed to save: ' + err.message); }
+}
+
+async function deleteAnimal(id) {
+  if (!confirm('Delete this animal and all its records? This cannot be undone.')) return;
+  try {
+    await api('DELETE', '/api/herd/' + id);
+    showView('list');
+  } catch (err) { alert('Failed: ' + err.message); }
+}
+
+// ── Quick Weight ─────────────────────────────────────────────────────────────
+async function showQuickWeight() {
+  document.getElementById('wm-date').value = todayStr();
+  if (!herdData.length) await loadHerd();
+  const active = herdData.filter(a => a.status === 'active');
+  let html = '';
+  active.forEach(a => {
+    const prev = a.last_weight ? parseFloat(a.last_weight).toLocaleString() + ' lbs' : 'no prior';
+    html += '<div class="batch-row"><div><div class="animal-label">' + esc(a.tag_id||a.name||'#'+a.id) + '</div><div class="prev-weight">Prev: ' + prev + '</div></div>' +
+      '<input type="number" class="batch-input" data-id="' + a.id + '" step="0.1" placeholder="lbs">' +
+      '<div style="font-size:11px;color:var(--muted)" id="gain-' + a.id + '"></div></div>';
+  });
+  if (!active.length) html = '<p style="color:var(--muted)">No active animals. Add animals first.</p>';
+  document.getElementById('weight-batch').innerHTML = html;
+  openModal('weight-modal');
+}
+
+function showSingleWeight(animalId) {
+  document.getElementById('wm-date').value = todayStr();
+  const a = herdData.find(x => x.id === animalId) || {};
+  const prev = a.last_weight ? parseFloat(a.last_weight).toLocaleString() + ' lbs' : 'no prior';
+  document.getElementById('weight-batch').innerHTML = '<div class="batch-row"><div><div class="animal-label">' + esc(a.tag_id||a.name||'#'+animalId) + '</div><div class="prev-weight">Prev: ' + prev + '</div></div><input type="number" class="batch-input" data-id="' + animalId + '" step="0.1" placeholder="lbs"><div></div></div>';
+  openModal('weight-modal');
+}
+
+async function saveBatchWeights() {
+  const date = document.getElementById('wm-date').value;
+  if (!date) { alert('Please enter a date.'); return; }
+  const inputs = document.querySelectorAll('#weight-batch .batch-input');
+  let saved = 0;
+  for (const inp of inputs) {
+    const w = parseFloat(inp.value);
+    if (!w || w <= 0) continue;
+    try {
+      await api('POST', '/api/herd/' + inp.dataset.id + '/weights', { weight: w, weigh_date: date });
+      saved++;
+    } catch {}
+  }
+  closeModal('weight-modal');
+  if (saved) { alert(saved + ' weight(s) saved.'); loadDashboard(); await loadHerd(); }
+}
+
+// ── Quick Health ─────────────────────────────────────────────────────────────
+async function showQuickHealth() {
+  document.getElementById('hm-date').value = todayStr();
+  if (!herdData.length) await loadHerd();
+  const sel = document.getElementById('hm-animal');
+  sel.innerHTML = herdData.filter(a => a.status==='active').map(a => '<option value="' + a.id + '">' + esc(a.tag_id||a.name||'#'+a.id) + '</option>').join('');
+  openModal('health-modal');
+}
+
+function showSingleHealth(animalId) {
+  document.getElementById('hm-date').value = todayStr();
+  const a = herdData.find(x => x.id === animalId) || {};
+  document.getElementById('hm-animal').innerHTML = '<option value="' + animalId + '">' + esc(a.tag_id||a.name||'#'+animalId) + '</option>';
+  openModal('health-modal');
+}
+
+async function saveHealthEvent() {
+  const animalId = document.getElementById('hm-animal').value;
+  try {
+    await api('POST', '/api/herd/' + animalId + '/health', {
+      event_type: document.getElementById('hm-type').value,
+      event_date: document.getElementById('hm-date').value,
+      product: document.getElementById('hm-product').value,
+      dosage: document.getElementById('hm-dosage').value,
+      withdrawal_days: document.getElementById('hm-withdrawal').value,
+      cost: document.getElementById('hm-cost').value,
+      administered_by: document.getElementById('hm-admin').value,
+      notes: document.getElementById('hm-notes').value
+    });
+    closeModal('health-modal');
+    loadDashboard();
+  } catch (err) { alert('Failed: ' + err.message); }
+}
+
+// ── Production ───────────────────────────────────────────────────────────────
+function showSingleProduction(animalId) {
+  const html = '<div class="modal-box"><button class="modal-close" onclick="closeModal(\'prod-modal\')">&times;</button><h3>Add Production Event</h3>' +
+    '<div class="field"><label>Event Type</label><select id="pm-type"><option value="breeding">Breeding</option><option value="calving">Calving</option><option value="preg_check">Preg Check</option><option value="weaning">Weaning</option></select></div>' +
+    '<div class="field"><label>Date</label><input type="date" id="pm-date" value="' + todayStr() + '"></div>' +
+    '<div class="field"><label>Bull Name</label><input type="text" id="pm-bull"></div>' +
+    '<div class="field"><label>Calving Ease (1-5)</label><input type="number" id="pm-ce" min="1" max="5"></div>' +
+    '<div class="field"><label>Notes</label><textarea id="pm-notes" rows="2"></textarea></div>' +
+    '<div style="margin-top:16px"><button class="btn btn-primary" onclick="saveProduction(' + animalId + ')">Save</button></div></div>';
+  let overlay = document.getElementById('prod-modal');
+  if (!overlay) { overlay = document.createElement('div'); overlay.id = 'prod-modal'; overlay.className = 'modal-overlay'; document.body.appendChild(overlay); overlay.addEventListener('click', e => { if (e.target === overlay) closeModal('prod-modal'); }); }
+  overlay.innerHTML = html;
+  overlay.classList.add('open');
+}
+
+async function saveProduction(animalId) {
+  try {
+    await api('POST', '/api/herd/' + animalId + '/production', {
+      event_type: document.getElementById('pm-type').value,
+      event_date: document.getElementById('pm-date').value,
+      bull_name: document.getElementById('pm-bull').value,
+      calving_ease: document.getElementById('pm-ce').value,
+      notes: document.getElementById('pm-notes').value
+    });
+    closeModal('prod-modal');
+    openProfile(animalId);
+  } catch (err) { alert('Failed: ' + err.message); }
+}
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { const el = document.getElementById(id); if (el) el.classList.remove('open'); }
+function esc(s) { if (!s) return ''; const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+function fmtDate(d) { if (!d) return '—'; const dt = new Date(d); const m=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']; return m[dt.getMonth()] + ' ' + dt.getDate() + ', ' + dt.getFullYear(); }
+function fmtDateShort(d) { if (!d) return ''; const dt = new Date(d); return (dt.getMonth()+1) + '/' + dt.getDate(); }
+function todayStr() { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); }
+function daysBetween(a, b) { return Math.round((b - a) / 86400000); }
+
+// Modal close on overlay click
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); });
+});
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+async function loadHerd() {
+  try { herdData = await api('GET', '/api/herd'); } catch { herdData = []; }
+}
+document.addEventListener('DOMContentLoaded', initAuth);
+</script>
+</body>
+</html>

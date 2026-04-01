@@ -252,6 +252,7 @@ app.use('/api/reports',  limiter(30),  require('./routes/reports'));
 app.use('/api/searches', limiter(60),  require('./routes/searches'));
 app.use('/api/sellers',  limiter(60),  require('./routes/sellers'));
 app.use('/api/cattle',   limiter(100), require('./routes/cattle'));
+app.use('/api/herd',     limiter(200), require('./routes/herd'));
 
 // ── GET /api/settings (public — stats bar) ───────────
 app.get('/api/settings', async (req, res) => {
@@ -568,6 +569,72 @@ async function start() {
       )`);
       await query(`CREATE INDEX IF NOT EXISTS idx_calving_user ON calving_records(user_id)`);
       console.log('✅  Calving records table ready');
+
+      // Herd manager tables
+      await query(`CREATE TABLE IF NOT EXISTS animals (
+        id              BIGSERIAL      PRIMARY KEY,
+        user_id         BIGINT         NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        tag_id          VARCHAR(50),
+        name            VARCHAR(100),
+        species         VARCHAR(20)    DEFAULT 'cattle',
+        sex             VARCHAR(10),
+        breed           VARCHAR(50),
+        birth_date      DATE,
+        birth_weight    DECIMAL(6,2),
+        color           VARCHAR(50),
+        sire_id         BIGINT         REFERENCES animals(id) ON DELETE SET NULL,
+        dam_id          BIGINT         REFERENCES animals(id) ON DELETE SET NULL,
+        sire_name       VARCHAR(100),
+        dam_name        VARCHAR(100),
+        purchase_date   DATE,
+        purchase_price  DECIMAL(10,2),
+        status          VARCHAR(20)    DEFAULT 'active',
+        notes           TEXT,
+        photo_url       TEXT,
+        created_at      TIMESTAMPTZ    NOT NULL DEFAULT NOW()
+      )`);
+      await query(`CREATE INDEX IF NOT EXISTS idx_animals_user ON animals(user_id)`);
+
+      await query(`CREATE TABLE IF NOT EXISTS animal_weights (
+        id          BIGSERIAL    PRIMARY KEY,
+        animal_id   BIGINT       NOT NULL REFERENCES animals(id) ON DELETE CASCADE,
+        weight      DECIMAL(6,2) NOT NULL,
+        weigh_date  DATE         NOT NULL,
+        notes       TEXT,
+        created_at  TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+      )`);
+      await query(`CREATE INDEX IF NOT EXISTS idx_weights_animal ON animal_weights(animal_id)`);
+
+      await query(`CREATE TABLE IF NOT EXISTS animal_health (
+        id                    BIGSERIAL    PRIMARY KEY,
+        animal_id             BIGINT       NOT NULL REFERENCES animals(id) ON DELETE CASCADE,
+        event_type            VARCHAR(50),
+        event_date            DATE         NOT NULL,
+        product               VARCHAR(100),
+        dosage                VARCHAR(50),
+        withdrawal_days       INTEGER,
+        withdrawal_clear_date DATE,
+        administered_by       VARCHAR(100),
+        cost                  DECIMAL(8,2),
+        notes                 TEXT,
+        created_at            TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+      )`);
+      await query(`CREATE INDEX IF NOT EXISTS idx_health_animal ON animal_health(animal_id)`);
+
+      await query(`CREATE TABLE IF NOT EXISTS animal_production (
+        id            BIGSERIAL    PRIMARY KEY,
+        animal_id     BIGINT       NOT NULL REFERENCES animals(id) ON DELETE CASCADE,
+        event_type    VARCHAR(30),
+        event_date    DATE         NOT NULL,
+        bull_id       BIGINT       REFERENCES animals(id) ON DELETE SET NULL,
+        bull_name     VARCHAR(100),
+        calving_ease  INTEGER,
+        calf_id       BIGINT       REFERENCES animals(id) ON DELETE SET NULL,
+        notes         TEXT,
+        created_at    TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+      )`);
+      await query(`CREATE INDEX IF NOT EXISTS idx_production_animal ON animal_production(animal_id)`);
+      console.log('✅  Herd manager tables ready');
 
     } catch (migErr) {
       console.warn('⚠️  Migration warning:', migErr.message);
