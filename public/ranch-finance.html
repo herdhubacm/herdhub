@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ranch Financial Dashboard | Herd Hub</title>
+<meta name="description" content="Track ranch income, expenses, and profit. Break-even calculators, budget tracking, and tax year exports for cattle operations.">
+<meta name="theme-color" content="#2C1A0E">
+<link rel="icon" type="image/png" href="/logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Oswald:wght@300;400;500;600;700&family=Source+Serif+4:wght@300;400;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--dark:#1C0F06;--brown:#2C1A0E;--rust:#8B3214;--rust2:#A63D1A;--gold:#C9A96E;--gold2:#E8C87A;--cream:#F5EFE0;--tan:#C4A882;--muted:#8C7560;--light:#E8DCC8;--danger:#C0392B;--warn:#D4820A;--good:#2E7D4F;--sage:#6B7C5E}
+html{scroll-behavior:smooth}
+body{font-family:'Source Serif 4',serif;background:var(--dark);color:var(--cream);min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:0;opacity:.6}
+
+.site-header{background:var(--brown);border-bottom:2px solid var(--rust);padding:0 40px;display:flex;align-items:center;justify-content:space-between;height:64px;position:sticky;top:0;z-index:100}
+.logo{font-family:'Playfair Display',serif;font-size:22px;font-weight:900;color:var(--cream);text-decoration:none}.logo span{color:var(--gold)}
+.back-link{font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--tan);text-decoration:none;transition:color .2s}.back-link:hover{color:var(--gold)}
+
+.container{max-width:1100px;margin:0 auto;padding:24px 40px 80px;position:relative;z-index:1}
+
+.auth-gate{text-align:center;padding:120px 40px;position:relative;z-index:1}
+.auth-gate h1{font-family:'Playfair Display',serif;font-size:48px;font-weight:900;color:var(--cream);margin-bottom:12px}
+.auth-gate h1 em{font-style:italic;color:var(--gold)}
+.auth-gate p{font-size:16px;color:var(--muted);margin-bottom:32px}
+.auth-gate a{display:inline-block;font-family:'Oswald',sans-serif;font-size:14px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;background:var(--rust);color:white;padding:16px 40px;border-radius:4px;text-decoration:none}
+
+/* Section */
+.section{margin-bottom:40px}
+.section-eyebrow{font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--rust2);margin-bottom:6px}
+.section-title{font-family:'Playfair Display',serif;font-size:26px;font-weight:900;color:var(--cream);margin-bottom:6px}
+.section-desc{font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:20px}
+
+.card{background:rgba(44,26,14,.6);border:1px solid rgba(201,169,110,.12);border-radius:8px;padding:24px;margin-bottom:16px}
+.card-title{font-family:'Oswald',sans-serif;font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:16px}
+
+/* Stats */
+.stats-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.stat-card{background:rgba(44,26,14,.6);border:1px solid rgba(201,169,110,.12);border-radius:8px;padding:18px;text-align:center}
+.stat-card .num{font-family:'Playfair Display',serif;font-size:30px;font-weight:700;color:var(--gold)}
+.stat-card .num.profit{color:var(--good)}.stat-card .num.loss{color:var(--danger)}
+.stat-card .lbl{font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-top:4px}
+
+/* Buttons */
+.btn{font-family:'Oswald',sans-serif;font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:10px 20px;border-radius:4px;border:none;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:6px}
+.btn-primary{background:var(--rust);color:white}.btn-primary:hover{background:var(--rust2)}
+.btn-ghost{background:transparent;color:var(--tan);border:1px solid rgba(201,169,110,.3)}.btn-ghost:hover{border-color:var(--gold);color:var(--gold)}
+.btn-sm{padding:6px 12px;font-size:11px}
+.btn-danger{background:var(--danger);color:white}
+.btn-good{background:var(--good);color:white}
+
+/* Fields */
+.field{margin-bottom:14px}
+.field label{display:block;font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--tan);margin-bottom:5px}
+.field input,.field select,.field textarea{width:100%;padding:10px 12px;background:rgba(28,15,6,.6);border:1px solid rgba(201,169,110,.2);border-radius:4px;color:var(--cream);font-family:'Source Serif 4',serif;font-size:14px}
+.field input:focus,.field select:focus{outline:none;border-color:var(--gold)}
+.field select option{background:var(--brown);color:var(--cream)}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.field-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.field-row-4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px}
+
+/* Table */
+.tx-table{width:100%;border-collapse:collapse}
+.tx-table th{font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-align:left;padding:10px;border-bottom:1px solid rgba(201,169,110,.15);cursor:pointer}
+.tx-table td{padding:10px;font-size:13px;border-bottom:1px solid rgba(201,169,110,.06)}
+.tx-table tr.income td{background:rgba(46,125,79,.04)}.tx-table tr.expense td{background:rgba(192,57,43,.04)}
+.tx-table tr:hover td{background:rgba(201,169,110,.06)}
+
+/* Budget bars */
+.budget-row{margin-bottom:14px}
+.budget-label{display:flex;justify-content:space-between;font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:.06em;color:var(--tan);margin-bottom:4px}
+.budget-bar{height:20px;background:rgba(28,15,6,.6);border-radius:4px;overflow:hidden;position:relative}
+.budget-fill{height:100%;border-radius:4px;transition:width .4s}
+.budget-fill.under{background:linear-gradient(90deg,var(--rust),var(--gold))}.budget-fill.over{background:linear-gradient(90deg,var(--danger),#e74c3c)}
+.budget-pct{position:absolute;right:8px;top:2px;font-family:'Oswald',sans-serif;font-size:10px;color:white;font-weight:600}
+
+/* Result stat cards */
+.result-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin:20px 0}
+.result-stat{background:rgba(28,15,6,.5);border:1px solid rgba(201,169,110,.12);border-radius:6px;padding:18px;text-align:center}
+.result-stat .lbl{font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.result-stat .val{font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:var(--gold)}
+.result-stat .sub{font-size:12px;color:var(--tan);margin-top:2px}
+.result-stat.profit .val{color:var(--good)}.result-stat.loss .val{color:var(--danger)}
+
+/* Charts */
+.chart-wrap{background:rgba(28,15,6,.4);border:1px solid rgba(201,169,110,.1);border-radius:8px;padding:20px;position:relative}
+.chart-wrap canvas{max-height:280px}
+.charts-row{display:grid;grid-template-columns:280px 1fr;gap:16px;margin-bottom:24px}
+
+/* Quick add bar */
+.quick-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px}
+
+/* Tabs */
+.tab-bar{display:flex;gap:4px;border-bottom:1px solid rgba(201,169,110,.12);margin-bottom:20px;overflow-x:auto}
+.tab-btn{font-family:'Oswald',sans-serif;font-size:12px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;padding:10px 18px;background:transparent;border:none;border-bottom:2px solid transparent;color:var(--muted);cursor:pointer;transition:all .2s;white-space:nowrap}
+.tab-btn:hover{color:var(--cream)}.tab-btn.active{color:var(--gold);border-bottom-color:var(--gold)}
+.tab-content{display:none}.tab-content.active{display:block}
+
+/* Modal */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;align-items:flex-start;justify-content:center;padding:40px 20px;overflow-y:auto}
+.modal-overlay.open{display:flex}
+.modal-box{background:var(--brown);border:1px solid rgba(201,169,110,.2);border-radius:10px;padding:32px;max-width:560px;width:100%;position:relative;margin:auto}
+.modal-box h3{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--cream);margin-bottom:20px}
+.modal-close{position:absolute;top:12px;right:16px;background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer}.modal-close:hover{color:var(--cream)}
+
+/* Year selector */
+.year-select{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+.year-select label{font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--tan)}
+.year-select select{padding:8px 14px;background:rgba(28,15,6,.6);border:1px solid rgba(201,169,110,.2);border-radius:4px;color:var(--cream);font-family:'Oswald',sans-serif;font-size:13px}
+
+/* Disclaimer */
+.disclaimer{margin-top:40px;padding:16px 20px;background:rgba(44,26,14,.4);border:1px solid rgba(201,169,110,.08);border-radius:6px;font-size:13px;color:var(--muted);line-height:1.7}
+
+@media(max-width:768px){
+  .container{padding:16px 16px 60px}.site-header{padding:0 16px}
+  .stats-bar{grid-template-columns:1fr 1fr}.charts-row{grid-template-columns:1fr}
+  .field-row,.field-row-3,.field-row-4{grid-template-columns:1fr}
+  .quick-bar{justify-content:center}
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <a href="/" class="logo">Herd <span>Hub</span></a>
+  <a href="/" class="back-link">&larr; Back to Marketplace</a>
+</header>
+
+<div id="auth-gate" class="auth-gate" style="display:none">
+  <h1>Ranch <em>Finance</em></h1>
+  <p>Sign in to track your ranch income, expenses, and profit — with break-even calculators and tax year exports.</p>
+  <a href="/">Sign In on Herd Hub</a>
+</div>
+
+<div id="app" style="display:none">
+<div class="container">
+
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:8px">
+    <h2 style="font-family:'Playfair Display',serif;font-size:28px;font-weight:900">Ranch <span style="color:var(--gold)">Finance</span></h2>
+    <div class="year-select">
+      <label>Tax Year:</label>
+      <select id="year-sel" onchange="loadAll()"></select>
+    </div>
+  </div>
+
+  <!-- Quick add -->
+  <div class="quick-bar">
+    <button class="btn btn-good btn-sm" onclick="quickAdd('Cattle Sales','income')">+ Cattle Sale</button>
+    <button class="btn btn-good btn-sm" onclick="quickAdd('Calf Sales','income')">+ Calf Sale</button>
+    <button class="btn btn-danger btn-sm" onclick="quickAdd('Feed & Hay','expense')">+ Feed Purchase</button>
+    <button class="btn btn-danger btn-sm" onclick="quickAdd('Vet & Medicine','expense')">+ Vet Expense</button>
+    <button class="btn btn-ghost btn-sm" onclick="quickAdd('Other Income','income')">+ Other Income</button>
+    <button class="btn btn-ghost btn-sm" onclick="quickAdd('Other Expense','expense')">+ Other Expense</button>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab(this,'t-dashboard')">Dashboard</button>
+    <button class="tab-btn" onclick="switchTab(this,'t-ledger')">Ledger</button>
+    <button class="tab-btn" onclick="switchTab(this,'t-budget')">Budget</button>
+    <button class="tab-btn" onclick="switchTab(this,'t-calcs')">Calculators</button>
+    <button class="tab-btn" onclick="switchTab(this,'t-tax')">Tax Summary</button>
+  </div>
+
+  <!-- ═══ DASHBOARD ═══ -->
+  <div class="tab-content active" id="t-dashboard">
+    <div class="stats-bar" id="pnl-stats"></div>
+    <div class="charts-row">
+      <div class="chart-wrap"><canvas id="donut-chart"></canvas></div>
+      <div class="chart-wrap"><canvas id="monthly-chart"></canvas></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <div class="card"><div class="card-title">Top Income</div><div id="top-income"></div></div>
+      <div class="card"><div class="card-title">Top Expenses</div><div id="top-expenses"></div></div>
+    </div>
+  </div>
+
+  <!-- ═══ LEDGER ═══ -->
+  <div class="tab-content" id="t-ledger">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <input type="text" class="field" id="ledger-search" placeholder="Search..." style="padding:8px 12px;width:200px;margin:0;background:rgba(28,15,6,.6);border:1px solid rgba(201,169,110,.2);border-radius:4px;color:var(--cream);font-size:13px" oninput="renderLedger()">
+        <select id="ledger-type" style="padding:8px;background:rgba(28,15,6,.6);border:1px solid rgba(201,169,110,.2);border-radius:4px;color:var(--cream);font-family:'Oswald',sans-serif;font-size:11px" onchange="renderLedger()">
+          <option value="">All Types</option><option value="income">Income</option><option value="expense">Expense</option>
+        </select>
+        <select id="ledger-cat" style="padding:8px;background:rgba(28,15,6,.6);border:1px solid rgba(201,169,110,.2);border-radius:4px;color:var(--cream);font-family:'Oswald',sans-serif;font-size:11px" onchange="renderLedger()">
+          <option value="">All Categories</option>
+        </select>
+      </div>
+      <button class="btn btn-primary" onclick="showTxModal()">+ Add Transaction</button>
+    </div>
+    <div style="overflow-x:auto">
+      <table class="tx-table"><thead><tr><th>Date</th><th>Description</th><th>Category</th><th>Type</th><th style="text-align:right">Amount</th><th style="text-align:right">Balance</th><th></th></tr></thead>
+      <tbody id="ledger-tbody"></tbody></table>
+    </div>
+    <div id="ledger-empty" style="display:none;text-align:center;padding:40px;color:var(--muted)">No transactions yet. Add your first one above.</div>
+  </div>
+
+  <!-- ═══ BUDGET ═══ -->
+  <div class="tab-content" id="t-budget">
+    <div class="section-desc">Set annual expense budgets and track actual spending against them.</div>
+    <div class="card">
+      <div class="card-title">Set Budget</div>
+      <div style="display:flex;gap:10px;align-items:end;flex-wrap:wrap">
+        <div class="field" style="margin:0;flex:1;min-width:180px"><label>Category</label>
+          <select id="bud-cat">
+            <option>Feed & Hay</option><option>Vet & Medicine</option><option>Breeding & AI</option><option>Equipment</option><option>Fuel</option><option>Labor</option><option>Land & Lease</option><option>Utilities</option><option>Marketing</option><option>Insurance</option><option>Taxes & Fees</option><option>Other Expense</option>
+          </select>
+        </div>
+        <div class="field" style="margin:0;width:160px"><label>Annual Budget ($)</label><input type="number" id="bud-amt" step="0.01" placeholder="e.g. 15000"></div>
+        <button class="btn btn-primary" onclick="saveBudget()" style="height:42px">Save</button>
+      </div>
+    </div>
+    <div id="budget-bars"></div>
+  </div>
+
+  <!-- ═══ CALCULATORS ═══ -->
+  <div class="tab-content" id="t-calcs">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+
+      <!-- Cost of Gain -->
+      <div class="card">
+        <div class="card-title">Cost of Gain</div>
+        <div class="field-row"><div class="field"><label>Purchase Weight</label><input type="number" id="cog-pw" value="550"></div><div class="field"><label>Sell Weight</label><input type="number" id="cog-sw" value="800"></div></div>
+        <div class="field-row"><div class="field"><label>Total Feed Cost</label><input type="number" id="cog-feed" value="420" step="0.01"></div><div class="field"><label>Vet/Other Costs</label><input type="number" id="cog-other" value="45" step="0.01"></div></div>
+        <div class="field"><label>Purchase Price/Head</label><input type="number" id="cog-pp" value="1650" step="0.01"></div>
+        <button class="btn btn-primary" onclick="calcCOG()">Calculate</button>
+        <div id="cog-result"></div>
+      </div>
+
+      <!-- Break Even -->
+      <div class="card">
+        <div class="card-title">Break-Even Calculator</div>
+        <div class="field"><label>Total Cost Per Head ($)</label><input type="number" id="be-cost" value="2100" step="0.01"></div>
+        <div class="field"><label>Expected Sell Weight (lbs)</label><input type="number" id="be-wt" value="800"></div>
+        <button class="btn btn-primary" onclick="calcBE()">Calculate</button>
+        <div id="be-result"></div>
+      </div>
+    </div>
+
+    <!-- Cow-Calf Enterprise -->
+    <div class="card" style="margin-top:16px">
+      <div class="card-title">Cow-Calf Enterprise Analysis</div>
+      <div class="field-row-4">
+        <div class="field"><label>Number of Cows</label><input type="number" id="cc-cows" value="50"></div>
+        <div class="field"><label>Bull Cost/Year ($)</label><input type="number" id="cc-bull" value="8000"></div>
+        <div class="field"><label>Feed/Cow/Year ($)</label><input type="number" id="cc-feed" value="900"></div>
+        <div class="field"><label>Vet/Cow/Year ($)</label><input type="number" id="cc-vet" value="65"></div>
+      </div>
+      <div class="field-row-4">
+        <div class="field"><label>Land Cost/Cow ($)</label><input type="number" id="cc-land" value="200"></div>
+        <div class="field"><label>Calf Crop %</label><input type="number" id="cc-crop" value="90"></div>
+        <div class="field"><label>Avg Weaning Wt</label><input type="number" id="cc-ww" value="550"></div>
+        <div class="field"><label>Calf Price ($/cwt)</label><input type="number" id="cc-price" value="270" step="0.01"></div>
+      </div>
+      <button class="btn btn-primary" onclick="calcCC()">Calculate</button>
+      <div id="cc-result"></div>
+    </div>
+  </div>
+
+  <!-- ═══ TAX SUMMARY ═══ -->
+  <div class="tab-content" id="t-tax">
+    <div class="section-desc">Summary of income and expenses for your selected tax year. Export to CSV for your accountant.</div>
+    <div style="margin-bottom:16px"><button class="btn btn-primary" onclick="exportCSV()">Export to CSV</button></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <div class="card"><div class="card-title">Income by Category</div><div id="tax-income"></div></div>
+      <div class="card"><div class="card-title">Expenses by Category</div><div id="tax-expenses"></div></div>
+    </div>
+    <div class="result-grid" id="tax-totals"></div>
+    <div class="disclaimer"><strong style="color:var(--tan)">Disclaimer:</strong> This is not tax advice. The information provided is for record-keeping purposes only. Consult your accountant or tax professional for tax preparation and filing.</div>
+  </div>
+
+</div><!-- /container -->
+</div><!-- /app -->
+
+<!-- Transaction Modal -->
+<div class="modal-overlay" id="tx-modal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal()">&times;</button>
+    <h3 id="tx-modal-title">Add Transaction</h3>
+    <input type="hidden" id="tx-id">
+    <div class="field-row">
+      <div class="field"><label>Date</label><input type="date" id="tx-date"></div>
+      <div class="field"><label>Type</label><select id="tx-type" onchange="updateCatOptions()"><option value="income">Income</option><option value="expense">Expense</option></select></div>
+    </div>
+    <div class="field"><label>Category</label><select id="tx-cat"></select></div>
+    <div class="field"><label>Description</label><input type="text" id="tx-desc" placeholder="e.g. Sold 10 steers at OKC"></div>
+    <div class="field"><label>Amount ($)</label><input type="number" id="tx-amount" step="0.01"></div>
+    <div class="field-row">
+      <div class="field"><label>Head Count</label><input type="number" id="tx-head"></div>
+      <div class="field"><label>Price/Head ($)</label><input type="number" id="tx-pph" step="0.01"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Weight (lbs)</label><input type="number" id="tx-wt" step="0.1"></div>
+      <div class="field"><label>Price/CWT ($)</label><input type="number" id="tx-cwt" step="0.01"></div>
+    </div>
+    <div class="field"><label>Notes</label><textarea id="tx-notes" rows="2" style="width:100%;padding:10px;background:rgba(28,15,6,.6);border:1px solid rgba(201,169,110,.2);border-radius:4px;color:var(--cream);font-family:'Source Serif 4',serif;font-size:14px;resize:vertical"></textarea></div>
+    <div style="display:flex;gap:10px;margin-top:16px">
+      <button class="btn btn-primary" onclick="saveTx()">Save</button>
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const INCOME_CATS = ['Cattle Sales','Calf Sales','Culls','Breeding Fees','Hay Sales','Government Payments','Other Income'];
+const EXPENSE_CATS = ['Feed & Hay','Vet & Medicine','Breeding & AI','Equipment','Fuel','Labor','Land & Lease','Utilities','Marketing','Insurance','Taxes & Fees','Other Expense'];
+
+let authToken = null, txData = [], summaryData = null, budgetData = [];
+let donutChart = null, monthlyChart = null;
+
+// Auth
+async function initAuth() {
+  try { const r = await fetch('/api/auth/refresh',{credentials:'include'}); if(r.ok){const d=await r.json();if(d.token)authToken=d.token;} } catch{}
+  if (authToken) { document.getElementById('app').style.display=''; document.getElementById('auth-gate').style.display='none'; initYears(); loadAll(); }
+  else { document.getElementById('auth-gate').style.display=''; document.getElementById('app').style.display='none'; }
+}
+
+async function api(method,url,body){
+  const o={method,headers:{Authorization:'Bearer '+authToken}};
+  if(body){o.headers['Content-Type']='application/json';o.body=JSON.stringify(body);}
+  const r=await fetch(url,o);if(!r.ok)throw new Error('Error '+r.status);return r.json();
+}
+
+function getYear(){return parseInt(document.getElementById('year-sel').value)}
+
+function initYears(){
+  const sel=document.getElementById('year-sel');
+  const now=new Date().getFullYear();
+  for(let y=now;y>=now-5;y--)sel.innerHTML+='<option value="'+y+'">'+y+'</option>';
+}
+
+async function loadAll(){
+  await Promise.all([loadSummary(),loadTransactions(),loadBudgets()]);
+}
+
+// Summary / Dashboard
+async function loadSummary(){
+  try{
+    summaryData=await api('GET','/api/finance/summary?year='+getYear());
+    renderDashboard();
+    renderTax();
+  }catch{}
+}
+
+function renderDashboard(){
+  const s=summaryData;
+  const netClass=s.net_profit>=0?'profit':'loss';
+  document.getElementById('pnl-stats').innerHTML=
+    statC('$'+commas(Math.round(s.total_income)),'Total Income','')+
+    statC('$'+commas(Math.round(s.total_expenses)),'Total Expenses','')+
+    statC((s.net_profit>=0?'+':'-')+'$'+commas(Math.round(Math.abs(s.net_profit))),'Net Profit/Loss',netClass)+
+    statC(s.profit_margin+'%','Profit Margin',netClass);
+
+  // Donut
+  const incCats=s.by_category.filter(c=>c.type==='income');
+  const expCats=s.by_category.filter(c=>c.type==='expense');
+  if(donutChart)donutChart.destroy();
+  donutChart=new Chart(document.getElementById('donut-chart'),{
+    type:'doughnut',
+    data:{labels:['Income','Expenses'],datasets:[{data:[s.total_income,s.total_expenses],backgroundColor:['rgba(46,125,79,.7)','rgba(192,57,43,.7)'],borderColor:['#2E7D4F','#C0392B'],borderWidth:2}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#C4A882',font:{family:'Oswald',size:11}}}}}
+  });
+
+  // Monthly bar
+  const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const mInc=new Array(12).fill(0),mExp=new Array(12).fill(0);
+  s.by_month.forEach(m=>{
+    const i=m.month-1;
+    if(m.type==='income')mInc[i]=parseFloat(m.total);
+    else mExp[i]=parseFloat(m.total);
+  });
+  if(monthlyChart)monthlyChart.destroy();
+  monthlyChart=new Chart(document.getElementById('monthly-chart'),{
+    type:'bar',
+    data:{labels:months,datasets:[
+      {label:'Income',data:mInc,backgroundColor:'rgba(46,125,79,.6)',borderRadius:3},
+      {label:'Expenses',data:mExp,backgroundColor:'rgba(192,57,43,.6)',borderRadius:3}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#C4A882',font:{family:'Oswald',size:11}}},tooltip:{backgroundColor:'#2C1A0E',titleColor:'#F5EFE0',bodyColor:'#C9A96E'}},
+    scales:{x:{ticks:{color:'#8C7560',font:{family:'Oswald',size:10}},grid:{color:'rgba(201,169,110,.06)'}},y:{ticks:{color:'#8C7560',font:{family:'Oswald',size:10},callback:v=>'$'+commas(v)},grid:{color:'rgba(201,169,110,.06)'}}}}
+  });
+
+  // Top cats
+  document.getElementById('top-income').innerHTML=incCats.slice(0,5).map(c=>'<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(201,169,110,.06);font-size:13px"><span style="color:var(--light)">'+esc(c.category)+'</span><span style="color:var(--good);font-weight:600">$'+commas(Math.round(parseFloat(c.total)))+'</span></div>').join('')||'<span style="color:var(--muted)">No income recorded</span>';
+  document.getElementById('top-expenses').innerHTML=expCats.slice(0,5).map(c=>'<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(201,169,110,.06);font-size:13px"><span style="color:var(--light)">'+esc(c.category)+'</span><span style="color:var(--danger);font-weight:600">$'+commas(Math.round(parseFloat(c.total)))+'</span></div>').join('')||'<span style="color:var(--muted)">No expenses recorded</span>';
+}
+
+function statC(num,lbl,cls){return'<div class="stat-card"><div class="num '+cls+'">'+num+'</div><div class="lbl">'+lbl+'</div></div>';}
+
+// Transactions / Ledger
+async function loadTransactions(){
+  try{txData=await api('GET','/api/finance/transactions?year='+getYear());renderLedger();updateCatFilter();}catch{txData=[];}
+}
+
+function updateCatFilter(){
+  const cats=[...new Set(txData.map(t=>t.category).filter(Boolean))].sort();
+  const sel=document.getElementById('ledger-cat');
+  const cur=sel.value;
+  sel.innerHTML='<option value="">All Categories</option>'+cats.map(c=>'<option'+(c===cur?' selected':'')+'>'+esc(c)+'</option>').join('');
+}
+
+function renderLedger(){
+  const search=(document.getElementById('ledger-search').value||'').toLowerCase();
+  const typeF=document.getElementById('ledger-type').value;
+  const catF=document.getElementById('ledger-cat').value;
+
+  let list=txData.filter(t=>{
+    if(typeF&&t.type!==typeF)return false;
+    if(catF&&t.category!==catF)return false;
+    if(search&&!(t.description||'').toLowerCase().includes(search))return false;
+    return true;
+  });
+
+  const tbody=document.getElementById('ledger-tbody');
+  const empty=document.getElementById('ledger-empty');
+  if(!list.length){tbody.innerHTML='';empty.style.display='';return;}
+  empty.style.display='none';
+
+  let balance=0;
+  const sorted=[...list].reverse();
+  sorted.forEach(t=>{balance+=t.type==='income'?parseFloat(t.amount):-parseFloat(t.amount);t._bal=balance;});
+
+  tbody.innerHTML=list.map(t=>{
+    const amt=parseFloat(t.amount);
+    const sign=t.type==='income'?'+':'-';
+    const color=t.type==='income'?'var(--good)':'var(--danger)';
+    return'<tr class="'+t.type+'"><td>'+fmtDate(t.transaction_date)+'</td><td>'+esc(t.description||'—')+'</td><td>'+esc(t.category||'')+'</td><td style="text-transform:capitalize">'+t.type+'</td><td style="text-align:right;color:'+color+';font-weight:600">'+sign+'$'+commas(amt.toFixed(2))+'</td><td style="text-align:right;color:var(--tan)">$'+commas((t._bal||0).toFixed(2))+'</td><td><button class="btn btn-sm btn-ghost" onclick="event.stopPropagation();editTx('+t.id+')">Edit</button> <button class="btn btn-sm btn-danger" onclick="event.stopPropagation();deleteTx('+t.id+')">Del</button></td></tr>';
+  }).join('');
+}
+
+// Transaction modal
+function showTxModal(editId){
+  document.getElementById('tx-modal-title').textContent=editId?'Edit Transaction':'Add Transaction';
+  document.getElementById('tx-id').value=editId||'';
+  if(!editId){
+    document.getElementById('tx-date').value=todayStr();
+    document.getElementById('tx-type').value='income';
+    updateCatOptions();
+    document.getElementById('tx-desc').value='';
+    document.getElementById('tx-amount').value='';
+    document.getElementById('tx-head').value='';
+    document.getElementById('tx-pph').value='';
+    document.getElementById('tx-wt').value='';
+    document.getElementById('tx-cwt').value='';
+    document.getElementById('tx-notes').value='';
+  }
+  document.getElementById('tx-modal').classList.add('open');
+}
+
+function quickAdd(cat,type){
+  document.getElementById('tx-id').value='';
+  document.getElementById('tx-date').value=todayStr();
+  document.getElementById('tx-type').value=type;
+  updateCatOptions();
+  document.getElementById('tx-cat').value=cat;
+  document.getElementById('tx-desc').value='';
+  document.getElementById('tx-amount').value='';
+  document.getElementById('tx-head').value='';
+  document.getElementById('tx-pph').value='';
+  document.getElementById('tx-wt').value='';
+  document.getElementById('tx-cwt').value='';
+  document.getElementById('tx-notes').value='';
+  document.getElementById('tx-modal-title').textContent='Add '+cat;
+  document.getElementById('tx-modal').classList.add('open');
+}
+
+function updateCatOptions(){
+  const type=document.getElementById('tx-type').value;
+  const cats=type==='income'?INCOME_CATS:EXPENSE_CATS;
+  document.getElementById('tx-cat').innerHTML=cats.map(c=>'<option>'+c+'</option>').join('');
+}
+
+async function editTx(id){
+  const t=txData.find(x=>x.id===id);if(!t)return;
+  document.getElementById('tx-id').value=id;
+  document.getElementById('tx-date').value=t.transaction_date?t.transaction_date.slice(0,10):'';
+  document.getElementById('tx-type').value=t.type||'income';
+  updateCatOptions();
+  document.getElementById('tx-cat').value=t.category||'';
+  document.getElementById('tx-desc').value=t.description||'';
+  document.getElementById('tx-amount').value=t.amount||'';
+  document.getElementById('tx-head').value=t.head_count||'';
+  document.getElementById('tx-pph').value=t.price_per_head||'';
+  document.getElementById('tx-wt').value=t.weight_lbs||'';
+  document.getElementById('tx-cwt').value=t.price_per_cwt||'';
+  document.getElementById('tx-notes').value=t.notes||'';
+  document.getElementById('tx-modal-title').textContent='Edit Transaction';
+  document.getElementById('tx-modal').classList.add('open');
+}
+
+async function saveTx(){
+  const id=document.getElementById('tx-id').value;
+  const body={
+    transaction_date:document.getElementById('tx-date').value,
+    type:document.getElementById('tx-type').value,
+    category:document.getElementById('tx-cat').value,
+    description:document.getElementById('tx-desc').value,
+    amount:document.getElementById('tx-amount').value,
+    head_count:document.getElementById('tx-head').value,
+    price_per_head:document.getElementById('tx-pph').value,
+    weight_lbs:document.getElementById('tx-wt').value,
+    price_per_cwt:document.getElementById('tx-cwt').value,
+    notes:document.getElementById('tx-notes').value,
+    tax_year:getYear()
+  };
+  try{
+    if(id)await api('PUT','/api/finance/transactions/'+id,body);
+    else await api('POST','/api/finance/transactions',body);
+    closeModal();loadAll();
+  }catch(e){alert('Failed: '+e.message);}
+}
+
+async function deleteTx(id){
+  if(!confirm('Delete this transaction?'))return;
+  try{await api('DELETE','/api/finance/transactions/'+id);loadAll();}catch(e){alert('Failed');}
+}
+
+function closeModal(){document.getElementById('tx-modal').classList.remove('open');}
+
+// Budgets
+async function loadBudgets(){
+  try{budgetData=await api('GET','/api/finance/budgets?year='+getYear());renderBudgets();}catch{budgetData=[];}
+}
+
+async function saveBudget(){
+  const cat=document.getElementById('bud-cat').value;
+  const amt=document.getElementById('bud-amt').value;
+  if(!amt){alert('Enter budget amount');return;}
+  try{await api('POST','/api/finance/budgets',{category:cat,budgeted_amount:amt,tax_year:getYear()});loadBudgets();}catch(e){alert('Failed');}
+}
+
+function renderBudgets(){
+  const el=document.getElementById('budget-bars');
+  if(!budgetData.length&&!summaryData){el.innerHTML='<div class="card" style="text-align:center;color:var(--muted)">No budgets set yet.</div>';return;}
+
+  const actuals={};
+  if(summaryData)(summaryData.by_category||[]).filter(c=>c.type==='expense').forEach(c=>{actuals[c.category]=parseFloat(c.total);});
+
+  const cats=budgetData.length?budgetData:EXPENSE_CATS.map(c=>({category:c,budgeted_amount:0}));
+  let html='<div class="card"><div class="card-title">Budget vs Actual</div>';
+  (budgetData.length?budgetData:cats).forEach(b=>{
+    const budgeted=parseFloat(b.budgeted_amount)||0;
+    if(budgeted<=0)return;
+    const actual=actuals[b.category]||0;
+    const pct=budgeted>0?Math.round((actual/budgeted)*100):0;
+    const over=pct>100;
+    const variance=actual-budgeted;
+    html+='<div class="budget-row"><div class="budget-label"><span>'+esc(b.category)+'</span><span>$'+commas(Math.round(actual))+' / $'+commas(Math.round(budgeted))+' <span style="color:'+(over?'var(--danger)':'var(--good)')+'">('+(variance>=0?'+':'')+commas(Math.round(variance))+')</span></span></div><div class="budget-bar"><div class="budget-fill '+(over?'over':'under')+'" style="width:'+Math.min(pct,100)+'%"></div><div class="budget-pct">'+pct+'%</div></div></div>';
+  });
+  html+='</div>';
+  el.innerHTML=html;
+}
+
+// Tax summary
+function renderTax(){
+  if(!summaryData)return;
+  const s=summaryData;
+  const inc=s.by_category.filter(c=>c.type==='income');
+  const exp=s.by_category.filter(c=>c.type==='expense');
+
+  document.getElementById('tax-income').innerHTML=inc.map(c=>'<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(201,169,110,.06);font-size:13px"><span>'+esc(c.category)+'</span><span style="color:var(--good)">$'+commas(parseFloat(c.total).toFixed(2))+'</span></div>').join('')||'<span style="color:var(--muted)">None</span>';
+  document.getElementById('tax-expenses').innerHTML=exp.map(c=>'<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(201,169,110,.06);font-size:13px"><span>'+esc(c.category)+'</span><span style="color:var(--danger)">$'+commas(parseFloat(c.total).toFixed(2))+'</span></div>').join('')||'<span style="color:var(--muted)">None</span>';
+
+  const netC=s.net_profit>=0?'profit':'loss';
+  document.getElementById('tax-totals').innerHTML=
+    '<div class="result-stat"><div class="lbl">Total Income</div><div class="val">$'+commas(Math.round(s.total_income))+'</div></div>'+
+    '<div class="result-stat"><div class="lbl">Total Expenses</div><div class="val">$'+commas(Math.round(s.total_expenses))+'</div></div>'+
+    '<div class="result-stat '+netC+'"><div class="lbl">Net Farm Income</div><div class="val">'+(s.net_profit>=0?'+':'-')+'$'+commas(Math.round(Math.abs(s.net_profit)))+'</div></div>';
+}
+
+function exportCSV(){window.open('/api/finance/export?year='+getYear()+'&token='+encodeURIComponent(authToken));}
+
+// Calculators
+function calcCOG(){
+  const pw=parseFloat(document.getElementById('cog-pw').value)||0;
+  const sw=parseFloat(document.getElementById('cog-sw').value)||0;
+  const feed=parseFloat(document.getElementById('cog-feed').value)||0;
+  const other=parseFloat(document.getElementById('cog-other').value)||0;
+  const pp=parseFloat(document.getElementById('cog-pp').value)||0;
+  const gain=sw-pw;
+  const totalCost=feed+other;
+  const cogPerLb=gain>0?totalCost/gain:0;
+  const totalAll=pp+totalCost;
+  const beCwt=sw>0?(totalAll/sw)*100:0;
+  document.getElementById('cog-result').innerHTML='<div class="result-grid" style="margin-top:16px"><div class="result-stat"><div class="lbl">Cost/Lb Gain</div><div class="val">$'+cogPerLb.toFixed(2)+'</div></div><div class="result-stat"><div class="lbl">Total Cost</div><div class="val">$'+commas(Math.round(totalAll))+'</div></div><div class="result-stat"><div class="lbl">Break-Even</div><div class="val">$'+beCwt.toFixed(2)+'/cwt</div></div></div>';
+}
+
+function calcBE(){
+  const cost=parseFloat(document.getElementById('be-cost').value)||0;
+  const wt=parseFloat(document.getElementById('be-wt').value)||0;
+  const beCwt=wt>0?(cost/wt)*100:0;
+  document.getElementById('be-result').innerHTML='<div class="result-grid" style="margin-top:16px"><div class="result-stat"><div class="lbl">Break-Even</div><div class="val">$'+beCwt.toFixed(2)+'/cwt</div></div><div class="result-stat"><div class="lbl">Break-Even/Head</div><div class="val">$'+commas(Math.round(cost))+'</div></div></div>';
+}
+
+function calcCC(){
+  const cows=parseInt(document.getElementById('cc-cows').value)||0;
+  const bull=parseFloat(document.getElementById('cc-bull').value)||0;
+  const feed=parseFloat(document.getElementById('cc-feed').value)||0;
+  const vet=parseFloat(document.getElementById('cc-vet').value)||0;
+  const land=parseFloat(document.getElementById('cc-land').value)||0;
+  const crop=parseFloat(document.getElementById('cc-crop').value)||90;
+  const ww=parseFloat(document.getElementById('cc-ww').value)||0;
+  const price=parseFloat(document.getElementById('cc-price').value)||0;
+
+  const totalCostPerCow=feed+vet+land+(bull/cows);
+  const calvesWeaned=Math.round(cows*(crop/100));
+  const costPerCalf=calvesWeaned>0?(cows*totalCostPerCow)/calvesWeaned:0;
+  const beCwt=ww>0?(costPerCalf/ww)*100:0;
+  const revenuePerCalf=(price/100)*ww;
+  const profitPerCow=calvesWeaned>0?((revenuePerCalf*calvesWeaned)-(cows*totalCostPerCow))/cows:0;
+  const pClass=profitPerCow>=0?'profit':'loss';
+
+  document.getElementById('cc-result').innerHTML='<div class="result-grid" style="margin-top:16px">'+
+    '<div class="result-stat"><div class="lbl">Cost/Calf Produced</div><div class="val">$'+commas(Math.round(costPerCalf))+'</div></div>'+
+    '<div class="result-stat"><div class="lbl">Break-Even Calf Price</div><div class="val">$'+beCwt.toFixed(2)+'/cwt</div></div>'+
+    '<div class="result-stat"><div class="lbl">Calves Weaned</div><div class="val">'+calvesWeaned+'</div><div class="sub">'+crop+'% crop</div></div>'+
+    '<div class="result-stat '+pClass+'"><div class="lbl">Profit/Loss Per Cow</div><div class="val">'+(profitPerCow>=0?'+':'-')+'$'+commas(Math.round(Math.abs(profitPerCow)))+'</div></div></div>';
+}
+
+// Tab switching
+function switchTab(btn,id){
+  document.querySelectorAll('.tab-btn').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// Helpers
+function esc(s){if(!s)return'';const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+function commas(n){return String(n).replace(/\B(?=(\d{3})+(?!\d))/g,',');}
+function fmtDate(d){if(!d)return'—';const dt=new Date(d);const m=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return m[dt.getMonth()]+' '+dt.getDate()+', '+dt.getFullYear();}
+function todayStr(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+
+// Modal close on overlay
+document.getElementById('tx-modal').addEventListener('click',e=>{if(e.target.id==='tx-modal')closeModal();});
+
+// CSV export needs auth token in query since it's a direct download
+const origExport=exportCSV;
+exportCSV=function(){
+  const url='/api/finance/export?year='+getYear();
+  fetch(url,{headers:{Authorization:'Bearer '+authToken}}).then(r=>r.blob()).then(b=>{
+    const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='herdhub-finance-'+getYear()+'.csv';a.click();
+  }).catch(()=>alert('Export failed'));
+};
+
+document.addEventListener('DOMContentLoaded',initAuth);
+</script>
+</body>
+</html>

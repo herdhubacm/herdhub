@@ -253,6 +253,7 @@ app.use('/api/searches', limiter(60),  require('./routes/searches'));
 app.use('/api/sellers',  limiter(60),  require('./routes/sellers'));
 app.use('/api/cattle',   limiter(100), require('./routes/cattle'));
 app.use('/api/herd',     limiter(200), require('./routes/herd'));
+app.use('/api/finance',  limiter(200), require('./routes/finance'));
 
 // ── GET /api/settings (public — stats bar) ───────────
 app.get('/api/settings', async (req, res) => {
@@ -666,6 +667,37 @@ async function start() {
       )`);
       await query(`CREATE INDEX IF NOT EXISTS idx_price_alerts_user ON price_alerts(user_id)`);
       console.log('✅  Market price tables ready');
+
+      // Finance tables
+      await query(`CREATE TABLE IF NOT EXISTS finance_transactions (
+        id              BIGSERIAL      PRIMARY KEY,
+        user_id         BIGINT         NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        transaction_date DATE,
+        category        VARCHAR(50),
+        type            VARCHAR(10),
+        description     VARCHAR(200),
+        amount          DECIMAL(10,2),
+        head_count      INTEGER,
+        price_per_head  DECIMAL(10,2),
+        weight_lbs      DECIMAL(8,2),
+        price_per_cwt   DECIMAL(8,2),
+        animal_id       BIGINT         REFERENCES animals(id) ON DELETE SET NULL,
+        tax_year        INTEGER,
+        notes           TEXT,
+        created_at      TIMESTAMPTZ    NOT NULL DEFAULT NOW()
+      )`);
+      await query(`CREATE INDEX IF NOT EXISTS idx_finance_user_year ON finance_transactions(user_id, tax_year)`);
+
+      await query(`CREATE TABLE IF NOT EXISTS finance_budgets (
+        id              BIGSERIAL      PRIMARY KEY,
+        user_id         BIGINT         NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        category        VARCHAR(50),
+        budgeted_amount DECIMAL(10,2),
+        tax_year        INTEGER,
+        created_at      TIMESTAMPTZ    NOT NULL DEFAULT NOW()
+      )`);
+      await query(`CREATE INDEX IF NOT EXISTS idx_budgets_user ON finance_budgets(user_id, tax_year)`);
+      console.log('✅  Finance tables ready');
 
     } catch (migErr) {
       console.warn('⚠️  Migration warning:', migErr.message);
