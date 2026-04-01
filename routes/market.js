@@ -16,6 +16,7 @@
 const express = require('express');
 const fetch   = require('node-fetch');
 const { query } = require('../db/database');
+const { authenticateToken } = require('../middleware/auth');
 
 const router   = express.Router();
 const BASE_URL = process.env.USDA_AMS_BASE_URL || 'https://marsapi.ams.usda.gov/services/v1.2';
@@ -250,5 +251,114 @@ function getDefaultTicker() {
     'Source: USDA AMS Market News (connecting…)'
   ];
 }
+
+// ── GET /api/market/prices/history ─────────────────────
+router.get('/prices/history', async (req, res) => {
+  try {
+    const { category, weight_low, weight_high, days = 90 } = req.query;
+    const conditions = ['report_date >= CURRENT_DATE - $1::integer'];
+    const params = [Math.min(parseInt(days) || 90, 365)];
+    let p = 2;
+    if (category) { conditions.push('category=$' + p); params.push(category); p++; }
+    if (weight_low) { conditions.push('weight_low>=$' + p); params.push(parseInt(weight_low)); p++; }
+    if (weight_high) { conditions.push('weight_high<=$' + p); params.push(parseInt(weight_high)); p++; }
+
+    const { rows } = await query(
+      `SELECT report_date, category, weight_low, weight_high,
+              price_low, price_high, price_avg, head_count
+       FROM market_prices WHERE ${conditions.join(' AND ')}
+       ORDER BY report_date ASC`, params);
+    res.json(rows);
+  } catch (err) {
+    console.error('Price history error:', err.message);
+    res.status(500).json({ error: 'Failed to load price history' });
+  }
+});
+
+// ── GET /api/market/calculator ────────────────────────
+router.get('/calculator', (req, res) => {
+  const purchasePrice = parseFloat(req.query.purchase_price) || 0;
+  const purchaseWeight = parseFloat(req.query.purchase_weight) || 0;
+  const dailyCost = parseFloat(req.query.daily_cost) || 0;
+  const daysOnFeed = parseInt(req.query.days_on_feed) || 0;
+  const targetWeight = parseFloat(req.query.target_weight) || 0;
+
+  const totalPurchase = purchasePrice;
+  const feedCost = dailyCost * daysOnFeed;
+  const totalCost = totalPurchase + feedCost;
+  const sellWeight = targetWeight > 0 ? targetWeight : purchaseWeight;
+  const breakEvenCwt = sellWeight > 0 ? (totalCost / sellWeight) * 100 : 0;
+
+  res.json({
+    total_purchase: totalPurchase,
+    feed_cost: feedCost,
+    total_cost: totalCost,
+    sell_weight: sellWeight,
+    break_even_cwt: Math.round(breakEvenCwt * 100) / 100,
+  });
+});
+
+// ── GET /api/market/nearby ────────────────────────────
+router.get('/nearby', async (req, res) => {
+  const { state } = req.query;
+  const regionMap = {
+    TX:'South Central',OK:'South Central',NM:'South Central',AR:'South Central',LA:'South Central',
+    KS:'Central',NE:'Central',CO:'Central',IA:'Central',MO:'Central',SD:'Central',ND:'Central',MN:'Central',WI:'Central',IL:'Central',IN:'Central',OH:'Central',MI:'Central',
+    MT:'Northwest',WY:'Northwest',ID:'Northwest',OR:'Northwest',WA:'Northwest',UT:'Northwest',NV:'Northwest',
+    CA:'West',AZ:'West',HI:'West',
+    FL:'Southeast',GA:'Southeast',AL:'Southeast',MS:'Southeast',SC:'Southeast',NC:'Southeast',TN:'Southeast',KY:'Southeast',VA:'Southeast',WV:'Southeast',
+    PA:'Northeast',NY:'Northeast',NJ:'Northeast',CT:'Northeast',MA:'Northeast',ME:'Northeast',NH:'Northeast',VT:'Northeast',RI:'Northeast',DE:'Northeast',MD:'Northeast'
+  };
+  const region = regionMap[(state||'').toUpperCase()] || 'Central';
+  try {
+    const { rows } = await query(
+      `SELECT * FROM market_prices WHERE region=$1
+       ORDER BY report_date DESC LIMIT 20`, [region]);
+    res.json({ region, prices: rows });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to load nearby prices' });
+  }
+});
+
+// ── POST /api/market/alerts ───────────────────────────
+router.post('/alerts', authenticateToken, async (req, res) => {
+  try {
+    const { category, weight_low, weight_high, target_price, alert_type } = req.body;
+    if (!target_price) return res.status(400).json({ error: 'target_price required' });
+    const { rows } = await query(
+      `INSERT INTO price_alerts (user_id, category, weight_low, weight_high, target_price, alert_type)
+       VALUES ($1,$2,$3,$4,$5,$6) RETURNING *`,
+      [req.user.id, category || null, parseInt(weight_low)||null, parseInt(weight_high)||null,
+       parseFloat(target_price), alert_type || 'above']);
+    res.status(201).json(rows[0]);
+  } catch (err) {
+    console.error('POST alerts error:', err.message);
+    res.status(500).json({ error: 'Failed to save alert' });
+  }
+});
+
+// ── GET /api/market/alerts ────────────────────────────
+router.get('/alerts', authenticateToken, async (req, res) => {
+  try {
+    const { rows } = await query(
+      'SELECT * FROM price_alerts WHERE user_id=$1 ORDER BY created_at DESC', [req.user.id]);
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to load alerts' });
+  }
+});
+
+// ── DELETE /api/market/alerts/:id ─────────────────────
+router.delete('/alerts/:id', authenticateToken, async (req, res) => {
+  try {
+    const { rowCount } = await query(
+      'DELETE FROM price_alerts WHERE id=$1 AND user_id=$2',
+      [parseInt(req.params.id), req.user.id]);
+    if (!rowCount) return res.status(404).json({ error: 'Alert not found' });
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to delete alert' });
+  }
+});
 
 module.exports = router;

@@ -636,6 +636,37 @@ async function start() {
       await query(`CREATE INDEX IF NOT EXISTS idx_production_animal ON animal_production(animal_id)`);
       console.log('✅  Herd manager tables ready');
 
+      // Market price intelligence tables
+      await query(`CREATE TABLE IF NOT EXISTS market_prices (
+        id          BIGSERIAL      PRIMARY KEY,
+        report_date DATE,
+        source      VARCHAR(50),
+        region      VARCHAR(50),
+        category    VARCHAR(50),
+        weight_low  INTEGER,
+        weight_high INTEGER,
+        price_low   DECIMAL(8,2),
+        price_high  DECIMAL(8,2),
+        price_avg   DECIMAL(8,2),
+        head_count  INTEGER,
+        created_at  TIMESTAMPTZ    NOT NULL DEFAULT NOW()
+      )`);
+      await query(`CREATE INDEX IF NOT EXISTS idx_market_prices_cat ON market_prices(category, report_date)`);
+
+      await query(`CREATE TABLE IF NOT EXISTS price_alerts (
+        id           BIGSERIAL      PRIMARY KEY,
+        user_id      BIGINT         NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        category     VARCHAR(50),
+        weight_low   INTEGER,
+        weight_high  INTEGER,
+        target_price DECIMAL(8,2),
+        alert_type   VARCHAR(20)    DEFAULT 'above',
+        active       BOOLEAN        DEFAULT true,
+        created_at   TIMESTAMPTZ    NOT NULL DEFAULT NOW()
+      )`);
+      await query(`CREATE INDEX IF NOT EXISTS idx_price_alerts_user ON price_alerts(user_id)`);
+      console.log('✅  Market price tables ready');
+
     } catch (migErr) {
       console.warn('⚠️  Migration warning:', migErr.message);
     }
