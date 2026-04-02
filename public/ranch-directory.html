@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ranch Directory | Herd Hub</title>
+<meta name="description" content="Browse verified cattle ranches across America. Find trusted breeders by state, breed specialty, and more.">
+<meta name="theme-color" content="#2C1A0E">
+<link rel="icon" type="image/png" href="/logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Oswald:wght@300;400;500;600;700&family=Source+Serif+4:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--dark:#1C0F06;--brown:#2C1A0E;--rust:#8B3214;--rust2:#A63D1A;--gold:#C9A96E;--gold2:#E8C87A;--cream:#F5EFE0;--tan:#C4A882;--muted:#8C7560;--light:#E8DCC8}
+body{font-family:'Source Serif 4',serif;background:var(--dark);color:var(--cream);min-height:100vh}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:0;opacity:.6}
+.site-header{background:var(--brown);border-bottom:2px solid var(--rust);padding:0 40px;display:flex;align-items:center;justify-content:space-between;height:64px;position:sticky;top:0;z-index:100}
+.logo{font-family:'Playfair Display',serif;font-size:22px;font-weight:900;color:var(--cream);text-decoration:none}.logo span{color:var(--gold)}
+.back-link{font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--tan);text-decoration:none}.back-link:hover{color:var(--gold)}
+.hero{padding:60px 40px 40px;text-align:center;position:relative;z-index:1}
+.hero h1{font-family:'Playfair Display',serif;font-size:clamp(36px,5vw,56px);font-weight:900;color:var(--cream)}.hero h1 em{font-style:italic;color:var(--gold)}
+.hero-sub{font-family:'Oswald',sans-serif;font-size:14px;letter-spacing:.15em;text-transform:uppercase;color:var(--tan);margin-top:8px}
+.container{max-width:1100px;margin:0 auto;padding:0 40px 80px;position:relative;z-index:1}
+.filters{display:flex;gap:10px;margin-bottom:24px;flex-wrap:wrap;align-items:center}
+.filters input,.filters select{padding:10px 14px;background:rgba(28,15,6,.6);border:1px solid rgba(201,169,110,.2);border-radius:4px;color:var(--cream);font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:.06em}
+.filters input:focus,.filters select:focus{outline:none;border-color:var(--gold)}
+.filters select option{background:var(--brown);color:var(--cream)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+.ranch-card{background:rgba(44,26,14,.6);border:1px solid rgba(201,169,110,.12);border-radius:8px;padding:24px;text-decoration:none;transition:border-color .2s;display:block;color:var(--cream)}
+.ranch-card:hover{border-color:var(--gold)}
+.ranch-card-header{display:flex;gap:14px;align-items:center;margin-bottom:12px}
+.ranch-card-logo{width:56px;height:56px;border-radius:8px;object-fit:cover;background:rgba(201,169,110,.1);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:24px}
+.ranch-card-name{font-family:'Playfair Display',serif;font-size:18px;font-weight:700}
+.ranch-card-loc{font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:.08em;color:var(--muted);text-transform:uppercase}
+.badge{display:inline-block;font-family:'Oswald',sans-serif;font-size:9px;letter-spacing:.06em;text-transform:uppercase;padding:2px 6px;border-radius:3px;margin-right:4px}
+.badge-premium{background:rgba(201,169,110,.2);color:var(--gold2)}.badge-verified{background:rgba(59,130,246,.2);color:#93c5fd}
+.chip{display:inline-block;font-family:'Oswald',sans-serif;font-size:10px;padding:2px 8px;border-radius:3px;background:rgba(201,169,110,.1);color:var(--tan);margin:2px}
+.listing-count{font-family:'Oswald',sans-serif;font-size:11px;color:var(--muted);margin-top:10px}
+.empty{text-align:center;padding:60px;color:var(--muted);font-size:16px}
+@media(max-width:768px){.container{padding:0 16px 60px}.site-header{padding:0 16px}.filters{flex-direction:column}}
+</style>
+</head>
+<body>
+<header class="site-header"><a href="/" class="logo">Herd <span>Hub</span></a><a href="/" class="back-link">&larr; Back</a></header>
+<section class="hero"><h1>Ranch <em>Directory</em></h1><div class="hero-sub">Find trusted ranches and breeders across America</div></section>
+<div class="container">
+<div class="filters">
+<input type="text" id="f-search" placeholder="Search by ranch name..." oninput="renderGrid()" style="flex:1;min-width:200px">
+<select id="f-state" onchange="loadRanches()"><option value="">All States</option></select>
+<select id="f-breed" onchange="renderGrid()"><option value="">All Breeds</option><option>Angus</option><option>Hereford</option><option>Simmental</option><option>Charolais</option><option>Red Angus</option><option>Limousin</option><option>Gelbvieh</option></select>
+<label style="font-family:Oswald,sans-serif;font-size:11px;color:var(--tan);display:flex;align-items:center;gap:6px"><input type="checkbox" id="f-premium" onchange="renderGrid()"> Premium Only</label>
+</div>
+<div class="grid" id="ranch-grid"><div class="empty">Loading...</div></div>
+</div>
+<script>
+const STATES='AL,AK,AZ,AR,CA,CO,CT,DE,FL,GA,HI,ID,IL,IN,IA,KS,KY,LA,ME,MD,MA,MI,MN,MS,MO,MT,NE,NV,NH,NJ,NM,NY,NC,ND,OH,OK,OR,PA,RI,SC,SD,TN,TX,UT,VT,VA,WA,WV,WI,WY'.split(',');
+document.getElementById('f-state').innerHTML='<option value="">All States</option>'+STATES.map(s=>'<option>'+s+'</option>').join('');
+let ranches=[];
+async function loadRanches(){
+  const state=document.getElementById('f-state').value;
+  const qs=state?'?state='+state:'';
+  try{const r=await fetch('/api/ranch/directory'+qs);ranches=await r.json();renderGrid();}catch{document.getElementById('ranch-grid').innerHTML='<div class="empty">Failed to load directory</div>';}
+}
+function renderGrid(){
+  const search=(document.getElementById('f-search').value||'').toLowerCase();
+  const breed=document.getElementById('f-breed').value;
+  const premium=document.getElementById('f-premium').checked;
+  let list=ranches.filter(r=>{
+    if(search&&!(r.ranch_name||'').toLowerCase().includes(search))return false;
+    if(breed&&!(r.breeds||[]).some(b=>b.toLowerCase().includes(breed.toLowerCase())))return false;
+    if(premium&&!r.is_premium)return false;
+    return true;
+  });
+  if(!list.length){document.getElementById('ranch-grid').innerHTML='<div class="empty">No ranches found matching your filters.</div>';return;}
+  document.getElementById('ranch-grid').innerHTML=list.map(r=>{
+    const logo=r.logo_url?'<img class="ranch-card-logo" src="'+esc(r.logo_url)+'" alt="">':'<div class="ranch-card-logo">&#x1F404;</div>';
+    let badges='';if(r.is_verified)badges+='<span class="badge badge-verified">&#x2713; Verified</span>';if(r.is_premium)badges+='<span class="badge badge-premium">&#x2B50; Premium</span>';
+    const breeds=(r.breeds||[]).slice(0,3).map(b=>'<span class="chip">'+esc(b)+'</span>').join('');
+    return'<a href="/ranch-profile.html?id='+r.user_id+'" class="ranch-card"><div class="ranch-card-header">'+logo+'<div><div class="ranch-card-name">'+esc(r.ranch_name||'Ranch')+'</div><div class="ranch-card-loc">'+esc((r.location_city||'')+(r.location_state?', '+r.location_state:''))+'</div>'+badges+'</div></div><div>'+breeds+'</div><div class="listing-count">'+((r.active_listings||0))+' active listing'+(r.active_listings===1?'':'s')+'</div></a>';
+  }).join('');
+}
+function esc(s){if(!s)return'';const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+loadRanches();
+</script>
+</body>
+</html>

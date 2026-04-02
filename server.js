@@ -254,6 +254,9 @@ app.use('/api/sellers',  limiter(60),  require('./routes/sellers'));
 app.use('/api/cattle',   limiter(100), require('./routes/cattle'));
 app.use('/api/herd',     limiter(200), require('./routes/herd'));
 app.use('/api/finance',  limiter(200), require('./routes/finance'));
+app.use('/api/genetics', limiter(100), require('./routes/genetics'));
+app.use('/api/ranch',    limiter(100), require('./routes/ranch'));
+app.use('/api/sales',    limiter(100), require('./routes/sales'));
 
 // ── GET /api/settings (public — stats bar) ───────────
 app.get('/api/settings', async (req, res) => {
@@ -698,6 +701,107 @@ async function start() {
       )`);
       await query(`CREATE INDEX IF NOT EXISTS idx_budgets_user ON finance_budgets(user_id, tax_year)`);
       console.log('✅  Finance tables ready');
+
+      // Genetic pairings
+      await query(`CREATE TABLE IF NOT EXISTS genetic_pairings (
+        id               BIGSERIAL    PRIMARY KEY,
+        user_id          BIGINT       NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        bull_name        VARCHAR(100),
+        bull_breed       VARCHAR(50),
+        bull_epds        JSONB,
+        cow_herd_epds    JSONB,
+        cow_herd_breed   VARCHAR(50),
+        predicted_results JSONB,
+        notes            TEXT,
+        created_at       TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+      )`);
+      await query(`CREATE INDEX IF NOT EXISTS idx_pairings_user ON genetic_pairings(user_id)`);
+      console.log('✅  Genetic pairings table ready');
+
+      // Ranch profiles
+      await query(`CREATE TABLE IF NOT EXISTS ranch_profiles (
+        id              BIGSERIAL    PRIMARY KEY,
+        user_id         BIGINT       NOT NULL REFERENCES users(id) ON DELETE CASCADE UNIQUE,
+        ranch_name      VARCHAR(150),
+        tagline         VARCHAR(200),
+        story           TEXT,
+        founded_year    INTEGER,
+        acres           INTEGER,
+        location_city   VARCHAR(100),
+        location_state  VARCHAR(2),
+        phone           VARCHAR(20),
+        website         VARCHAR(200),
+        facebook        VARCHAR(200),
+        instagram       VARCHAR(200),
+        specialties     TEXT[],
+        breeds          TEXT[],
+        logo_url        TEXT,
+        banner_url      TEXT,
+        is_premium      BOOLEAN      DEFAULT false,
+        is_verified     BOOLEAN      DEFAULT false,
+        premium_since   TIMESTAMPTZ,
+        views           INTEGER      DEFAULT 0,
+        created_at      TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+        updated_at      TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+      )`);
+      console.log('✅  Ranch profiles table ready');
+
+      // Digital sales
+      await query(`CREATE TABLE IF NOT EXISTS sales_events (
+        id                     BIGSERIAL    PRIMARY KEY,
+        user_id                BIGINT       NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        title                  VARCHAR(200),
+        description            TEXT,
+        sale_date              TIMESTAMPTZ,
+        registration_deadline  TIMESTAMPTZ,
+        location_name          VARCHAR(200),
+        location_state         VARCHAR(2),
+        sale_type              VARCHAR(30)  DEFAULT 'production',
+        status                 VARCHAR(20)  DEFAULT 'draft',
+        banner_url             TEXT,
+        terms                  TEXT,
+        commission_rate        DECIMAL(4,2) DEFAULT 2.00,
+        created_at             TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+      )`);
+      await query(`CREATE TABLE IF NOT EXISTS sale_lots (
+        id                BIGSERIAL    PRIMARY KEY,
+        sale_id           BIGINT       NOT NULL REFERENCES sales_events(id) ON DELETE CASCADE,
+        lot_number        INTEGER,
+        title             VARCHAR(200),
+        description       TEXT,
+        head_count        INTEGER,
+        breed             VARCHAR(50),
+        sex               VARCHAR(20),
+        avg_weight        DECIMAL(6,2),
+        avg_age_months    INTEGER,
+        reserve_price     DECIMAL(10,2),
+        starting_bid      DECIMAL(10,2),
+        current_bid       DECIMAL(10,2),
+        current_bidder_id BIGINT       REFERENCES users(id),
+        bid_count         INTEGER      DEFAULT 0,
+        status            VARCHAR(20)  DEFAULT 'pending',
+        video_url         TEXT,
+        epd_data          JSONB,
+        notes             TEXT,
+        created_at        TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+      )`);
+      await query(`CREATE TABLE IF NOT EXISTS sale_bids (
+        id         BIGSERIAL    PRIMARY KEY,
+        lot_id     BIGINT       NOT NULL REFERENCES sale_lots(id) ON DELETE CASCADE,
+        user_id    BIGINT       REFERENCES users(id),
+        bid_amount DECIMAL(10,2),
+        bid_time   TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+        status     VARCHAR(20)  DEFAULT 'active'
+      )`);
+      await query(`CREATE TABLE IF NOT EXISTS sale_registrations (
+        id            BIGSERIAL    PRIMARY KEY,
+        sale_id       BIGINT       REFERENCES sales_events(id) ON DELETE CASCADE,
+        user_id       BIGINT       REFERENCES users(id) ON DELETE CASCADE,
+        approved      BOOLEAN      DEFAULT false,
+        registered_at TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+        UNIQUE(sale_id, user_id)
+      )`);
+      console.log('✅  Digital sales tables ready');
 
     } catch (migErr) {
       console.warn('⚠️  Migration warning:', migErr.message);

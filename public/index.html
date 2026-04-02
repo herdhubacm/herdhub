@@ -25,6 +25,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="icon" type="image/png" href="/logo.png">
 <link rel="apple-touch-icon" href="/logo.png">
+<link rel="manifest" href="/manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Herd Hub">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Source+Serif+4:wght@300;400;600&family=Oswald:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box}
@@ -44,6 +48,37 @@ nav a{font-family:'Oswald',sans-serif;font-size:13px;font-weight:500;letter-spac
 nav a:hover{color:var(--gold);background:rgba(255,255,255,.05)}
 .nav-cta{background:var(--rust)!important;color:white!important;padding:9px 16px!important;border-radius:3px;margin-left:8px;font-weight:700!important}
 .nav-cta:hover{background:var(--dark-rust)!important}
+.nav-dropdown{position:relative}
+.nav-dropdown>a{display:inline-flex;align-items:center;gap:4px}
+.nav-dropdown>a::after{content:'';border:4px solid transparent;border-top-color:var(--tan);margin-top:2px}
+.nav-dropdown:hover>a::after{border-top-color:var(--gold)}
+.dropdown-menu{display:none;position:absolute;top:100%;left:0;background:var(--dark-brown);border:1px solid rgba(201,169,110,.15);border-radius:4px;min-width:220px;padding:6px 0;box-shadow:0 8px 32px rgba(0,0,0,.5);z-index:110}
+.nav-dropdown:hover .dropdown-menu,.dropdown-menu:hover{display:block}
+.dropdown-menu a{display:block;padding:9px 18px;font-family:'Oswald',sans-serif;font-size:12px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--cream);text-decoration:none;transition:all .15s}
+.dropdown-menu a:hover{color:var(--gold);background:rgba(255,255,255,.04)}
+.dropdown-menu .sep{height:1px;background:rgba(201,169,110,.1);margin:4px 0}
+.pwa-banner{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--dark-brown);border-top:2px solid var(--rust);padding:14px 24px;z-index:120;align-items:center;justify-content:center;gap:16px;font-family:'Oswald',sans-serif;font-size:13px;color:var(--cream);letter-spacing:.04em}
+.pwa-banner.show{display:flex}
+.pwa-banner button{font-family:'Oswald',sans-serif;font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:8px 18px;border-radius:4px;border:none;cursor:pointer}
+.pwa-install-btn{background:var(--rust);color:white}
+.pwa-dismiss{background:none;color:var(--tan);border:1px solid rgba(201,169,110,.3)!important}
+.tools-section{background:var(--dark-brown);padding:64px 24px;border-top:2px solid var(--rust);margin-top:40px}
+.tools-inner{max-width:1280px;margin:0 auto}
+.tools-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:32px}
+.tool-card{background:rgba(255,255,255,.03);border:1px solid rgba(201,169,110,.1);border-radius:8px;padding:28px;transition:all .2s}
+.tool-card:hover{border-color:var(--gold);transform:translateY(-2px)}
+.tool-card .icon{font-size:32px;margin-bottom:12px}
+.tool-card h3{font-family:'Oswald',sans-serif;font-size:15px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--cream);margin-bottom:8px}
+.tool-card p{font-size:14px;color:var(--tan);line-height:1.6;margin-bottom:14px}
+.tool-card a{font-family:'Oswald',sans-serif;font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);text-decoration:none}
+.tool-card a:hover{color:var(--cream)}
+.sales-cta{background:linear-gradient(135deg,rgba(139,50,20,.2),rgba(44,26,14,.6));border:1px solid rgba(201,169,110,.1);border-radius:8px;padding:48px;text-align:center;margin-top:24px}
+.sales-cta h2{font-family:'Playfair Display',serif;font-size:clamp(28px,3vw,40px);font-weight:900;color:var(--cream);margin-bottom:10px}
+.sales-cta h2 span{color:var(--gold)}
+.sales-cta p{font-size:16px;color:var(--tan);max-width:500px;margin:0 auto 24px;line-height:1.6}
+.sales-cta a{display:inline-block;font-family:'Oswald',sans-serif;font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:13px 28px;border-radius:3px;text-decoration:none;margin:0 6px}
+@media(max-width:768px){.tools-grid{grid-template-columns:1fr 1fr}.dropdown-menu{min-width:180px}}
+@media(max-width:480px){.tools-grid{grid-template-columns:1fr}}
 .header-actions{display:flex;align-items:center;gap:10px}
 .btn-signin{font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--tan);text-decoration:none;padding:8px 16px;border:1px solid rgba(201,169,110,.4);border-radius:3px;transition:all .2s;cursor:pointer;background:none}
 .btn-signin:hover{color:var(--gold);border-color:var(--gold)}
@@ -455,17 +490,36 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
       <div class="logo-text"><div class="site-name">Herd <span style="color:var(--gold)">Hub</span></div><div class="site-tagline">American Cattle Marketplace</div></div>
     </div>
     <nav aria-label="Main navigation">
-      <a href="javascript:void(0)" data-action="category" data-cat="beef_cattle"><span aria-hidden="true">🐄</span> Cattle</a>
-      <a href="javascript:void(0)" data-action="category" data-cat="equipment"><span aria-hidden="true">🚜</span> Equipment</a>
-      <a href="javascript:void(0)" data-action="category" data-cat="trucks_trailers"><span aria-hidden="true">🚛</span> Trailers</a>
-      <a href="javascript:void(0)" data-action="category" data-cat="working_dogs"><span aria-hidden="true">🐕</span> Dogs</a>
-      <a href="javascript:void(0)" data-action="page" data-page="about">About</a>
-      <a href="javascript:void(0)" data-action="page" data-page="merch">Merch</a>
-      <a href="/herd-vision.html" style="color:var(--gold);font-weight:700">Herd Vision</a>
-      <a href="/gestation-calculator.html" style="color:var(--gold);font-weight:700">Gestation Calc</a>
-      <a href="/herd-manager.html" style="color:var(--gold);font-weight:700">Herd Manager</a>
-      <a href="/market-intelligence.html" style="color:var(--gold);font-weight:700">Market Intel</a>
-      <a href="/ranch-finance.html" style="color:var(--gold);font-weight:700">Finance</a>
+      <a href="javascript:void(0)" data-action="category" data-cat="beef_cattle">Browse</a>
+      <div class="nav-dropdown">
+        <a href="javascript:void(0)">Sell</a>
+        <div class="dropdown-menu">
+          <a href="javascript:void(0)" data-action="modal" data-modal="post-listing">Post a Listing</a>
+          <a href="/digital-sales.html">Run a Sale</a>
+          <div class="sep"></div>
+          <a href="/ranch-profile.html">My Ranch Profile</a>
+        </div>
+      </div>
+      <div class="nav-dropdown">
+        <a href="javascript:void(0)">Tools</a>
+        <div class="dropdown-menu">
+          <a href="/herd-vision.html">Herd Vision (EPD Analysis)</a>
+          <a href="/genetic-pairing.html">Genetic Pairing Engine</a>
+          <a href="/gestation-calculator.html">Gestation Calculator</a>
+          <a href="/market-intelligence.html">Market Prices</a>
+          <a href="/ranch-finance.html">Ranch Financials</a>
+          <a href="/herd-manager.html">Herd Manager</a>
+        </div>
+      </div>
+      <div class="nav-dropdown">
+        <a href="javascript:void(0)">Community</a>
+        <div class="dropdown-menu">
+          <a href="javascript:void(0)" data-action="page" data-page="articles">Ranch News</a>
+          <a href="javascript:void(0)" data-action="page" data-page="forum">Forum</a>
+          <a href="/ranch-directory.html">Ranch Directory</a>
+          <a href="javascript:void(0)" data-action="page" data-page="merch">Merch Store</a>
+        </div>
+      </div>
       <a href="javascript:void(0)" class="nav-cta" style="margin-left:20px" data-action="modal" data-modal="post-listing">+ Post Ad</a>
     </nav>
     <div class="header-actions">
@@ -2804,6 +2858,30 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
 </script>
 
 </main>
+<!-- RANCH TOOLS SECTION -->
+<section class="tools-section">
+<div class="tools-inner">
+<div style="text-align:center">
+<h2 style="font-family:'Playfair Display',serif;font-size:clamp(28px,3.5vw,42px);font-weight:900;color:var(--cream)">Everything You Need to Run Your <span style="color:var(--gold)">Operation</span></h2>
+<p style="font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:.15em;text-transform:uppercase;color:var(--tan);margin-top:8px">Professional-grade tools built for cattle producers — free with your Herd Hub account</p>
+</div>
+<div class="tools-grid">
+<div class="tool-card"><div class="icon">🐄</div><h3>Herd Manager</h3><p>Digital records for every animal. Weight history, health events, calving records.</p><a href="/herd-manager.html">Open Tool &rarr;</a></div>
+<div class="tool-card"><div class="icon">📈</div><h3>Market Prices</h3><p>Live cattle prices from sale barns near you. Know what your cattle are worth today.</p><a href="/market-intelligence.html">Open Tool &rarr;</a></div>
+<div class="tool-card"><div class="icon">🔬</div><h3>Herd Vision</h3><p>EPD analysis and bull selection guidance. Make smarter breeding decisions.</p><a href="/herd-vision.html">Open Tool &rarr;</a></div>
+<div class="tool-card"><div class="icon">🧬</div><h3>Genetic Pairing</h3><p>Predict your calf crop performance before breeding season starts.</p><a href="/genetic-pairing.html">Open Tool &rarr;</a></div>
+<div class="tool-card"><div class="icon">📅</div><h3>Gestation Calculator</h3><p>Track breeding dates and calving windows across your whole herd.</p><a href="/gestation-calculator.html">Open Tool &rarr;</a></div>
+<div class="tool-card"><div class="icon">💰</div><h3>Ranch Financials</h3><p>Simple P&amp;L tracking built for cattle operations. Ready for tax season.</p><a href="/ranch-finance.html">Open Tool &rarr;</a></div>
+</div>
+<div class="sales-cta">
+<h2>Run Your Own Online <span>Production Sale</span></h2>
+<p>Reach buyers nationwide. We handle bidding, payments, and settlement. Just 2% commission.</p>
+<a href="/digital-sales.html" style="background:var(--rust);color:white">Learn More</a>
+<a href="/digital-sales.html" style="border:2px solid rgba(245,239,224,.5);color:var(--cream)">Start Your Sale</a>
+</div>
+</div>
+</section>
+
 <div class="ribbon">🤝 Herd Hub is 100% American-Owned — Supporting Farmers & Ranchers Since 2018</div>
 <footer role="contentinfo">
   <div class="footer-inner">
@@ -2827,7 +2905,7 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
         <li><a href="javascript:void(0)" onclick="loadSeoPage('cow_calf_pairs','','Cow Calf Pairs')">Cow Calf Pairs</a></li>
 <li><a data-action="category" data-cat="bucking_bulls">Bucking Bulls</a></li><li><a data-action="category" data-cat="heifers">Bred Heifers</a></li><li><a data-action="category" data-cat="calves">Calves</a></li></ul></div>
       <div class="footer-col"><h4>Equipment</h4><ul><li><a data-action="category" data-cat="equipment">Tractors & Equipment</a></li><li><a data-action="category" data-cat="trucks_trailers">Trucks & Trailers</a></li><li><a data-action="category" data-cat="working_dogs">Working Dogs</a></li><li><a data-action="category" data-cat="farm_to_table">Farm to Table</a></li><li><a data-action="category" data-cat="feed_hay">Feed & Hay</a></li></ul></div>
-      <div class="footer-col"><h4>Resources</h4><ul><li><a href="javascript:void(0)" data-action="scroll" data-target="market">Cattle Prices</a></li><li><a href="https://www.ams.usda.gov/market-news/cattle" target="_blank" rel="noopener">Market Reports ↗</a></li><li><a>Ranch News</a></li><li><a href="/herd-vision.html">🔬 Herd Vision</a></li><li><a href="/market-intelligence.html">Market Intelligence</a></li><li><a href="/ranch-finance.html">Ranch Finance</a></li><li><a data-action="page" data-page="forum">Community Forum</a></li><li><a <a href="/herd-vision.html" style="color:var(--gold)">🔬 Herd Vision</a>-action="page" data-page="merch">Merch Store</a></li><li><a data-action="page" data-page="beef-boxes">Beef Boxes</a></li></ul></div>
+      <div class="footer-col"><h4>Resources</h4><ul><li><a href="/market-intelligence.html">Market Prices</a></li><li><a href="/herd-manager.html">Herd Manager</a></li><li><a href="/herd-vision.html">Herd Vision</a></li><li><a href="/genetic-pairing.html">Genetic Pairing</a></li><li><a href="/ranch-finance.html">Ranch Finance</a></li><li><a href="/digital-sales.html">Digital Sales</a></li><li><a href="/ranch-directory.html">Ranch Directory</a></li><li><a data-action="page" data-page="forum">Community Forum</a></li></ul></div>
       <div class="footer-col"><h4>Account</h4><ul><li><a data-action="modal" data-modal="auth">Sign In</a></li><li><a data-action="modal" data-modal="auth">Register Free</a></li><li><a data-action="modal" data-modal="post-listing">Post a Listing</a></li><li><a href="javascript:void(0)" data-action="page" data-page="contact">Contact Support</a></li></ul></div>
     </div>
     <div class="footer-bottom"><span>© 2026 Herd <span style="color:var(--gold)">Hub</span> · American Cattle Marketplace. All rights reserved.</span><span><a href="javascript:void(0)" data-action="page" data-page="privacy">Privacy Policy</a> · <a href="javascript:void(0)" data-action="page" data-page="terms">Terms of Service</a> · <a href="javascript:void(0)" data-action="page" data-page="user-agreement">User Agreement</a> · <a href="javascript:void(0)" data-action="modal" data-modal="auth" data-tab="register">Advertise</a></span></div>
@@ -5897,5 +5975,37 @@ async function loadUnreadCount() {
 </script>
 <!-- Cloudflare Turnstile SDK -->
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+<!-- PWA Install Banner -->
+<div class="pwa-banner" id="pwa-banner">
+<span>📱 Add Herd Hub to your home screen for quick access</span>
+<button class="pwa-install-btn" id="pwa-install-btn">Install</button>
+<button class="pwa-dismiss" onclick="dismissPWA()">✕</button>
+</div>
+<script>
+// Service Worker Registration
+if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').catch(()=>{});}
+
+// PWA Install Prompt
+let deferredPrompt=null;
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;showPWABanner();});
+document.getElementById('pwa-install-btn').addEventListener('click',()=>{
+  if(deferredPrompt){deferredPrompt.prompt();deferredPrompt.userChoice.then(()=>{deferredPrompt=null;document.getElementById('pwa-banner').classList.remove('show');});}
+  else{alert('Tap the Share button, then "Add to Home Screen"');}
+});
+function showPWABanner(){
+  const last=localStorage.getItem('pwa_dismissed');
+  if(last&&Date.now()-parseInt(last)<7*86400000)return;
+  if(window.matchMedia('(display-mode:standalone)').matches)return;
+  setTimeout(()=>{document.getElementById('pwa-banner').classList.add('show');},30000);
+}
+function dismissPWA(){document.getElementById('pwa-banner').classList.remove('show');localStorage.setItem('pwa_dismissed',Date.now());}
+// iOS detection — show banner after 30s
+if(/iPad|iPhone|iPod/.test(navigator.userAgent)&&!window.MSStream){
+  const last=localStorage.getItem('pwa_dismissed');
+  if(!last||Date.now()-parseInt(last)>=7*86400000){
+    if(!window.navigator.standalone)setTimeout(()=>{document.getElementById('pwa-banner').classList.add('show');},30000);
+  }
+}
+</script>
 </body>
 </html>

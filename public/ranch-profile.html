@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ranch Profile | Herd Hub</title>
+<meta name="theme-color" content="#2C1A0E">
+<link rel="icon" type="image/png" href="/logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Oswald:wght@300;400;500;600;700&family=Source+Serif+4:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--dark:#1C0F06;--brown:#2C1A0E;--rust:#8B3214;--rust2:#A63D1A;--gold:#C9A96E;--gold2:#E8C87A;--cream:#F5EFE0;--tan:#C4A882;--muted:#8C7560;--light:#E8DCC8;--good:#2E7D4F}
+body{font-family:'Source Serif 4',serif;background:var(--dark);color:var(--cream);min-height:100vh}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:0;opacity:.6}
+.site-header{background:var(--brown);border-bottom:2px solid var(--rust);padding:0 40px;display:flex;align-items:center;justify-content:space-between;height:64px;position:sticky;top:0;z-index:100}
+.logo{font-family:'Playfair Display',serif;font-size:22px;font-weight:900;color:var(--cream);text-decoration:none}.logo span{color:var(--gold)}
+.back-link{font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--tan);text-decoration:none}.back-link:hover{color:var(--gold)}
+.banner{width:100%;height:280px;object-fit:cover;background:linear-gradient(135deg,rgba(44,26,14,.8),rgba(139,50,20,.4));display:block;position:relative;z-index:1}
+.profile-wrap{max-width:1000px;margin:-60px auto 0;padding:0 40px 80px;position:relative;z-index:2}
+.profile-header{display:flex;gap:24px;align-items:flex-end;margin-bottom:32px;flex-wrap:wrap}
+.ranch-logo{width:120px;height:120px;border-radius:12px;object-fit:cover;border:4px solid var(--dark);background:var(--brown);display:flex;align-items:center;justify-content:center;font-size:48px}
+.ranch-info h1{font-family:'Playfair Display',serif;font-size:36px;font-weight:900;color:var(--cream)}
+.ranch-info .tagline{font-size:16px;color:var(--tan);margin-top:4px}
+.badge{display:inline-flex;align-items:center;gap:4px;font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:.08em;text-transform:uppercase;padding:4px 10px;border-radius:4px;margin-right:6px}
+.badge-verified{background:rgba(59,130,246,.2);color:#93c5fd}.badge-premium{background:rgba(201,169,110,.2);color:var(--gold2)}
+.detail-grid{display:grid;grid-template-columns:2fr 1fr;gap:24px;margin-bottom:32px}
+.card{background:rgba(44,26,14,.6);border:1px solid rgba(201,169,110,.12);border-radius:8px;padding:24px;margin-bottom:16px}
+.card-title{font-family:'Oswald',sans-serif;font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:16px}
+.detail-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(201,169,110,.06);font-size:14px}
+.detail-row .label{color:var(--muted)}.detail-row .value{color:var(--cream);font-weight:600}
+.chip{display:inline-block;font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:.06em;padding:4px 10px;border-radius:4px;background:rgba(201,169,110,.12);color:var(--tan);margin:3px}
+.listings-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px}
+.listing-card{background:rgba(44,26,14,.6);border:1px solid rgba(201,169,110,.12);border-radius:8px;overflow:hidden;transition:border-color .2s;cursor:pointer}
+.listing-card:hover{border-color:var(--gold)}
+.listing-card img{width:100%;height:160px;object-fit:cover}
+.listing-card .info{padding:14px}
+.listing-card .title{font-family:'Oswald',sans-serif;font-size:13px;font-weight:600;color:var(--cream);margin-bottom:4px}
+.listing-card .price{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:var(--gold)}
+.contact-btn{display:inline-flex;align-items:center;gap:8px;background:var(--rust);color:white;font-family:'Oswald',sans-serif;font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:12px 24px;border-radius:4px;border:none;cursor:pointer;text-decoration:none}
+.contact-btn:hover{background:var(--rust2)}
+.social-link{color:var(--tan);text-decoration:none;font-size:13px;display:block;margin-bottom:6px}.social-link:hover{color:var(--gold)}
+@media(max-width:768px){.profile-wrap{padding:0 16px 60px}.detail-grid{grid-template-columns:1fr}.site-header{padding:0 16px}.profile-header{align-items:center}.banner{height:180px}}
+</style>
+</head>
+<body>
+<header class="site-header"><a href="/" class="logo">Herd <span>Hub</span></a><a href="/" class="back-link">&larr; Back</a></header>
+<div id="banner-wrap"><div class="banner" id="banner-img"></div></div>
+<div class="profile-wrap">
+<div id="profile-content"><div style="text-align:center;padding:80px;color:var(--muted)">Loading ranch profile...</div></div>
+</div>
+<script>
+async function loadProfile(){
+  const params=new URLSearchParams(location.search);
+  const uid=params.get('id');
+  if(!uid){document.getElementById('profile-content').innerHTML='<div style="text-align:center;padding:80px;color:var(--muted)">No ranch ID specified.</div>';return;}
+  try{
+    const r=await fetch('/api/ranch/'+uid);
+    if(!r.ok)throw new Error('Not found');
+    const ranch=await r.json();
+    if(ranch.banner_url)document.getElementById('banner-img').style.backgroundImage='url('+ranch.banner_url+')';
+    document.title=ranch.ranch_name+' | Herd Hub';
+    const logoEl=ranch.logo_url?'<img class="ranch-logo" src="'+esc(ranch.logo_url)+'" alt="">':'<div class="ranch-logo">&#x1F404;</div>';
+    let badges='';
+    if(ranch.is_verified)badges+='<span class="badge badge-verified">&#x2713; Verified</span>';
+    if(ranch.is_premium)badges+='<span class="badge badge-premium">&#x2B50; Premium</span>';
+    let html='<div class="profile-header">'+logoEl+'<div class="ranch-info"><h1>'+esc(ranch.ranch_name||'Ranch')+'</h1>'+badges+'<div class="tagline">'+esc(ranch.tagline||'')+'</div></div></div>';
+    html+='<div class="detail-grid"><div>';
+    if(ranch.story)html+='<div class="card"><div class="card-title">Our Story</div><div style="font-size:15px;line-height:1.8;color:var(--light)">'+esc(ranch.story)+'</div></div>';
+    // Listings
+    if(ranch.listings&&ranch.listings.length){
+      html+='<div class="card"><div class="card-title">Active Listings ('+ranch.listings.length+')</div><div class="listings-grid">';
+      ranch.listings.forEach(l=>{
+        const img=l.photo_urls&&l.photo_urls.length?l.photo_urls[0]:'';
+        html+='<a href="/?listing='+l.id+'" class="listing-card" style="text-decoration:none">'+(img?'<img src="'+esc(img)+'" alt="">':'')+'<div class="info"><div class="title">'+esc(l.title)+'</div><div class="price">'+(l.price?'$'+parseFloat(l.price).toLocaleString():'Contact')+'</div></div></a>';
+      });
+      html+='</div></div>';
+    }
+    html+='</div><div>';
+    // Details sidebar
+    html+='<div class="card"><div class="card-title">Details</div>';
+    if(ranch.location_city||ranch.location_state)html+='<div class="detail-row"><span class="label">Location</span><span class="value">'+esc((ranch.location_city||'')+(ranch.location_state?', '+ranch.location_state:''))+'</span></div>';
+    if(ranch.founded_year)html+='<div class="detail-row"><span class="label">Founded</span><span class="value">'+ranch.founded_year+'</span></div>';
+    if(ranch.acres)html+='<div class="detail-row"><span class="label">Acreage</span><span class="value">'+ranch.acres.toLocaleString()+' acres</span></div>';
+    if(ranch.views)html+='<div class="detail-row"><span class="label">Profile Views</span><span class="value">'+ranch.views.toLocaleString()+'</span></div>';
+    html+='</div>';
+    if(ranch.breeds&&ranch.breeds.length)html+='<div class="card"><div class="card-title">Breeds</div>'+ranch.breeds.map(b=>'<span class="chip">'+esc(b)+'</span>').join('')+'</div>';
+    if(ranch.specialties&&ranch.specialties.length)html+='<div class="card"><div class="card-title">Specialties</div>'+ranch.specialties.map(s=>'<span class="chip">'+esc(s)+'</span>').join('')+'</div>';
+    html+='<div class="card"><div class="card-title">Contact</div>';
+    if(ranch.phone)html+='<a class="social-link" href="tel:'+ranch.phone+'">&#x1F4DE; '+esc(ranch.phone)+'</a>';
+    if(ranch.website)html+='<a class="social-link" href="'+esc(ranch.website)+'" target="_blank">&#x1F310; Website</a>';
+    if(ranch.facebook)html+='<a class="social-link" href="'+esc(ranch.facebook)+'" target="_blank">Facebook</a>';
+    if(ranch.instagram)html+='<a class="social-link" href="'+esc(ranch.instagram)+'" target="_blank">Instagram</a>';
+    html+='</div>';
+    html+='</div></div>';
+    document.getElementById('profile-content').innerHTML=html;
+  }catch(e){document.getElementById('profile-content').innerHTML='<div style="text-align:center;padding:80px;color:var(--muted)">Ranch profile not found.</div>';}
+}
+function esc(s){if(!s)return'';const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+loadProfile();
+</script>
+</body>
+</html>
