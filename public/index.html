@@ -1861,14 +1861,11 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
         </label>
       </div>
 
-      <!-- Cloudflare Turnstile — invisible bot protection -->
-      <div class="cf-turnstile" id="reg-turnstile"
-           data-sitekey="0x4AAAAAACvlxvfNDqtmZWE-"
-           data-theme="light"
-           data-size="flexible"
-           data-callback="onTurnstileSuccess"
-           data-error-callback="onTurnstileError"
-           style="margin:10px 0"></div>
+      <!-- Honeypot bot protection — hidden from real users -->
+      <div style="position:absolute;left:-9999px;top:-9999px" aria-hidden="true">
+        <label for="website">Website</label>
+        <input type="text" name="website" id="reg-honeypot" tabindex="-1" autocomplete="off">
+      </div>
 
       <button class="btn-primary" id="reg-submit-btn" style="width:100%;justify-content:center;margin-top:4px" data-action="register">Create Free Account</button>
       <p style="font-size:11px;color:#aaa;text-align:center;margin-top:10px;line-height:1.6">By creating an account you agree to the terms above. Your information is never sold to third parties.</p>
@@ -3550,18 +3547,8 @@ async function doLogin() {
   } catch(e) { errEl.textContent = 'Connection error'; errEl.style.display='block'; }
 }
 
-// ── Turnstile callbacks ────────────────────────────────
-let turnstileToken = null;
-function onTurnstileSuccess(token) {
-  turnstileToken = token;
-  const btn = document.getElementById('reg-submit-btn');
-  if (btn) btn.disabled = false;
-}
-function onTurnstileError() {
-  turnstileToken = null;
-  const err = document.getElementById('register-error');
-  if (err) { err.textContent = 'Security check failed. Please refresh and try again.'; err.style.display = 'block'; }
-}
+// ── Bot protection (honeypot) ─────────────────────────
+// Hidden field "website" — bots auto-fill, humans don't see it
 
 // Password strength check
 function checkPasswordStrength(pw) {
@@ -3594,13 +3581,9 @@ async function doRegister() {
     return;
   }
 
-  // Turnstile check — skip if widget not loaded (dev/localhost)
-  const tsWidget = document.getElementById('reg-turnstile');
-  if (tsWidget && !turnstileToken) {
-    errEl.textContent = 'Please complete the security check.';
-    errEl.style.display = 'block';
-    return;
-  }
+  // Honeypot check — bots fill hidden fields, real users don't
+  const honeypot = document.getElementById('reg-honeypot');
+  if (honeypot && honeypot.value) { return; }
 
   const newsletterOptIn = document.getElementById('reg-newsletter-check');
   const body = {
@@ -3613,7 +3596,7 @@ async function doRegister() {
     newsletter_opt_in: newsletterOptIn ? newsletterOptIn.checked : false,
     terms_accepted: true,
     terms_accepted_at: new Date().toISOString(),
-    cf_turnstile_token: turnstileToken || null,
+    website: honeypot ? honeypot.value : '',
   };
   try {
     const r = await fetch(`${API}/api/auth/register`, { method:'POST', headers:{'Content-Type':'application/json','X-CSRF-Token': csrfToken||''}, body: JSON.stringify(body) });
@@ -3624,7 +3607,7 @@ async function doRegister() {
     document.getElementById('auth-btn').style.display = 'none';
     document.getElementById('account-btn').style.display = 'inline-block';
     document.getElementById('account-name').textContent = d.user.name.split(' ')[0];
-    turnstileToken = null; if(window.turnstile){try{window.turnstile.reset('#reg-turnstile');}catch(e){}} if(window._trackEvent) window._trackEvent('auth','register','new_user'); closeModal('auth'); updateAuthUI(); setTimeout(() => showOnboarding(d.user.name), 600); showToast('Welcome to Herd Hub, ' + d.user.name.split(' ')[0] + '!');
+    if(window._trackEvent) window._trackEvent('auth','register','new_user'); closeModal('auth'); updateAuthUI(); setTimeout(() => showOnboarding(d.user.name), 600); showToast('Welcome to Herd Hub, ' + d.user.name.split(' ')[0] + '!');
   } catch(e) { errEl.textContent = 'Connection error'; errEl.style.display='block'; }
 }
 
@@ -5973,8 +5956,6 @@ async function loadUnreadCount() {
   } catch(e) {}
 }
 </script>
-<!-- Cloudflare Turnstile SDK -->
-<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <!-- PWA Install Banner -->
 <div class="pwa-banner" id="pwa-banner">
 <span>📱 Add Herd Hub to your home screen for quick access</span>
