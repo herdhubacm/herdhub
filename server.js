@@ -803,6 +803,15 @@ async function start() {
       )`);
       console.log('✅  Digital sales tables ready');
 
+      // Silent auction columns for sale_lots
+      await query(`ALTER TABLE sale_lots ADD COLUMN IF NOT EXISTS end_date TIMESTAMPTZ`);
+      await query(`ALTER TABLE sale_lots ADD COLUMN IF NOT EXISTS sale_confirmed BOOLEAN DEFAULT false`);
+      await query(`ALTER TABLE sale_lots ADD COLUMN IF NOT EXISTS winner_user_id BIGINT REFERENCES users(id)`);
+      await query(`ALTER TABLE sale_lots ADD COLUMN IF NOT EXISTS winner_notified BOOLEAN DEFAULT false`);
+      await query(`ALTER TABLE sale_lots ADD COLUMN IF NOT EXISTS location_state VARCHAR(2)`);
+      await query(`ALTER TABLE sale_lots ADD COLUMN IF NOT EXISTS photo_urls JSONB`);
+      console.log('✅  Silent auction columns ready');
+
     } catch (migErr) {
       console.warn('⚠️  Migration warning:', migErr.message);
     }
@@ -835,6 +844,12 @@ async function start() {
       console.log(`📊  USDA feed: ${process.env.USDA_AMS_BASE_URL || 'https://marsapi.ams.usda.gov/services/v1.2'}`);
       console.log(`🌍  Environment: ${process.env.NODE_ENV || 'development'}\n`);
     });
+
+    // ── Silent auction cron — check for ended auctions every hour ──
+    const { endExpiredAuctions } = require('./routes/sales');
+    setInterval(endExpiredAuctions, 60 * 60 * 1000); // every hour
+    setTimeout(endExpiredAuctions, 30 * 1000); // also run 30s after startup
+    console.log('⏰  Silent auction cron scheduled (hourly)');
 
     // ── Listing expiry cron — runs every 6 hours ──────
     const { sendEmail, listingExpiryEmail } = require('./services/email');

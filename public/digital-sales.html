@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Digital Sales Platform | Herd Hub</title>
-<meta name="description" content="Run online cattle production sales through Herd Hub. Reach buyers nationwide with digital bidding and settlement.">
+<title>Silent Auctions — Cattle & Equipment | Herd Hub</title>
+<meta name="description" content="Bid on cattle, equipment, and hay from verified producers. Silent auction format — no buyer's premium. Herd Hub.">
 <meta name="theme-color" content="#2C1A0E">
 <link rel="icon" type="image/png" href="/logo.png">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Oswald:wght@300;400;500;600;700&family=Source+Serif+4:wght@300;400;600&display=swap" rel="stylesheet">
@@ -16,37 +16,49 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .site-header{background:var(--brown);border-bottom:2px solid var(--rust);padding:0 40px;display:flex;align-items:center;justify-content:space-between;height:64px;position:sticky;top:0;z-index:100}
 .logo{font-family:'Playfair Display',serif;font-size:22px;font-weight:900;color:var(--cream);text-decoration:none}.logo span{color:var(--gold)}
 .back-link{font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--tan);text-decoration:none}.back-link:hover{color:var(--gold)}
-.hero{padding:60px 40px 40px;text-align:center;position:relative;z-index:1}
+.hero{padding:50px 40px 40px;text-align:center;position:relative;z-index:1}
 .hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(139,50,20,.25) 0%,transparent 70%);pointer-events:none}
-.hero h1{font-family:'Playfair Display',serif;font-size:clamp(36px,5vw,60px);font-weight:900;color:var(--cream)}.hero h1 em{font-style:italic;color:var(--gold)}
-.hero-sub{font-family:'Oswald',sans-serif;font-size:14px;letter-spacing:.15em;text-transform:uppercase;color:var(--tan);margin-top:8px}
-.hero-desc{font-size:15px;color:var(--muted);max-width:600px;margin:12px auto 0;line-height:1.7}
+.hero h1{font-family:'Playfair Display',serif;font-size:clamp(32px,5vw,56px);font-weight:900;color:var(--cream)}.hero h1 em{font-style:italic;color:var(--gold)}
+.hero-sub{font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:.15em;text-transform:uppercase;color:var(--tan);margin-top:8px}
+.hero-desc{font-size:14px;color:var(--muted);max-width:550px;margin:10px auto 0;line-height:1.6}
 .container{max-width:1100px;margin:0 auto;padding:0 40px 80px;position:relative;z-index:1}
-.section{margin-bottom:32px}
-.section-title{font-family:'Playfair Display',serif;font-size:24px;font-weight:900;color:var(--cream);margin-bottom:16px}
-.card{background:rgba(44,26,14,.6);border:1px solid rgba(201,169,110,.12);border-radius:8px;overflow:hidden;transition:border-color .2s}
-.card:hover{border-color:var(--gold)}
-.card-body{padding:20px}
-.card-title{font-family:'Oswald',sans-serif;font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:12px}
-.sale-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}
-.sale-banner{width:100%;height:180px;object-fit:cover;background:linear-gradient(135deg,rgba(139,50,20,.4),rgba(44,26,14,.8))}
-.sale-meta{display:flex;gap:16px;flex-wrap:wrap;font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:.06em;color:var(--muted);margin-bottom:8px}
-.sale-title{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--cream);margin-bottom:4px}
-.sale-ranch{font-size:13px;color:var(--tan)}
-.live-badge{display:inline-block;font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:.1em;text-transform:uppercase;padding:3px 8px;border-radius:3px;background:var(--danger);color:white;animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
-.lot-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;margin-top:16px}
-.lot-card{background:rgba(28,15,6,.4);border:1px solid rgba(201,169,110,.1);border-radius:6px;padding:16px;cursor:pointer;transition:border-color .2s}
+.filter-tabs{display:flex;gap:6px;margin:20px 0;flex-wrap:wrap;justify-content:center}
+.ftab{font-family:'Oswald',sans-serif;font-size:12px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;padding:8px 18px;border-radius:4px;border:1px solid rgba(201,169,110,.2);background:transparent;color:var(--tan);cursor:pointer;transition:all .2s}
+.ftab:hover{border-color:var(--gold);color:var(--gold)}.ftab.active{background:var(--rust);border-color:var(--rust);color:white}
+.lot-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;margin-top:20px}
+.lot-card{background:rgba(44,26,14,.6);border:1px solid rgba(201,169,110,.12);border-radius:8px;overflow:hidden;transition:border-color .2s;cursor:pointer}
 .lot-card:hover{border-color:var(--gold)}
-.lot-num{font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--rust2)}
-.lot-title{font-size:14px;font-weight:600;color:var(--cream);margin:4px 0}
-.lot-bid{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--gold)}
-.lot-bids{font-family:'Oswald',sans-serif;font-size:10px;color:var(--muted)}
-.btn{font-family:'Oswald',sans-serif;font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:10px 20px;border-radius:4px;border:none;cursor:pointer;transition:all .2s}
+.lot-img{width:100%;height:200px;object-fit:cover;background:rgba(201,169,110,.08);display:flex;align-items:center;justify-content:center;font-size:48px;color:var(--muted)}
+.lot-body{padding:18px}
+.lot-title{font-family:'Oswald',sans-serif;font-size:15px;font-weight:600;color:var(--cream);margin-bottom:4px}
+.lot-meta{font-size:12px;color:var(--muted);margin-bottom:10px}
+.lot-bid-row{display:flex;justify-content:space-between;align-items:center}
+.lot-price{font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:var(--gold)}
+.lot-bids{font-family:'Oswald',sans-serif;font-size:11px;color:var(--muted)}
+.lot-countdown{font-family:'Oswald',sans-serif;font-size:12px;color:var(--tan);margin-top:8px;letter-spacing:.04em}
+.badge-ending{display:inline-block;font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:2px 8px;border-radius:3px;background:rgba(192,57,43,.3);color:#f5b7b1;margin-bottom:6px}
+.badge-ended{display:inline-block;font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:2px 8px;border-radius:3px;background:rgba(140,117,96,.2);color:var(--muted);margin-bottom:6px}
+.detail-hero{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px}
+.detail-photo{width:100%;height:360px;border-radius:8px;object-fit:cover;background:rgba(201,169,110,.08)}
+.detail-info h2{font-family:'Playfair Display',serif;font-size:28px;font-weight:900;color:var(--cream);margin-bottom:8px}
+.detail-meta{font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.8}
+.detail-meta strong{color:var(--light)}
+.bid-box{background:rgba(44,26,14,.6);border:1px solid rgba(201,169,110,.15);border-radius:8px;padding:24px;margin-top:16px}
+.bid-current{font-family:'Playfair Display',serif;font-size:36px;font-weight:700;color:var(--gold);margin-bottom:4px}
+.bid-label{font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+.bid-input{display:flex;gap:10px;align-items:center}
+.bid-input input{flex:1;padding:12px 14px;background:rgba(28,15,6,.6);border:1px solid rgba(201,169,110,.2);border-radius:4px;color:var(--cream);font-family:'Source Serif 4',serif;font-size:16px}
+.bid-input input:focus{outline:none;border-color:var(--gold)}
+.bid-note{font-size:12px;color:var(--muted);margin-top:8px;font-style:italic}
+.countdown-big{font-family:'Oswald',sans-serif;font-size:18px;color:var(--gold);letter-spacing:.06em;margin-bottom:16px}
+.card{background:rgba(44,26,14,.6);border:1px solid rgba(201,169,110,.12);border-radius:8px;padding:24px;margin-bottom:16px}
+.card-title{font-family:'Oswald',sans-serif;font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:16px}
+.btn{font-family:'Oswald',sans-serif;font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:12px 24px;border-radius:4px;border:none;cursor:pointer;transition:all .2s}
 .btn-primary{background:var(--rust);color:white}.btn-primary:hover{background:var(--rust2)}
 .btn-ghost{background:transparent;color:var(--tan);border:1px solid rgba(201,169,110,.3)}.btn-ghost:hover{border-color:var(--gold);color:var(--gold)}
-.btn-sm{padding:6px 12px;font-size:11px}
-.countdown{font-family:'Oswald',sans-serif;font-size:13px;color:var(--gold);letter-spacing:.05em}
+.btn-good{background:var(--good);color:white}
+.btn-sm{padding:8px 14px;font-size:11px}
+.btn-danger{background:var(--danger);color:white}
 .field{margin-bottom:14px}
 .field label{display:block;font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--tan);margin-bottom:5px}
 .field input,.field select,.field textarea{width:100%;padding:10px 12px;background:rgba(28,15,6,.6);border:1px solid rgba(201,169,110,.2);border-radius:4px;color:var(--cream);font-family:'Source Serif 4',serif;font-size:14px}
@@ -54,167 +66,215 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .field select option{background:var(--brown);color:var(--cream)}
 .field textarea{resize:vertical;min-height:60px}
 .field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.field-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;align-items:flex-start;justify-content:center;padding:40px 20px;overflow-y:auto}
 .modal-overlay.open{display:flex}
-.modal-box{background:var(--brown);border:1px solid rgba(201,169,110,.2);border-radius:10px;padding:32px;max-width:600px;width:100%;margin:auto;position:relative}
+.modal-box{background:var(--brown);border:1px solid rgba(201,169,110,.2);border-radius:10px;padding:32px;max-width:640px;width:100%;margin:auto;position:relative}
 .modal-box h3{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--cream);margin-bottom:20px}
 .modal-close{position:absolute;top:12px;right:16px;background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer}
+.my-table{width:100%;border-collapse:collapse}
+.my-table th{font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-align:left;padding:8px;border-bottom:1px solid rgba(201,169,110,.15)}
+.my-table td{padding:8px;font-size:13px;border-bottom:1px solid rgba(201,169,110,.06);color:var(--light)}
+.status-active{color:var(--good)}.status-ended{color:var(--warn)}.status-sold{color:var(--gold)}.status-pending{color:var(--tan)}
 .view{display:none}.view.active{display:block}
-.cta-banner{background:linear-gradient(135deg,rgba(139,50,20,.3),rgba(44,26,14,.6));border:1px solid rgba(201,169,110,.15);border-radius:8px;padding:40px;text-align:center;margin:32px 0}
-.cta-banner h2{font-family:'Playfair Display',serif;font-size:28px;font-weight:900;color:var(--cream);margin-bottom:8px}
-.cta-banner p{font-size:15px;color:var(--tan);margin-bottom:20px;max-width:500px;margin-left:auto;margin-right:auto}
-@media(max-width:768px){.container{padding:0 16px 60px}.site-header{padding:0 16px}.sale-grid{grid-template-columns:1fr}.field-row{grid-template-columns:1fr}}
+.empty-state{text-align:center;padding:60px 20px;color:var(--muted)}
+.seller-note{font-size:12px;color:var(--muted);line-height:1.6;margin-top:12px;padding:12px;background:rgba(44,26,14,.4);border-radius:4px}
+@media(max-width:768px){.container{padding:0 16px 60px}.site-header{padding:0 16px}.detail-hero{grid-template-columns:1fr}.detail-photo{height:240px}.field-row,.field-row-3{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
-<header class="site-header"><a href="/" class="logo">Herd <span>Hub</span></a><a href="/" class="back-link">&larr; Back</a></header>
+<header class="site-header"><a href="/" class="logo">Herd <span>Hub</span></a><a href="/" class="back-link">&larr; Back to Marketplace</a></header>
 <section class="hero">
-<h1>Digital <em>Sales</em></h1>
-<div class="hero-sub">Run your production sale online</div>
-<p class="hero-desc">Reach buyers nationwide. We handle bidding, payments, and settlement. Just 2% commission on final sale price.</p>
+<h1>Silent <em>Auctions</em></h1>
+<div class="hero-sub">Bid on cattle from verified producers &mdash; no buyer's premium</div>
+<p class="hero-desc">Browse lots, place confidential bids, and win. Sellers and buyers settle directly. Herd Hub charges sellers a simple 2% success fee.</p>
 </section>
 <div class="container">
 
-<!-- Sales Directory -->
-<div class="view active" id="view-directory">
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px">
-<div class="section-title" style="margin:0">Upcoming Sales</div>
-<button class="btn btn-primary" onclick="showCreateSale()">+ Create a Sale</button>
+<!-- BROWSE -->
+<div class="view active" id="view-browse">
+<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px">
+  <div class="filter-tabs">
+    <button class="ftab active" onclick="setFilter('all',this)">All Active</button>
+    <button class="ftab" onclick="setFilter('ending',this)">Ending Soon</button>
+    <button class="ftab" onclick="setFilter('ended',this)">Recently Ended</button>
+  </div>
+  <div style="display:flex;gap:8px">
+    <button class="btn btn-ghost btn-sm" onclick="showMyAuctions()">My Auctions</button>
+    <button class="btn btn-primary btn-sm" onclick="showPostLot()">+ Post a Lot</button>
+  </div>
 </div>
-<div class="sale-grid" id="sales-grid"><div style="text-align:center;padding:40px;color:var(--muted)">Loading sales...</div></div>
+<div class="lot-grid" id="lot-grid"><div class="empty-state">Loading auctions...</div></div>
+</div>
 
-<div class="cta-banner">
-<h2>Sell Your Cattle <span style="color:var(--gold)">Online</span></h2>
-<p>Set up your production sale in minutes. Add lots, set reserves, and let buyers bid from anywhere in the country.</p>
-<button class="btn btn-primary" style="padding:14px 36px;font-size:14px" onclick="showCreateSale()">Start Your Sale</button>
-</div>
-</div>
-
-<!-- Sale Detail -->
+<!-- DETAIL -->
 <div class="view" id="view-detail">
-<button class="btn btn-ghost btn-sm" onclick="showView('directory')" style="margin-bottom:16px">&larr; Back to Sales</button>
-<div id="sale-detail"></div>
+<div style="margin-bottom:16px"><button class="btn btn-ghost btn-sm" onclick="showView('browse')">&larr; Back to Auctions</button></div>
+<div id="detail-content"></div>
+</div>
+
+<!-- MY AUCTIONS -->
+<div class="view" id="view-my">
+<div style="margin-bottom:16px"><button class="btn btn-ghost btn-sm" onclick="showView('browse')">&larr; Back to Auctions</button></div>
+<h2 style="font-family:'Playfair Display',serif;font-size:24px;font-weight:900;margin-bottom:20px">My <span style="color:var(--gold)">Auctions</span></h2>
+<div id="my-seller"></div>
+<div id="my-buyer"></div>
 </div>
 
 </div>
 
-<!-- Create Sale Modal -->
-<div class="modal-overlay" id="create-modal">
+<!-- POST LOT MODAL -->
+<div class="modal-overlay" id="post-modal">
 <div class="modal-box">
-<button class="modal-close" onclick="document.getElementById('create-modal').classList.remove('open')">&times;</button>
-<h3>Create a Sale</h3>
-<div class="field"><label>Sale Title</label><input type="text" id="cs-title" placeholder="e.g. Spring Production Sale 2026"></div>
+<button class="modal-close" onclick="closeModal()">&times;</button>
+<h3>Post a Lot for Auction</h3>
+<div class="field"><label>Title</label><input type="text" id="pl-title" placeholder="e.g. 10 Black Angus Steers — 650 lbs"></div>
 <div class="field-row">
-<div class="field"><label>Sale Date</label><input type="datetime-local" id="cs-date"></div>
-<div class="field"><label>Registration Deadline</label><input type="datetime-local" id="cs-deadline"></div>
+  <div class="field"><label>Category / Breed</label><input type="text" id="pl-breed" placeholder="e.g. Angus"></div>
+  <div class="field"><label>Sex</label><select id="pl-sex"><option value="steers">Steers</option><option value="heifers">Heifers</option><option value="bulls">Bulls</option><option value="cows">Cows</option><option value="pairs">Cow/Calf Pairs</option><option value="mixed">Mixed</option></select></div>
 </div>
-<div class="field-row">
-<div class="field"><label>Location</label><input type="text" id="cs-location" placeholder="e.g. Smith Ranch, Abilene"></div>
-<div class="field"><label>State</label><input type="text" id="cs-state" placeholder="TX" maxlength="2" style="text-transform:uppercase"></div>
+<div class="field-row-3">
+  <div class="field"><label>Head Count</label><input type="number" id="pl-head" value="1"></div>
+  <div class="field"><label>Avg Weight (lbs)</label><input type="number" id="pl-weight"></div>
+  <div class="field"><label>State</label><input type="text" id="pl-state" placeholder="TX" maxlength="2" style="text-transform:uppercase"></div>
 </div>
-<div class="field"><label>Sale Type</label><select id="cs-type"><option value="production">Production Sale</option><option value="dispersal">Dispersal Sale</option><option value="bull">Bull Sale</option><option value="female">Female Sale</option><option value="replacement">Replacement Heifer Sale</option></select></div>
-<div class="field"><label>Description</label><textarea id="cs-desc" rows="3"></textarea></div>
-<div class="field"><label>Terms & Conditions</label><textarea id="cs-terms" rows="2"></textarea></div>
-<div style="margin-top:16px"><button class="btn btn-primary" onclick="createSale()">Create Sale</button></div>
+<div class="field"><label>Description</label><textarea id="pl-desc" rows="3" placeholder="Describe the cattle, health history, genetics..."></textarea></div>
+<div class="field-row-3">
+  <div class="field"><label>Starting Bid ($)</label><input type="number" id="pl-start" step="0.01" placeholder="e.g. 500"></div>
+  <div class="field"><label>Reserve Price (optional)</label><input type="number" id="pl-reserve" step="0.01" placeholder="Hidden from buyers"></div>
+  <div class="field"><label>Auction Length</label><select id="pl-days"><option value="3">3 Days</option><option value="5">5 Days</option><option value="7" selected>7 Days</option><option value="10">10 Days</option><option value="14">14 Days</option></select></div>
+</div>
+<div class="seller-note">Herd Hub charges a 2% success fee if your lot sells. You will receive an invoice after confirming the sale. Buyer and seller settle the transaction directly.</div>
+<div style="margin-top:16px"><button class="btn btn-primary" onclick="submitLot()">Publish Lot</button></div>
 </div>
 </div>
 
 <script>
-let authToken=null;
+let authToken=null,allLots=[],currentFilter='all';
 async function initAuth(){try{const r=await fetch('/api/auth/refresh',{credentials:'include'});if(r.ok){const d=await r.json();if(d.token)authToken=d.token;}}catch{}}
-async function api(m,u,b){const o={method:m,headers:{Authorization:'Bearer '+authToken}};if(b){o.headers['Content-Type']='application/json';o.body=JSON.stringify(b);}const r=await fetch(u,o);if(!r.ok)throw new Error('Error');return r.json();}
+async function api(m,u,b){const o={method:m,headers:{Authorization:'Bearer '+authToken}};if(b){o.headers['Content-Type']='application/json';o.body=JSON.stringify(b);}const r=await fetch(u,o);if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e.error||'Error');}return r.json();}
+function showView(id){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.getElementById('view-'+id).classList.add('active');if(id==='browse')loadLots();}
 
-function showView(id){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.getElementById('view-'+id).classList.add('active');}
-
-async function loadSales(){
+async function loadLots(){
   try{
-    const sales=await fetch('/api/sales').then(r=>r.json());
-    if(!sales.length){document.getElementById('sales-grid').innerHTML='<div style="text-align:center;padding:40px;color:var(--muted);grid-column:1/-1">No sales listed yet. Be the first to create one!</div>';return;}
-    const now=new Date();
-    document.getElementById('sales-grid').innerHTML=sales.map(s=>{
-      const saleDate=new Date(s.sale_date);
-      const isLive=s.status==='live';
-      const isPast=saleDate<now&&!isLive;
-      return'<div class="card" style="cursor:pointer" onclick="loadSaleDetail('+s.id+')"><div class="sale-banner"></div><div class="card-body">'+(isLive?'<div style="margin-bottom:8px"><span class="live-badge">LIVE NOW</span></div>':'')+'<div class="sale-title">'+esc(s.title)+'</div><div class="sale-ranch">'+esc(s.ranch_name||s.seller_name||'')+'</div><div class="sale-meta"><span>'+fmtDate(s.sale_date)+'</span><span>'+esc(s.location_state||'')+'</span><span>'+s.lot_count+' lots</span></div></div></div>';
-    }).join('');
-  }catch{document.getElementById('sales-grid').innerHTML='<div style="padding:40px;color:var(--muted);text-align:center">Failed to load sales</div>';}
+    if(currentFilter==='ended')allLots=await fetch('/api/sales/lots/ended').then(r=>r.json());
+    else if(currentFilter==='ending')allLots=await fetch('/api/sales/lots/ending-soon').then(r=>r.json());
+    else allLots=await fetch('/api/sales/lots/active').then(r=>r.json());
+    renderGrid();
+  }catch{document.getElementById('lot-grid').innerHTML='<div class="empty-state">Failed to load auctions</div>';}
+}
+function setFilter(f,btn){currentFilter=f;document.querySelectorAll('.ftab').forEach(t=>t.classList.remove('active'));btn.classList.add('active');loadLots();}
+
+function renderGrid(){
+  const grid=document.getElementById('lot-grid');
+  if(!allLots.length){grid.innerHTML='<div class="empty-state">No auctions found.'+(currentFilter==='all'?'<br><button class="btn btn-primary" style="margin-top:16px" onclick="showPostLot()">Post the First Lot</button>':'')+'</div>';return;}
+  const now=Date.now();
+  grid.innerHTML=allLots.map(l=>{
+    const endMs=new Date(l.end_date).getTime();
+    const remaining=endMs-now;
+    const isEnded=l.status==='ended'||l.status==='sold'||remaining<=0;
+    const isEndingSoon=!isEnded&&remaining<86400000;
+    const currentBid=parseFloat(l.current_bid)||0;
+    const startBid=parseFloat(l.starting_bid)||0;
+    const bid=currentBid>0?'$'+commas(currentBid.toFixed(0)):startBid>0?'$'+commas(startBid.toFixed(0))+' start':'No bids';
+    const photos=tryParse(l.photo_urls);
+    const imgEl=photos.length?'<img class="lot-img" src="'+esc(photos[0])+'" alt="">':'<div class="lot-img">&#x1F404;</div>';
+    return'<div class="lot-card" onclick="openLot('+l.id+')">'+imgEl+'<div class="lot-body">'+(isEndingSoon?'<div class="badge-ending">Ending Soon</div>':'')+(isEnded?'<div class="badge-ended">Auction Ended'+(currentBid>0?' &mdash; Winning bid: $'+commas(currentBid.toFixed(0)):'')+'</div>':'')+'<div class="lot-title">'+esc(l.title||'Lot')+'</div><div class="lot-meta">'+esc(l.breed||'')+' &middot; '+(l.head_count||1)+' head'+(l.location_state?' &middot; '+l.location_state:'')+(l.ranch_name?' &middot; '+esc(l.ranch_name):'')+'</div><div class="lot-bid-row"><div class="lot-price">'+bid+'</div><div class="lot-bids">'+(l.bid_count||0)+' bid'+(l.bid_count===1?'':'s')+'</div></div>'+(isEnded?'':'<div class="lot-countdown" data-end="'+endMs+'"></div>')+'</div></div>';
+  }).join('');
+  updateCountdowns();
 }
 
-async function loadSaleDetail(id){
-  showView('detail');
-  const el=document.getElementById('sale-detail');
-  el.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted)">Loading...</div>';
+function updateCountdowns(){document.querySelectorAll('[data-end]').forEach(el=>{const diff=parseInt(el.dataset.end)-Date.now();if(diff<=0){el.textContent='Auction ended';el.style.color='var(--muted)';return;}const d=Math.floor(diff/86400000),h=Math.floor((diff%86400000)/3600000),m=Math.floor((diff%3600000)/60000),s=Math.floor((diff%60000)/1000);el.textContent=(d>0?d+'d ':'')+(h>0?h+'h ':'')+m+'m '+s+'s';if(diff<86400000)el.style.color='var(--danger)';});}
+setInterval(updateCountdowns,1000);
+
+async function openLot(id){
+  showView('detail');const el=document.getElementById('detail-content');
+  el.innerHTML='<div class="empty-state">Loading...</div>';
   try{
-    const sale=await fetch('/api/sales/'+id).then(r=>r.json());
-    const now=new Date();
-    const saleDate=new Date(sale.sale_date);
-    const diff=saleDate-now;
-    const daysLeft=Math.max(0,Math.floor(diff/86400000));
-    const hoursLeft=Math.max(0,Math.floor((diff%86400000)/3600000));
-    let html='<div class="sale-banner" style="height:200px;border-radius:8px;margin-bottom:24px"></div>';
-    html+='<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:16px;margin-bottom:24px"><div>';
-    html+='<div class="sale-title" style="font-size:28px">'+esc(sale.title)+'</div>';
-    html+='<div class="sale-ranch" style="font-size:15px">'+esc(sale.ranch_name||sale.seller_name||'')+'</div>';
-    html+='<div class="sale-meta" style="margin-top:8px"><span>'+fmtDate(sale.sale_date)+'</span><span>'+esc(sale.location_name||'')+(sale.location_state?', '+sale.location_state:'')+'</span></div>';
-    html+='</div><div style="text-align:right">';
-    if(diff>0)html+='<div class="countdown">'+daysLeft+'d '+hoursLeft+'h until sale</div>';
-    html+='<button class="btn btn-primary" style="margin-top:8px" onclick="registerForSale('+id+')">Register to Bid</button>';
-    html+='</div></div>';
-    if(sale.description)html+='<div style="font-size:15px;color:var(--light);line-height:1.7;margin-bottom:24px">'+esc(sale.description)+'</div>';
-    // Lots
-    if(sale.lots&&sale.lots.length){
-      html+='<div class="section-title">Sale Lots ('+sale.lots.length+')</div><div class="lot-grid">';
-      sale.lots.forEach(l=>{
-        const bid=l.current_bid?'$'+parseFloat(l.current_bid).toLocaleString():l.starting_bid?'$'+parseFloat(l.starting_bid).toLocaleString():'No bids';
-        html+='<div class="lot-card" onclick="showLotBid('+l.id+','+id+')"><div class="lot-num">Lot '+l.lot_number+'</div><div class="lot-title">'+esc(l.title||'Lot '+l.lot_number)+'</div><div style="font-size:12px;color:var(--muted);margin-bottom:6px">'+esc(l.breed||'')+' &middot; '+(l.head_count||1)+' head'+(l.sex?' &middot; '+l.sex:'')+'</div><div class="lot-bid">'+bid+'</div><div class="lot-bids">'+l.bid_count+' bid'+(l.bid_count===1?'':'s')+'</div></div>';
-      });
-      html+='</div>';
-    }
-    if(sale.terms)html+='<div style="margin-top:32px;padding:16px;background:rgba(44,26,14,.4);border:1px solid rgba(201,169,110,.08);border-radius:6px;font-size:12px;color:var(--muted);line-height:1.6"><strong style="color:var(--tan)">Terms & Conditions:</strong><br>'+esc(sale.terms)+'</div>';
-    el.innerHTML=html;
-  }catch{el.innerHTML='<div style="text-align:center;padding:40px;color:var(--danger)">Failed to load sale details</div>';}
+    const lot=await fetch('/api/sales/lots/'+id).then(r=>r.json());
+    const endMs=new Date(lot.end_date).getTime();const isEnded=lot.status==='ended'||lot.status==='sold'||endMs<=Date.now();
+    const currentBid=parseFloat(lot.current_bid)||0,startBid=parseFloat(lot.starting_bid)||0;
+    const minBid=currentBid>0?currentBid+1:startBid>0?startBid:1;
+    const photos=tryParse(lot.photo_urls);
+    const photoEl=photos.length?'<img class="detail-photo" src="'+esc(photos[0])+'" alt="">':'<div class="detail-photo" style="display:flex;align-items:center;justify-content:center;font-size:80px;color:var(--muted)">&#x1F404;</div>';
+    let html='<div class="detail-hero">'+photoEl+'<div>';
+    if(isEnded)html+='<div class="badge-ended" style="margin-bottom:8px">Auction Ended</div>';
+    else if(endMs-Date.now()<86400000)html+='<div class="badge-ending" style="margin-bottom:8px">Ending Soon</div>';
+    html+='<h2>'+esc(lot.title||'Lot')+'</h2><div class="detail-meta">';
+    if(lot.breed)html+='<strong>Breed:</strong> '+esc(lot.breed)+'<br>';
+    html+='<strong>Head:</strong> '+(lot.head_count||1);
+    if(lot.sex)html+=' &middot; <strong>Sex:</strong> '+esc(lot.sex);
+    if(lot.avg_weight)html+=' &middot; <strong>Avg Weight:</strong> '+lot.avg_weight+' lbs';
+    html+='<br>';
+    if(lot.location_state)html+='<strong>Location:</strong> '+esc(lot.location_state)+'<br>';
+    if(lot.ranch_name)html+='<strong>Seller:</strong> <a href="/ranch-profile.html?id='+(lot.ranch_user_id||lot.seller_id)+'" style="color:var(--gold)">'+esc(lot.ranch_name)+'</a><br>';
+    else if(lot.seller_name)html+='<strong>Seller:</strong> '+esc(lot.seller_name)+'<br>';
+    html+='<strong>Bids:</strong> '+lot.total_bids+(lot.last_bid_time?' &middot; Last bid: '+timeSince(lot.last_bid_time):'')+'</div>';
+    if(!isEnded)html+='<div class="countdown-big" data-end="'+endMs+'"></div>';
+    html+='<div class="bid-box"><div class="bid-label">Current High Bid</div><div class="bid-current">'+(currentBid>0?'$'+commas(currentBid.toFixed(0)):'$'+commas(startBid.toFixed(0))+' <span style="font-size:14px;color:var(--muted)">(starting bid)</span>')+'</div>';
+    if(isEnded){
+      if(lot.status==='sold')html+='<div style="margin-top:12px;color:var(--good);font-weight:600">Sale confirmed</div>';
+      else if(currentBid>0)html+='<div style="margin-top:12px;color:var(--muted)">Pending seller confirmation</div>';
+      else html+='<div style="margin-top:12px;color:var(--muted)">No bids received</div>';
+    }else if(authToken){
+      html+='<div class="bid-input" style="margin-top:12px"><span style="font-size:18px;color:var(--tan)">$</span><input type="number" id="bid-amount" min="'+minBid+'" step="1" value="'+minBid+'"><button class="btn btn-primary" onclick="placeBid('+lot.id+')">Place Bid</button></div><div class="bid-note">Your bid is confidential &mdash; other bidders only see the current high bid. Min: $'+commas(minBid.toFixed(0))+'</div>';
+    }else{html+='<div style="margin-top:12px;text-align:center;color:var(--muted)"><a href="/" style="color:var(--gold)">Sign in</a> to place a bid</div>';}
+    html+='</div></div></div>';
+    if(lot.description)html+='<div class="card"><div class="card-title">Description</div><div style="font-size:15px;line-height:1.8;color:var(--light);white-space:pre-line">'+esc(lot.description)+'</div></div>';
+    if(photos.length>1){html+='<div class="card"><div class="card-title">Photos</div><div style="display:flex;gap:8px;flex-wrap:wrap">';photos.forEach(p=>{html+='<img src="'+esc(p)+'" style="width:160px;height:120px;object-fit:cover;border-radius:4px;border:1px solid rgba(201,169,110,.15)">';});html+='</div></div>';}
+    el.innerHTML=html;updateCountdowns();
+  }catch(e){el.innerHTML='<div class="empty-state">Failed to load: '+esc(e.message)+'</div>';}
 }
 
-async function registerForSale(id){
-  if(!authToken){alert('Please sign in to register for bidding');return;}
-  try{await api('POST','/api/sales/'+id+'/register');alert('Registered! You can now bid on lots in this sale.');}catch{alert('Registration failed');}
+async function placeBid(lotId){
+  const amount=parseFloat(document.getElementById('bid-amount').value);
+  if(!amount||amount<=0){alert('Enter a valid bid');return;}
+  try{await api('POST','/api/sales/lots/'+lotId+'/bid',{bid_amount:amount});openLot(lotId);}catch(e){alert(e.message);}
 }
 
-function showLotBid(lotId,saleId){
-  if(!authToken){alert('Sign in to bid');return;}
-  const amount=prompt('Enter your bid amount ($):');
-  if(!amount)return;
-  api('POST','/api/sales/lots/'+lotId+'/bid',{bid_amount:parseFloat(amount)}).then(()=>{alert('Bid placed!');loadSaleDetail(saleId);}).catch(e=>alert('Bid failed — you may need to register first or bid higher.'));
-}
+function showPostLot(){if(!authToken){alert('Sign in to post a lot');return;}document.getElementById('post-modal').classList.add('open');}
+function closeModal(){document.getElementById('post-modal').classList.remove('open');}
 
-function showCreateSale(){
-  if(!authToken){alert('Sign in to create a sale');return;}
-  document.getElementById('create-modal').classList.add('open');
-}
-
-async function createSale(){
+async function submitLot(){
+  const title=document.getElementById('pl-title').value;if(!title){alert('Enter a title');return;}
   try{
-    const sale=await api('POST','/api/sales',{
-      title:document.getElementById('cs-title').value,
-      sale_date:document.getElementById('cs-date').value,
-      registration_deadline:document.getElementById('cs-deadline').value,
-      location_name:document.getElementById('cs-location').value,
-      location_state:document.getElementById('cs-state').value,
-      sale_type:document.getElementById('cs-type').value,
-      description:document.getElementById('cs-desc').value,
-      terms:document.getElementById('cs-terms').value
-    });
-    document.getElementById('create-modal').classList.remove('open');
-    alert('Sale created! Add lots to complete setup.');
-    loadSales();
-  }catch{alert('Failed to create sale');}
+    const sale=await api('POST','/api/sales',{title:'Silent Auction',sale_type:'auction'});
+    await api('POST','/api/sales/'+sale.id+'/lots',{title,breed:document.getElementById('pl-breed').value,sex:document.getElementById('pl-sex').value,head_count:document.getElementById('pl-head').value,avg_weight:document.getElementById('pl-weight').value,location_state:document.getElementById('pl-state').value,description:document.getElementById('pl-desc').value,starting_bid:document.getElementById('pl-start').value||0,reserve_price:document.getElementById('pl-reserve').value||null,auction_days:document.getElementById('pl-days').value});
+    closeModal();alert('Lot published! Your auction is now live.');loadLots();
+  }catch(e){alert('Failed: '+e.message);}
 }
 
-function fmtDate(d){if(!d)return'';const dt=new Date(d);const m=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return m[dt.getMonth()]+' '+dt.getDate()+', '+dt.getFullYear();}
+async function showMyAuctions(){
+  if(!authToken){alert('Sign in to view your auctions');return;}
+  showView('my');
+  try{
+    const[events,bids]=await Promise.all([api('GET','/api/sales/my/events'),api('GET','/api/sales/my/bids')]);
+    let sh='<div class="card"><div class="card-title">My Listings (Seller)</div>';
+    if(!events.length)sh+='<div style="color:var(--muted);font-size:13px">No lots listed yet.</div>';
+    else{sh+='<table class="my-table"><thead><tr><th>Lot</th><th>Status</th><th>High Bid</th><th>Bids</th><th>Ends</th><th></th></tr></thead><tbody>';
+      for(const ev of events){try{const s=await fetch('/api/sales/'+ev.id).then(r=>r.json());(s.lots||[]).forEach(l=>{const st=l.status||'pending';sh+='<tr><td style="color:var(--cream);cursor:pointer" onclick="openLot('+l.id+')">'+esc(l.title||'Lot')+'</td><td><span class="status-'+st+'">'+st+'</span></td><td>'+(l.current_bid?'$'+commas(parseFloat(l.current_bid).toFixed(0)):'—')+'</td><td>'+(l.bid_count||0)+'</td><td>'+(l.end_date?fmtDate(l.end_date):'—')+'</td><td>'+(st==='ended'&&l.current_bid?'<button class="btn btn-good btn-sm" onclick="confirmSale('+l.id+')">Confirm</button>':'')+'</td></tr>';});}catch{}}
+      sh+='</tbody></table>';}
+    sh+='</div>';document.getElementById('my-seller').innerHTML=sh;
+    let bh='<div class="card"><div class="card-title">My Bids (Buyer)</div>';
+    if(!bids.length)bh+='<div style="color:var(--muted);font-size:13px">No bids placed yet.</div>';
+    else{bh+='<table class="my-table"><thead><tr><th>Lot</th><th>My Bid</th><th>High Bid</th><th>Status</th><th>Winning?</th></tr></thead><tbody>';
+      bids.forEach(b=>{bh+='<tr style="cursor:pointer" onclick="openLot('+b.lot_id+')"><td style="color:var(--cream)">'+esc(b.title||'Lot')+'</td><td>$'+commas(parseFloat(b.my_last_bid).toFixed(0))+'</td><td>'+(b.current_bid?'$'+commas(parseFloat(b.current_bid).toFixed(0)):'—')+'</td><td><span class="status-'+(b.status||'active')+'">'+esc(b.status)+'</span></td><td style="color:'+(b.am_winning?'var(--good)':'var(--danger)')+'">'+(b.am_winning?'Yes':'Outbid')+'</td></tr>';});
+      bh+='</tbody></table>';}
+    bh+='</div>';document.getElementById('my-buyer').innerHTML=bh;
+  }catch{document.getElementById('my-seller').innerHTML='<div class="card" style="color:var(--muted)">Failed to load</div>';}
+}
+
+async function confirmSale(lotId){if(!confirm('Confirm sale to winning bidder? They will receive your contact info.'))return;try{await api('POST','/api/sales/lots/'+lotId+'/confirm');alert('Sale confirmed! Buyer notified.');showMyAuctions();}catch(e){alert('Failed: '+e.message);}}
+
 function esc(s){if(!s)return'';const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+function commas(n){return String(n).replace(/\B(?=(\d{3})+(?!\d))/g,',');}
+function fmtDate(d){if(!d)return'';const dt=new Date(d);const m=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return m[dt.getMonth()]+' '+dt.getDate();}
+function timeSince(d){const s=Math.floor((Date.now()-new Date(d).getTime())/1000);if(s<60)return s+'s ago';if(s<3600)return Math.floor(s/60)+'m ago';if(s<86400)return Math.floor(s/3600)+'h ago';return Math.floor(s/86400)+'d ago';}
+function tryParse(s){try{const a=JSON.parse(s||'[]');return Array.isArray(a)?a:[];}catch{return[];}}
 
-document.getElementById('create-modal').addEventListener('click',e=>{if(e.target.id==='create-modal')e.target.classList.remove('open');});
-document.addEventListener('DOMContentLoaded',async()=>{await initAuth();loadSales();});
+const p=new URLSearchParams(location.search);if(p.get('lot'))document.addEventListener('DOMContentLoaded',()=>setTimeout(()=>openLot(parseInt(p.get('lot'))),500));
+document.getElementById('post-modal').addEventListener('click',e=>{if(e.target.id==='post-modal')closeModal();});
+document.addEventListener('DOMContentLoaded',async()=>{await initAuth();loadLots();});
 </script>
 </body>
 </html>
