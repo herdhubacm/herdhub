@@ -429,8 +429,18 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
   .nl-bb-newsletter{border-right:none!important;border-bottom:1px solid var(--mid-brown)!important}
   .nl-bb-half{padding:28px 24px!important}
 }
+.hamburger{display:none;background:none;border:none;color:var(--cream);font-size:26px;cursor:pointer;padding:4px 8px;line-height:1}
+.mobile-nav-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:150}
+.mobile-nav{position:fixed;top:0;right:-280px;width:280px;height:100%;background:var(--dark-brown);z-index:160;padding:20px;overflow-y:auto;transition:right .3s ease;box-shadow:-4px 0 20px rgba(0,0,0,.5)}
+.mobile-nav.open{right:0}
+.mobile-nav-overlay.open{display:block}
+.mobile-nav .mn-close{background:none;border:none;color:var(--tan);font-size:24px;cursor:pointer;position:absolute;top:16px;right:16px}
+.mobile-nav a{display:block;font-family:'Oswald',sans-serif;font-size:14px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--cream);text-decoration:none;padding:12px 0;border-bottom:1px solid rgba(201,169,110,.08)}
+.mobile-nav a:hover{color:var(--gold)}
+.mobile-nav .mn-section{font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);padding:16px 0 6px;margin-top:4px}
 @media(max-width:600px){
-  nav a:not(.nav-cta){display:none!important}
+  nav{display:none!important}
+  .hamburger{display:block!important}
   #online-counter{display:none!important}
   html,body{overflow-x:hidden!important;max-width:100vw!important}
   .header-inner{padding:10px 12px!important}
@@ -519,6 +529,7 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
       </div>
       <a href="javascript:void(0)" class="nav-cta" style="margin-left:20px" data-action="modal" data-modal="post-listing">+ Post Ad</a>
     </nav>
+    <button class="hamburger" id="hamburger-btn" aria-label="Open menu">&#9776;</button>
     <div class="header-actions">
       <div id="online-counter" aria-label="Users currently online" style="font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:.08em;color:var(--tan);display:flex;align-items:center;gap:5px;margin-right:16px"><span style="display:inline-block;width:7px;height:7px;background:#4ade80;border-radius:50%;box-shadow:0 0 6px #4ade80"></span><span id="online-count">—</span> online</div>
       <button class="btn-signin" id="auth-btn" data-action="modal" data-modal="auth" aria-label="Sign in or register to Herd Hub">Sign In / Register</button>
@@ -528,7 +539,6 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
 </header>
 
 <!-- MAIN PAGE CONTENT -->
-<main id="main-content">
 <main id="main-content"><div id="page-home">
 
 <!-- HERO -->
@@ -2911,6 +2921,13 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
 </footer>
 
 <script>
+// ── HTML escaping (XSS protection) ────────────────────
+function escHtml(s) {
+  if (s === null || s === undefined) return '';
+  const map = {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'};
+  return String(s).replace(/[&<>"']/g, c => map[c]);
+}
+
 // ── State ──────────────────────────────────────────────
 
 // ── SEO Landing Page Router ─────────────────────────────
@@ -3746,14 +3763,14 @@ function renderCompactCard(l) {
   const price = l.price
     ? `$${Number(l.price).toLocaleString()}${l.price_type && l.price_type !== 'fixed' ? '<small style="font-size:9px;font-weight:400;color:#aaa"> ' + l.price_type.replace(/_/g,' ') + '</small>' : ''}`
     : `<span style="font-size:10px;color:#aaa">Call</span>`;
-  return `<div class="compact-card cc-animate" onclick="openListing(${l.id})" onkeydown="if(event.key==='Enter'||event.key===' ')openListing(${l.id})" tabindex="0" role="button" aria-label="View listing: ${l.title}">
+  return `<div class="compact-card cc-animate" onclick="openListing(${l.id})" onkeydown="if(event.key==='Enter'||event.key===' ')openListing(${l.id})" tabindex="0" role="button" aria-label="View listing: ${escHtml(l.title)}">
     <div class="cc-img">${imgHtml}${badge}</div>
     <div class="cc-body">
       <div class="cc-cat">${emoji} ${fmtCat(l.category)}</div>
-      <div class="cc-title">${l.title}</div>
+      <div class="cc-title">${escHtml(l.title)}</div>
       <div class="cc-footer">
         <div class="cc-price">${price}</div>
-        <div class="cc-loc">${l.state||''}</div>
+        <div class="cc-loc">${escHtml(l.state||'')}</div>
       </div>
     </div>
   </div>`;
@@ -3951,7 +3968,7 @@ async function loadTierSections() { await loadHomepageSections(); }
 function renderListingCard(l, darkBg) {
   const imgSrc = l.thumb_small || l.thumb;
   const img = imgSrc
-    ? `<img src="${imgSrc}" alt="${l.title}" loading="lazy" onerror="this.style.display='none'">`
+    ? `<img src="${imgSrc}" alt="${escHtml(l.title)}" loading="lazy" onerror="this.style.display='none'">`
     : `<div style="width:100%;height:100%;background:var(--light-tan);display:flex;align-items:center;justify-content:center;font-size:48px">${catEmoji(l.category)}</div>`;
   const tierBadge = {t_bone:'🥩 T-Bone', filet:'🥩 Filet', sirloin:'🥩 Sirloin', ribeye:'🥩 Ribeye'}[l.tier] || '';
   const badge = l.is_featured
@@ -3965,9 +3982,9 @@ function renderListingCard(l, darkBg) {
       <div class="listing-img">${img}${badge}<button class="listing-fav" onclick="event.stopPropagation();toggleSave(${l.id},this)">♡</button></div>
       <div class="listing-body">
         <div class="listing-cat">${catEmoji(l.category)} ${fmtCat(l.category)}</div>
-        <div class="listing-title">${l.title}</div>
-        <div class="listing-details">${[l.breed, l.seller_name].filter(Boolean).join(' · ')}</div>
-        <div class="listing-footer"><div class="listing-price">${price}</div><div class="listing-location">📍 ${l.city}, ${l.state}</div></div>
+        <div class="listing-title">${escHtml(l.title)}</div>
+        <div class="listing-details">${[l.breed, l.seller_name].filter(Boolean).map(escHtml).join(' · ')}</div>
+        <div class="listing-footer"><div class="listing-price">${price}</div><div class="listing-location">📍 ${escHtml(l.city||'')}, ${escHtml(l.state||'')}</div></div>
       </div>
     </div>`;
 }
@@ -5957,6 +5974,34 @@ async function loadUnreadCount() {
   } catch(e) {}
 }
 </script>
+<!-- Mobile Nav Drawer -->
+<div class="mobile-nav-overlay" id="mobile-nav-overlay"></div>
+<div class="mobile-nav" id="mobile-nav">
+  <button class="mn-close" id="mobile-nav-close">&times;</button>
+  <a href="/" style="margin-top:20px">Home</a>
+  <a href="javascript:void(0)" data-action="category" data-cat="beef_cattle" onclick="closeMobileNav()">Browse Listings</a>
+  <div class="mn-section">Sell</div>
+  <a href="javascript:void(0)" data-action="modal" data-modal="post-listing" onclick="closeMobileNav()">Post a Listing</a>
+  <a href="/digital-sales.html">Run a Sale</a>
+  <div class="mn-section">Tools</div>
+  <a href="/herd-vision.html">Herd Vision</a>
+  <a href="/genetic-pairing.html">Genetic Pairing</a>
+  <a href="/gestation-calculator.html">Gestation Calculator</a>
+  <a href="/market-intelligence.html">Market Prices</a>
+  <a href="/ranch-finance.html">Ranch Financials</a>
+  <a href="/herd-manager.html">Herd Manager</a>
+  <div class="mn-section">Community</div>
+  <a href="javascript:void(0)" data-action="page" data-page="articles" onclick="closeMobileNav()">Ranch News</a>
+  <a href="javascript:void(0)" data-action="page" data-page="forum" onclick="closeMobileNav()">Forum</a>
+  <a href="javascript:void(0)" data-action="page" data-page="merch" onclick="closeMobileNav()">Merch Store</a>
+</div>
+<script>
+document.getElementById('hamburger-btn').addEventListener('click',()=>{document.getElementById('mobile-nav').classList.add('open');document.getElementById('mobile-nav-overlay').classList.add('open');});
+document.getElementById('mobile-nav-close').addEventListener('click',closeMobileNav);
+document.getElementById('mobile-nav-overlay').addEventListener('click',closeMobileNav);
+function closeMobileNav(){document.getElementById('mobile-nav').classList.remove('open');document.getElementById('mobile-nav-overlay').classList.remove('open');}
+</script>
+
 <!-- PWA Install Banner -->
 <div class="pwa-banner" id="pwa-banner">
 <span>📱 Add Herd Hub to your home screen for quick access</span>

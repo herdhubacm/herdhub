@@ -351,17 +351,18 @@ router.post('/contact', async (req, res) => {
       return res.status(400).json({ error: 'Valid email required' });
 
     const { sendEmail } = require('../services/email');
+    const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     await sendEmail({
       to: process.env.SUPPORT_EMAIL || 'ad@theherdhub.com',
-      subject: `[Support] ${subject} — from ${name}`,
+      subject: `[Support] ${subject.slice(0,100)} — from ${name.slice(0,50)}`,
       html: `
         <div style="font-family:Arial,sans-serif;max-width:600px">
           <h2 style="color:#2c1a0e">Support Request</h2>
           <table style="border-collapse:collapse;width:100%">
-            <tr><td style="padding:8px;border:1px solid #ddd;font-weight:700;width:120px">Name</td><td style="padding:8px;border:1px solid #ddd">${name}</td></tr>
-            <tr><td style="padding:8px;border:1px solid #ddd;font-weight:700">Email</td><td style="padding:8px;border:1px solid #ddd"><a href="mailto:${email}">${email}</a></td></tr>
-            <tr><td style="padding:8px;border:1px solid #ddd;font-weight:700">Subject</td><td style="padding:8px;border:1px solid #ddd">${subject}</td></tr>
-            <tr><td style="padding:8px;border:1px solid #ddd;font-weight:700;vertical-align:top">Message</td><td style="padding:8px;border:1px solid #ddd;white-space:pre-wrap">${message}</td></tr>
+            <tr><td style="padding:8px;border:1px solid #ddd;font-weight:700;width:120px">Name</td><td style="padding:8px;border:1px solid #ddd">${esc(name)}</td></tr>
+            <tr><td style="padding:8px;border:1px solid #ddd;font-weight:700">Email</td><td style="padding:8px;border:1px solid #ddd">${esc(email)}</td></tr>
+            <tr><td style="padding:8px;border:1px solid #ddd;font-weight:700">Subject</td><td style="padding:8px;border:1px solid #ddd">${esc(subject)}</td></tr>
+            <tr><td style="padding:8px;border:1px solid #ddd;font-weight:700;vertical-align:top">Message</td><td style="padding:8px;border:1px solid #ddd;white-space:pre-wrap">${esc(message)}</td></tr>
           </table>
         </div>`,
       text: `Support request from ${name} (${email})\nSubject: ${subject}\n\n${message}`,

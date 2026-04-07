@@ -16,7 +16,7 @@
 const express = require('express');
 const fetch   = require('node-fetch');
 const { query } = require('../db/database');
-const { authenticateToken } = require('../middleware/auth');
+const { authenticateToken, requireAdmin } = require('../middleware/auth');
 
 const router   = express.Router();
 const BASE_URL = process.env.USDA_AMS_BASE_URL || 'https://marsapi.ams.usda.gov/services/v1.2';
@@ -214,7 +214,7 @@ router.get('/cache-status', async (_req, res) => {
 });
 
 // ── DELETE /api/market/cache ───────────────────────────
-router.delete('/cache', async (_req, res) => {
+router.delete('/cache', authenticateToken, requireAdmin, async (_req, res) => {
   try {
     await query('DELETE FROM market_cache');
     res.json({ message: 'Market cache cleared — next request fetches fresh USDA data' });

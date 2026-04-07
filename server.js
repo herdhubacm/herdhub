@@ -31,24 +31,6 @@ function validateCsrfToken(token) {
   return true;
 }
 
-// ── Cloudflare Turnstile verification ─────────────────
-async function verifyTurnstile(token) {
-  if (!process.env.TURNSTILE_SECRET_KEY) return true; // skip if not configured
-  if (!token) return false;
-  try {
-    const resp = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ secret: process.env.TURNSTILE_SECRET_KEY, response: token })
-    });
-    const data = await resp.json();
-    return data.success === true;
-  } catch(e) {
-    console.warn('Turnstile verify error:', e.message);
-    return true; // fail open — don't block legit users if Cloudflare is down
-  }
-}
-
 const { testConnection: testDb, query } = require('./db/database');
 const { testConnection: testStorage } = require('./services/storage');
 
@@ -286,8 +268,6 @@ app.use('/api/auth/register', (req, res, next) => {
   next();
 });
 
-// Export verifyTurnstile for use in auth route
-app.locals.verifyTurnstile = verifyTurnstile;
 
 // ── Online counter ────────────────────────────────────
 let activeVisitors = 0;
