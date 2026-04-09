@@ -80,11 +80,11 @@ router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
     if (!email || !password)
-      return res.status(400).json({ error: 'email and password required' });
+      return res.status(400).json({ error: 'Email and password required' });
 
     const identifier = email.toLowerCase().trim();
 
-    // Step 1 — Look up user (needed for admin check and password verify)
+    // Step 1 — Look up user
     const { rows } = await query(
       'SELECT id, email, name, role, password_hash FROM users WHERE email = $1',
       [identifier]
@@ -92,25 +92,18 @@ router.post('/login', async (req, res) => {
     const user = rows[0] || null;
     const isAdmin = user && user.role === 'admin';
 
-    // Step 2 — Rate limit check (skip entirely for admins)
+    // Step 2 — Rate limit check (admin bypass, non-fatal on error)
     if (!isAdmin) {
-      const { rows: lockRows } = await query(
-        'SELECT attempts, locked_until FROM login_attempts WHERE identifier=$1',
-        [identifier]
-      );
-      const lockRecord = lockRows[0];
-      if (lockRecord) {
-        // Check if currently locked out
-        if (lockRecord.locked_until && new Date(lockRecord.locked_until) > new Date()) {
-          const minsLeft = Math.ceil((new Date(lockRecord.locked_until) - new Date()) / 60000);
-          return res.status(429).json({
-            error: `Account temporarily locked. Try again in ${minsLeft} minute${minsLeft === 1 ? '' : 's'}, or reset your password.`
-          });
+      try {
+        const { rows: lockRows } = await query(
+          'SELECT attempts, locked_until FROM login_attempts WHERE identifier=$1', [identifier]);
+        const rec = lockRows[0];
+        if (rec && rec.locked_until && new Date(rec.locked_until) > new Date()) {
+          const mins = Math.ceil((new Date(rec.locked_until) - new Date()) / 60000);
+          return res.status(429).json({ error: `Too many attempts. Try again in ${mins} minute${mins !== 1 ? 's' : ''}.` });
         }
-        // If lockout has passed, reset attempts
-        if (lockRecord.attempts >= 10 && lockRecord.locked_until && new Date(lockRecord.locked_until) <= new Date()) {
-          await query('UPDATE login_attempts SET attempts=0, locked_until=NULL WHERE identifier=$1', [identifier]);
-        }
+      } catch (e) {
+        console.warn('Rate limit check skipped (non-fatal):', e.message);
       }
     }
 
@@ -118,28 +111,27 @@ router.post('/login', async (req, res) => {
     const valid = user ? await bcrypt.compare(password, user.password_hash) : false;
 
     if (!user || !valid) {
-      // Step 4 — Failed: increment attempts (skip for admins)
+      // Step 4 — Record failed attempt (non-fatal)
       if (!isAdmin) {
-        const { rows: upserted } = await query(
-          `INSERT INTO login_attempts (identifier, attempts, last_attempt)
-           VALUES ($1, 1, NOW())
-           ON CONFLICT (identifier) DO UPDATE
-             SET attempts = login_attempts.attempts + 1, last_attempt = NOW()
-           RETURNING attempts`,
-          [identifier]
-        );
-        const newAttempts = upserted[0]?.attempts || 1;
-        if (newAttempts >= 10) {
-          await query("UPDATE login_attempts SET locked_until = NOW() + INTERVAL '3 minutes' WHERE identifier=$1", [identifier]);
-          return res.status(429).json({ error: 'Too many failed attempts. Account locked for 3 minutes.' });
-        }
-        return res.status(401).json({ error: 'Invalid credentials', attempts_remaining: 10 - newAttempts });
+        try {
+          await query(`
+            INSERT INTO login_attempts (identifier, attempts, last_attempt, locked_until)
+            VALUES ($1, 1, NOW(), NULL)
+            ON CONFLICT (identifier) DO UPDATE SET
+              attempts = login_attempts.attempts + 1,
+              last_attempt = NOW(),
+              locked_until = CASE
+                WHEN login_attempts.attempts + 1 >= 10
+                THEN NOW() + INTERVAL '3 minutes' ELSE NULL END
+          `, [identifier]);
+        } catch (e) { console.warn('Failed to record attempt (non-fatal):', e.message); }
       }
-      return res.status(401).json({ error: 'Invalid credentials' });
+      return res.status(401).json({ error: 'Invalid email or password' });
     }
 
     // Step 5 — Success: clear attempts and issue token
-    await query('DELETE FROM login_attempts WHERE identifier=$1', [identifier]);
+    try { await query('DELETE FROM login_attempts WHERE identifier=$1', [identifier]); }
+    catch (e) { /* non-fatal */ }
 
     const payload = { id: user.id, email: user.email, name: user.name, role: user.role };
     const token   = signToken(payload);

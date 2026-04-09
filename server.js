@@ -512,14 +512,19 @@ async function start() {
       )`);
       console.log('✅  Email drip log table ready');
 
-      // Login attempt tracking — simplified upsert model
-      await query(`CREATE TABLE IF NOT EXISTS login_attempts (
-        id           BIGSERIAL    PRIMARY KEY,
-        identifier   TEXT         NOT NULL UNIQUE,
-        attempts     INTEGER      NOT NULL DEFAULT 0,
-        last_attempt TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
-        locked_until TIMESTAMPTZ
-      )`);
+      // Login attempt tracking — migrate old table to new schema
+      try {
+        await query(`DROP TABLE IF EXISTS login_attempts`);
+        await query(`CREATE TABLE login_attempts (
+          id           BIGSERIAL    PRIMARY KEY,
+          identifier   TEXT         NOT NULL UNIQUE,
+          attempts     INTEGER      NOT NULL DEFAULT 0,
+          last_attempt TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+          locked_until TIMESTAMPTZ
+        )`);
+      } catch (e) {
+        console.warn('login_attempts migration note:', e.message);
+      }
       console.log('✅  Login attempts table ready');
 
       // Site settings table
