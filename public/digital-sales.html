@@ -100,7 +100,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
     <button class="ftab" onclick="setFilter('ended',this)">Recently Ended</button>
   </div>
   <div style="display:flex;gap:8px">
-    <button class="btn btn-ghost btn-sm" onclick="showMyAuctions()">My Auctions</button>
+    <button class="btn btn-ghost btn-sm" onclick="showMyLots()">My Lot Sales</button>
     <button class="btn btn-primary btn-sm" onclick="showPostLot()">+ Post a Lot</button>
   </div>
 </div>
@@ -109,14 +109,14 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 
 <!-- DETAIL -->
 <div class="view" id="view-detail">
-<div style="margin-bottom:16px"><button class="btn btn-ghost btn-sm" onclick="showView('browse')">&larr; Back to Auctions</button></div>
+<div style="margin-bottom:16px"><button class="btn btn-ghost btn-sm" onclick="showView('browse')">&larr; Back to Lot Sales</button></div>
 <div id="detail-content"></div>
 </div>
 
-<!-- MY AUCTIONS -->
+<!-- MY LOT SALES -->
 <div class="view" id="view-my">
-<div style="margin-bottom:16px"><button class="btn btn-ghost btn-sm" onclick="showView('browse')">&larr; Back to Auctions</button></div>
-<h2 style="font-family:'Playfair Display',serif;font-size:24px;font-weight:900;margin-bottom:20px">My <span style="color:var(--gold)">Auctions</span></h2>
+<div style="margin-bottom:16px"><button class="btn btn-ghost btn-sm" onclick="showView('browse')">&larr; Back to Lot Sales</button></div>
+<h2 style="font-family:'Playfair Display',serif;font-size:24px;font-weight:900;margin-bottom:20px">My <span style="color:var(--gold)">Lot Sales</span></h2>
 <div id="my-seller"></div>
 <div id="my-buyer"></div>
 </div>
@@ -252,27 +252,52 @@ async function submitLot(){
   }catch(e){alert('Failed: '+e.message);}
 }
 
-async function showMyAuctions(){
-  if(!authToken){alert('Sign in to view your auctions');return;}
+async function showMyLots(){
+  if(!authToken){alert('Sign in to view your lot sales');return;}
   showView('my');
   try{
-    const[events,bids]=await Promise.all([api('GET','/api/sales/my/events'),api('GET','/api/sales/my/bids')]);
-    let sh='<div class="card"><div class="card-title">My Listings (Seller)</div>';
-    if(!events.length)sh+='<div style="color:var(--muted);font-size:13px">No lots listed yet.</div>';
-    else{sh+='<table class="my-table"><thead><tr><th>Lot</th><th>Status</th><th>High Bid</th><th>Bids</th><th>Ends</th><th></th></tr></thead><tbody>';
-      for(const ev of events){try{const s=await fetch('/api/sales/'+ev.id).then(r=>r.json());(s.lots||[]).forEach(l=>{const st=l.status||'pending';sh+='<tr><td style="color:var(--cream);cursor:pointer" onclick="openLot('+l.id+')">'+esc(l.title||'Lot')+'</td><td><span class="status-'+st+'">'+st+'</span></td><td>'+(l.current_bid?'$'+commas(parseFloat(l.current_bid).toFixed(0)):'—')+'</td><td>'+(l.bid_count||0)+'</td><td>'+(l.end_date?fmtDate(l.end_date):'—')+'</td><td>'+(st==='ended'&&l.current_bid?'<button class="btn btn-good btn-sm" onclick="confirmSale('+l.id+')">Confirm</button>':'')+'</td></tr>';});}catch{}}
-      sh+='</tbody></table>';}
+    const[lots,bids]=await Promise.all([api('GET','/api/sales/my/lots'),api('GET','/api/sales/my/bids')]);
+
+    // Seller section
+    let sh='<div class="card"><div class="card-title">My Lot Sales (Seller)</div>';
+    if(!lots.length)sh+='<div style="color:var(--muted);font-size:13px">You haven\'t posted any lot sales yet. <a href="javascript:void(0)" onclick="showPostLot()" style="color:var(--gold)">Post your first lot &rarr;</a></div>';
+    else{
+      sh+='<table class="my-table"><thead><tr><th>Lot</th><th>High Bid</th><th>Bids</th><th>Ends</th><th>Status</th><th></th></tr></thead><tbody>';
+      lots.forEach(l=>{
+        const st=l.status||'pending';
+        const bid=l.current_bid?'$'+commas(parseFloat(l.current_bid).toFixed(0)):'—';
+        const ends=l.end_date?fmtDate(l.end_date):'—';
+        let actions='';
+        if(st==='active')actions+='<button class="btn btn-sm" style="background:var(--warn);color:white;margin-right:4px" onclick="event.stopPropagation();endLotEarly('+l.id+')">End Early</button>';
+        if(st==='ended'&&l.current_bid)actions+='<button class="btn btn-good btn-sm" style="margin-right:4px" onclick="event.stopPropagation();confirmSale('+l.id+')">Confirm Sale</button>';
+        if(st!=='sold')actions+='<button class="btn btn-sm btn-danger" onclick="event.stopPropagation();deleteLot('+l.id+')">Delete</button>';
+        sh+='<tr style="cursor:pointer" onclick="openLot('+l.id+')"><td style="color:var(--cream);font-weight:600">'+esc(l.title||'Lot')+'</td><td>'+bid+'</td><td>'+(l.bid_count||0)+'</td><td>'+ends+'</td><td><span class="status-'+st+'">'+st+'</span></td><td style="white-space:nowrap">'+actions+'</td></tr>';
+      });
+      sh+='</tbody></table>';
+    }
     sh+='</div>';document.getElementById('my-seller').innerHTML=sh;
+
+    // Buyer section
     let bh='<div class="card"><div class="card-title">My Bids (Buyer)</div>';
     if(!bids.length)bh+='<div style="color:var(--muted);font-size:13px">No bids placed yet.</div>';
-    else{bh+='<table class="my-table"><thead><tr><th>Lot</th><th>My Bid</th><th>High Bid</th><th>Status</th><th>Winning?</th></tr></thead><tbody>';
+    else{
+      bh+='<table class="my-table"><thead><tr><th>Lot</th><th>My Bid</th><th>High Bid</th><th>Status</th><th>Winning?</th></tr></thead><tbody>';
       bids.forEach(b=>{bh+='<tr style="cursor:pointer" onclick="openLot('+b.lot_id+')"><td style="color:var(--cream)">'+esc(b.title||'Lot')+'</td><td>$'+commas(parseFloat(b.my_last_bid).toFixed(0))+'</td><td>'+(b.current_bid?'$'+commas(parseFloat(b.current_bid).toFixed(0)):'—')+'</td><td><span class="status-'+(b.status||'active')+'">'+esc(b.status)+'</span></td><td style="color:'+(b.am_winning?'var(--good)':'var(--danger)')+'">'+(b.am_winning?'Yes':'Outbid')+'</td></tr>';});
-      bh+='</tbody></table>';}
+      bh+='</tbody></table>';
+    }
     bh+='</div>';document.getElementById('my-buyer').innerHTML=bh;
   }catch{document.getElementById('my-seller').innerHTML='<div class="card" style="color:var(--muted)">Failed to load</div>';}
 }
 
-async function confirmSale(lotId){if(!confirm('Confirm sale to winning bidder? They will receive your contact info.'))return;try{await api('POST','/api/sales/lots/'+lotId+'/confirm');alert('Sale confirmed! Buyer notified.');showMyAuctions();}catch(e){alert('Failed: '+e.message);}}
+async function endLotEarly(id){
+  if(!confirm('End this lot sale early? Current bids will stand.'))return;
+  try{await api('PUT','/api/sales/lots/'+id+'/end');showMyLots();}catch(e){alert('Failed: '+e.message);}
+}
+async function deleteLot(id){
+  if(!confirm('Delete this lot? If bids exist it will be cancelled instead.'))return;
+  try{await api('DELETE','/api/sales/lots/'+id);showMyLots();}catch(e){alert('Failed: '+e.message);}
+}
+async function confirmSale(lotId){if(!confirm('Confirm sale to winning bidder? They will receive your contact info.'))return;try{await api('POST','/api/sales/lots/'+lotId+'/confirm');alert('Sale confirmed! Buyer notified.');showMyLots();}catch(e){alert('Failed: '+e.message);}}
 
 function esc(s){if(!s)return'';const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
 function commas(n){return String(n).replace(/\B(?=(\d{3})+(?!\d))/g,',');}
@@ -282,7 +307,7 @@ function tryParse(s){try{const a=JSON.parse(s||'[]');return Array.isArray(a)?a:[
 
 const p=new URLSearchParams(location.search);if(p.get('lot'))document.addEventListener('DOMContentLoaded',()=>setTimeout(()=>openLot(parseInt(p.get('lot'))),500));
 document.getElementById('post-modal').addEventListener('click',e=>{if(e.target.id==='post-modal')closeModal();});
-document.addEventListener('DOMContentLoaded',async()=>{await initAuth();loadLots();if(location.hash==='#post')setTimeout(showPostLot,500);});
+document.addEventListener('DOMContentLoaded',async()=>{await initAuth();loadLots();if(location.hash==='#post')setTimeout(showPostLot,500);if(location.hash==='#my-lots')setTimeout(showMyLots,500);});
 </script>
 </body>
 </html>
