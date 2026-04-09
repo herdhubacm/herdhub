@@ -83,37 +83,63 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ error: 'email and password required' });
 
     const identifier = email.toLowerCase().trim();
-    const ip = req.ip;
 
-    // ── Brute force check — max 8 failed attempts per 5 min (keyed on email) ──
-    const { rows: attempts } = await query(
-      `SELECT COUNT(*) AS c FROM login_attempts
-       WHERE identifier=$1 AND success=FALSE
-         AND created_at > NOW() - INTERVAL '5 minutes'`,
-      [identifier]
-    );
-    if (parseInt(attempts[0].c) >= 8) {
-      await query('INSERT INTO login_attempts (identifier, success, ip) VALUES ($1, false, $2)', [identifier, ip]);
-      return res.status(429).json({
-        error: 'Too many failed login attempts. Please wait a few minutes or reset your password.'
-      });
-    }
-
+    // Step 1 — Look up user (needed for admin check and password verify)
     const { rows } = await query(
       'SELECT id, email, name, role, password_hash FROM users WHERE email = $1',
       [identifier]
     );
+    const user = rows[0] || null;
+    const isAdmin = user && user.role === 'admin';
 
-    // Record attempt before checking password (timing-safe)
-    const user  = rows[0] || null;
+    // Step 2 — Rate limit check (skip entirely for admins)
+    if (!isAdmin) {
+      const { rows: lockRows } = await query(
+        'SELECT attempts, locked_until FROM login_attempts WHERE identifier=$1',
+        [identifier]
+      );
+      const lockRecord = lockRows[0];
+      if (lockRecord) {
+        // Check if currently locked out
+        if (lockRecord.locked_until && new Date(lockRecord.locked_until) > new Date()) {
+          const minsLeft = Math.ceil((new Date(lockRecord.locked_until) - new Date()) / 60000);
+          return res.status(429).json({
+            error: `Account temporarily locked. Try again in ${minsLeft} minute${minsLeft === 1 ? '' : 's'}, or reset your password.`
+          });
+        }
+        // If lockout has passed, reset attempts
+        if (lockRecord.attempts >= 10 && lockRecord.locked_until && new Date(lockRecord.locked_until) <= new Date()) {
+          await query('UPDATE login_attempts SET attempts=0, locked_until=NULL WHERE identifier=$1', [identifier]);
+        }
+      }
+    }
+
+    // Step 3 — Verify password
     const valid = user ? await bcrypt.compare(password, user.password_hash) : false;
 
-    await query(
-      'INSERT INTO login_attempts (identifier, success, ip) VALUES ($1, $2, $3)',
-      [identifier, valid, ip]
-    );
+    if (!user || !valid) {
+      // Step 4 — Failed: increment attempts (skip for admins)
+      if (!isAdmin) {
+        const { rows: upserted } = await query(
+          `INSERT INTO login_attempts (identifier, attempts, last_attempt)
+           VALUES ($1, 1, NOW())
+           ON CONFLICT (identifier) DO UPDATE
+             SET attempts = login_attempts.attempts + 1, last_attempt = NOW()
+           RETURNING attempts`,
+          [identifier]
+        );
+        const newAttempts = upserted[0]?.attempts || 1;
+        if (newAttempts >= 10) {
+          await query("UPDATE login_attempts SET locked_until = NOW() + INTERVAL '3 minutes' WHERE identifier=$1", [identifier]);
+          return res.status(429).json({ error: 'Too many failed attempts. Account locked for 3 minutes.' });
+        }
+        return res.status(401).json({ error: 'Invalid credentials', attempts_remaining: 10 - newAttempts });
+      }
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
 
-    if (!user || !valid) return res.status(401).json({ error: 'Invalid credentials' });
+    // Step 5 — Success: clear attempts and issue token
+    await query('DELETE FROM login_attempts WHERE identifier=$1', [identifier]);
 
     const payload = { id: user.id, email: user.email, name: user.name, role: user.role };
     const token   = signToken(payload);
@@ -512,4 +538,13 @@ router.post('/admin/verification-requests/:id/deny', authenticateToken, async (r
       [(req.body.admin_notes||'').slice(0,1000), req.user.id, parseInt(req.params.id)]);
     res.json({ message: 'Request denied' });
   } catch { res.status(500).json({ error: 'Server error' }); }
+});
+
+// ── Admin: clear all login lockouts ──────────────────
+router.delete('/admin/clear-lockouts', authenticateToken, async (req, res) => {
+  if (req.user.role !== 'admin') return res.status(403).json({ error: 'Admin only' });
+  try {
+    await query('DELETE FROM login_attempts');
+    res.json({ message: 'All login lockouts cleared' });
+  } catch { res.status(500).json({ error: 'Failed' }); }
 });

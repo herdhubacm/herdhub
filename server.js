@@ -139,10 +139,10 @@ const limiter = (max, windowMinutes = 15) => rateLimit({
 // Strict limiter for sensitive operations
 const strictLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 10,
+  max: 60,
   standardHeaders: true,
   legacyHeaders: false,
-  message: { error: 'Too many attempts. Please wait 15 minutes before trying again.' },
+  message: { error: 'Too many requests. Please wait a moment.' },
   keyGenerator: (req) => req.headers['cf-connecting-ip'] || req.headers['x-forwarded-for']?.split(',')[0] || req.ip,
 });
 
@@ -512,17 +512,14 @@ async function start() {
       )`);
       console.log('✅  Email drip log table ready');
 
-      // Login attempt tracking for brute force protection
+      // Login attempt tracking — simplified upsert model
       await query(`CREATE TABLE IF NOT EXISTS login_attempts (
-        id         BIGSERIAL    PRIMARY KEY,
-        identifier TEXT         NOT NULL,
-        success    BOOLEAN      NOT NULL DEFAULT FALSE,
-        ip         TEXT,
-        created_at TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+        id           BIGSERIAL    PRIMARY KEY,
+        identifier   TEXT         NOT NULL UNIQUE,
+        attempts     INTEGER      NOT NULL DEFAULT 0,
+        last_attempt TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+        locked_until TIMESTAMPTZ
       )`);
-      await query(`CREATE INDEX IF NOT EXISTS idx_login_attempts_ident ON login_attempts(identifier, created_at)`);
-      // Clean old attempts hourly
-      await query(`DELETE FROM login_attempts WHERE created_at < NOW() - INTERVAL '24 hours'`);
       console.log('✅  Login attempts table ready');
 
       // Site settings table
