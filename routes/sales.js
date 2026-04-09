@@ -154,7 +154,7 @@ router.post('/lots/:id/bid', authenticateToken, async (req, res) => {
             <p>Someone placed a higher bid on <strong>${l.title || 'Lot #' + l.lot_number}</strong>.</p>
             <p style="font-size:24px;color:#8B3214;font-weight:bold">Current high bid: $${amount.toFixed(2)}</p>
             <p><a href="https://theherdhub.com/digital-sales.html?lot=${lotId}" style="background:#8B3214;color:white;padding:12px 24px;border-radius:4px;text-decoration:none;display:inline-block">Place a New Bid</a></p>
-            <p style="color:#666;font-size:12px">— Herd Hub Silent Auctions</p>
+            <p style="color:#666;font-size:12px">— Herd Hub Lot Sales</p>
           </div>`);
       }
     }
@@ -169,7 +169,7 @@ router.post('/lots/:id/bid', authenticateToken, async (req, res) => {
           <p>Your lot <strong>${l.title || 'Lot #' + l.lot_number}</strong> has a new high bid.</p>
           <p style="font-size:24px;color:#2E7D4F;font-weight:bold">$${amount.toFixed(2)}</p>
           <p style="color:#666">Total bids: ${(l.bid_count || 0) + 1}</p>
-          <p style="color:#666;font-size:12px">— Herd Hub Silent Auctions</p>
+          <p style="color:#666;font-size:12px">— Herd Hub Lot Sales</p>
         </div>`);
     }
 
@@ -213,7 +213,7 @@ router.post('/lots/:id/confirm', authenticateToken, async (req, res) => {
           Email: ${sellerInfo.rows[0].email}<br>
           ${sellerInfo.rows[0].phone ? 'Phone: ' + sellerInfo.rows[0].phone : ''}</p>
           <p>Please contact the seller directly to arrange payment and delivery.</p>
-          <p style="color:#666;font-size:12px">— Herd Hub Silent Auctions</p>
+          <p style="color:#666;font-size:12px">— Herd Hub Lot Sales</p>
         </div>`);
     }
 
@@ -253,7 +253,7 @@ async function endExpiredAuctions() {
                 <p>You had the highest bid on <strong>${lot.title || 'Lot #' + lot.lot_number}</strong>.</p>
                 <p style="font-size:24px;color:#C9A96E;font-weight:bold">Your bid: $${parseFloat(lot.current_bid).toFixed(2)}</p>
                 <p>The seller will review and confirm the sale shortly. You'll receive their contact info once confirmed.</p>
-                <p style="color:#666;font-size:12px">— Herd Hub Silent Auctions</p>
+                <p style="color:#666;font-size:12px">— Herd Hub Lot Sales</p>
               </div>`);
           }
         }
@@ -263,7 +263,7 @@ async function endExpiredAuctions() {
             <h2 style="color:#2C1A0E">Your Auction Has Ended</h2>
             <p><strong>${lot.title || 'Lot #' + lot.lot_number}</strong></p>
             ${hasBids ? `<p style="font-size:24px;color:#2E7D4F;font-weight:bold">Winning bid: $${parseFloat(lot.current_bid).toFixed(2)}</p><p>Total bids: ${lot.bid_count || 0}</p>${!reserveMet ? '<p style="color:#C0392B"><strong>Note: Reserve price was not met.</strong> You may decline this sale.</p>' : ''}${winnerInfo}<p><a href="https://theherdhub.com/digital-sales.html" style="background:#8B3214;color:white;padding:12px 24px;border-radius:4px;text-decoration:none;display:inline-block">Confirm or Decline Sale</a></p>` : '<p style="color:#666">No bids were received on this lot.</p>'}
-            <p style="color:#666;font-size:12px">— Herd Hub Silent Auctions</p>
+            <p style="color:#666;font-size:12px">— Herd Hub Lot Sales</p>
           </div>`);
       }
     }
@@ -306,6 +306,39 @@ router.get('/my/events', authenticateToken, async (req, res) => {
   }
 });
 
+// GET /api/sales/my/lots — all lots created by logged-in user
+router.get('/my/lots', authenticateToken, async (req, res) => {
+  try {
+    const { rows } = await query(`
+      SELECT sl.id, sl.title, sl.current_bid, sl.bid_count, sl.end_date, sl.status,
+        sl.sale_confirmed, sl.starting_bid, sl.breed, sl.head_count
+      FROM sale_lots sl
+      JOIN sales_events se ON se.id=sl.sale_id
+      WHERE se.user_id=$1
+      ORDER BY sl.created_at DESC`, [req.user.id]);
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to load lots' });
+  }
+});
+
+// PUT /api/sales/lots/:id/end — seller ends auction early
+router.put('/lots/:id/end', authenticateToken, async (req, res) => {
+  try {
+    const lotId = parseInt(req.params.id);
+    const check = await query(
+      `SELECT sl.id, sl.status FROM sale_lots sl JOIN sales_events se ON se.id=sl.sale_id
+       WHERE sl.id=$1 AND se.user_id=$2`, [lotId, req.user.id]);
+    if (!check.rows.length) return res.status(403).json({ error: 'Not your lot' });
+    if (check.rows[0].status === 'ended' || check.rows[0].status === 'sold')
+      return res.status(400).json({ error: 'Auction already ended' });
+    await query("UPDATE sale_lots SET status='ended', end_date=NOW() WHERE id=$1", [lotId]);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to end auction' });
+  }
+});
+
 // GET /api/sales/my/bids
 router.get('/my/bids', authenticateToken, async (req, res) => {
   try {
@@ -324,9 +357,14 @@ router.get('/my/bids', authenticateToken, async (req, res) => {
   }
 });
 
-// POST /api/sales — create sale
+// POST /api/sales — create sale (verified sellers only)
 router.post('/', authenticateToken, async (req, res) => {
   try {
+    // Check verified status
+    const { rows: urows } = await query('SELECT is_verified FROM users WHERE id=$1', [req.user.id]);
+    if (!urows.length || !urows[0].is_verified) {
+      return res.status(403).json({ error: 'Only verified sellers can create lot sales. Request verification from your account page.' });
+    }
     const b = req.body;
     const { rows } = await query(`
       INSERT INTO sales_events (user_id, title, description, sale_date,
@@ -373,17 +411,22 @@ router.post('/:id/lots', authenticateToken, async (req, res) => {
   }
 });
 
-// ── DELETE /api/sales/lots/:id — delete own lot ──────
+// ── DELETE /api/sales/lots/:id — delete or cancel own lot ──
 router.delete('/lots/:id', authenticateToken, async (req, res) => {
   try {
     const lotId = parseInt(req.params.id);
     const check = await query(
-      `SELECT sl.id FROM sale_lots sl JOIN sales_events se ON se.id=sl.sale_id
+      `SELECT sl.id, sl.bid_count FROM sale_lots sl JOIN sales_events se ON se.id=sl.sale_id
        WHERE sl.id=$1 AND se.user_id=$2`, [lotId, req.user.id]);
     if (!check.rows.length) return res.status(403).json({ error: 'Not your lot' });
-    await query('DELETE FROM sale_bids WHERE lot_id=$1', [lotId]);
-    await query('DELETE FROM sale_lots WHERE id=$1', [lotId]);
-    res.json({ success: true });
+    if (parseInt(check.rows[0].bid_count) > 0) {
+      // Has bids — cancel instead of delete
+      await query("UPDATE sale_lots SET status='cancelled' WHERE id=$1", [lotId]);
+      res.json({ success: true, cancelled: true });
+    } else {
+      await query('DELETE FROM sale_lots WHERE id=$1', [lotId]);
+      res.json({ success: true, deleted: true });
+    }
   } catch (err) {
     console.error('DELETE lot error:', err.message);
     res.status(500).json({ error: 'Failed to delete lot' });

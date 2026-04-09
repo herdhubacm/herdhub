@@ -500,12 +500,14 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
       <div class="logo-text"><div class="site-name">Herd <span style="color:var(--gold)">Hub</span></div><div class="site-tagline">American Cattle Marketplace</div></div>
     </div>
     <nav aria-label="Main navigation">
-      <a href="javascript:void(0)" data-action="category" data-cat="beef_cattle">Browse</a>
+      <a href="javascript:void(0)" onclick="showAllListings()">Browse</a>
       <div class="nav-dropdown">
         <a href="javascript:void(0)">Sell</a>
         <div class="dropdown-menu">
           <a href="javascript:void(0)" data-action="modal" data-modal="post-listing">Post a Listing</a>
-          <a href="/digital-sales.html">Run a Sale</a>
+          <div class="sep"></div>
+          <a href="/digital-sales.html">Browse Lot Sales</a>
+          <a href="/digital-sales.html#post">Post a Lot Sale</a>
         </div>
       </div>
       <div class="nav-dropdown">
@@ -818,8 +820,8 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
       <div class="tool-card"><div class="icon">💰</div><h3>Ranch Financials</h3><p>Simple P&amp;L tracking built for cattle operations. Ready for tax season.</p><a href="/ranch-finance.html">Open Tool &rarr;</a></div>
       </div>
       <div class="sales-cta">
-      <h2>Run Your Own Online <span>Production Sale</span></h2>
-      <p>Reach buyers nationwide. We handle bidding, payments, and settlement. Just 2% commission.</p>
+      <h2>Sell Your Cattle with <span>Lot Sales</span></h2>
+      <p>List your cattle, set a price, and let buyers bid. Seller and buyer settle directly. Just 2% success fee.</p>
       <a href="/digital-sales.html" style="background:var(--rust);color:white">Learn More</a>
       <a href="/digital-sales.html" style="border:2px solid rgba(245,239,224,.5);color:var(--cream)">Start Your Sale</a>
       </div>
@@ -2920,7 +2922,7 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
         <li><a href="javascript:void(0)" onclick="loadSeoPage('cow_calf_pairs','','Cow Calf Pairs')">Cow Calf Pairs</a></li>
 <li><a data-action="category" data-cat="bucking_bulls">Bucking Bulls</a></li><li><a data-action="category" data-cat="heifers">Bred Heifers</a></li><li><a data-action="category" data-cat="calves">Calves</a></li></ul></div>
       <div class="footer-col"><h4>Equipment</h4><ul><li><a data-action="category" data-cat="equipment">Tractors & Equipment</a></li><li><a data-action="category" data-cat="trucks_trailers">Trucks & Trailers</a></li><li><a data-action="category" data-cat="working_dogs">Working Dogs</a></li><li><a data-action="category" data-cat="farm_to_table">Farm to Table</a></li><li><a data-action="category" data-cat="feed_hay">Feed & Hay</a></li></ul></div>
-      <div class="footer-col"><h4>Resources</h4><ul><li><a href="/market-intelligence.html">Market Prices</a></li><li><a href="/herd-manager.html">Herd Manager</a></li><li><a href="/herd-vision.html">Herd Vision</a></li><li><a href="/genetic-pairing.html">Genetic Pairing</a></li><li><a href="/ranch-finance.html">Ranch Finance</a></li><li><a href="/digital-sales.html">Digital Sales</a></li><li><a data-action="page" data-page="forum">Community Forum</a></li></ul></div>
+      <div class="footer-col"><h4>Resources</h4><ul><li><a href="/market-intelligence.html">Market Prices</a></li><li><a href="/herd-manager.html">Herd Manager</a></li><li><a href="/herd-vision.html">Herd Vision</a></li><li><a href="/genetic-pairing.html">Genetic Pairing</a></li><li><a href="/ranch-finance.html">Ranch Finance</a></li><li><a href="/digital-sales.html">Lot Sales</a></li><li><a data-action="page" data-page="forum">Community Forum</a></li></ul></div>
       <div class="footer-col"><h4>Account</h4><ul><li><a data-action="modal" data-modal="auth">Sign In</a></li><li><a data-action="modal" data-modal="auth">Register Free</a></li><li><a data-action="modal" data-modal="post-listing">Post a Listing</a></li><li><a href="javascript:void(0)" data-action="page" data-page="contact">Contact Support</a></li></ul></div>
     </div>
     <div class="footer-bottom"><span>© 2026 Herd <span style="color:var(--gold)">Hub</span> · American Cattle Marketplace. All rights reserved.</span><span><a href="javascript:void(0)" data-action="page" data-page="privacy">Privacy Policy</a> · <a href="javascript:void(0)" data-action="page" data-page="terms">Terms of Service</a> · <a href="javascript:void(0)" data-action="page" data-page="user-agreement">User Agreement</a> · <a href="javascript:void(0)" data-action="modal" data-modal="auth" data-tab="register">Advertise</a></span></div>
@@ -4843,24 +4845,21 @@ async function loadMyAuctions() {
   const container = document.getElementById('my-auctions-container');
   container.innerHTML = '<div class="loading">Loading…</div>';
   try {
-    const events = await fetch('/api/sales/my/events', { headers: { Authorization: 'Bearer ' + authToken } }).then(r => r.json());
-    let allLots = [];
-    for (const ev of events) {
-      try {
-        const sale = await fetch('/api/sales/' + ev.id).then(r => r.json());
-        (sale.lots || []).forEach(l => { l._sale_title = ev.title; allLots.push(l); });
-      } catch {}
-    }
-    if (!allLots.length) { container.innerHTML = '<p style="color:#888;text-align:center;padding:20px">No auction lots yet. <a href="/digital-sales.html" style="color:var(--rust)">Post your first lot →</a></p>'; return; }
-    container.innerHTML = '<table style="width:100%;border-collapse:collapse;font-size:14px"><thead><tr style="border-bottom:2px solid var(--light-tan)"><th style="text-align:left;padding:8px;font-family:Oswald,sans-serif;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#888">Lot</th><th style="text-align:left;padding:8px;font-family:Oswald,sans-serif;font-size:11px;color:#888">High Bid</th><th style="text-align:left;padding:8px;font-family:Oswald,sans-serif;font-size:11px;color:#888">Bids</th><th style="text-align:left;padding:8px;font-family:Oswald,sans-serif;font-size:11px;color:#888">Ends</th><th style="text-align:left;padding:8px;font-family:Oswald,sans-serif;font-size:11px;color:#888">Status</th><th style="padding:8px"></th></tr></thead><tbody>' +
-      allLots.map(l => {
+    const lots = await fetch('/api/sales/my/lots', { headers: { Authorization: 'Bearer ' + authToken } }).then(r => r.json());
+    if (!lots.length) { container.innerHTML = '<p style="color:#888;text-align:center;padding:20px">No lot sales yet. <a href="/digital-sales.html#post" style="color:var(--rust)">Post your first lot →</a></p>'; return; }
+    const thStyle = 'text-align:left;padding:8px;font-family:Oswald,sans-serif;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#888';
+    container.innerHTML = '<table style="width:100%;border-collapse:collapse;font-size:14px"><thead><tr style="border-bottom:2px solid var(--light-tan)"><th style="' + thStyle + '">Lot</th><th style="' + thStyle + '">High Bid</th><th style="' + thStyle + '">Bids</th><th style="' + thStyle + '">Ends</th><th style="' + thStyle + '">Status</th><th style="padding:8px"></th></tr></thead><tbody>' +
+      lots.map(l => {
         const bid = l.current_bid ? '$' + Number(l.current_bid).toLocaleString() : '—';
         const ends = l.end_date ? new Date(l.end_date).toLocaleDateString() : '—';
         const st = l.status || 'pending';
-        const stColor = st === 'active' ? 'var(--sage)' : st === 'ended' ? '#D4820A' : st === 'sold' ? 'var(--gold)' : '#888';
-        return '<tr style="border-bottom:1px solid var(--light-tan)"><td style="padding:8px"><a href="/digital-sales.html?lot=' + l.id + '" style="color:var(--rust);text-decoration:underline">' + escHtml(l.title || 'Lot') + '</a></td><td style="padding:8px">' + bid + '</td><td style="padding:8px">' + (l.bid_count || 0) + '</td><td style="padding:8px">' + ends + '</td><td style="padding:8px"><span style="color:' + stColor + ';font-weight:600;text-transform:uppercase;font-size:12px">' + st + '</span></td><td style="padding:8px"><button style="background:var(--rust);color:white;border:none;padding:5px 10px;border-radius:3px;font-family:Oswald,sans-serif;font-size:11px;cursor:pointer" onclick="deleteAuctionLot(' + l.id + ')">Delete</button>' + (st === 'ended' && l.current_bid ? ' <button style="background:var(--sage);color:white;border:none;padding:5px 10px;border-radius:3px;font-family:Oswald,sans-serif;font-size:11px;cursor:pointer" onclick="confirmAuctionSale(' + l.id + ')">Confirm Sale</button>' : '') + '</td></tr>';
+        const stColor = st === 'active' ? 'var(--sage)' : st === 'ended' ? '#D4820A' : st === 'sold' ? 'var(--gold)' : st === 'cancelled' ? 'var(--rust)' : '#888';
+        let actions = '<button style="background:var(--rust);color:white;border:none;padding:5px 10px;border-radius:3px;font-family:Oswald,sans-serif;font-size:11px;cursor:pointer" onclick="deleteAuctionLot(' + l.id + ')">Delete</button>';
+        if (st === 'active') actions += ' <button style="background:#D4820A;color:white;border:none;padding:5px 10px;border-radius:3px;font-family:Oswald,sans-serif;font-size:11px;cursor:pointer" onclick="endAuctionEarly(' + l.id + ')">End Early</button>';
+        if (st === 'ended' && l.current_bid) actions += ' <button style="background:var(--sage);color:white;border:none;padding:5px 10px;border-radius:3px;font-family:Oswald,sans-serif;font-size:11px;cursor:pointer" onclick="confirmAuctionSale(' + l.id + ')">Confirm Sale</button>';
+        return '<tr style="border-bottom:1px solid var(--light-tan)"><td style="padding:8px"><a href="/digital-sales.html?lot=' + l.id + '" style="color:var(--rust);text-decoration:underline">' + escHtml(l.title || 'Lot') + '</a></td><td style="padding:8px">' + bid + '</td><td style="padding:8px">' + (l.bid_count || 0) + '</td><td style="padding:8px">' + ends + '</td><td style="padding:8px"><span style="color:' + stColor + ';font-weight:600;text-transform:uppercase;font-size:12px">' + st + '</span></td><td style="padding:8px">' + actions + '</td></tr>';
       }).join('') + '</tbody></table>';
-  } catch (e) { container.innerHTML = '<p style="color:#888;text-align:center">Failed to load auctions</p>'; }
+  } catch (e) { container.innerHTML = '<p style="color:#888;text-align:center">Failed to load lot sales</p>'; }
 }
 async function deleteAuctionLot(id) {
   if (!confirm('Delete this auction lot? This cannot be undone.')) return;
@@ -4868,6 +4867,13 @@ async function deleteAuctionLot(id) {
     await fetch('/api/sales/lots/' + id, { method: 'DELETE', headers: { Authorization: 'Bearer ' + authToken } });
     loadMyAuctions();
   } catch { alert('Failed to delete'); }
+}
+async function endAuctionEarly(id) {
+  if (!confirm('End this auction early? Current bids will stand.')) return;
+  try {
+    await fetch('/api/sales/lots/' + id + '/end', { method: 'PUT', headers: { Authorization: 'Bearer ' + authToken } });
+    loadMyAuctions();
+  } catch { alert('Failed to end auction'); }
 }
 async function confirmAuctionSale(id) {
   if (!confirm('Confirm sale to the winning bidder?')) return;
@@ -6029,7 +6035,8 @@ async function loadUnreadCount() {
   <a href="javascript:void(0)" data-action="category" data-cat="beef_cattle" onclick="closeMobileNav()">Browse Listings</a>
   <div class="mn-section">Sell</div>
   <a href="javascript:void(0)" data-action="modal" data-modal="post-listing" onclick="closeMobileNav()">Post a Listing</a>
-  <a href="/digital-sales.html">Run a Sale</a>
+  <a href="/digital-sales.html">Browse Lot Sales</a>
+  <a href="/digital-sales.html#post">Post a Lot Sale</a>
   <div class="mn-section">Tools</div>
   <a href="/herd-vision.html">Herd Vision</a>
   <a href="/genetic-pairing.html">Genetic Pairing</a>

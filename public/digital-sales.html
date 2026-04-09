@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Silent Auctions — Cattle & Equipment | Herd Hub</title>
-<meta name="description" content="Bid on cattle, equipment, and hay from verified producers. Silent auction format — no buyer's premium. Herd Hub.">
+<title>Lot Sales — Cattle & Equipment | Herd Hub</title>
+<meta name="description" content="Bid on cattle, equipment, and hay from verified producers. No buyer's premium. Herd Hub Lot Sales.">
 <meta name="theme-color" content="#2C1A0E">
 <link rel="icon" type="image/png" href="/logo.png">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Oswald:wght@300;400;500;600;700&family=Source+Serif+4:wght@300;400;600&display=swap" rel="stylesheet">
@@ -85,7 +85,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 <body>
 <header class="site-header"><a href="/" class="logo">Herd <span>Hub</span></a><a href="/" class="back-link">&larr; Back to Marketplace</a></header>
 <section class="hero">
-<h1>Silent <em>Auctions</em></h1>
+<h1>Lot <em>Sales</em></h1>
 <div class="hero-sub">Bid on cattle from verified producers &mdash; no buyer's premium</div>
 <p class="hero-desc">Browse lots, place confidential bids, and win. Sellers and buyers settle directly. Herd Hub charges sellers a simple 2% success fee.</p>
 </section>
@@ -232,13 +232,21 @@ async function placeBid(lotId){
   try{await api('POST','/api/sales/lots/'+lotId+'/bid',{bid_amount:amount});openLot(lotId);}catch(e){alert(e.message);}
 }
 
-function showPostLot(){if(!authToken){alert('Sign in to post a lot');return;}document.getElementById('post-modal').classList.add('open');}
+async function showPostLot(){
+  if(!authToken){alert('Sign in to post a lot sale');return;}
+  // Check verified status
+  try{
+    const me=await fetch('/api/auth/me',{headers:{Authorization:'Bearer '+authToken}}).then(r=>r.json());
+    if(!me.is_verified){alert('Lot Sales are available to verified sellers only. Go to your account page to request verification — it\'s free and takes 24 hours.');return;}
+  }catch{alert('Could not verify your account status. Please try again.');return;}
+  document.getElementById('post-modal').classList.add('open');
+}
 function closeModal(){document.getElementById('post-modal').classList.remove('open');}
 
 async function submitLot(){
   const title=document.getElementById('pl-title').value;if(!title){alert('Enter a title');return;}
   try{
-    const sale=await api('POST','/api/sales',{title:'Silent Auction',sale_type:'auction'});
+    const sale=await api('POST','/api/sales',{title:'Lot Sale',sale_type:'lot_sale'});
     await api('POST','/api/sales/'+sale.id+'/lots',{title,breed:document.getElementById('pl-breed').value,sex:document.getElementById('pl-sex').value,head_count:document.getElementById('pl-head').value,avg_weight:document.getElementById('pl-weight').value,location_state:document.getElementById('pl-state').value,description:document.getElementById('pl-desc').value,starting_bid:document.getElementById('pl-start').value||0,reserve_price:document.getElementById('pl-reserve').value||null,auction_days:document.getElementById('pl-days').value});
     closeModal();alert('Lot published! Your auction is now live.');loadLots();
   }catch(e){alert('Failed: '+e.message);}
@@ -274,7 +282,7 @@ function tryParse(s){try{const a=JSON.parse(s||'[]');return Array.isArray(a)?a:[
 
 const p=new URLSearchParams(location.search);if(p.get('lot'))document.addEventListener('DOMContentLoaded',()=>setTimeout(()=>openLot(parseInt(p.get('lot'))),500));
 document.getElementById('post-modal').addEventListener('click',e=>{if(e.target.id==='post-modal')closeModal();});
-document.addEventListener('DOMContentLoaded',async()=>{await initAuth();loadLots();});
+document.addEventListener('DOMContentLoaded',async()=>{await initAuth();loadLots();if(location.hash==='#post')setTimeout(showPostLot,500);});
 </script>
 </body>
 </html>
