@@ -373,5 +373,22 @@ router.post('/:id/lots', authenticateToken, async (req, res) => {
   }
 });
 
+// ── DELETE /api/sales/lots/:id — delete own lot ──────
+router.delete('/lots/:id', authenticateToken, async (req, res) => {
+  try {
+    const lotId = parseInt(req.params.id);
+    const check = await query(
+      `SELECT sl.id FROM sale_lots sl JOIN sales_events se ON se.id=sl.sale_id
+       WHERE sl.id=$1 AND se.user_id=$2`, [lotId, req.user.id]);
+    if (!check.rows.length) return res.status(403).json({ error: 'Not your lot' });
+    await query('DELETE FROM sale_bids WHERE lot_id=$1', [lotId]);
+    await query('DELETE FROM sale_lots WHERE id=$1', [lotId]);
+    res.json({ success: true });
+  } catch (err) {
+    console.error('DELETE lot error:', err.message);
+    res.status(500).json({ error: 'Failed to delete lot' });
+  }
+});
+
 module.exports = router;
 module.exports.endExpiredAuctions = endExpiredAuctions;

@@ -1521,6 +1521,7 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
       <button class="acct-tab" data-action="acct-tab" data-tab="listings">📋 My Listings</button>
       <button class="acct-tab" data-action="acct-tab" data-tab="saved">❤️ Saved</button>
       <button class="acct-tab" data-action="acct-tab" data-tab="searches">🔔 Saved Searches</button>
+      <button class="acct-tab" data-action="acct-tab" data-tab="auctions">🔨 My Auctions</button>
       <button class="acct-tab" data-action="acct-tab" data-tab="messages">💬 Messages <span id="msg-badge" style="display:none;background:var(--rust);color:white;font-size:10px;padding:2px 6px;border-radius:10px;margin-left:4px">0</span></button>
       <button class="acct-tab" data-action="acct-tab" data-tab="post">+ Post New Listing</button>
     </div>
@@ -1639,6 +1640,12 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
       </div>
 
       <div id="saved-searches-list"><div class="loading">Loading saved searches…</div></div>
+    </div>
+
+    <!-- My Auctions Panel -->
+    <div class="acct-panel" id="acct-panel-auctions">
+      <h3 style="font-family:'Playfair Display',serif;font-size:20px;color:var(--dark-brown);margin-bottom:20px">My Auctions</h3>
+      <div id="my-auctions-container"><div class="loading">Loading your auction lots…</div></div>
     </div>
 
     <!-- Messages Panel -->
@@ -4829,6 +4836,46 @@ function switchAcctTab(tab) {
   if (tab === 'saved')     loadSavedListings();
   if (tab === 'searches')  loadSavedSearches();
   if (tab === 'messages')  loadMyMessages();
+  if (tab === 'auctions')  loadMyAuctions();
+}
+
+async function loadMyAuctions() {
+  const container = document.getElementById('my-auctions-container');
+  container.innerHTML = '<div class="loading">Loading…</div>';
+  try {
+    const events = await fetch('/api/sales/my/events', { headers: { Authorization: 'Bearer ' + authToken } }).then(r => r.json());
+    let allLots = [];
+    for (const ev of events) {
+      try {
+        const sale = await fetch('/api/sales/' + ev.id).then(r => r.json());
+        (sale.lots || []).forEach(l => { l._sale_title = ev.title; allLots.push(l); });
+      } catch {}
+    }
+    if (!allLots.length) { container.innerHTML = '<p style="color:#888;text-align:center;padding:20px">No auction lots yet. <a href="/digital-sales.html" style="color:var(--rust)">Post your first lot →</a></p>'; return; }
+    container.innerHTML = '<table style="width:100%;border-collapse:collapse;font-size:14px"><thead><tr style="border-bottom:2px solid var(--light-tan)"><th style="text-align:left;padding:8px;font-family:Oswald,sans-serif;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#888">Lot</th><th style="text-align:left;padding:8px;font-family:Oswald,sans-serif;font-size:11px;color:#888">High Bid</th><th style="text-align:left;padding:8px;font-family:Oswald,sans-serif;font-size:11px;color:#888">Bids</th><th style="text-align:left;padding:8px;font-family:Oswald,sans-serif;font-size:11px;color:#888">Ends</th><th style="text-align:left;padding:8px;font-family:Oswald,sans-serif;font-size:11px;color:#888">Status</th><th style="padding:8px"></th></tr></thead><tbody>' +
+      allLots.map(l => {
+        const bid = l.current_bid ? '$' + Number(l.current_bid).toLocaleString() : '—';
+        const ends = l.end_date ? new Date(l.end_date).toLocaleDateString() : '—';
+        const st = l.status || 'pending';
+        const stColor = st === 'active' ? 'var(--sage)' : st === 'ended' ? '#D4820A' : st === 'sold' ? 'var(--gold)' : '#888';
+        return '<tr style="border-bottom:1px solid var(--light-tan)"><td style="padding:8px"><a href="/digital-sales.html?lot=' + l.id + '" style="color:var(--rust);text-decoration:underline">' + escHtml(l.title || 'Lot') + '</a></td><td style="padding:8px">' + bid + '</td><td style="padding:8px">' + (l.bid_count || 0) + '</td><td style="padding:8px">' + ends + '</td><td style="padding:8px"><span style="color:' + stColor + ';font-weight:600;text-transform:uppercase;font-size:12px">' + st + '</span></td><td style="padding:8px"><button style="background:var(--rust);color:white;border:none;padding:5px 10px;border-radius:3px;font-family:Oswald,sans-serif;font-size:11px;cursor:pointer" onclick="deleteAuctionLot(' + l.id + ')">Delete</button>' + (st === 'ended' && l.current_bid ? ' <button style="background:var(--sage);color:white;border:none;padding:5px 10px;border-radius:3px;font-family:Oswald,sans-serif;font-size:11px;cursor:pointer" onclick="confirmAuctionSale(' + l.id + ')">Confirm Sale</button>' : '') + '</td></tr>';
+      }).join('') + '</tbody></table>';
+  } catch (e) { container.innerHTML = '<p style="color:#888;text-align:center">Failed to load auctions</p>'; }
+}
+async function deleteAuctionLot(id) {
+  if (!confirm('Delete this auction lot? This cannot be undone.')) return;
+  try {
+    await fetch('/api/sales/lots/' + id, { method: 'DELETE', headers: { Authorization: 'Bearer ' + authToken } });
+    loadMyAuctions();
+  } catch { alert('Failed to delete'); }
+}
+async function confirmAuctionSale(id) {
+  if (!confirm('Confirm sale to the winning bidder?')) return;
+  try {
+    const r = await fetch('/api/sales/lots/' + id + '/confirm', { method: 'POST', headers: { Authorization: 'Bearer ' + authToken } });
+    if (r.ok) { alert('Sale confirmed! Buyer has been notified.'); loadMyAuctions(); }
+    else { const d = await r.json(); alert(d.error || 'Failed'); }
+  } catch { alert('Failed to confirm'); }
 }
 
 function daysUntilExpiry(expiresAt) {

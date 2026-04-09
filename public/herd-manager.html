@@ -859,9 +859,6 @@ document.querySelectorAll('.modal-overlay').forEach(m => {
 });
 
 // ── Init ─────────────────────────────────────────────────────────────────────
-async function loadHerd() {
-  try { herdData = await api('GET', '/api/herd'); } catch { herdData = []; }
-}
 document.addEventListener('DOMContentLoaded', initAuth);
 </script>
 </body>

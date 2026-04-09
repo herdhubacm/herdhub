@@ -319,14 +319,20 @@ async function loadPrices() {
       const changeClass = change >= 0 ? 'up' : 'down';
       const arrow = change >= 0 ? '&#x25B2;' : '&#x25BC;';
       const unit = cat.perHead ? '/hd' : '/cwt';
-      const stale = data.cached || !live;
+      const isCached = data.cached === true;
+      const isRef = !live;
+      let statusHtml;
+      if (isRef && isCached) statusHtml = '<div class="updated">Cached data <span class="delayed-badge">data delayed</span></div>';
+      else if (isRef) statusHtml = '<div class="updated">Reference price</div>';
+      else if (isCached) statusHtml = '<div class="updated">USDA AMS <span class="delayed-badge">cached</span></div>';
+      else statusHtml = '<div class="updated" style="color:#4ade80">USDA AMS &middot; <span style="color:#4ade80;font-weight:600">Live</span></div>';
 
       return '<div class="price-card">' +
         '<div class="category">' + cat.label + '</div>' +
         '<div class="price">$' + price.toFixed(2) + '<span style="font-size:14px;color:var(--muted)">' + unit + '</span></div>' +
         '<div class="range">$' + low.toFixed(2) + ' \u2013 $' + high.toFixed(2) + '</div>' +
         '<div class="change ' + changeClass + '">' + arrow + ' ' + changeStr + '</div>' +
-        (stale ? '<div class="updated">Last cached data' + (stale ? ' <span class="delayed-badge">data delayed</span>' : '') + '</div>' : '<div class="updated">USDA AMS &middot; Updated today</div>') +
+        statusHtml +
         '</div>';
     }).join('');
   } catch {

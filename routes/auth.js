@@ -85,17 +85,17 @@ router.post('/login', async (req, res) => {
     const identifier = email.toLowerCase().trim();
     const ip = req.ip;
 
-    // ── Brute force check — max 8 failed attempts per 15 min ────────────
+    // ── Brute force check — max 8 failed attempts per 5 min (keyed on email) ──
     const { rows: attempts } = await query(
       `SELECT COUNT(*) AS c FROM login_attempts
        WHERE identifier=$1 AND success=FALSE
-         AND created_at > NOW() - INTERVAL '15 minutes'`,
+         AND created_at > NOW() - INTERVAL '5 minutes'`,
       [identifier]
     );
     if (parseInt(attempts[0].c) >= 8) {
       await query('INSERT INTO login_attempts (identifier, success, ip) VALUES ($1, false, $2)', [identifier, ip]);
       return res.status(429).json({
-        error: 'Too many failed login attempts. Please wait 15 minutes or reset your password.'
+        error: 'Too many failed login attempts. Please wait a few minutes or reset your password.'
       });
     }
 
