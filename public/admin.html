@@ -161,6 +161,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
       <button class="nav-item" onclick="switchPanel('articles')"><span class="icon">📝</span><span>Articles</span></button>
       <button class="nav-item" onclick="switchPanel('forum')"><span class="icon">🗣️</span><span>Forum</span></button>
       <button class="nav-item" onclick="switchPanel('waitlists')"><span class="icon">📬</span><span>Waitlists</span></button>
+      <button class="nav-item" onclick="switchPanel('verifications')"><span class="icon">✅</span><span>Verifications</span><span class="nav-badge" id="verify-badge" style="display:none">0</span></button>
       <button class="nav-item" onclick="switchPanel('payments')"><span class="icon">💳</span><span>Payments</span></button>
       <button class="nav-item" onclick="switchPanel('settings')"><span class="icon">⚙️</span><span>Settings</span></button>
     </nav>
@@ -189,8 +190,10 @@ tr:hover td{background:rgba(255,255,255,.02)}
         <div class="stats-grid" id="stats-grid">
           <div class="stat-card green"><div class="label">Active Listings</div><div class="value" id="s-active">—</div><div class="sub" id="s-today">— today</div></div>
           <div class="stat-card blue"><div class="label">Total Users</div><div class="value" id="s-users">—</div><div class="sub" id="s-users-today">— joined today</div></div>
-          <div class="stat-card gold"><div class="label">Paid Listings</div><div class="value" id="s-paid">—</div><div class="sub" id="s-tier-breakdown">Ribeye / Filet / T-Bone</div></div>
+          <div class="stat-card gold"><div class="label">Lot Sales</div><div class="value" id="s-lots">—</div><div class="sub" id="s-lots-sub">— active · — bids</div></div>
           <div class="stat-card rust"><div class="label">Unread Messages</div><div class="value" id="s-unread">—</div><div class="sub">Support inbox</div></div>
+          <div class="stat-card" style="border-left:3px solid var(--gold)"><div class="label">Paid Listings</div><div class="value" id="s-paid">—</div><div class="sub" id="s-tier-breakdown">Ribeye / Filet / T-Bone</div></div>
+          <div class="stat-card" id="s-verify-card" style="border-left:3px solid var(--red);display:none"><div class="label">Pending Verifications</div><div class="value" id="s-verify-count">0</div><div class="sub"><a href="javascript:void(0)" onclick="switchPanel('verifications')" style="color:var(--rust-light)">Review now →</a></div></div>
         </div>
 
         <div class="mini-charts">
@@ -432,6 +435,17 @@ tr:hover td{background:rgba(255,255,255,.02)}
             </table>
             <div style="margin-top:8px;font-size:12px;color:var(--muted)">Total: <strong id="beefbox-waitlist-count" style="color:var(--gold)">—</strong></div>
           </div>
+        </div>
+      </div>
+
+      <!-- VERIFICATIONS PANEL -->
+      <div class="panel" id="panel-verifications">
+        <div class="table-wrap">
+          <div class="table-header"><h2>Pending Verification Requests</h2></div>
+          <table>
+            <thead><tr><th>Name</th><th>Ranch/Business</th><th>Email</th><th>Phone</th><th>State</th><th>Operation</th><th>Head Count</th><th>Reason</th><th>Submitted</th><th></th></tr></thead>
+            <tbody id="verifications-tbody"><tr><td colspan="10" style="text-align:center;color:var(--muted);padding:24px">Loading…</td></tr></tbody>
+          </table>
         </div>
       </div>
 
@@ -686,6 +700,7 @@ const panelTitles = {
   forum:     ['Community Forum', 'Topics and replies — moderate and manage'],
   waitlists: ['Waitlists', 'Beef Box and newsletter signups'],
   payments:  ['Payments', 'Paid listings and subscription status'],
+  verifications: ['Verification Requests', 'Review seller verification requests'],
   settings:  ['Settings', 'Platform configuration and quick actions'],
 };
 
@@ -705,6 +720,7 @@ function switchPanel(name) {
   if (name === 'forum')    { forumPage = 1;    loadAdminForum(); }
   if (name === 'waitlists') { loadWaitlists(); }
   if (name === 'payments')  { loadPayments(); }
+  if (name === 'verifications') { loadVerifications(); }
   if (name === 'settings')  { loadSettings(); }
 }
 
@@ -722,6 +738,21 @@ async function loadDashboard() {
     document.getElementById('s-tier-breakdown').textContent =
       `${d.revenue.ribeye_count||0} Ribeye · ${d.revenue.filet_count||0} Filet · ${d.revenue.tbone_count||0} T-Bone`;
     document.getElementById('s-unread').textContent = d.messages.unread || 0;
+
+    // Lot sales stats
+    if (d.lotSales) {
+      document.getElementById('s-lots').textContent = d.lotSales.total || 0;
+      document.getElementById('s-lots-sub').textContent = `${d.lotSales.active||0} active · ${d.lotSales.total_bids||0} bids`;
+    }
+
+    // Verification requests
+    const pendingVerify = parseInt(d.verifications?.pending || 0);
+    const verifyCard = document.getElementById('s-verify-card');
+    document.getElementById('s-verify-count').textContent = pendingVerify;
+    verifyCard.style.display = pendingVerify > 0 ? '' : 'none';
+    const vBadge = document.getElementById('verify-badge');
+    vBadge.textContent = pendingVerify;
+    vBadge.style.display = pendingVerify > 0 ? 'inline-block' : 'none';
 
     // Update unread badge
     const unread = parseInt(d.messages.unread || 0);
@@ -1411,6 +1442,48 @@ function exportWaitlist() {
 }
 
 // ── Payments ──────────────────────────────────────────
+async function loadVerifications() {
+  const tbody = document.getElementById('verifications-tbody');
+  tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:var(--muted);padding:24px">Loading…</td></tr>';
+  try {
+    const r = await fetch(`${API}/api/auth/admin/verification-requests`, { headers: { Authorization: `Bearer ${token}` } });
+    const rows = await r.json();
+    if (!rows.length) { tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:var(--muted);padding:24px">No pending requests</td></tr>'; return; }
+    tbody.innerHTML = rows.map(vr => `<tr>
+      <td><strong>${escHtml(vr.full_name||'')}</strong></td>
+      <td>${escHtml(vr.business_name||'—')}</td>
+      <td style="font-size:12px">${escHtml(vr.email||'')}</td>
+      <td>${escHtml(vr.phone||'—')}</td>
+      <td>${escHtml(vr.state||'—')}</td>
+      <td>${escHtml(vr.operation_type||'—')}</td>
+      <td>${escHtml(vr.head_count||'—')}</td>
+      <td style="max-width:200px;font-size:12px" class="truncate">${escHtml(vr.reason||'—')}</td>
+      <td style="font-size:12px;color:var(--muted)">${timeAgo(vr.created_at)}</td>
+      <td style="white-space:nowrap">
+        <button class="btn btn-success" style="font-size:11px;padding:5px 10px" onclick="approveVerification(${vr.id})">Approve</button>
+        <button class="btn btn-danger" style="font-size:11px;padding:5px 10px" onclick="denyVerification(${vr.id})">Deny</button>
+      </td>
+    </tr>`).join('');
+  } catch { tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:var(--red);padding:24px">Failed to load</td></tr>'; }
+}
+async function approveVerification(id) {
+  if (!confirm('Approve this seller for verification?')) return;
+  try {
+    await fetch(`${API}/api/auth/admin/verification-requests/${id}/approve`, { method: 'POST', headers: { Authorization: `Bearer ${token}` } });
+    loadVerifications(); loadDashboard();
+  } catch { alert('Failed'); }
+}
+async function denyVerification(id) {
+  const notes = prompt('Reason for denial (optional):');
+  try {
+    await fetch(`${API}/api/auth/admin/verification-requests/${id}/deny`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ admin_notes: notes || '' })
+    });
+    loadVerifications(); loadDashboard();
+  } catch { alert('Failed'); }
+}
+
 async function loadPayments() {
   const tbody = document.getElementById('payments-tbody');
   try {

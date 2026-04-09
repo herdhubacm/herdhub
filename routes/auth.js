@@ -419,34 +419,97 @@ router.post('/logout', (req, res) => {
 });
 
 // ── POST /api/auth/verify-request ─────────────────────
-// Seller requests verification — emails admin
 router.post('/verify-request', authenticateToken, async (req, res) => {
   try {
+    // Check if already verified
+    const { rows: urows } = await query('SELECT is_verified FROM users WHERE id=$1', [req.user.id]);
+    if (urows[0]?.is_verified) return res.json({ message: 'Already verified' });
+
+    // Check for pending request
+    const { rows: existing } = await query(
+      "SELECT id FROM verification_requests WHERE user_id=$1 AND status='pending'", [req.user.id]);
+    if (existing.length) return res.status(400).json({ error: 'You already have a pending verification request' });
+
+    const { full_name, business_name, phone, state, operation_type, head_count, reason } = req.body;
+    if (!full_name || !phone || !state)
+      return res.status(400).json({ error: 'Name, phone, and state are required' });
+
+    await query(
+      `INSERT INTO verification_requests (user_id, full_name, business_name, phone, state, operation_type, head_count, reason)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
+      [req.user.id, (full_name||'').slice(0,150), (business_name||'').slice(0,150),
+       (phone||'').slice(0,20), (state||'').slice(0,2), (operation_type||'').slice(0,100),
+       (head_count||'').slice(0,50), (reason||'').slice(0,2000)]);
+
     const { sendEmail } = require('../services/email');
-    const { rows } = await query('SELECT name, email, phone, state, city FROM users WHERE id=$1', [req.user.id]);
-    if (!rows.length) return res.status(404).json({ error: 'User not found' });
-    const user = rows[0];
-
-    await sendEmail({
+    const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    sendEmail({
       to: process.env.SUPPORT_EMAIL || 'ad@theherdhub.com',
-      subject: `Verification Request — ${user.name}`,
-      html: `<p>${user.name} (${user.email}, ${user.phone}) from ${user.city}, ${user.state} has requested seller verification.</p>
-             <p>User ID: ${req.user.id}</p>
-             <p>To verify: UPDATE users SET is_verified=TRUE WHERE id=${req.user.id};</p>`,
-      text: `Verification request from ${user.name} (ID: ${req.user.id})`,
-    });
+      subject: `New Verification Request — ${full_name}`,
+      html: `<div style="font-family:sans-serif"><h2>New Verification Request</h2>
+        <p><strong>${esc(full_name)}</strong> — ${esc(business_name||'No business name')}</p>
+        <p>Phone: ${esc(phone)} | State: ${esc(state)} | Operation: ${esc(operation_type||'N/A')}</p>
+        <p>Head count: ${esc(head_count||'N/A')}</p>
+        <p>Reason: ${esc(reason||'N/A')}</p>
+        <p><a href="https://theherdhub.com/admin.html">Review in Admin Panel</a></p></div>`,
+    }).catch(() => {});
 
-    res.json({ ok: true, message: "Verification request sent! We'll review your account within 24 hours." });
+    res.json({ ok: true, message: 'Verification request submitted. You will be notified within 24-48 hours.' });
   } catch(e) {
-    res.status(500).json({ error: 'Failed to send verification request' });
+    console.error('Verify request error:', e.message);
+    res.status(500).json({ error: 'Failed to submit verification request' });
   }
 });
 
-// ── PUT /api/admin/users/:id/verify ───────────────────
-router.put('/admin-verify/:id', authenticateToken, async (req, res) => {
+// ── GET /api/auth/verify-status ──────────────────────
+router.get('/verify-status', authenticateToken, async (req, res) => {
+  try {
+    const { rows: u } = await query('SELECT is_verified FROM users WHERE id=$1', [req.user.id]);
+    const { rows: p } = await query(
+      "SELECT id, status FROM verification_requests WHERE user_id=$1 ORDER BY created_at DESC LIMIT 1", [req.user.id]);
+    res.json({ is_verified: u[0]?.is_verified || false, pending_request: p[0] || null });
+  } catch { res.status(500).json({ error: 'Failed' }); }
+});
+
+// ── Admin: get verification requests ─────────────────
+router.get('/admin/verification-requests', authenticateToken, async (req, res) => {
   if (req.user.role !== 'admin') return res.status(403).json({ error: 'Admin only' });
   try {
-    await query('UPDATE users SET is_verified=TRUE WHERE id=$1', [req.params.id]);
-    res.json({ ok: true });
-  } catch(e) { res.status(500).json({ error: 'Failed to verify user' }); }
+    const { rows } = await query(`
+      SELECT vr.*, u.email, u.name AS account_name, u.is_verified
+      FROM verification_requests vr JOIN users u ON vr.user_id=u.id
+      WHERE vr.status='pending' ORDER BY vr.created_at DESC`);
+    res.json(rows);
+  } catch { res.status(500).json({ error: 'Server error' }); }
+});
+
+// ── Admin: approve verification ──────────────────────
+router.post('/admin/verification-requests/:id/approve', authenticateToken, async (req, res) => {
+  if (req.user.role !== 'admin') return res.status(403).json({ error: 'Admin only' });
+  try {
+    const { rows } = await query('SELECT * FROM verification_requests WHERE id=$1', [parseInt(req.params.id)]);
+    if (!rows.length) return res.status(404).json({ error: 'Not found' });
+    await query('UPDATE users SET is_verified=true WHERE id=$1', [rows[0].user_id]);
+    await query("UPDATE verification_requests SET status='approved', reviewed_by=$1, reviewed_at=NOW() WHERE id=$2",
+      [req.user.id, req.params.id]);
+    // Email user
+    const { sendEmail } = require('../services/email');
+    const u = await query('SELECT email, name FROM users WHERE id=$1', [rows[0].user_id]);
+    if (u.rows.length) sendEmail({
+      to: u.rows[0].email,
+      subject: 'You\'re Verified on Herd Hub!',
+      html: `<div style="font-family:sans-serif;max-width:500px;margin:0 auto"><h2 style="color:#2E7D4F">Congratulations, ${u.rows[0].name}!</h2><p>Your Herd Hub seller verification has been approved. You can now post Lot Sales and reach buyers nationwide.</p><p><a href="https://theherdhub.com/digital-sales.html#post" style="background:#8B3214;color:white;padding:12px 24px;border-radius:4px;text-decoration:none;display:inline-block">Post Your First Lot Sale</a></p></div>`,
+    }).catch(() => {});
+    res.json({ message: 'User verified' });
+  } catch(e) { res.status(500).json({ error: 'Server error' }); }
+});
+
+// ── Admin: deny verification ─────────────────────────
+router.post('/admin/verification-requests/:id/deny', authenticateToken, async (req, res) => {
+  if (req.user.role !== 'admin') return res.status(403).json({ error: 'Admin only' });
+  try {
+    await query("UPDATE verification_requests SET status='denied', admin_notes=$1, reviewed_by=$2, reviewed_at=NOW() WHERE id=$3",
+      [(req.body.admin_notes||'').slice(0,1000), req.user.id, parseInt(req.params.id)]);
+    res.json({ message: 'Request denied' });
+  } catch { res.status(500).json({ error: 'Server error' }); }
 });

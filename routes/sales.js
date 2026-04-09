@@ -194,9 +194,40 @@ router.post('/lots/:id/confirm', authenticateToken, async (req, res) => {
     if (l.status !== 'ended') return res.status(400).json({ error: 'Auction has not ended yet' });
     if (!l.current_bidder_id) return res.status(400).json({ error: 'No bids received' });
 
+    const finalPrice = parseFloat(l.current_bid);
+    const commissionAmount = Math.round(finalPrice * 0.02 * 100) / 100;
+
+    // Try to create Stripe payment link for commission
+    let invoiceUrl = null;
+    try {
+      let stripe;
+      if (process.env.STRIPE_SECRET_KEY && !process.env.STRIPE_SECRET_KEY.includes('YOUR_')) {
+        stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+      }
+      if (stripe && commissionAmount >= 0.50) {
+        const product = await stripe.products.create({
+          name: 'Herd Hub Lot Sale Commission',
+          description: `2% commission on: ${(l.title || 'Lot #' + l.lot_number).slice(0,200)} — Final price: $${finalPrice.toFixed(2)}`,
+        });
+        const price = await stripe.prices.create({
+          product: product.id,
+          unit_amount: Math.round(commissionAmount * 100),
+          currency: 'usd',
+        });
+        const paymentLink = await stripe.paymentLinks.create({
+          line_items: [{ price: price.id, quantity: 1 }],
+        });
+        invoiceUrl = paymentLink.url;
+      }
+    } catch (stripeErr) {
+      console.warn('Stripe commission link error:', stripeErr.message);
+    }
+
     await query(
-      `UPDATE sale_lots SET sale_confirmed=true, winner_user_id=$1, status='sold' WHERE id=$2`,
-      [l.current_bidder_id, lotId]);
+      `UPDATE sale_lots SET sale_confirmed=true, winner_user_id=$1, status='sold',
+        final_sale_price=$2, commission_amount=$3, commission_invoice_url=$4
+       WHERE id=$5`,
+      [l.current_bidder_id, finalPrice, commissionAmount, invoiceUrl, lotId]);
 
     // Email winner with seller contact info
     const winner = await query('SELECT email, name FROM users WHERE id=$1', [l.current_bidder_id]);
@@ -207,7 +238,7 @@ router.post('/lots/:id/confirm', authenticateToken, async (req, res) => {
         `<div style="font-family:sans-serif;max-width:500px;margin:0 auto">
           <h2 style="color:#2E7D4F">Congratulations — You Won!</h2>
           <p>The seller has confirmed your winning bid on <strong>${l.title || 'Lot #' + l.lot_number}</strong>.</p>
-          <p style="font-size:24px;color:#2E7D4F;font-weight:bold">Winning bid: $${parseFloat(l.current_bid).toFixed(2)}</p>
+          <p style="font-size:24px;color:#2E7D4F;font-weight:bold">Winning bid: $${finalPrice.toFixed(2)}</p>
           <h3>Seller Contact Info</h3>
           <p><strong>${sellerInfo.rows[0].name}</strong><br>
           Email: ${sellerInfo.rows[0].email}<br>
@@ -217,7 +248,21 @@ router.post('/lots/:id/confirm', authenticateToken, async (req, res) => {
         </div>`);
     }
 
-    res.json({ success: true });
+    // Email seller with commission invoice
+    if (sellerInfo.rows.length) {
+      notify(sellerInfo.rows[0].email,
+        'Sale confirmed — Commission invoice for ' + (l.title || 'Lot #' + l.lot_number),
+        `<div style="font-family:sans-serif;max-width:500px;margin:0 auto">
+          <h2 style="color:#2C1A0E">Congratulations on Your Sale!</h2>
+          <p>Your lot <strong>${l.title || 'Lot #' + l.lot_number}</strong> sold for <strong>$${finalPrice.toFixed(2)}</strong>.</p>
+          <p>The Herd Hub platform fee of 2% is <strong>$${commissionAmount.toFixed(2)}</strong>.</p>
+          ${invoiceUrl ? '<p><a href="' + invoiceUrl + '" style="background:#8B3214;color:white;padding:12px 24px;border-radius:4px;text-decoration:none;display:inline-block">Pay Commission — $' + commissionAmount.toFixed(2) + '</a></p>' : '<p style="color:#666">A commission invoice will be sent separately.</p>'}
+          <p>The buyer has been notified with your contact info. Thank you for selling on Herd Hub!</p>
+          <p style="color:#666;font-size:12px">— Herd Hub Lot Sales</p>
+        </div>`);
+    }
+
+    res.json({ success: true, commission_amount: commissionAmount, invoice_url: invoiceUrl });
   } catch (err) {
     console.error('Confirm error:', err.message);
     res.status(500).json({ error: 'Failed to confirm sale' });

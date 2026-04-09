@@ -1557,7 +1557,7 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
         </div>
         <div class="form-group"><label for="acct-bio">Bio</label><textarea id="acct-bio" rows="3" placeholder="Tell buyers about your operation…"></textarea></div>
         <button class="btn-primary" data-action="save-profile" style="margin-top:4px">Save Changes</button>
-        <button class="btn-secondary" style="padding:9px 16px;font-size:13px;margin-top:4px;margin-left:8px" onclick="requestVerification()" title="Request a verified seller badge">&#10003; Get Verified</button>
+        <div id="verify-section" style="margin-top:20px;padding:16px;background:var(--cream);border:1.5px solid var(--light-tan);border-radius:6px;display:none"></div>
         <div style="margin-top:28px;padding-top:20px;border-top:1px solid var(--light-tan)">
           <h4 style="font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--mid-brown);margin-bottom:14px">Change Password</h4>
           <div id="pw-error" class="form-error" style="display:none"></div>
@@ -4826,8 +4826,9 @@ async function loadAccountPage() {
     document.getElementById('acct-bio').value = currentUser.bio || '';
   }
 
-  // Load listings
+  // Load listings and verification status
   loadMyListings();
+  loadVerifyStatus();
 }
 
 function switchAcctTab(tab) {
@@ -5676,15 +5677,48 @@ async function loadRecentSalesTicker() {
 }
 
 // ── Seller Verification ─────────────────────────────────
-async function requestVerification() {
-  if (!authToken) { openModal('auth'); return; }
+async function loadVerifyStatus() {
+  if (!authToken) return;
+  try {
+    const r = await fetch(`${API}/api/auth/verify-status`, { headers: { Authorization: `Bearer ${authToken}` } });
+    const d = await r.json();
+    const el = document.getElementById('verify-section');
+    if (!el) return;
+    el.style.display = '';
+    if (d.is_verified) {
+      el.innerHTML = '<div style="color:var(--sage);font-weight:700;font-family:Oswald,sans-serif;font-size:14px;letter-spacing:.06em">&#x2713; Verified Lot Sales Seller</div>';
+    } else if (d.pending_request?.status === 'pending') {
+      el.innerHTML = '<div style="font-family:Oswald,sans-serif;font-size:13px;color:var(--mid-brown)">&#x23F3; Your verification request is under review. You\'ll hear from us within 24-48 hours.</div>';
+    } else {
+      el.innerHTML = '<div style="font-family:Oswald,sans-serif;font-size:14px;font-weight:700;letter-spacing:.06em;color:var(--dark-brown);margin-bottom:8px">Get Verified to Post Lot Sales</div>' +
+        '<p style="font-size:13px;color:#666;margin-bottom:14px">Verified sellers can list cattle through Herd Hub Lot Sales. Verification is free and takes 24-48 hours.</p>' +
+        '<div class="form-row"><div class="form-group"><label>Full Name *</label><input type="text" id="vr-name" placeholder="Jake Harrington"></div><div class="form-group"><label>Ranch / Business Name</label><input type="text" id="vr-business" placeholder="Harrington Cattle Co"></div></div>' +
+        '<div class="form-row"><div class="form-group"><label>Phone *</label><input type="tel" id="vr-phone" placeholder="(806) 555-1234"></div><div class="form-group"><label>State *</label><select id="vr-state"><option value="">Select…</option><option>AL</option><option>AK</option><option>AZ</option><option>AR</option><option>CA</option><option>CO</option><option>CT</option><option>DE</option><option>FL</option><option>GA</option><option>HI</option><option>ID</option><option>IL</option><option>IN</option><option>IA</option><option>KS</option><option>KY</option><option>LA</option><option>ME</option><option>MD</option><option>MA</option><option>MI</option><option>MN</option><option>MS</option><option>MO</option><option>MT</option><option>NE</option><option>NV</option><option>NH</option><option>NJ</option><option>NM</option><option>NY</option><option>NC</option><option>ND</option><option>OH</option><option>OK</option><option>OR</option><option>PA</option><option>RI</option><option>SC</option><option>SD</option><option>TN</option><option>TX</option><option>UT</option><option>VT</option><option>VA</option><option>WA</option><option>WV</option><option>WI</option><option>WY</option></select></div></div>' +
+        '<div class="form-row"><div class="form-group"><label>Operation Type</label><select id="vr-op"><option value="">Select…</option><option>Cow-Calf</option><option>Seedstock</option><option>Stocker</option><option>Feedlot</option><option>Other</option></select></div><div class="form-group"><label>Approx Head Count</label><input type="text" id="vr-head" placeholder="e.g. 50-100"></div></div>' +
+        '<div class="form-group"><label>Why do you want to sell on Herd Hub Lot Sales?</label><textarea id="vr-reason" rows="2" placeholder="Tell us about your operation..."></textarea></div>' +
+        '<button class="btn-primary" style="margin-top:4px" onclick="submitVerification()">Request Verification</button>';
+    }
+  } catch {}
+}
+async function submitVerification() {
   try {
     const r = await fetch(`${API}/api/auth/verify-request`, {
-      method: 'POST', headers: { Authorization: `Bearer ${authToken}` }
+      method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
+      body: JSON.stringify({
+        full_name: document.getElementById('vr-name').value,
+        business_name: document.getElementById('vr-business').value,
+        phone: document.getElementById('vr-phone').value,
+        state: document.getElementById('vr-state').value,
+        operation_type: document.getElementById('vr-op').value,
+        head_count: document.getElementById('vr-head').value,
+        reason: document.getElementById('vr-reason').value
+      })
     });
     const d = await r.json();
-    showToast(d.message || d.error || 'Request sent');
-  } catch(e) { showToast('Connection error'); }
+    if (!r.ok) { showToast(d.error || 'Failed'); return; }
+    showToast(d.message || 'Request submitted!');
+    loadVerifyStatus();
+  } catch { showToast('Connection error'); }
 }
 
 // ── SEO Landing Pages ───────────────────────────────────

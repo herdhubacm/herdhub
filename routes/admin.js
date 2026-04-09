@@ -30,7 +30,7 @@ router.use(authenticateToken, requireAdmin);
 // ── GET /api/admin/stats ───────────────────────────────
 router.get('/stats', async (_req, res) => {
   try {
-    const [listings, users, messages, revenue, recentListings, topCategories, topStates] = await Promise.all([
+    const [listings, users, messages, revenue, recentListings, topCategories, topStates, lotSales, verifications] = await Promise.all([
       query(`SELECT
         COUNT(*) FILTER (WHERE status='active')  AS active,
         COUNT(*) FILTER (WHERE status='expired') AS expired,
@@ -64,6 +64,14 @@ router.get('/stats', async (_req, res) => {
       query(`SELECT state, COUNT(*) AS count
              FROM listings WHERE status='active' AND state IS NOT NULL
              GROUP BY state ORDER BY count DESC LIMIT 10`),
+      query(`SELECT
+        COUNT(*) AS total,
+        COUNT(*) FILTER (WHERE status='active') AS active,
+        COUNT(*) FILTER (WHERE status='ended') AS ended,
+        COUNT(*) FILTER (WHERE status='sold') AS sold,
+        COALESCE(SUM(bid_count),0) AS total_bids
+       FROM sale_lots`),
+      query(`SELECT COUNT(*) AS pending FROM verification_requests WHERE status='pending'`),
     ]);
 
     res.json({
@@ -74,6 +82,8 @@ router.get('/stats', async (_req, res) => {
       recentListings:  recentListings.rows,
       topCategories:   topCategories.rows,
       topStates:       topStates.rows,
+      lotSales:        lotSales.rows[0],
+      verifications:   verifications.rows[0],
     });
   } catch (err) {
     console.error('Admin stats error:', err);

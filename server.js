@@ -792,6 +792,32 @@ async function start() {
       await query(`ALTER TABLE sale_lots ADD COLUMN IF NOT EXISTS photo_urls JSONB`);
       console.log('✅  Silent auction columns ready');
 
+      // Commission columns for sale_lots
+      await query(`ALTER TABLE sale_lots ADD COLUMN IF NOT EXISTS commission_amount DECIMAL(10,2)`);
+      await query(`ALTER TABLE sale_lots ADD COLUMN IF NOT EXISTS commission_paid BOOLEAN DEFAULT false`);
+      await query(`ALTER TABLE sale_lots ADD COLUMN IF NOT EXISTS commission_invoice_url TEXT`);
+      await query(`ALTER TABLE sale_lots ADD COLUMN IF NOT EXISTS final_sale_price DECIMAL(10,2)`);
+      console.log('✅  Commission columns ready');
+
+      // Verification requests table
+      await query(`CREATE TABLE IF NOT EXISTS verification_requests (
+        id              BIGSERIAL    PRIMARY KEY,
+        user_id         BIGINT       NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        full_name       VARCHAR(150),
+        business_name   VARCHAR(150),
+        phone           VARCHAR(20),
+        state           VARCHAR(2),
+        operation_type  VARCHAR(100),
+        head_count      VARCHAR(50),
+        reason          TEXT,
+        status          VARCHAR(20)  DEFAULT 'pending',
+        admin_notes     TEXT,
+        reviewed_by     BIGINT       REFERENCES users(id),
+        reviewed_at     TIMESTAMPTZ,
+        created_at      TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+      )`);
+      console.log('✅  Verification requests table ready');
+
     } catch (migErr) {
       console.warn('⚠️  Migration warning:', migErr.message);
     }
