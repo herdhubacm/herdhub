@@ -161,6 +161,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
       <button class="nav-item" onclick="switchPanel('articles')"><span class="icon">📝</span><span>Articles</span></button>
       <button class="nav-item" onclick="switchPanel('forum')"><span class="icon">🗣️</span><span>Forum</span></button>
       <button class="nav-item" onclick="switchPanel('waitlists')"><span class="icon">📬</span><span>Waitlists</span></button>
+      <button class="nav-item" onclick="switchPanel('featured')"><span class="icon">⭐</span><span>Featured</span><span class="nav-badge" id="featured-badge" style="display:none;background:var(--gold)">0</span></button>
       <button class="nav-item" onclick="switchPanel('verifications')"><span class="icon">✅</span><span>Verifications</span><span class="nav-badge" id="verify-badge" style="display:none">0</span></button>
       <button class="nav-item" onclick="switchPanel('payments')"><span class="icon">💳</span><span>Payments</span></button>
       <button class="nav-item" onclick="switchPanel('settings')"><span class="icon">⚙️</span><span>Settings</span></button>
@@ -482,6 +483,43 @@ tr:hover td{background:rgba(255,255,255,.02)}
       </div>
 
       <!-- SETTINGS PANEL -->
+      <!-- FEATURED LISTINGS PANEL -->
+      <div class="panel" id="panel-featured">
+        <div style="display:flex;gap:8px;margin-bottom:16px">
+          <button class="btn" id="ftab-manage" onclick="setFeaturedTab('manage')" style="background:var(--rust);color:white">Manage Featured</button>
+          <button class="btn" id="ftab-preview" onclick="setFeaturedTab('preview')" style="background:transparent;color:var(--muted);border:1px solid var(--border)">Homepage Preview</button>
+        </div>
+
+        <div id="featured-manage">
+          <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:center">
+            <input type="text" id="feat-search" placeholder="Search title or email…" style="padding:8px 12px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;width:240px" onkeyup="debounce(loadFeaturedListings,400)()">
+            <button class="btn" onclick="loadFeaturedListings({status:'active'})" style="font-size:11px;padding:6px 12px">Active</button>
+            <button class="btn" onclick="loadFeaturedListings({featured:'true'})" style="font-size:11px;padding:6px 12px">Featured Only</button>
+            <button class="btn" onclick="loadFeaturedListings()" style="font-size:11px;padding:6px 12px">All</button>
+          </div>
+          <div id="feat-bulk-bar" style="display:none;background:rgba(201,169,110,.1);border:1px solid rgba(201,169,110,.2);border-radius:6px;padding:10px 16px;margin-bottom:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <span style="font-size:12px;color:var(--gold);font-weight:600" id="feat-sel-count">0 selected</span>
+            <button class="btn" style="font-size:11px;padding:5px 10px;background:var(--gold);color:var(--bg)" onclick="bulkFeature('t_bone')">Feature as Prime</button>
+            <button class="btn" style="font-size:11px;padding:5px 10px;background:#C9A96E;color:var(--bg)" onclick="bulkFeature('filet')">Feature as Choice</button>
+            <button class="btn" style="font-size:11px;padding:5px 10px;background:var(--red);color:white" onclick="bulkUnfeature()">Unfeature</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th style="width:30px"><input type="checkbox" id="feat-check-all" onchange="toggleAllFeatured(this.checked)"></th><th>Title</th><th>Seller</th><th>State</th><th>Category</th><th>Tier</th><th>Featured</th><th>Status</th><th style="width:200px">Actions</th></tr></thead>
+              <tbody id="feat-tbody"><tr><td colspan="9" style="text-align:center;color:var(--muted);padding:24px">Click to load…</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="featured-preview" style="display:none">
+          <div style="margin-bottom:16px;display:flex;justify-content:space-between;align-items:center">
+            <span style="font-size:13px;color:var(--muted)" id="preview-count"></span>
+            <button class="btn" onclick="loadFeaturedPreview()" style="font-size:11px;padding:6px 12px">Refresh Preview</button>
+          </div>
+          <div id="preview-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px"></div>
+        </div>
+      </div>
+
       <div class="panel" id="panel-settings">
         <div class="table-wrap">
           <div class="table-header"><h2>Site Settings</h2></div>
@@ -699,6 +737,7 @@ const panelTitles = {
   articles:  ['Articles', 'Ranch News & Resources — create and edit'],
   forum:     ['Community Forum', 'Topics and replies — moderate and manage'],
   waitlists: ['Waitlists', 'Beef Box and newsletter signups'],
+  featured:  ['Featured Listings', 'Control what appears on the homepage'],
   payments:  ['Payments', 'Paid listings and subscription status'],
   verifications: ['Verification Requests', 'Review seller verification requests'],
   settings:  ['Settings', 'Platform configuration and quick actions'],
@@ -719,6 +758,7 @@ function switchPanel(name) {
   if (name === 'articles') { articlesPage = 1; loadAdminArticles(); }
   if (name === 'forum')    { forumPage = 1;    loadAdminForum(); }
   if (name === 'waitlists') { loadWaitlists(); }
+  if (name === 'featured')  { loadFeaturedListings(); }
   if (name === 'payments')  { loadPayments(); }
   if (name === 'verifications') { loadVerifications(); }
   if (name === 'settings')  { loadSettings(); }
@@ -753,6 +793,16 @@ async function loadDashboard() {
     const vBadge = document.getElementById('verify-badge');
     vBadge.textContent = pendingVerify;
     vBadge.style.display = pendingVerify > 0 ? 'inline-block' : 'none';
+
+    // Featured count badge
+    try {
+      const fr = await fetch(`${API}/api/admin/featured?featured=true`, { headers: { Authorization: `Bearer ${token}` } });
+      const fd = await fr.json();
+      const fBadge = document.getElementById('featured-badge');
+      const fc = fd.featured_count || 0;
+      fBadge.textContent = fc;
+      fBadge.style.display = fc > 0 ? 'inline-block' : 'none';
+    } catch {}
 
     // Update unread badge
     const unread = parseInt(d.messages.unread || 0);
@@ -1443,6 +1493,134 @@ function exportWaitlist() {
 }
 
 // ── Payments ──────────────────────────────────────────
+// ── Featured Listings ────────────────────────────────
+let featSelectedIds = new Set();
+let featCurrentFilter = {};
+
+function setFeaturedTab(tab) {
+  document.getElementById('featured-manage').style.display = tab === 'manage' ? '' : 'none';
+  document.getElementById('featured-preview').style.display = tab === 'preview' ? '' : 'none';
+  document.getElementById('ftab-manage').style.background = tab === 'manage' ? 'var(--rust)' : 'transparent';
+  document.getElementById('ftab-manage').style.color = tab === 'manage' ? 'white' : 'var(--muted)';
+  document.getElementById('ftab-preview').style.background = tab === 'preview' ? 'var(--rust)' : 'transparent';
+  document.getElementById('ftab-preview').style.color = tab === 'preview' ? 'white' : 'var(--muted)';
+  if (tab === 'preview') loadFeaturedPreview();
+}
+
+async function loadFeaturedListings(filters) {
+  if (filters) featCurrentFilter = filters;
+  const f = featCurrentFilter;
+  const params = new URLSearchParams();
+  const search = document.getElementById('feat-search')?.value;
+  if (search) params.set('search', search);
+  if (f.status) params.set('status', f.status);
+  if (f.featured) params.set('featured', f.featured);
+
+  const tbody = document.getElementById('feat-tbody');
+  tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:24px">Loading…</td></tr>';
+  try {
+    const r = await fetch(`${API}/api/admin/featured?${params}`, { headers: { Authorization: `Bearer ${token}` } });
+    const d = await r.json();
+    const rows = d.listings || [];
+    featSelectedIds.clear();
+    updateBulkBar();
+    if (!rows.length) { tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:24px">No listings found</td></tr>'; return; }
+    const tierNames = { burger: 'Burger', sirloin: 'Sirloin', ribeye: 'Ribeye', filet: 'Choice', t_bone: 'Prime' };
+    const tierColors = { burger: 'var(--muted)', sirloin: 'var(--rust)', ribeye: '#e06030', filet: 'var(--gold)', t_bone: '#a855f7' };
+    tbody.innerHTML = rows.map(l => {
+      const tn = tierNames[l.tier] || l.tier || 'Burger';
+      const tc = tierColors[l.tier] || 'var(--muted)';
+      return `<tr style="${l.is_featured ? 'border-left:3px solid var(--gold)' : ''}">
+        <td><input type="checkbox" data-id="${l.id}" onchange="toggleFeatSel(${l.id},this.checked)"></td>
+        <td class="truncate" style="max-width:200px">${escHtml(l.title)}</td>
+        <td style="font-size:12px">${escHtml(l.seller_name)}<br><span style="color:var(--muted)">${escHtml(l.seller_email)}</span></td>
+        <td>${l.state || '—'}</td>
+        <td style="font-size:12px">${(l.category || '').replace(/_/g, ' ')}</td>
+        <td><span class="badge" style="background:${tc};color:white">${tn}</span></td>
+        <td>${l.is_featured ? '<span style="color:var(--green);font-weight:700">✓</span>' : '<span style="color:var(--muted)">—</span>'}</td>
+        <td>${statusBadge(l.status)}</td>
+        <td style="white-space:nowrap">
+          ${l.is_featured ? `<button class="btn btn-danger" style="font-size:10px;padding:4px 8px" onclick="setFeatured(${l.id},false,'burger')">✕ Unfeature</button>` : `<button class="btn btn-success" style="font-size:10px;padding:4px 8px" onclick="setFeatured(${l.id},true,'t_bone')">⭐ Feature</button>`}
+          <select style="font-size:11px;padding:3px;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:4px" onchange="setFeatured(${l.id},true,this.value)">
+            <option value="burger"${l.tier==='burger'?' selected':''}>Burger</option>
+            <option value="sirloin"${l.tier==='sirloin'?' selected':''}>Sirloin</option>
+            <option value="ribeye"${l.tier==='ribeye'?' selected':''}>Ribeye</option>
+            <option value="filet"${l.tier==='filet'?' selected':''}>Choice</option>
+            <option value="t_bone"${l.tier==='t_bone'?' selected':''}>Prime</option>
+          </select>
+        </td>
+      </tr>`;
+    }).join('');
+  } catch (e) { tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--red)">Failed: ' + e.message + '</td></tr>'; }
+}
+
+async function setFeatured(id, featured, tier) {
+  try {
+    await fetch(`${API}/api/admin/listings/${id}/feature`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ is_featured: featured, tier })
+    });
+    loadFeaturedListings();
+  } catch { alert('Failed'); }
+}
+
+function toggleFeatSel(id, checked) {
+  if (checked) featSelectedIds.add(id); else featSelectedIds.delete(id);
+  updateBulkBar();
+}
+function toggleAllFeatured(checked) {
+  document.querySelectorAll('#feat-tbody input[type=checkbox]').forEach(cb => {
+    cb.checked = checked;
+    const id = parseInt(cb.dataset.id);
+    if (checked) featSelectedIds.add(id); else featSelectedIds.delete(id);
+  });
+  updateBulkBar();
+}
+function updateBulkBar() {
+  const bar = document.getElementById('feat-bulk-bar');
+  bar.style.display = featSelectedIds.size > 0 ? 'flex' : 'none';
+  document.getElementById('feat-sel-count').textContent = featSelectedIds.size + ' selected';
+}
+
+async function bulkFeature(tier) {
+  try {
+    await fetch(`${API}/api/admin/listings/bulk-feature`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ ids: [...featSelectedIds], is_featured: true, tier })
+    });
+    loadFeaturedListings();
+  } catch { alert('Failed'); }
+}
+async function bulkUnfeature() {
+  try {
+    await fetch(`${API}/api/admin/listings/bulk-feature`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ ids: [...featSelectedIds], is_featured: false, tier: 'burger' })
+    });
+    loadFeaturedListings();
+  } catch { alert('Failed'); }
+}
+
+async function loadFeaturedPreview() {
+  const grid = document.getElementById('preview-grid');
+  grid.innerHTML = '<div style="color:var(--muted);grid-column:1/-1;text-align:center;padding:24px">Loading…</div>';
+  try {
+    const r = await fetch(`${API}/api/listings/featured`, { headers: { Authorization: `Bearer ${token}` } });
+    const rows = await r.json();
+    document.getElementById('preview-count').textContent = rows.length + ' listings in featured rotation';
+    if (!rows.length) { grid.innerHTML = '<div style="color:var(--muted);grid-column:1/-1;text-align:center;padding:24px">No featured listings — homepage will show newest listings as fallback</div>'; return; }
+    grid.innerHTML = rows.map(l => `
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden">
+        ${l.thumb ? `<img src="${l.thumb}" style="width:100%;height:120px;object-fit:cover">` : '<div style="height:80px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:24px">🐄</div>'}
+        <div style="padding:10px">
+          <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:4px" class="truncate">${escHtml(l.title)}</div>
+          <div style="font-size:11px;color:var(--muted)">${l.state || ''} · ${tierBadge(l.tier)}</div>
+          <button class="btn btn-danger" style="font-size:10px;padding:3px 8px;margin-top:6px;width:100%" onclick="setFeatured(${l.id},false,'burger')">Remove</button>
+        </div>
+      </div>`).join('');
+  } catch { grid.innerHTML = '<div style="color:var(--red);grid-column:1/-1;text-align:center;padding:24px">Failed to load</div>'; }
+}
+
 async function loadVerifications() {
   const tbody = document.getElementById('verifications-tbody');
   tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:var(--muted);padding:24px">Loading…</td></tr>';

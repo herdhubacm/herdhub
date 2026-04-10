@@ -441,6 +441,49 @@ router.put('/settings', async (req, res) => {
   } catch(e) { res.status(500).json({ error: 'Failed to save settings' }); }
 });
 
+// ── GET /api/admin/featured — all listings with feature status ─
+router.get('/featured', async (req, res) => {
+  try {
+    const { search, status, featured } = req.query;
+    const conds = [];
+    const params = [];
+    let p = 1;
+    if (status) { conds.push('l.status=$' + p); params.push(status); p++; }
+    if (featured === 'true') conds.push('l.is_featured=true');
+    if (search) { conds.push('(l.title ILIKE $' + p + ' OR u.email ILIKE $' + p + ')'); params.push('%' + search + '%'); p++; }
+    const where = conds.length ? 'WHERE ' + conds.join(' AND ') : '';
+    const { rows } = await query(`
+      SELECT l.id, l.title, l.category, l.tier, l.is_featured, l.status,
+             l.price, l.state, l.created_at, l.expires_at,
+             u.name AS seller_name, u.email AS seller_email
+      FROM listings l JOIN users u ON l.user_id=u.id
+      ${where} ORDER BY l.is_featured DESC, l.created_at DESC LIMIT 200`, params);
+    const { rows: countRows } = await query("SELECT COUNT(*) AS c FROM listings WHERE is_featured=true AND status='active'");
+    res.json({ listings: rows, featured_count: parseInt(countRows[0]?.c || 0) });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ── POST /api/admin/listings/:id/feature ─────────────
+router.post('/listings/:id/feature', async (req, res) => {
+  try {
+    const { is_featured, tier } = req.body;
+    await query('UPDATE listings SET is_featured=$1, tier=$2 WHERE id=$3',
+      [is_featured !== false, tier || 'burger', parseInt(req.params.id)]);
+    res.json({ ok: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ── POST /api/admin/listings/bulk-feature ────────────
+router.post('/listings/bulk-feature', async (req, res) => {
+  try {
+    const { ids, is_featured, tier } = req.body;
+    if (!ids?.length) return res.status(400).json({ error: 'No IDs' });
+    await query('UPDATE listings SET is_featured=$1, tier=$2 WHERE id=ANY($3)',
+      [is_featured !== false, tier || 't_bone', ids]);
+    res.json({ ok: true, count: ids.length });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 // ── GET /api/settings (public — for frontend stats bar) ─
 // Mounted separately in server.js as /api/settings
 
