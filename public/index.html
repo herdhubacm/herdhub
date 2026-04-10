@@ -4039,7 +4039,7 @@ function renderListingCard(l, darkBg) {
   const img = imgSrc
     ? `<img src="${imgSrc}" alt="${escHtml(l.title)}" loading="lazy" onerror="this.style.display='none'">`
     : `<div style="width:100%;height:100%;background:var(--light-tan);display:flex;align-items:center;justify-content:center;font-size:48px">${catEmoji(l.category)}</div>`;
-  const tierBadge = {t_bone:'🥩 T-Bone', filet:'🥩 Filet', sirloin:'🥩 Sirloin', ribeye:'🥩 Ribeye'}[l.tier] || '';
+  const tierBadge = {t_bone:'🥩 Prime', filet:'🥩 Choice', sirloin:'🥩 Sirloin', ribeye:'🥩 Ribeye'}[l.tier] || '';
   const badge = l.is_featured
     ? `<span class="listing-badge featured">${tierBadge || '⭐ Featured'}</span>`
     : '<span class="listing-badge new">New</span>';
@@ -4202,7 +4202,7 @@ async function openListing(id) {
       : `<span style="font-size:18px;color:#888;font-style:italic">Call for price</span>`;
 
     // Tier badge
-    const tierBadge = {t_bone:'🥩 T-Bone Partner', filet:'🥩 Filet Advertiser', sirloin:'🥩 Sirloin Featured',
+    const tierBadge = {t_bone:'🥩 Prime Partner', filet:'🥩 Choice Advertiser', sirloin:'🥩 Sirloin Featured',
       ribeye:'🥩 Ribeye Featured', farm_to_table:'🌿 Farm to Table', burger:'🍔 Standard'}[l.tier] || '';
 
     // Meta pills

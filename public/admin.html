@@ -736,7 +736,7 @@ async function loadDashboard() {
     document.getElementById('s-users-today').textContent = `${d.users.today || 0} joined today`;
     document.getElementById('s-paid').textContent = d.revenue.paid_count || 0;
     document.getElementById('s-tier-breakdown').textContent =
-      `${d.revenue.ribeye_count||0} Ribeye · ${d.revenue.filet_count||0} Filet · ${d.revenue.tbone_count||0} T-Bone`;
+      `${d.revenue.ribeye_count||0} Ribeye · ${d.revenue.filet_count||0} Choice · ${d.revenue.tbone_count||0} Prime`;
     document.getElementById('s-unread').textContent = d.messages.unread || 0;
 
     // Lot sales stats
@@ -1010,8 +1010,9 @@ function fmtDate(iso) {
 }
 
 function tierBadge(tier) {
-  const map = { basic:'badge-gray', ribeye:'badge-rust', filet:'badge-gold', t_bone:'badge-purple' };
-  return `<span class="badge ${map[tier]||'badge-gray'}">${tier||'basic'}</span>`;
+  const map = { basic:'badge-gray', burger:'badge-gray', sirloin:'badge-rust', ribeye:'badge-rust', filet:'badge-gold', t_bone:'badge-purple' };
+  const names = { burger:'Burger', sirloin:'Sirloin', ribeye:'Ribeye', filet:'Choice', t_bone:'Prime' };
+  return `<span class="badge ${map[tier]||'badge-gray'}">${names[tier]||tier||'basic'}</span>`;
 }
 function statusBadge(s) {
   const map = { active:'badge-green', expired:'badge-red', pending:'badge-gold' };

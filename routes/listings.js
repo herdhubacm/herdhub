@@ -139,17 +139,24 @@ router.get('/', optionalAuth, async (req, res) => {
 // ── GET /api/listings/featured ────────────────────────
 router.get('/featured', async (_req, res) => {
   try {
-    const { rows } = await query(
-      `SELECT l.id, l.title, l.category, l.breed, l.price, l.price_type,
+    const cols = `l.id, l.title, l.category, l.breed, l.price, l.price_type,
               l.quantity, l.state, l.city, l.tier, l.is_featured, l.created_at,
               u.name AS seller_name, u.is_verified AS seller_verified,
               (SELECT url FROM listing_photos WHERE listing_id=l.id ORDER BY sort_order LIMIT 1) AS thumb,
-              (SELECT thumb_url FROM listing_photos WHERE listing_id=l.id ORDER BY sort_order LIMIT 1) AS thumb_small
-       FROM listings l
-       JOIN users u ON u.id = l.user_id
-       WHERE l.status = 'active' AND l.is_featured = TRUE
+              (SELECT thumb_url FROM listing_photos WHERE listing_id=l.id ORDER BY sort_order LIMIT 1) AS thumb_small`;
+    // Try featured/paid tiers first
+    let { rows } = await query(
+      `SELECT ${cols} FROM listings l JOIN users u ON u.id = l.user_id
+       WHERE l.status = 'active' AND (l.is_featured = TRUE OR l.tier IN ('t_bone','filet','ribeye'))
        ORDER BY l.created_at DESC LIMIT 12`
     );
+    // Fallback: newest active listings
+    if (!rows.length) {
+      ({ rows } = await query(
+        `SELECT ${cols} FROM listings l JOIN users u ON u.id = l.user_id
+         WHERE l.status = 'active' ORDER BY l.created_at DESC LIMIT 12`
+      ));
+    }
     res.json(rows);
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch featured listings' });
