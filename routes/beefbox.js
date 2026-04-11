@@ -6,7 +6,7 @@ const { authenticateToken, requireAdmin } = require('../middleware/auth');
 // ── POST /api/beefbox/signup ───────────────────────────
 router.post('/signup', async (req, res) => {
   try {
-    const { name, email, state, type } = req.body;
+    const { name, email, state, type, street, city, zip } = req.body;
     if (!name || !email) return res.status(400).json({ error: 'Name and email are required.' });
     if (!email.includes('@')) return res.status(400).json({ error: 'Please enter a valid email address.' });
 
@@ -16,8 +16,9 @@ router.post('/signup', async (req, res) => {
     if (existing.length) return res.status(409).json({ error: "You're already on the list! We'll be in touch at launch." });
 
     await query(
-      'INSERT INTO beefbox_waitlist (name, email, state, type) VALUES ($1, $2, $3, $4)',
-      [name, email.toLowerCase(), state || null, type || null]
+      'INSERT INTO beefbox_waitlist (name, email, state, type, street, city, zip) VALUES ($1, $2, $3, $4, $5, $6, $7)',
+      [name, email.toLowerCase(), state || null, type || null,
+       (street||'').slice(0,150) || null, (city||'').slice(0,100) || null, (zip||'').slice(0,20) || null]
     );
     res.status(201).json({ success: true, message: "You're on the list!" });
   } catch (err) {
@@ -39,7 +40,7 @@ router.get('/count', async (_req, res) => {
 router.get('/list', authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { rows } = await query(
-      'SELECT id, name, email, state, type, created_at FROM beefbox_waitlist ORDER BY created_at DESC'
+      'SELECT id, name, email, state, type, street, city, zip, created_at FROM beefbox_waitlist ORDER BY created_at DESC'
     );
     res.json(rows);
   } catch (err) {

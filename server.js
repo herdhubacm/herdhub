@@ -436,6 +436,9 @@ async function start() {
         type       TEXT,
         created_at TIMESTAMPTZ  NOT NULL DEFAULT NOW()
       )`);
+      await query(`ALTER TABLE beefbox_waitlist ADD COLUMN IF NOT EXISTS street VARCHAR(150)`);
+      await query(`ALTER TABLE beefbox_waitlist ADD COLUMN IF NOT EXISTS city VARCHAR(100)`);
+      await query(`ALTER TABLE beefbox_waitlist ADD COLUMN IF NOT EXISTS zip VARCHAR(20)`);
       console.log('✅  Beef Box waitlist table ready');
 
       // Ensure updated_at column exists on listings

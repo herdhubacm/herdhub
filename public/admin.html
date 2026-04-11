@@ -431,7 +431,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
           <div style="margin-bottom:20px">
             <h3 style="font-size:14px;color:var(--gold);margin-bottom:12px">📦 Beef Box Waitlist</h3>
             <table>
-              <thead><tr><th>Name</th><th>Email</th><th>State</th><th>Type</th><th>Signed Up</th><th>Actions</th></tr></thead>
+              <thead><tr><th>Name</th><th>Email</th><th>Address</th><th>State</th><th>Type</th><th>Signed Up</th><th>Actions</th></tr></thead>
               <tbody id="beefbox-waitlist-tbody"><tr><td colspan="5" style="text-align:center;color:var(--muted);padding:16px">Loading…</td></tr></tbody>
             </table>
             <div style="margin-top:8px;font-size:12px;color:var(--muted)">Total: <strong id="beefbox-waitlist-count" style="color:var(--gold)">—</strong></div>
@@ -1397,16 +1397,19 @@ async function loadWaitlists() {
       headers: { Authorization: `Bearer ${token}` }
     });
     const rows = await r.json();
-    if (!rows.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:16px">No signups yet.</td></tr>'; return; }
-    tbody.innerHTML = rows.map(row => `
-      <tr>
+    if (!rows.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:16px">No signups yet.</td></tr>'; return; }
+    tbody.innerHTML = rows.map(row => {
+      const addr = [row.street, row.city, row.zip].filter(Boolean).join(', ');
+      return `<tr>
         <td>${escHtml(row.name)}</td>
         <td>${escHtml(row.email)}</td>
+        <td style="font-size:12px">${escHtml(addr || '—')}</td>
         <td>${escHtml(row.state || '—')}</td>
         <td>${escHtml(row.type || '—')}</td>
         <td>${fmtDate(row.created_at)}</td>
         <td><button class="btn-action danger" onclick="deleteWaitlistEntry(${row.id}, this)">🗑 Delete</button></td>
-      </tr>`).join('');
+      </tr>`;
+    }).join('');
     if (countEl) countEl.textContent = rows.length;
   } catch(e) {
     tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:16px">Could not load waitlist.</td></tr>';

@@ -2650,6 +2650,14 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
           <input type="email" id="bb-email" placeholder="you@example.com" style="background:rgba(255,255,255,.06);border-color:rgba(201,169,110,.25);color:var(--cream)">
         </div>
         <div class="form-group">
+          <label style="color:var(--tan)">Shipping Address <span style="opacity:.5;font-size:11px">(for merch delivery — optional)</span></label>
+          <input type="text" id="bb-street" placeholder="123 Ranch Road" style="background:rgba(255,255,255,.06);border-color:rgba(201,169,110,.25);color:var(--cream);margin-bottom:8px">
+          <div style="display:grid;grid-template-columns:2fr 1fr;gap:8px">
+            <input type="text" id="bb-city" placeholder="City" style="background:rgba(255,255,255,.06);border-color:rgba(201,169,110,.25);color:var(--cream)">
+            <input type="text" id="bb-zip" placeholder="ZIP" maxlength="10" style="background:rgba(255,255,255,.06);border-color:rgba(201,169,110,.25);color:var(--cream)">
+          </div>
+        </div>
+        <div class="form-group">
           <label style="color:var(--tan)">State</label>
           <select id="bb-state" style="background:rgba(255,255,255,.06);border-color:rgba(201,169,110,.25);color:var(--cream)">
             <option value="">Select State…</option>
@@ -4724,6 +4732,9 @@ function subscribeNewsletter() {
 async function doBeefBoxSignup() {
   const name  = document.getElementById('bb-name').value.trim();
   const email = document.getElementById('bb-email').value.trim();
+  const street = document.getElementById('bb-street').value.trim();
+  const city  = document.getElementById('bb-city').value.trim();
+  const zip   = document.getElementById('bb-zip').value.trim();
   const state = document.getElementById('bb-state').value;
   const type  = document.getElementById('bb-type').value;
   const errEl = document.getElementById('bb-error');
@@ -4739,13 +4750,13 @@ async function doBeefBoxSignup() {
     const r = await fetch(`${API}/api/beefbox/signup`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, email, state, type })
+      body: JSON.stringify({ name, email, street, city, zip, state, type })
     });
     const d = await r.json();
     if (!r.ok) { errEl.textContent = d.error || 'Something went wrong. Please try again.'; errEl.style.display='block'; }
     else {
       sucEl.style.display = 'block';
-      ['bb-name','bb-email'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
+      ['bb-name','bb-email','bb-street','bb-city','bb-zip'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
       document.getElementById('bb-state').value = '';
       document.getElementById('bb-type').value = '';
     }
