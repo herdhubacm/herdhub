@@ -174,7 +174,17 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
   .list-toolbar{flex-direction:column;align-items:stretch}
   .batch-row{grid-template-columns:1fr 80px 100px}
 }
+@media print {
+  .site-header, .hero, .btn, button, .tool-tabs, .tab-bar, .filter-tabs,
+  .auth-banner, .disclaimer, [onclick], input, select, textarea { display:none!important }
+  body, body::before { background:white!important; color:black!important }
+  body::before { display:none!important }
+  .card, .result-stat, .stage-card { border-color:#ddd!important; background:white!important }
+  .result-stat .val, .stage-card .stage-name { color:#2C1A0E!important }
+  * { color:black!important }
+}
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
 
@@ -227,7 +237,11 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 <div class="view" id="view-list">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px">
     <h2 style="font-family:'Playfair Display',serif;font-size:24px;font-weight:900;cursor:pointer" onclick="showView('dashboard')">&larr; <span style="color:var(--gold)">Herd</span> List</h2>
-    <button class="btn btn-primary" onclick="showAddAnimal()">+ Add Animal</button>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-primary btn-sm" onclick="exportRosterPDF()">&#x1F4C4; Export Roster PDF</button>
+      <button class="btn btn-ghost btn-sm" onclick="window.print()">&#x1F5A8; Print</button>
+      <button class="btn btn-primary" onclick="showAddAnimal()">+ Add Animal</button>
+    </div>
   </div>
 
   <div class="list-toolbar">
@@ -533,6 +547,7 @@ async function openProfile(id) {
         '<button class="btn btn-ghost btn-sm" onclick="showSingleWeight(' + a.id + ')">+ Weight</button>' +
         '<button class="btn btn-ghost btn-sm" onclick="showSingleHealth(' + a.id + ')">+ Health</button>' +
         '<button class="btn btn-ghost btn-sm" onclick="showSingleProduction(' + a.id + ')">+ Production</button>' +
+        '<button class="btn btn-primary btn-sm" onclick="exportAnimalPDF(' + a.id + ')">&#x1F4C4; Export PDF</button>' +
         '<button class="btn btn-danger btn-sm" onclick="deleteAnimal(' + a.id + ')">Delete</button>' +
       '</div></div></div>';
 
@@ -860,6 +875,106 @@ document.querySelectorAll('.modal-overlay').forEach(m => {
 
 // ── Init ─────────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', initAuth);
+
+// ── PDF Helpers ───────────────────────────────────────────────────────────────
+function makePDF(title) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  doc.setFillColor(44, 26, 14); doc.rect(0, 0, 210, 20, 'F');
+  doc.setFillColor(201, 169, 110); doc.rect(0, 20, 210, 2, 'F');
+  doc.setTextColor(245, 239, 224); doc.setFontSize(14); doc.text('HERD HUB', 14, 13);
+  doc.setFontSize(8); doc.text('American Cattle Marketplace', 50, 13);
+  doc.setTextColor(44, 26, 14); doc.setFontSize(16); doc.text(title, 14, 34);
+  doc.setFontSize(9); doc.setTextColor(120, 120, 120);
+  doc.text('Generated: ' + new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString(), 14, 40);
+  return { doc, y: 48 };
+}
+function addTable(doc, y, headers, rows) {
+  doc.setFontSize(8); doc.setTextColor(100, 100, 100);
+  const colW = 182 / headers.length;
+  headers.forEach((h, i) => doc.text(h, 14 + i * colW, y));
+  y += 2; doc.setDrawColor(201, 169, 110); doc.line(14, y, 196, y); y += 5;
+  doc.setTextColor(30, 30, 30); doc.setFontSize(9);
+  rows.forEach(row => {
+    if (y > 270) { doc.addPage(); y = 20; }
+    row.forEach((cell, i) => doc.text(String(cell || ''), 14 + i * colW, y)); y += 5;
+  });
+  return y + 5;
+}
+function addFooter(doc) {
+  const pages = doc.internal.getNumberOfPages();
+  for (let i = 1; i <= pages; i++) {
+    doc.setPage(i); doc.setFontSize(7); doc.setTextColor(150, 150, 150);
+    doc.text('theherdhub.com — Generated ' + new Date().toLocaleDateString(), 14, 290);
+    doc.text('Page ' + i + ' of ' + pages, 180, 290);
+  }
+}
+
+async function exportAnimalPDF(id) {
+  try {
+    const a = await api('GET', '/api/herd/' + id);
+    const { doc, y: y0 } = makePDF('Animal Record — ' + (a.name || a.tag_id || 'Unknown'));
+    let y = y0;
+    const age = a.birth_date ? calcAge(a.birth_date) : '—';
+    const lastW = a.weights && a.weights.length ? parseFloat(a.weights[0].weight).toLocaleString() + ' lbs' : '—';
+    doc.setFontSize(11); doc.setTextColor(44, 26, 14);
+    doc.text((a.name || a.tag_id || 'Unnamed'), 14, y); y += 8;
+    const details = [
+      ['Tag ID', a.tag_id || '—'],
+      ['Name', a.name || '—'],
+      ['Breed', a.breed || '—'],
+      ['Sex', a.sex || '—'],
+      ['Age', age],
+      ['Status', a.status || 'active'],
+      ['Last Weight', lastW],
+      ['Birth Date', a.birth_date ? fmtDate(a.birth_date) : '—'],
+      ['Birth Weight', a.birth_weight ? a.birth_weight + ' lbs' : '—'],
+      ['Color', a.color || '—'],
+      ['Sire', a.sire_name || '—'],
+      ['Dam', a.dam_name || '—'],
+      ['Purchase Date', a.purchase_date ? fmtDate(a.purchase_date) : '—'],
+      ['Purchase Price', a.purchase_price ? '$' + parseFloat(a.purchase_price).toLocaleString() : '—'],
+    ];
+    y = addTable(doc, y, ['Field', 'Value'], details);
+    if (a.weights && a.weights.length) {
+      y += 4; doc.setFontSize(10); doc.setTextColor(44, 26, 14); doc.text('Weight History', 14, y); y += 6;
+      const wRows = a.weights.slice(0, 20).map(w => [fmtDate(w.weigh_date), parseFloat(w.weight).toLocaleString() + ' lbs', w.notes || '']);
+      y = addTable(doc, y, ['Date', 'Weight', 'Notes'], wRows);
+    }
+    if (a.health_records && a.health_records.length) {
+      y += 4; doc.setFontSize(10); doc.setTextColor(44, 26, 14); doc.text('Health Records', 14, y); y += 6;
+      const hRows = a.health_records.slice(0, 20).map(h => [fmtDate(h.event_date), h.event_type || '', h.product || '', h.cost ? '$' + h.cost : '']);
+      y = addTable(doc, y, ['Date', 'Event', 'Product', 'Cost'], hRows);
+    }
+    if (a.notes) {
+      y += 4; doc.setFontSize(9); doc.setTextColor(60, 60, 60);
+      const ls = doc.splitTextToSize('Notes: ' + a.notes, 180);
+      doc.text(ls, 14, y);
+    }
+    addFooter(doc);
+    doc.save('Animal_' + (a.tag_id || a.id) + '_' + new Date().toISOString().slice(0,10) + '.pdf');
+  } catch (err) { alert('Could not export: ' + err.message); }
+}
+
+function exportRosterPDF() {
+  const { doc, y: y0 } = makePDF('Herd Roster');
+  let y = y0;
+  doc.setFontSize(9); doc.setTextColor(60, 60, 60);
+  doc.text('Total Animals: ' + herdData.length, 14, y); y += 8;
+  const headers = ['Tag ID', 'Name', 'Breed', 'Sex', 'Age', 'Last Weight', 'Status'];
+  const rows = herdData.map(a => [
+    a.tag_id || '—',
+    a.name || '—',
+    a.breed || '—',
+    a.sex || '—',
+    a.birth_date ? calcAge(a.birth_date).replace(/<[^>]+>/g, '') : '—',
+    a.last_weight ? parseFloat(a.last_weight).toLocaleString() + ' lbs' : '—',
+    a.status || 'active'
+  ]);
+  y = addTable(doc, y, headers, rows);
+  addFooter(doc);
+  doc.save('HerdRoster_' + new Date().toISOString().slice(0,10) + '.pdf');
+}
 </script>
 </body>
 </html>

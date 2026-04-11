@@ -102,7 +102,17 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
   .price-grid{grid-template-columns:1fr 1fr}.field-row,.field-row-3,.field-row-4{grid-template-columns:1fr}
   .auth-banner{flex-direction:column;text-align:center}
 }
+@media print {
+  .site-header, .hero, .btn, button, .tool-tabs, .tab-bar, .filter-tabs,
+  .auth-banner, .disclaimer, [onclick], input, select, textarea { display:none!important }
+  body, body::before { background:white!important; color:black!important }
+  body::before { display:none!important }
+  .card, .result-stat, .stage-card { border-color:#ddd!important; background:white!important }
+  .result-stat .val, .stage-card .stage-name { color:#2C1A0E!important }
+  * { color:black!important }
+}
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
 
@@ -127,6 +137,10 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
   <div class="section-desc">Latest cattle prices from USDA Agricultural Marketing Service. Updated automatically.</div>
   <div class="price-grid" id="price-board">
     <div class="price-card"><div class="category">Loading...</div><div class="price">—</div></div>
+  </div>
+  <div style="margin-top:12px;display:flex;gap:8px">
+    <button class="btn btn-primary btn-sm" onclick="exportMarketPDF()">&#x1F4C4; Download PDF</button>
+    <button class="btn btn-ghost btn-sm" onclick="window.print()">&#x1F5A8; Print</button>
   </div>
 </div>
 
@@ -590,6 +604,70 @@ document.addEventListener('DOMContentLoaded', async () => {
   loadHistory();
   renderSeasonalChart();
 });
+
+// ── PDF Helpers ───────────────────────────────────────────────────────────────
+function makePDF(title) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  doc.setFillColor(44, 26, 14); doc.rect(0, 0, 210, 20, 'F');
+  doc.setFillColor(201, 169, 110); doc.rect(0, 20, 210, 2, 'F');
+  doc.setTextColor(245, 239, 224); doc.setFontSize(14); doc.text('HERD HUB', 14, 13);
+  doc.setFontSize(8); doc.text('American Cattle Marketplace', 50, 13);
+  doc.setTextColor(44, 26, 14); doc.setFontSize(16); doc.text(title, 14, 34);
+  doc.setFontSize(9); doc.setTextColor(120, 120, 120);
+  doc.text('Generated: ' + new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString(), 14, 40);
+  return { doc, y: 48 };
+}
+function addTable(doc, y, headers, rows) {
+  doc.setFontSize(8); doc.setTextColor(100, 100, 100);
+  const colW = 182 / headers.length;
+  headers.forEach((h, i) => doc.text(h, 14 + i * colW, y));
+  y += 2; doc.setDrawColor(201, 169, 110); doc.line(14, y, 196, y); y += 5;
+  doc.setTextColor(30, 30, 30); doc.setFontSize(9);
+  rows.forEach(row => {
+    if (y > 270) { doc.addPage(); y = 20; }
+    row.forEach((cell, i) => doc.text(String(cell || ''), 14 + i * colW, y)); y += 5;
+  });
+  return y + 5;
+}
+function addFooter(doc) {
+  const pages = doc.internal.getNumberOfPages();
+  for (let i = 1; i <= pages; i++) {
+    doc.setPage(i); doc.setFontSize(7); doc.setTextColor(150, 150, 150);
+    doc.text('theherdhub.com — Generated ' + new Date().toLocaleDateString(), 14, 290);
+    doc.text('Page ' + i + ' of ' + pages, 180, 290);
+  }
+}
+
+function exportMarketPDF() {
+  const { doc, y: y0 } = makePDF('Market Price Intelligence Report');
+  let y = y0;
+  // Price board
+  const headers = ['Category', 'Price', 'Range', 'Change'];
+  const rows = [];
+  document.querySelectorAll('#price-board .price-card').forEach(card => {
+    const cat = card.querySelector('.category')?.textContent || '';
+    const price = card.querySelector('.price')?.textContent?.replace(/\s+/g, ' ').trim() || '';
+    const range = card.querySelector('.range')?.textContent || '';
+    const change = card.querySelector('.change')?.textContent || '';
+    if (cat && cat !== 'Loading...') rows.push([cat, price, range, change]);
+  });
+  if (rows.length) y = addTable(doc, y, headers, rows);
+  // Break-even result if visible
+  const beResult = document.getElementById('be-result');
+  if (beResult && beResult.style.display !== 'none' && beResult.textContent.trim()) {
+    y += 4; doc.setFontSize(10); doc.setTextColor(44, 26, 14); doc.text('Break-Even Analysis', 14, y); y += 6;
+    const stats = [];
+    beResult.querySelectorAll('.result-stat').forEach(s => {
+      const lbl = s.querySelector('.lbl')?.textContent || '';
+      const val = s.querySelector('.val')?.textContent || '';
+      if (lbl) stats.push([lbl, val]);
+    });
+    if (stats.length) y = addTable(doc, y, ['Metric', 'Value'], stats);
+  }
+  addFooter(doc);
+  doc.save('MarketIntelligence_' + new Date().toISOString().slice(0,10) + '.pdf');
+}
 </script>
 </body>
 </html>

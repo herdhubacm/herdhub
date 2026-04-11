@@ -761,7 +761,17 @@ select option { background: var(--brown); color: var(--cream); }
   .container { padding: 0 20px 60px; }
   .site-header { padding: 0 20px; }
 }
+@media print {
+  .site-header, .hero, .btn, button, .tool-tabs, .tab-bar, .filter-tabs,
+  .auth-banner, .disclaimer, [onclick], input, select, textarea { display:none!important }
+  body, body::before { background:white!important; color:black!important }
+  body::before { display:none!important }
+  .card, .result-stat, .stage-card { border-color:#ddd!important; background:white!important }
+  .result-stat .val, .stage-card .stage-name { color:#2C1A0E!important }
+  * { color:black!important }
+}
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
 
@@ -1051,6 +1061,10 @@ select option { background: var(--brown); color: var(--cream); }
     <!-- Results -->
     <div class="comparison-results" id="comparison-results">
       <div style="height:1px;background:rgba(255,255,255,.06);margin:40px 0 32px"></div>
+      <div id="compare-export" style="display:none;margin-bottom:12px;gap:8px">
+        <button class="btn btn-primary btn-sm" onclick="exportComparisonPDF()">&#x1F4C4; Download PDF</button>
+        <button class="btn btn-ghost btn-sm" onclick="window.print()">&#x1F5A8; Print</button>
+      </div>
       <div class="results-header">
         <div class="results-bull-name b1" id="res-b1-name">Bull A</div>
         <div class="results-vs">vs.</div>
@@ -1246,6 +1260,10 @@ select option { background: var(--brown); color: var(--cream); }
       <!-- Wizard Results -->
       <div class="recommendation" id="wizard-results">
         <div style="height:1px;background:rgba(255,255,255,.06);margin:40px 0 32px"></div>
+        <div id="wizard-export" style="display:none;margin-bottom:12px;gap:8px">
+          <button class="btn btn-primary btn-sm" onclick="exportWizardPDF()">&#x1F4C4; Download PDF</button>
+          <button class="btn btn-ghost btn-sm" onclick="window.print()">&#x1F5A8; Print</button>
+        </div>
         <div class="rec-header" id="rec-header"></div>
         <div id="epd-targets"></div>
         <div id="wizard-warnings"></div>
@@ -1476,6 +1494,7 @@ function runComparison() {
   document.getElementById('traits-area').innerHTML = traitsHTML;
   document.getElementById('comparison-results').classList.add('visible');
   document.getElementById('comparison-results').scrollIntoView({ behavior:'smooth', block:'start' });
+  document.getElementById('compare-export').style.display='flex';
 }
 
 // ── Bull Selection Wizard ─────────────────────────────────────────────────────
@@ -1642,6 +1661,7 @@ function runWizard() {
 
   document.getElementById('wizard-results').classList.add('visible');
   document.getElementById('wizard-results').scrollIntoView({ behavior:'smooth', block:'start' });
+  document.getElementById('wizard-export').style.display='flex';
 }
 
 function searchBulls() {
@@ -1652,6 +1672,130 @@ function searchBulls() {
   };
   const cat = catMap[goal] || 'bulls';
   window.location.href = `/?category=${cat}#listings`;
+}
+
+// ── PDF Helpers ───────────────────────────────────────────────────────────────
+function makePDF(title) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  doc.setFillColor(44, 26, 14);
+  doc.rect(0, 0, 210, 20, 'F');
+  doc.setFillColor(201, 169, 110);
+  doc.rect(0, 20, 210, 2, 'F');
+  doc.setTextColor(245, 239, 224);
+  doc.setFontSize(14);
+  doc.text('HERD HUB', 14, 13);
+  doc.setFontSize(8);
+  doc.text('American Cattle Marketplace', 50, 13);
+  doc.setTextColor(44, 26, 14);
+  doc.setFontSize(16);
+  doc.text(title, 14, 34);
+  doc.setFontSize(9);
+  doc.setTextColor(120, 120, 120);
+  doc.text('Generated: ' + new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString(), 14, 40);
+  return { doc, y: 48 };
+}
+
+function addTable(doc, y, headers, rows) {
+  doc.setFontSize(8);
+  doc.setTextColor(100, 100, 100);
+  const colW = 182 / headers.length;
+  headers.forEach((h, i) => doc.text(h, 14 + i * colW, y));
+  y += 2;
+  doc.setDrawColor(201, 169, 110);
+  doc.line(14, y, 196, y);
+  y += 5;
+  doc.setTextColor(30, 30, 30);
+  doc.setFontSize(9);
+  rows.forEach(row => {
+    if (y > 270) { doc.addPage(); y = 20; }
+    row.forEach((cell, i) => doc.text(String(cell || ''), 14 + i * colW, y));
+    y += 5;
+  });
+  return y + 5;
+}
+
+function addFooter(doc) {
+  const pages = doc.internal.getNumberOfPages();
+  for (let i = 1; i <= pages; i++) {
+    doc.setPage(i);
+    doc.setFontSize(7);
+    doc.setTextColor(150, 150, 150);
+    doc.text('theherdhub.com — Generated ' + new Date().toLocaleDateString(), 14, 290);
+    doc.text('Page ' + i + ' of ' + pages, 180, 290);
+  }
+}
+
+function exportComparisonPDF() {
+  const { doc, y: y0 } = makePDF('EPD Comparison Report');
+  let y = y0;
+  const b1n = document.getElementById('res-b1-name').textContent || 'Bull A';
+  const b2n = document.getElementById('res-b2-name').textContent || 'Bull B';
+  doc.setFontSize(11); doc.setTextColor(44, 26, 14);
+  doc.text('Comparing: ' + b1n + '  vs.  ' + b2n, 14, y); y += 10;
+  const headers = ['Trait', b1n.slice(0,14), b2n.slice(0,14), 'Edge'];
+  const rows = [];
+  document.querySelectorAll('.trait-row').forEach(row => {
+    const cells = row.querySelectorAll('.trait-name, .val-b1, .val-b2, .trait-winner');
+    if (cells.length >= 4) rows.push([cells[0].textContent, cells[1].textContent, cells[2].textContent, cells[3].textContent]);
+  });
+  if (rows.length) y = addTable(doc, y, headers, rows);
+  const insights = [];
+  document.querySelectorAll('.insight-box').forEach(el => { if (el.textContent.trim()) insights.push(el.textContent.trim()); });
+  if (insights.length) {
+    doc.setFontSize(10); doc.setTextColor(44, 26, 14); doc.text('Key Insights', 14, y); y += 6;
+    doc.setFontSize(8); doc.setTextColor(60, 60, 60);
+    insights.forEach(ins => {
+      if (y > 270) { doc.addPage(); y = 20; }
+      const lines = doc.splitTextToSize('• ' + ins, 180);
+      doc.text(lines, 14, y); y += lines.length * 4 + 3;
+    });
+  }
+  addFooter(doc);
+  doc.save('HerdVision_Comparison_' + new Date().toISOString().slice(0,10) + '.pdf');
+}
+
+function exportWizardPDF() {
+  const { doc, y: y0 } = makePDF('Bull Selection Wizard Report');
+  let y = y0;
+  const goalName = document.querySelector('.rec-goal-name')?.textContent || '';
+  const goalDesc = document.querySelector('.rec-goal-desc')?.textContent || '';
+  if (goalName) { doc.setFontSize(11); doc.setTextColor(44, 26, 14); doc.text('Goal: ' + goalName, 14, y); y += 6; }
+  if (goalDesc) { doc.setFontSize(9); doc.setTextColor(80, 80, 80); const ls = doc.splitTextToSize(goalDesc, 180); doc.text(ls, 14, y); y += ls.length * 4 + 6; }
+  const headers = ['Trait (EPD)', 'Priority', 'Target Range', 'Notes'];
+  const rows = [];
+  document.querySelectorAll('.epd-target-card').forEach(card => {
+    const name = card.querySelector('.epd-target-name')?.textContent || '';
+    const range = card.querySelector('.epd-target-range')?.textContent || '';
+    const label = card.querySelector('.epd-target-label')?.textContent || '';
+    const priority = card.querySelector('.priority-badge')?.textContent || '';
+    rows.push([name, priority, range, label.slice(0, 40)]);
+  });
+  if (rows.length) y = addTable(doc, y, headers, rows);
+  const warnings = [];
+  document.querySelectorAll('.warning-box').forEach(el => { if (el.textContent.trim()) warnings.push(el.textContent.trim()); });
+  if (warnings.length) {
+    doc.setFontSize(10); doc.setTextColor(44, 26, 14); doc.text('Warnings', 14, y); y += 6;
+    doc.setFontSize(8); doc.setTextColor(60, 60, 60);
+    warnings.forEach(w => {
+      if (y > 270) { doc.addPage(); y = 20; }
+      const lines = doc.splitTextToSize('• ' + w, 180);
+      doc.text(lines, 14, y); y += lines.length * 4 + 3;
+    });
+  }
+  const insights = [];
+  document.querySelectorAll('.insight-good').forEach(el => { if (el.textContent.trim()) insights.push(el.textContent.trim()); });
+  if (insights.length) {
+    y += 4; doc.setFontSize(10); doc.setTextColor(44, 26, 14); doc.text('Insights', 14, y); y += 6;
+    doc.setFontSize(8); doc.setTextColor(60, 60, 60);
+    insights.forEach(ins => {
+      if (y > 270) { doc.addPage(); y = 20; }
+      const lines = doc.splitTextToSize('• ' + ins, 180);
+      doc.text(lines, 14, y); y += lines.length * 4 + 3;
+    });
+  }
+  addFooter(doc);
+  doc.save('HerdVision_Wizard_' + new Date().toISOString().slice(0,10) + '.pdf');
 }
 </script>
 

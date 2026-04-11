@@ -56,7 +56,17 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .saved-list .saved-item{display:flex;justify-content:space-between;align-items:center;padding:12px;border-bottom:1px solid rgba(201,169,110,.06)}
 .disclaimer{margin-top:40px;padding:16px;background:rgba(44,26,14,.4);border:1px solid rgba(201,169,110,.08);border-radius:6px;font-size:12px;color:var(--muted);line-height:1.6}
 @media(max-width:768px){.container{padding:0 16px 60px}.site-header{padding:0 16px}.epd-grid{grid-template-columns:repeat(3,1fr)}}
+@media print {
+  .site-header, .hero, .btn, button, .tool-tabs, .tab-bar, .filter-tabs,
+  .auth-banner, .disclaimer, [onclick], input, select, textarea { display:none!important }
+  body, body::before { background:white!important; color:black!important }
+  body::before { display:none!important }
+  .card, .result-stat, .stage-card { border-color:#ddd!important; background:white!important }
+  .result-stat .val, .stage-card .stage-name { color:#2C1A0E!important }
+  * { color:black!important }
+}
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
 <header class="site-header"><a href="/" class="logo">Herd <span>Hub</span></a><a href="/" class="back-link">&larr; Back to Marketplace</a></header>
@@ -119,6 +129,10 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 <div id="results" style="display:none">
 <div class="section">
 <div class="section-title">Predicted Results</div>
+<div id="pairing-export" style="display:none;margin-bottom:12px;gap:8px">
+  <button class="btn btn-primary btn-sm" onclick="exportPairingPDF()">&#x1F4C4; Download PDF</button>
+  <button class="btn btn-ghost btn-sm" onclick="window.print()">&#x1F5A8; Print</button>
+</div>
 <div id="result-stats"></div>
 <div id="result-summary"></div>
 <div id="result-cows" style="display:none"></div>
@@ -304,6 +318,7 @@ function runPairing(){
 
   document.getElementById('results').style.display='';
   document.getElementById('results').scrollIntoView({behavior:'smooth'});
+  document.getElementById('pairing-export').style.display='flex';
 
   // Store for saving
   window._lastPairing={bullName,bullBreed,bullEpds,cowEpds,cowBreed,calfEpds,predWW,predChoice,ceRisk,predB,predM};
@@ -342,6 +357,62 @@ async function deletePairing(id){
 
 function esc(s){if(!s)return'';const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
 document.addEventListener('DOMContentLoaded',initAuth);
+
+// ── PDF Helpers ───────────────────────────────────────────────────────────────
+function makePDF(title) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  doc.setFillColor(44, 26, 14); doc.rect(0, 0, 210, 20, 'F');
+  doc.setFillColor(201, 169, 110); doc.rect(0, 20, 210, 2, 'F');
+  doc.setTextColor(245, 239, 224); doc.setFontSize(14); doc.text('HERD HUB', 14, 13);
+  doc.setFontSize(8); doc.text('American Cattle Marketplace', 50, 13);
+  doc.setTextColor(44, 26, 14); doc.setFontSize(16); doc.text(title, 14, 34);
+  doc.setFontSize(9); doc.setTextColor(120, 120, 120);
+  doc.text('Generated: ' + new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString(), 14, 40);
+  return { doc, y: 48 };
+}
+function addTable(doc, y, headers, rows) {
+  doc.setFontSize(8); doc.setTextColor(100, 100, 100);
+  const colW = 182 / headers.length;
+  headers.forEach((h, i) => doc.text(h, 14 + i * colW, y));
+  y += 2; doc.setDrawColor(201, 169, 110); doc.line(14, y, 196, y); y += 5;
+  doc.setTextColor(30, 30, 30); doc.setFontSize(9);
+  rows.forEach(row => {
+    if (y > 270) { doc.addPage(); y = 20; }
+    row.forEach((cell, i) => doc.text(String(cell || ''), 14 + i * colW, y)); y += 5;
+  });
+  return y + 5;
+}
+function addFooter(doc) {
+  const pages = doc.internal.getNumberOfPages();
+  for (let i = 1; i <= pages; i++) {
+    doc.setPage(i); doc.setFontSize(7); doc.setTextColor(150, 150, 150);
+    doc.text('theherdhub.com — Generated ' + new Date().toLocaleDateString(), 14, 290);
+    doc.text('Page ' + i + ' of ' + pages, 180, 290);
+  }
+}
+
+function exportPairingPDF() {
+  const p = window._lastPairing;
+  if (!p) return;
+  const { doc, y: y0 } = makePDF('Genetic Pairing Report');
+  let y = y0;
+  doc.setFontSize(11); doc.setTextColor(44, 26, 14);
+  doc.text('Bull: ' + p.bullName + ' (' + p.bullBreed + ')', 14, y); y += 6;
+  doc.text('Cow Herd Breed: ' + p.cowBreed, 14, y); y += 10;
+  doc.setFontSize(10); doc.text('Summary', 14, y); y += 6;
+  doc.setFontSize(9); doc.setTextColor(60, 60, 60);
+  doc.text('Predicted Weaning Weight: ' + p.predWW + ' lbs', 14, y); y += 5;
+  doc.text('% Choice or Better: ' + p.predChoice + '%', 14, y); y += 5;
+  doc.text('Calving Ease Risk: ' + p.ceRisk, 14, y); y += 5;
+  doc.text('$B Beef Value: $' + p.predB, 14, y); y += 5;
+  doc.text('$M Maternal Value: $' + p.predM, 14, y); y += 10;
+  const headers = ['Trait', 'Bull', 'Cow Avg', 'Calf Pred'];
+  const rows = EPD_TRAITS.map(t => [t.desc + ' (' + t.label + ')', p.bullEpds[t.key].toFixed(1), p.cowEpds[t.key].toFixed(1), p.calfEpds[t.key].toFixed(1)]);
+  y = addTable(doc, y, headers, rows);
+  addFooter(doc);
+  doc.save('GeneticPairing_' + new Date().toISOString().slice(0,10) + '.pdf');
+}
 </script>
 </body>
 </html>

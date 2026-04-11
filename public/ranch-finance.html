@@ -120,7 +120,17 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
   .field-row,.field-row-3,.field-row-4{grid-template-columns:1fr}
   .quick-bar{justify-content:center}
 }
+@media print {
+  .site-header, .hero, .btn, button, .tool-tabs, .tab-bar, .filter-tabs,
+  .auth-banner, .disclaimer, [onclick], input, select, textarea { display:none!important }
+  body, body::before { background:white!important; color:black!important }
+  body::before { display:none!important }
+  .card, .result-stat, .stage-card { border-color:#ddd!important; background:white!important }
+  .result-stat .val, .stage-card .stage-name { color:#2C1A0E!important }
+  * { color:black!important }
+}
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
 
@@ -167,6 +177,10 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 
   <!-- ═══ DASHBOARD ═══ -->
   <div class="tab-content active" id="t-dashboard">
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <button class="btn btn-primary btn-sm" onclick="exportPnLPDF()">&#x1F4C4; Download P&amp;L PDF</button>
+      <button class="btn btn-ghost btn-sm" onclick="window.print()">&#x1F5A8; Print</button>
+    </div>
     <div class="stats-bar" id="pnl-stats"></div>
     <div class="charts-row">
       <div class="chart-wrap"><canvas id="donut-chart"></canvas></div>
@@ -637,6 +651,72 @@ function todayStr(){const d=new Date();return d.getFullYear()+'-'+String(d.getMo
 
 // Modal close on overlay
 document.getElementById('tx-modal').addEventListener('click',e=>{if(e.target.id==='tx-modal')closeModal();});
+
+// ── PDF Helpers ───────────────────────────────────────────────────────────────
+function makePDF(title) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  doc.setFillColor(44, 26, 14); doc.rect(0, 0, 210, 20, 'F');
+  doc.setFillColor(201, 169, 110); doc.rect(0, 20, 210, 2, 'F');
+  doc.setTextColor(245, 239, 224); doc.setFontSize(14); doc.text('HERD HUB', 14, 13);
+  doc.setFontSize(8); doc.text('American Cattle Marketplace', 50, 13);
+  doc.setTextColor(44, 26, 14); doc.setFontSize(16); doc.text(title, 14, 34);
+  doc.setFontSize(9); doc.setTextColor(120, 120, 120);
+  doc.text('Generated: ' + new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString(), 14, 40);
+  return { doc, y: 48 };
+}
+function addTable(doc, y, headers, rows) {
+  doc.setFontSize(8); doc.setTextColor(100, 100, 100);
+  const colW = 182 / headers.length;
+  headers.forEach((h, i) => doc.text(h, 14 + i * colW, y));
+  y += 2; doc.setDrawColor(201, 169, 110); doc.line(14, y, 196, y); y += 5;
+  doc.setTextColor(30, 30, 30); doc.setFontSize(9);
+  rows.forEach(row => {
+    if (y > 270) { doc.addPage(); y = 20; }
+    row.forEach((cell, i) => doc.text(String(cell || ''), 14 + i * colW, y)); y += 5;
+  });
+  return y + 5;
+}
+function addFooter(doc) {
+  const pages = doc.internal.getNumberOfPages();
+  for (let i = 1; i <= pages; i++) {
+    doc.setPage(i); doc.setFontSize(7); doc.setTextColor(150, 150, 150);
+    doc.text('theherdhub.com — Generated ' + new Date().toLocaleDateString(), 14, 290);
+    doc.text('Page ' + i + ' of ' + pages, 180, 290);
+  }
+}
+
+function exportPnLPDF() {
+  const s = summaryData;
+  const { doc, y: y0 } = makePDF('Ranch Financial Report — ' + getYear());
+  let y = y0;
+  doc.setFontSize(11); doc.setTextColor(44, 26, 14);
+  doc.text('Tax Year: ' + getYear(), 14, y); y += 10;
+  // Summary stats
+  const summaryRows = [
+    ['Total Income', '$' + commas(Math.round(s.total_income))],
+    ['Total Expenses', '$' + commas(Math.round(s.total_expenses))],
+    ['Net Profit/Loss', (s.net_profit >= 0 ? '+' : '-') + '$' + commas(Math.round(Math.abs(s.net_profit)))],
+    ['Profit Margin', s.profit_margin + '%'],
+  ];
+  y = addTable(doc, y, ['Metric', 'Value'], summaryRows);
+  // Income by category
+  const incCats = s.by_category.filter(c => c.type === 'income');
+  if (incCats.length) {
+    y += 4; doc.setFontSize(10); doc.setTextColor(44, 26, 14); doc.text('Income by Category', 14, y); y += 6;
+    const incRows = incCats.map(c => [c.category, '$' + commas(Math.round(parseFloat(c.total)))]);
+    y = addTable(doc, y, ['Category', 'Total'], incRows);
+  }
+  // Expenses by category
+  const expCats = s.by_category.filter(c => c.type === 'expense');
+  if (expCats.length) {
+    y += 4; doc.setFontSize(10); doc.setTextColor(44, 26, 14); doc.text('Expenses by Category', 14, y); y += 6;
+    const expRows = expCats.map(c => [c.category, '$' + commas(Math.round(parseFloat(c.total)))]);
+    y = addTable(doc, y, ['Category', 'Total'], expRows);
+  }
+  addFooter(doc);
+  doc.save('RanchFinance_' + getYear() + '_' + new Date().toISOString().slice(0,10) + '.pdf');
+}
 
 // CSV export needs auth token in query since it's a direct download
 const origExport=exportCSV;
