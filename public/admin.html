@@ -499,13 +499,15 @@ tr:hover td{background:rgba(255,255,255,.02)}
           </div>
           <div id="feat-bulk-bar" style="display:none;background:rgba(201,169,110,.1);border:1px solid rgba(201,169,110,.2);border-radius:6px;padding:10px 16px;margin-bottom:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
             <span style="font-size:12px;color:var(--gold);font-weight:600" id="feat-sel-count">0 selected</span>
-            <button class="btn" style="font-size:11px;padding:5px 10px;background:var(--gold);color:var(--bg)" onclick="bulkFeature('t_bone')">Feature as Prime</button>
-            <button class="btn" style="font-size:11px;padding:5px 10px;background:#C9A96E;color:var(--bg)" onclick="bulkFeature('filet')">Feature as Choice</button>
+            <button class="btn" style="font-size:11px;padding:5px 10px;background:#a855f7;color:white" onclick="bulkFeature('filet')">👑 Prime (Stakeholder)</button>
+            <button class="btn" style="font-size:11px;padding:5px 10px;background:var(--gold);color:var(--bg)" onclick="bulkFeature('t_bone')">⭐ Choice (Sidebar)</button>
+            <button class="btn" style="font-size:11px;padding:5px 10px;background:var(--rust);color:white" onclick="bulkFeature('sirloin')">🥩 Sirloin (Featured)</button>
+            <button class="btn" style="font-size:11px;padding:5px 10px;background:#e06030;color:white" onclick="bulkFeature('ribeye')">🥩 Ribeye (Featured)</button>
             <button class="btn" style="font-size:11px;padding:5px 10px;background:var(--red);color:white" onclick="bulkUnfeature()">Unfeature</button>
           </div>
           <div class="table-wrap">
             <table>
-              <thead><tr><th style="width:30px"><input type="checkbox" id="feat-check-all" onchange="toggleAllFeatured(this.checked)"></th><th>Title</th><th>Seller</th><th>State</th><th>Category</th><th>Tier</th><th>Featured</th><th>Status</th><th style="width:200px">Actions</th></tr></thead>
+              <thead><tr><th style="width:30px"><input type="checkbox" id="feat-check-all" onchange="toggleAllFeatured(this.checked)"></th><th>Title</th><th>Seller</th><th>State</th><th>Category</th><th>Tier</th><th>Section</th><th>Status</th><th style="width:200px">Actions</th></tr></thead>
               <tbody id="feat-tbody"><tr><td colspan="9" style="text-align:center;color:var(--muted);padding:24px">Click to load…</td></tr></tbody>
             </table>
           </div>
@@ -1528,11 +1530,24 @@ async function loadFeaturedListings(filters) {
     featSelectedIds.clear();
     updateBulkBar();
     if (!rows.length) { tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:24px">No listings found</td></tr>'; return; }
-    const tierNames = { burger: 'Burger', sirloin: 'Sirloin', ribeye: 'Ribeye', filet: 'Choice', t_bone: 'Prime' };
-    const tierColors = { burger: 'var(--muted)', sirloin: 'var(--rust)', ribeye: '#e06030', filet: 'var(--gold)', t_bone: '#a855f7' };
+    const tierNames = { burger: 'Burger', sirloin: 'Sirloin', ribeye: 'Ribeye', filet: 'Prime', t_bone: 'Choice' };
+    const tierColors = { burger: 'var(--muted)', sirloin: 'var(--rust)', ribeye: '#e06030', filet: '#a855f7', t_bone: 'var(--gold)' };
+    const cattleCats = new Set(['bulls','bred_heifers','bred_cows','open_heifers','open_cows','cow_calf_pairs','feeder_stocker','showstock','dairy','bottle_calves','beef_cattle','fat_cattle','embryos','semen','full_herd']);
+    const equipCats = new Set(['equipment','trailers','chutes_pens']);
+    function getSection(tier,cat){
+      if(tier==='filet') return '👑 Stakeholder';
+      if(tier==='t_bone') return '⭐ Featured Ad';
+      if((tier==='sirloin'||tier==='ribeye')&&cattleCats.has(cat)) return '🐄 Featured Cattle';
+      if((tier==='sirloin'||tier==='ribeye')&&equipCats.has(cat)) return '🚜 Featured Equipment';
+      if((tier==='sirloin'||tier==='ribeye')&&cat==='working_dogs') return '🐕 Working Dogs';
+      if((tier==='sirloin'||tier==='ribeye')&&cat==='feed_hay') return '🌾 Hay & Feed';
+      if(cat==='farm_to_table') return '🌿 Farm-to-Table';
+      return '📋 Browse Only';
+    }
     tbody.innerHTML = rows.map(l => {
       const tn = tierNames[l.tier] || l.tier || 'Burger';
       const tc = tierColors[l.tier] || 'var(--muted)';
+      const section = getSection(l.tier, l.category);
       return `<tr style="${l.is_featured ? 'border-left:3px solid var(--gold)' : ''}">
         <td><input type="checkbox" data-id="${l.id}" onchange="toggleFeatSel(${l.id},this.checked)"></td>
         <td class="truncate" style="max-width:200px">${escHtml(l.title)}</td>
@@ -1540,16 +1555,16 @@ async function loadFeaturedListings(filters) {
         <td>${l.state || '—'}</td>
         <td style="font-size:12px">${(l.category || '').replace(/_/g, ' ')}</td>
         <td><span class="badge" style="background:${tc};color:white">${tn}</span></td>
-        <td>${l.is_featured ? '<span style="color:var(--green);font-weight:700">✓</span>' : '<span style="color:var(--muted)">—</span>'}</td>
+        <td style="font-size:11px">${section}</td>
         <td>${statusBadge(l.status)}</td>
         <td style="white-space:nowrap">
-          ${l.is_featured ? `<button class="btn btn-danger" style="font-size:10px;padding:4px 8px" onclick="setFeatured(${l.id},false,'burger')">✕ Unfeature</button>` : `<button class="btn btn-success" style="font-size:10px;padding:4px 8px" onclick="setFeatured(${l.id},true,'t_bone')">⭐ Feature</button>`}
+          ${l.is_featured ? `<button class="btn btn-danger" style="font-size:10px;padding:4px 8px" onclick="setFeatured(${l.id},false,'burger')">✕ Reset</button>` : `<button class="btn btn-success" style="font-size:10px;padding:4px 8px" onclick="setFeatured(${l.id},true,'sirloin')">⭐ Feature</button>`}
           <select style="font-size:11px;padding:3px;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:4px" onchange="setFeatured(${l.id},true,this.value)">
-            <option value="burger"${l.tier==='burger'?' selected':''}>Burger</option>
-            <option value="sirloin"${l.tier==='sirloin'?' selected':''}>Sirloin</option>
-            <option value="ribeye"${l.tier==='ribeye'?' selected':''}>Ribeye</option>
-            <option value="filet"${l.tier==='filet'?' selected':''}>Choice</option>
-            <option value="t_bone"${l.tier==='t_bone'?' selected':''}>Prime</option>
+            <option value="burger"${l.tier==='burger'?' selected':''}>Burger (Browse)</option>
+            <option value="sirloin"${l.tier==='sirloin'?' selected':''}>🥩 Sirloin</option>
+            <option value="ribeye"${l.tier==='ribeye'?' selected':''}>🥩 Ribeye</option>
+            <option value="t_bone"${l.tier==='t_bone'?' selected':''}>⭐ Choice (Sidebar)</option>
+            <option value="filet"${l.tier==='filet'?' selected':''}>👑 Prime (Stakeholder)</option>
           </select>
         </td>
       </tr>`;

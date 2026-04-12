@@ -4098,93 +4098,60 @@ function renderFtfMiniCard(l) {
   </div>`;
 }
 
+// ── Placeholder cards for empty sections ─────────────
+const PLACEHOLDER_PRIME = `<div style="border:2px dashed rgba(201,169,110,.3);border-radius:8px;padding:32px;text-align:center;background:rgba(201,169,110,.04)"><div style="font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:.2em;color:var(--gold);margin-bottom:8px">PRIME ADVERTISER</div><div style="font-family:'Playfair Display',serif;font-size:18px;color:var(--cream);margin-bottom:8px">Your Brand Here</div><div style="font-size:13px;color:var(--muted);margin-bottom:16px">Reach thousands of cattle producers nationwide</div><a href="mailto:ad@theherdhub.com" style="background:var(--rust);color:var(--cream);padding:10px 20px;border-radius:4px;font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:.08em;text-decoration:none">Contact Us →</a></div>`;
+const PLACEHOLDER_CHOICE = `<div style="border:2px dashed rgba(201,169,110,.3);border-radius:8px;padding:24px;text-align:center;background:rgba(201,169,110,.03)"><div style="font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:.15em;color:var(--gold);margin-bottom:6px">CHOICE ADVERTISER</div><div style="font-size:12px;color:var(--muted);margin-bottom:12px">Feature your listing in the sidebar</div><a href="mailto:ad@theherdhub.com" style="color:var(--gold);font-size:12px;text-decoration:underline">Learn More</a></div>`;
+const PLACEHOLDER_PAID = `<div style="grid-column:1/-1;border:2px dashed rgba(139,50,20,.3);border-radius:8px;padding:24px;text-align:center"><div style="font-size:13px;color:var(--muted);margin-bottom:12px">Upgrade to Sirloin or Ribeye to appear here</div><button onclick="showPage('pricing')" style="background:var(--rust);color:var(--cream);border:none;padding:8px 18px;border-radius:4px;font-family:'Oswald',sans-serif;font-size:12px;cursor:pointer">View Plans →</button></div>`;
+const PLACEHOLDER_FTF = `<p style="color:rgba(201,169,110,.5);font-size:13px;padding:16px 0">List your farm-direct beef, pork, or produce — always free. <span style="cursor:pointer;text-decoration:underline;color:var(--tan)" data-action="modal" data-modal="post-listing">Post a listing →</span></p>`;
+
 // ── Main homepage section loader ────────────────────────
 async function loadHomepageSections() {
   // 1. Farm to Table scroll
   try {
-    const r = await fetch(`${API}/api/listings?category=farm_to_table&limit=12&sort=newest`);
-    const data = await r.json();
-    const listings = data.listings || data || [];
+    const r = await fetch(`${API}/api/listings/farm-to-table`);
+    const listings = await r.json();
     const track = document.getElementById('ftf-scroll-track');
-    if (track) {
-      track.innerHTML = listings.length
-        ? listings.map(renderFtfMiniCard).join('')
-        : `<p style="color:rgba(201,169,110,.5);font-size:13px;padding:16px 0">No listings yet — <span style="cursor:pointer;text-decoration:underline;color:var(--tan)" data-action="modal" data-modal="post-listing">be the first to post!</span></p>`;
-    }
+    if (track) { track.innerHTML = listings.length ? listings.map(renderFtfMiniCard).join('') : PLACEHOLDER_FTF; }
   } catch(e) { console.warn('ftf load', e); }
 
-  // 2. Left sidebar — T-Bone partners
+  // 2. Stakeholders (Prime / filet) — left sidebar
   try {
-    const r = await fetch(`${API}/api/listings?tier=t_bone&sort=featured&limit=20`);
-    const data = await r.json();
-    const listings = data.listings || data || [];
+    const r = await fetch(`${API}/api/listings/stakeholders`);
+    const listings = await r.json();
     const el = document.getElementById('tbone-sidebar-listings');
-    if (el) {
-      el.innerHTML = listings.length
-        ? listings.map(l => renderSidebarAdCard(l, 'left')).join('')
-        : `<p style="color:rgba(201,169,110,.4);font-size:12px;padding:16px 12px">No partners yet.</p>`;
-    }
-    // Mobile strip
+    if (el) { el.innerHTML = listings.length ? listings.map(l => renderSidebarAdCard(l, 'left')).join('') : PLACEHOLDER_PRIME; }
     const mobileEl = document.getElementById('mobile-tbone-strip');
-    if (mobileEl) {
-      mobileEl.innerHTML = listings.length
-        ? listings.map(renderMobileAdCard).join('')
-        : `<p style="font-size:12px;color:#aaa;padding:16px">No partners yet.</p>`;
-    }
-  } catch(e) { console.warn('tbone sidebar', e); }
+    if (mobileEl) { mobileEl.innerHTML = listings.length ? listings.map(renderMobileAdCard).join('') : ''; }
+  } catch(e) { console.warn('stakeholders', e); }
 
-  // 3. Right sidebar — Filet ads
+  // 3. Featured Ads (Choice / t_bone) — right sidebar
   try {
-    const r = await fetch(`${API}/api/listings?tier=filet&sort=featured&limit=20`);
-    const data = await r.json();
-    const listings = data.listings || data || [];
+    const r = await fetch(`${API}/api/listings/featured-ads`);
+    const listings = await r.json();
     const el = document.getElementById('filet-sidebar-listings');
-    if (el) {
-      el.innerHTML = listings.length
-        ? listings.map(l => renderSidebarAdCard(l, 'right')).join('')
-        : `<p style="color:rgba(212,169,42,.4);font-size:12px;padding:16px 12px">No ads yet.</p>`;
-    }
-    // Mobile strip
+    if (el) { el.innerHTML = listings.length ? listings.map(l => renderSidebarAdCard(l, 'right')).join('') : PLACEHOLDER_CHOICE; }
     const mobileEl = document.getElementById('mobile-filet-strip');
-    if (mobileEl) {
-      mobileEl.innerHTML = listings.length
-        ? listings.map(renderMobileAdCard).join('')
-        : `<p style="font-size:12px;color:#aaa;padding:16px">No ads yet.</p>`;
-    }
-  } catch(e) { console.warn('filet sidebar', e); }
+    if (mobileEl) { mobileEl.innerHTML = listings.length ? listings.map(renderMobileAdCard).join('') : ''; }
+  } catch(e) { console.warn('featured-ads', e); }
 
-  // 4. Featured Cattle — all paid cattle tiers pooled, rotated in pages of 15
+  // 4. Featured Cattle — sirloin/ribeye cattle categories
   try {
-    const [r1, r2] = await Promise.all([
-      fetch(`${API}/api/listings?tier=sirloin&sort=featured&limit=60`),
-      fetch(`${API}/api/listings?tier=ribeye&sort=featured&limit=60`)
-    ]);
-    const [d1, d2] = await Promise.all([r1.json(), r2.json()]);
-    const cattle = [...(d1.listings||[]), ...(d2.listings||[])];
+    const r = await fetch(`${API}/api/listings/featured-cattle`);
+    const cattle = await r.json();
     const grid = document.getElementById('featured-cattle-grid');
     if (cattle.length) {
       setupRotation('cattle', cattle, 'featured-cattle-grid', 'cattle-dots', 'cattle-count', 'cattle-rotate-badge', 15);
-    } else if (grid) {
-      grid.innerHTML = `<div style="grid-column:1/-1;color:#aaa;font-size:13px;padding:16px 0;text-align:center">No featured cattle yet — <a style="color:var(--rust);cursor:pointer" data-action="modal" data-modal="post-listing">post a listing</a> to be first!</div>`;
-    }
+    } else if (grid) { grid.innerHTML = PLACEHOLDER_PAID; }
   } catch(e) { console.warn('cattle featured', e); }
 
-  // 5. Featured Equipment — rotated in pages of 10
+  // 5. Featured Equipment — sirloin/ribeye equipment categories
   try {
-    const [r1, r2] = await Promise.all([
-      fetch(`${API}/api/listings?tier=sirloin&sort=featured&limit=40`),
-      fetch(`${API}/api/listings?tier=ribeye&sort=featured&limit=40`)
-    ]);
-    const [d1, d2] = await Promise.all([r1.json(), r2.json()]);
-    const allEquip = [...(d1.listings||[]), ...(d2.listings||[])];
-    // Filter to equipment/supply categories only
-    const EQUIP_CATS = new Set(['equipment','trailers','chutes_pens','working_dogs','feed_hay']);
-    const equip = allEquip.filter(l => EQUIP_CATS.has(l.category));
+    const r = await fetch(`${API}/api/listings/featured-equipment`);
+    const equip = await r.json();
     const grid = document.getElementById('featured-equip-grid');
     if (equip.length) {
       setupRotation('equip', equip, 'featured-equip-grid', 'equip-dots', 'equip-count', 'equip-rotate-badge', 10);
-    } else if (grid) {
-      grid.innerHTML = `<div style="grid-column:1/-1;color:#aaa;font-size:13px;padding:16px 0;text-align:center">No featured equipment yet.</div>`;
+    } else if (grid) { grid.innerHTML = PLACEHOLDER_PAID; }
     }
   } catch(e) { console.warn('equip featured', e); }
 }
