@@ -4104,56 +4104,68 @@ const PLACEHOLDER_CHOICE = `<div style="border:2px dashed rgba(201,169,110,.3);b
 const PLACEHOLDER_PAID = `<div style="grid-column:1/-1;border:2px dashed rgba(139,50,20,.3);border-radius:8px;padding:24px;text-align:center"><div style="font-size:13px;color:var(--muted);margin-bottom:12px">Upgrade to Sirloin or Ribeye to appear here</div><button onclick="showPage('pricing')" style="background:var(--rust);color:var(--cream);border:none;padding:8px 18px;border-radius:4px;font-family:'Oswald',sans-serif;font-size:12px;cursor:pointer">View Plans →</button></div>`;
 const PLACEHOLDER_FTF = `<p style="color:rgba(201,169,110,.5);font-size:13px;padding:16px 0">List your farm-direct beef, pork, or produce — always free. <span style="cursor:pointer;text-decoration:underline;color:var(--tan)" data-action="modal" data-modal="post-listing">Post a listing →</span></p>`;
 
-// ── Main homepage section loader ────────────────────────
+// ── Main homepage section loader — each section independent ──
 async function loadHomepageSections() {
-  // 1. Farm to Table scroll
+  // Fire all independently so one failure doesn't block others
+  loadSection_FTF();
+  loadSection_Stakeholders();
+  loadSection_FeaturedAds();
+  loadSection_FeaturedCattle();
+  loadSection_FeaturedEquipment();
+}
+
+async function loadSection_FTF() {
   try {
     const r = await fetch(`${API}/api/listings/farm-to-table`);
+    if (!r.ok) throw new Error('HTTP ' + r.status);
     const listings = await r.json();
     const track = document.getElementById('ftf-scroll-track');
-    if (track) { track.innerHTML = listings.length ? listings.map(renderFtfMiniCard).join('') : PLACEHOLDER_FTF; }
+    if (track) track.innerHTML = (Array.isArray(listings) && listings.length) ? listings.map(renderFtfMiniCard).join('') : PLACEHOLDER_FTF;
   } catch(e) { console.warn('ftf load', e); }
-
-  // 2. Stakeholders (Prime / filet) — left sidebar
+}
+async function loadSection_Stakeholders() {
   try {
     const r = await fetch(`${API}/api/listings/stakeholders`);
+    if (!r.ok) throw new Error('HTTP ' + r.status);
     const listings = await r.json();
     const el = document.getElementById('tbone-sidebar-listings');
-    if (el) { el.innerHTML = listings.length ? listings.map(l => renderSidebarAdCard(l, 'left')).join('') : PLACEHOLDER_PRIME; }
-    const mobileEl = document.getElementById('mobile-tbone-strip');
-    if (mobileEl) { mobileEl.innerHTML = listings.length ? listings.map(renderMobileAdCard).join('') : ''; }
+    if (el) el.innerHTML = (Array.isArray(listings) && listings.length) ? listings.map(l => renderSidebarAdCard(l, 'left')).join('') : PLACEHOLDER_PRIME;
+    const m = document.getElementById('mobile-tbone-strip');
+    if (m) m.innerHTML = (Array.isArray(listings) && listings.length) ? listings.map(renderMobileAdCard).join('') : '';
   } catch(e) { console.warn('stakeholders', e); }
-
-  // 3. Featured Ads (Choice / t_bone) — right sidebar
+}
+async function loadSection_FeaturedAds() {
   try {
     const r = await fetch(`${API}/api/listings/featured-ads`);
+    if (!r.ok) throw new Error('HTTP ' + r.status);
     const listings = await r.json();
     const el = document.getElementById('filet-sidebar-listings');
-    if (el) { el.innerHTML = listings.length ? listings.map(l => renderSidebarAdCard(l, 'right')).join('') : PLACEHOLDER_CHOICE; }
-    const mobileEl = document.getElementById('mobile-filet-strip');
-    if (mobileEl) { mobileEl.innerHTML = listings.length ? listings.map(renderMobileAdCard).join('') : ''; }
+    if (el) el.innerHTML = (Array.isArray(listings) && listings.length) ? listings.map(l => renderSidebarAdCard(l, 'right')).join('') : PLACEHOLDER_CHOICE;
+    const m = document.getElementById('mobile-filet-strip');
+    if (m) m.innerHTML = (Array.isArray(listings) && listings.length) ? listings.map(renderMobileAdCard).join('') : '';
   } catch(e) { console.warn('featured-ads', e); }
-
-  // 4. Featured Cattle — sirloin/ribeye cattle categories
+}
+async function loadSection_FeaturedCattle() {
   try {
     const r = await fetch(`${API}/api/listings/featured-cattle`);
+    if (!r.ok) throw new Error('HTTP ' + r.status);
     const cattle = await r.json();
     const grid = document.getElementById('featured-cattle-grid');
-    if (cattle.length) {
+    if (Array.isArray(cattle) && cattle.length) {
       setupRotation('cattle', cattle, 'featured-cattle-grid', 'cattle-dots', 'cattle-count', 'cattle-rotate-badge', 15);
     } else if (grid) { grid.innerHTML = PLACEHOLDER_PAID; }
-  } catch(e) { console.warn('cattle featured', e); }
-
-  // 5. Featured Equipment — sirloin/ribeye equipment categories
+  } catch(e) { console.warn('cattle featured', e); const g=document.getElementById('featured-cattle-grid'); if(g)g.innerHTML=PLACEHOLDER_PAID; }
+}
+async function loadSection_FeaturedEquipment() {
   try {
     const r = await fetch(`${API}/api/listings/featured-equipment`);
+    if (!r.ok) throw new Error('HTTP ' + r.status);
     const equip = await r.json();
     const grid = document.getElementById('featured-equip-grid');
-    if (equip.length) {
+    if (Array.isArray(equip) && equip.length) {
       setupRotation('equip', equip, 'featured-equip-grid', 'equip-dots', 'equip-count', 'equip-rotate-badge', 10);
     } else if (grid) { grid.innerHTML = PLACEHOLDER_PAID; }
-    }
-  } catch(e) { console.warn('equip featured', e); }
+  } catch(e) { console.warn('equip featured', e); const g=document.getElementById('featured-equip-grid'); if(g)g.innerHTML=PLACEHOLDER_PAID; }
 }
 
 // Keep old name working for boot call
