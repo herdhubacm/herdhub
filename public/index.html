@@ -4106,66 +4106,64 @@ const PLACEHOLDER_FTF = `<p style="color:rgba(201,169,110,.5);font-size:13px;pad
 
 // ── Main homepage section loader — each section independent ──
 async function loadHomepageSections() {
-  // Fire all independently so one failure doesn't block others
-  loadSection_FTF();
-  loadSection_Stakeholders();
-  loadSection_FeaturedAds();
-  loadSection_FeaturedCattle();
-  loadSection_FeaturedEquipment();
+  // Fire all independently — one failure cannot block others
+  loadSection_FTF().catch(e => console.error('FTF:', e));
+  loadSection_Stakeholders().catch(e => console.error('Stakeholders:', e));
+  loadSection_FeaturedAds().catch(e => console.error('FeaturedAds:', e));
+  loadSection_FeaturedCattle().catch(e => console.error('FeaturedCattle:', e));
+  loadSection_FeaturedEquipment().catch(e => console.error('FeaturedEquipment:', e));
+  loadRecentListings().catch(e => console.error('RecentListings:', e));
 }
 
 async function loadSection_FTF() {
+  const track = document.getElementById('ftf-scroll-track');
   try {
     const r = await fetch(`${API}/api/listings/farm-to-table`);
-    if (!r.ok) throw new Error('HTTP ' + r.status);
-    const listings = await r.json();
-    const track = document.getElementById('ftf-scroll-track');
+    const listings = r.ok ? await r.json() : [];
     if (track) track.innerHTML = (Array.isArray(listings) && listings.length) ? listings.map(renderFtfMiniCard).join('') : PLACEHOLDER_FTF;
-  } catch(e) { console.warn('ftf load', e); }
+  } catch(e) { console.warn('ftf:', e); if(track) track.innerHTML = PLACEHOLDER_FTF; }
 }
 async function loadSection_Stakeholders() {
+  const el = document.getElementById('tbone-sidebar-listings');
+  const m = document.getElementById('mobile-tbone-strip');
   try {
     const r = await fetch(`${API}/api/listings/stakeholders`);
-    if (!r.ok) throw new Error('HTTP ' + r.status);
-    const listings = await r.json();
-    const el = document.getElementById('tbone-sidebar-listings');
-    if (el) el.innerHTML = (Array.isArray(listings) && listings.length) ? listings.map(l => renderSidebarAdCard(l, 'left')).join('') : PLACEHOLDER_PRIME;
-    const m = document.getElementById('mobile-tbone-strip');
-    if (m) m.innerHTML = (Array.isArray(listings) && listings.length) ? listings.map(renderMobileAdCard).join('') : '';
-  } catch(e) { console.warn('stakeholders', e); }
+    const listings = r.ok ? await r.json() : [];
+    const has = Array.isArray(listings) && listings.length;
+    if (el) el.innerHTML = has ? listings.map(l => renderSidebarAdCard(l, 'left')).join('') : PLACEHOLDER_PRIME;
+    if (m) m.innerHTML = has ? listings.map(renderMobileAdCard).join('') : '';
+  } catch(e) { console.warn('stakeholders:', e); if(el) el.innerHTML = PLACEHOLDER_PRIME; }
 }
 async function loadSection_FeaturedAds() {
+  const el = document.getElementById('filet-sidebar-listings');
+  const m = document.getElementById('mobile-filet-strip');
   try {
     const r = await fetch(`${API}/api/listings/featured-ads`);
-    if (!r.ok) throw new Error('HTTP ' + r.status);
-    const listings = await r.json();
-    const el = document.getElementById('filet-sidebar-listings');
-    if (el) el.innerHTML = (Array.isArray(listings) && listings.length) ? listings.map(l => renderSidebarAdCard(l, 'right')).join('') : PLACEHOLDER_CHOICE;
-    const m = document.getElementById('mobile-filet-strip');
-    if (m) m.innerHTML = (Array.isArray(listings) && listings.length) ? listings.map(renderMobileAdCard).join('') : '';
-  } catch(e) { console.warn('featured-ads', e); }
+    const listings = r.ok ? await r.json() : [];
+    const has = Array.isArray(listings) && listings.length;
+    if (el) el.innerHTML = has ? listings.map(l => renderSidebarAdCard(l, 'right')).join('') : PLACEHOLDER_CHOICE;
+    if (m) m.innerHTML = has ? listings.map(renderMobileAdCard).join('') : '';
+  } catch(e) { console.warn('featured-ads:', e); if(el) el.innerHTML = PLACEHOLDER_CHOICE; }
 }
 async function loadSection_FeaturedCattle() {
+  const grid = document.getElementById('featured-cattle-grid');
   try {
     const r = await fetch(`${API}/api/listings/featured-cattle`);
-    if (!r.ok) throw new Error('HTTP ' + r.status);
-    const cattle = await r.json();
-    const grid = document.getElementById('featured-cattle-grid');
+    const cattle = r.ok ? await r.json() : [];
     if (Array.isArray(cattle) && cattle.length) {
       setupRotation('cattle', cattle, 'featured-cattle-grid', 'cattle-dots', 'cattle-count', 'cattle-rotate-badge', 15);
     } else if (grid) { grid.innerHTML = PLACEHOLDER_PAID; }
-  } catch(e) { console.warn('cattle featured', e); const g=document.getElementById('featured-cattle-grid'); if(g)g.innerHTML=PLACEHOLDER_PAID; }
+  } catch(e) { console.warn('cattle:', e); if(grid) grid.innerHTML = PLACEHOLDER_PAID; }
 }
 async function loadSection_FeaturedEquipment() {
+  const grid = document.getElementById('featured-equip-grid');
   try {
     const r = await fetch(`${API}/api/listings/featured-equipment`);
-    if (!r.ok) throw new Error('HTTP ' + r.status);
-    const equip = await r.json();
-    const grid = document.getElementById('featured-equip-grid');
+    const equip = r.ok ? await r.json() : [];
     if (Array.isArray(equip) && equip.length) {
       setupRotation('equip', equip, 'featured-equip-grid', 'equip-dots', 'equip-count', 'equip-rotate-badge', 10);
     } else if (grid) { grid.innerHTML = PLACEHOLDER_PAID; }
-  } catch(e) { console.warn('equip featured', e); const g=document.getElementById('featured-equip-grid'); if(g)g.innerHTML=PLACEHOLDER_PAID; }
+  } catch(e) { console.warn('equip:', e); if(grid) grid.innerHTML = PLACEHOLDER_PAID; }
 }
 
 // Keep old name working for boot call
