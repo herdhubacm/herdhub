@@ -1774,11 +1774,6 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
               <option value="sirloin">🥩 Sirloin – $5.99/mo (Featured Cattle/Equipment section)</option>
               <option value="ribeye">🥩 Ribeye – $9.99 one-time (Featured Cattle/Equipment section)</option>
             </optgroup>
-            <optgroup label="📢 Ads (businesses, brands, farms)">
-              <option value="farm_to_table">🌿 Farm-to-Table – Free (Farm-to-Table section)</option>
-              <option value="filet">👑 Prime – $39.99/mo (Stakeholders — top placement)</option>
-              <option value="t_bone">⭐ Choice – $49.99 one-time (Featured Ads sidebar)</option>
-            </optgroup>
           </select></div>
         </div>
         <div class="form-group">
@@ -3722,6 +3717,22 @@ function initEventDelegation() {
             <option value="working_dogs">Working Dogs</option>
             <option value="feed_hay">Feed &amp; Hay</option>
           </optgroup>`;
+      }
+      // Rebuild tier dropdown for the active tab
+      const tierSel = document.getElementById('acct-pl-tier');
+      if (tierSel) {
+        tierSel.innerHTML = isAdvert
+          ? `<optgroup label="📢 Ads (businesses, brands, farms)">
+              <option value="farm_to_table">🌿 Farm-to-Table — Free (Farm-to-Table section)</option>
+              <option value="t_bone">⭐ Choice — $49.99 one-time (Featured Ads sidebar)</option>
+              <option value="filet">👑 Prime — $39.99/mo (Stakeholders — top placement)</option>
+             </optgroup>`
+          : `<optgroup label="🐄 Listings (cattle, equipment, dogs, hay)">
+              <option value="burger">🍔 Burger — Free (browse page only)</option>
+              <option value="sirloin">🥩 Sirloin — $5.99/mo (Featured Cattle/Equipment section)</option>
+              <option value="ribeye">🥩 Ribeye — $9.99 one-time (Featured Cattle/Equipment section)</option>
+             </optgroup>`;
+        tierSel.value = isAdvert ? 'farm_to_table' : 'burger';
       }
       // Hide price row for advertisements
       const priceRow = document.getElementById('acct-pl-price-row');
