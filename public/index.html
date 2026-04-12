@@ -2720,7 +2720,17 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
 @media(max-width:380px){.merch-grid{grid-template-columns:1fr}}
 .merch-card{background:rgba(255,255,255,.04);border:1px solid rgba(201,169,110,.1);border-radius:8px;overflow:hidden;cursor:pointer;transition:all .2s}
 .merch-card:hover{border-color:var(--gold);transform:translateY(-2px)}
-.merch-card img{width:100%;height:220px;object-fit:cover;display:block}
+.merch-card-img-wrap{position:relative;width:100%;height:220px;overflow:hidden}
+.merch-card-img-front,.merch-card-img-back{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:opacity .35s ease}
+.merch-card-img-back{opacity:0}
+.merch-card:hover .merch-card-img-back{opacity:1}
+.merch-card:hover .merch-card-img-front{opacity:0}
+.merch-card-img-wrap.flipped .merch-card-img-back{opacity:1}
+.merch-card-img-wrap.flipped .merch-card-img-front{opacity:0}
+.merch-flip-hint{position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,.5);color:white;font-family:'Oswald',sans-serif;font-size:10px;padding:3px 8px;border-radius:12px;opacity:0;transition:opacity .3s;pointer-events:none}
+.merch-card:hover .merch-flip-hint{opacity:1}
+.merch-tap-hint{display:none;font-family:'Oswald',sans-serif;font-size:10px;color:var(--muted);text-align:center;margin-top:4px;letter-spacing:.04em}
+@media(max-width:768px){.merch-tap-hint{display:block}.merch-flip-hint{display:none}}
 .merch-card-body{padding:14px}
 .merch-card-type{font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--rust);margin-bottom:4px}
 .merch-card-title{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--cream);margin-bottom:6px;line-height:1.3}
@@ -2828,11 +2838,23 @@ function renderMerchGrid(){
   const showing=list.slice(0,merchVisible);
   const grid=document.getElementById('merch-grid');
   grid.innerHTML=showing.map((p,i)=>{
-    const img=p.images.edges[0]?.node.url;
+    const frontImg=p.images.edges[0]?.node.url;
+    const backImg=p.images.edges[1]?.node.url;
     const price=parseFloat(p.priceRange.minVariantPrice.amount).toFixed(2);
     const multiVariant=p.variants.edges.length>1;
-    return'<div class="merch-card" onclick="openMerchProduct('+i+')">'+
-      (img?'<img src="'+img+'" alt="'+escHtml(p.title)+'" loading="lazy">':'<div style="height:220px;display:flex;align-items:center;justify-content:center;font-size:48px;background:rgba(201,169,110,.05)">🐄</div>')+
+    let imgHtml;
+    if(frontImg&&backImg){
+      imgHtml='<div class="merch-card-img-wrap" onclick="event.stopPropagation();this.classList.toggle(\'flipped\')">'+
+        '<img class="merch-card-img-front" src="'+frontImg+'" alt="'+escHtml(p.title)+' - Front">'+
+        '<img class="merch-card-img-back" src="'+backImg+'" alt="'+escHtml(p.title)+' - Back" loading="lazy">'+
+        '<span class="merch-flip-hint">&circlearrowright; Back</span>'+
+        '</div><div class="merch-tap-hint">&harr; Tap image to flip</div>';
+    } else if(frontImg){
+      imgHtml='<div class="merch-card-img-wrap"><img class="merch-card-img-front" src="'+frontImg+'" alt="'+escHtml(p.title)+'" style="position:relative"></div>';
+    } else {
+      imgHtml='<div style="height:220px;display:flex;align-items:center;justify-content:center;font-size:48px;background:rgba(201,169,110,.05)">&#x1F404;</div>';
+    }
+    return'<div class="merch-card" onclick="openMerchProduct('+i+')">'+imgHtml+
       '<div class="merch-card-body">'+
       (p.productType?'<div class="merch-card-type">'+escHtml(p.productType)+'</div>':'')+
       '<div class="merch-card-title">'+escHtml(p.title)+'</div>'+
