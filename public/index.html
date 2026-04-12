@@ -2808,13 +2808,29 @@ async function shopifyGQL(q,vars){
   return r.json();
 }
 
+// Fetch all products with pagination (Storefront API returns max 250 per page)
+async function fetchAllProducts(){
+  const PRODUCT_FIELDS=`id handle title description productType tags priceRange{minVariantPrice{amount currencyCode}} images(first:3){edges{node{url altText}}} variants(first:10){edges{node{id title availableForSale selectedOptions{name value}}}}`;
+  let all=[], cursor=null, hasNext=true;
+  while(hasNext){
+    const after=cursor?`after:"${cursor}",`:'';
+    const res=await shopifyGQL(`{products(first:50,${after}sortKey:TITLE){edges{node{${PRODUCT_FIELDS}} cursor} pageInfo{hasNextPage endCursor}}}`);
+    const edges=res.data?.products?.edges||[];
+    all=all.concat(edges.map(e=>e.node));
+    hasNext=res.data?.products?.pageInfo?.hasNextPage||false;
+    cursor=res.data?.products?.pageInfo?.endCursor||null;
+    // Safety: max 5 pages (250 products)
+    if(all.length>250)break;
+  }
+  return all;
+}
+
 async function loadMerchProducts(){
   document.getElementById('merch-loading').style.display='';
   document.getElementById('merch-grid').innerHTML='';
   try{
-    const res=await shopifyGQL(`{products(first:50){edges{node{id handle title description productType tags priceRange{minVariantPrice{amount currencyCode}} images(first:3){edges{node{url altText}}} variants(first:10){edges{node{id title availableForSale selectedOptions{name value}}}}}}}}`);
-    merchProducts=(res.data?.products?.edges||[]).map(e=>e.node);
-    if(!merchProducts.length){document.getElementById('merch-loading').textContent='No products available right now.';return;}
+    merchProducts=await fetchAllProducts();
+    if(!merchProducts.length){document.getElementById('merch-loading').textContent='No products available right now. Products must be published to the Online Store channel in Shopify.';return;}
     document.getElementById('merch-loading').style.display='none';
     renderMerchFilters();
     renderMerchGrid();
@@ -2826,9 +2842,10 @@ async function loadMerchProducts(){
 
 function renderMerchFilters(){
   const types=[...new Set(merchProducts.map(p=>p.productType).filter(Boolean))];
+  const filtered=merchFilter==='all'?merchProducts:merchProducts.filter(p=>p.productType===merchFilter);
   const el=document.getElementById('merch-filters');
-  el.innerHTML='<button class="merch-chip'+(merchFilter==='all'?' active':'')+'" onclick="setMerchFilter(\'all\')">All</button>'+
-    types.map(t=>'<button class="merch-chip'+(merchFilter===t?' active':'')+'" onclick="setMerchFilter(\''+escHtml(t)+'\')">'+escHtml(t)+'</button>').join('');
+  el.innerHTML='<button class="merch-chip'+(merchFilter==='all'?' active':'')+'" onclick="setMerchFilter(\'all\')">All ('+merchProducts.length+')</button>'+
+    types.map(t=>{const c=merchProducts.filter(p=>p.productType===t).length;return'<button class="merch-chip'+(merchFilter===t?' active':'')+'" onclick="setMerchFilter(\''+escHtml(t)+'\')">'+escHtml(t)+' ('+c+')</button>';}).join('');
 }
 
 window.setMerchFilter=function(f){merchFilter=f;merchVisible=12;renderMerchFilters();renderMerchGrid();};
