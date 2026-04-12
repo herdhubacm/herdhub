@@ -1769,15 +1769,15 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
         <div class="form-row">
           <div class="form-group"><label>Quantity</label><input type="number" id="acct-pl-quantity" value="1" min="1"></div>
           <div class="form-group"><label>Listing Tier</label><select id="acct-pl-tier">
-            <optgroup label="🐄 Seller Plans">
-              <option value="burger">🍔 Burger – Free (1 photo, 30 days)</option>
-              <option value="sirloin">🥩 Sirloin – $5.99/mo (3 photos, featured, recurring)</option>
-              <option value="ribeye">🥩 Ribeye – $9.99 one-time (3 photos, 30-day featured)</option>
+            <optgroup label="🐄 Listings (cattle, equipment, dogs, hay)">
+              <option value="burger">🍔 Burger – Free (browse page only)</option>
+              <option value="sirloin">🥩 Sirloin – $5.99/mo (Featured Cattle/Equipment section)</option>
+              <option value="ribeye">🥩 Ribeye – $9.99 one-time (Featured Cattle/Equipment section)</option>
             </optgroup>
-            <optgroup label="📢 Advertiser Plans">
-              <option value="farm_to_table">🌿 Farm to Table – Free (3 photos)</option>
-              <option value="filet">🥩 Choice – $49.99 one-time (5 photos, 30-day featured)</option>
-              <option value="t_bone">🥩 Prime – $39.99/mo (5 photos, year-round, PR + magazine)</option>
+            <optgroup label="📢 Ads (businesses, brands, farms)">
+              <option value="farm_to_table">🌿 Farm-to-Table – Free (Farm-to-Table section)</option>
+              <option value="filet">👑 Prime – $39.99/mo (Stakeholders — top placement)</option>
+              <option value="t_bone">⭐ Choice – $49.99 one-time (Featured Ads sidebar)</option>
             </optgroup>
           </select></div>
         </div>
@@ -2131,20 +2131,20 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
           <div class="plan-card-price">$0</div>
           <div class="plan-card-features">3 photos · F2T scroll section<br>Direct beef listings only</div>
         </div>
-        <div class="plan-card" data-plan="filet" data-action="select-plan">
+        <div class="plan-card" data-plan="t_bone" data-action="select-plan">
           <span class="plan-card-badge pcb-paid">One-Time</span>
-          <div class="plan-card-icon">🥩</div>
+          <div class="plan-card-icon">⭐</div>
           <div class="plan-card-name">Choice</div>
           <div class="plan-card-price">$49.99</div>
-          <div class="plan-card-features">5 photos · 30-day premium ad</div>
+          <div class="plan-card-features">5 photos · 30-day Featured Ads sidebar</div>
         </div>
-        <div class="plan-card" data-plan="t_bone" data-action="select-plan">
+        <div class="plan-card" data-plan="filet" data-action="select-plan">
           <span class="plan-card-badge pcb-gold">Best Value</span>
-          <div class="plan-card-icon">🥩</div>
+          <div class="plan-card-icon">👑</div>
           <div class="plan-card-name">Prime</div>
           <div style="font-family:'Oswald',sans-serif;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#92400e;margin-bottom:2px">Billed Yearly</div>
           <div class="plan-card-price">$39.99/mo</div>
-          <div class="plan-card-features">5 photos · Year-round + PR package</div>
+          <div class="plan-card-features">5 photos · Stakeholders — top placement year-round</div>
         </div>
       </div>
     </div>

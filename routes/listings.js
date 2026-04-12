@@ -387,7 +387,7 @@ router.post('/', authenticateToken, upload.array('photos', 20), async (req, res)
     if (!validCategories.includes(category))
       return res.status(400).json({ error: 'Invalid category' });
     const safeTier   = ['burger','sirloin','ribeye','filet','t_bone','farm_to_table'].includes(tier) ? tier : 'burger';
-    const isFeatured = ['sirloin','ribeye','filet','t_bone'].includes(safeTier);
+    const isFeatured = ['sirloin','ribeye','filet','t_bone','farm_to_table'].includes(safeTier);
     const photoLimit = tierPhotoLimit(safeTier);
 
     await client.query('BEGIN');
@@ -409,7 +409,7 @@ router.post('/', authenticateToken, upload.array('photos', 20), async (req, res)
         age_months ? +age_months : null,
         sex || null, state, city, zip || null,
         safeTier, isFeatured, expiresAt(safeTier),
-        safeTier === 'basic' ? 'free' : 'pending',
+        (safeTier === 'burger' || safeTier === 'farm_to_table') ? 'free' : 'pending',
         req.body.website_url || null,
       ]
     );
