@@ -34,6 +34,21 @@ function validateCsrfToken(token) {
 const { testConnection: testDb, query } = require('./db/database');
 const { testConnection: testStorage } = require('./services/storage');
 
+// ── Simple in-memory cache ────────────────────────────
+const apiCache = new Map();
+function getCached(key) {
+  const item = apiCache.get(key);
+  if (!item) return null;
+  if (Date.now() > item.expires) { apiCache.delete(key); return null; }
+  return item.data;
+}
+function setCached(key, data, ttlSeconds = 300) {
+  apiCache.set(key, { data, expires: Date.now() + ttlSeconds * 1000 });
+}
+setInterval(() => { const now = Date.now(); for (const [k, v] of apiCache) { if (now > v.expires) apiCache.delete(k); } }, 3600000);
+// Available globally via require from routes
+global.apiCache = { getCached, setCached };
+
 const app  = express();
 const PORT = process.env.PORT || 3000;
 
@@ -822,6 +837,13 @@ async function start() {
         created_at      TIMESTAMPTZ  NOT NULL DEFAULT NOW()
       )`);
       console.log('✅  Verification requests table ready');
+
+      // Performance indexes for homepage queries
+      await query(`CREATE INDEX IF NOT EXISTS idx_listings_tier_status ON listings(tier, status)`);
+      await query(`CREATE INDEX IF NOT EXISTS idx_listings_cat_tier_status ON listings(category, tier, status)`);
+      await query(`CREATE INDEX IF NOT EXISTS idx_listings_status_created ON listings(status, created_at DESC)`);
+      await query(`CREATE INDEX IF NOT EXISTS idx_listings_featured_status ON listings(is_featured, status)`);
+      console.log('✅  Performance indexes ready');
 
     } catch (migErr) {
       console.warn('⚠️  Migration warning:', migErr.message);

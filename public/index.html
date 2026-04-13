@@ -23,6 +23,7 @@
   };
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preload" as="image" href="https://images.unsplash.com/photo-1500595046743-cd271d694d30?w=1600&q=80">
 <link rel="icon" type="image/png" href="/logo.png">
 <link rel="apple-touch-icon" href="/logo.png">
 <link rel="manifest" href="/manifest.json">
@@ -4117,64 +4118,40 @@ const PLACEHOLDER_FTF = `<p style="color:rgba(201,169,110,.5);font-size:13px;pad
 
 // ── Main homepage section loader — each section independent ──
 async function loadHomepageSections() {
-  // Fire all independently — one failure cannot block others
-  loadSection_FTF().catch(e => console.error('FTF:', e));
-  loadSection_Stakeholders().catch(e => console.error('Stakeholders:', e));
-  loadSection_FeaturedAds().catch(e => console.error('FeaturedAds:', e));
-  loadSection_FeaturedCattle().catch(e => console.error('FeaturedCattle:', e));
-  loadSection_FeaturedEquipment().catch(e => console.error('FeaturedEquipment:', e));
-  loadRecentListings().catch(e => console.error('RecentListings:', e));
-}
+  try {
+    const r = await fetch(`${API}/api/listings/homepage`);
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const d = await r.json();
 
-async function loadSection_FTF() {
-  const track = document.getElementById('ftf-scroll-track');
-  try {
-    const r = await fetch(`${API}/api/listings/farm-to-table`);
-    const listings = r.ok ? await r.json() : [];
-    if (track) track.innerHTML = (Array.isArray(listings) && listings.length) ? listings.map(renderFtfMiniCard).join('') : PLACEHOLDER_FTF;
-  } catch(e) { console.warn('ftf:', e); if(track) track.innerHTML = PLACEHOLDER_FTF; }
-}
-async function loadSection_Stakeholders() {
-  const el = document.getElementById('tbone-sidebar-listings');
-  const m = document.getElementById('mobile-tbone-strip');
-  try {
-    const r = await fetch(`${API}/api/listings/stakeholders`);
-    const listings = r.ok ? await r.json() : [];
-    const has = Array.isArray(listings) && listings.length;
-    if (el) el.innerHTML = has ? listings.map(l => renderSidebarAdCard(l, 'left')).join('') : PLACEHOLDER_PRIME;
-    if (m) m.innerHTML = has ? listings.map(renderMobileAdCard).join('') : '';
-  } catch(e) { console.warn('stakeholders:', e); if(el) el.innerHTML = PLACEHOLDER_PRIME; }
-}
-async function loadSection_FeaturedAds() {
-  const el = document.getElementById('filet-sidebar-listings');
-  const m = document.getElementById('mobile-filet-strip');
-  try {
-    const r = await fetch(`${API}/api/listings/featured-ads`);
-    const listings = r.ok ? await r.json() : [];
-    const has = Array.isArray(listings) && listings.length;
-    if (el) el.innerHTML = has ? listings.map(l => renderSidebarAdCard(l, 'right')).join('') : PLACEHOLDER_CHOICE;
-    if (m) m.innerHTML = has ? listings.map(renderMobileAdCard).join('') : '';
-  } catch(e) { console.warn('featured-ads:', e); if(el) el.innerHTML = PLACEHOLDER_CHOICE; }
-}
-async function loadSection_FeaturedCattle() {
-  const grid = document.getElementById('featured-cattle-grid');
-  try {
-    const r = await fetch(`${API}/api/listings/featured-cattle`);
-    const cattle = r.ok ? await r.json() : [];
-    if (Array.isArray(cattle) && cattle.length) {
-      setupRotation('cattle', cattle, 'featured-cattle-grid', 'cattle-dots', 'cattle-count', 'cattle-rotate-badge', 15);
-    } else if (grid) { grid.innerHTML = PLACEHOLDER_PAID; }
-  } catch(e) { console.warn('cattle:', e); if(grid) grid.innerHTML = PLACEHOLDER_PAID; }
-}
-async function loadSection_FeaturedEquipment() {
-  const grid = document.getElementById('featured-equip-grid');
-  try {
-    const r = await fetch(`${API}/api/listings/featured-equipment`);
-    const equip = r.ok ? await r.json() : [];
-    if (Array.isArray(equip) && equip.length) {
-      setupRotation('equip', equip, 'featured-equip-grid', 'equip-dots', 'equip-count', 'equip-rotate-badge', 10);
-    } else if (grid) { grid.innerHTML = PLACEHOLDER_PAID; }
-  } catch(e) { console.warn('equip:', e); if(grid) grid.innerHTML = PLACEHOLDER_PAID; }
+    const track = document.getElementById('ftf-scroll-track');
+    if (track) track.innerHTML = d.farmToTable?.length ? d.farmToTable.map(renderFtfMiniCard).join('') : PLACEHOLDER_FTF;
+
+    const stakeEl = document.getElementById('tbone-sidebar-listings');
+    if (stakeEl) stakeEl.innerHTML = d.stakeholders?.length ? d.stakeholders.map(l => renderSidebarAdCard(l, 'left')).join('') : PLACEHOLDER_PRIME;
+    const stakeM = document.getElementById('mobile-tbone-strip');
+    if (stakeM) stakeM.innerHTML = d.stakeholders?.length ? d.stakeholders.map(renderMobileAdCard).join('') : '';
+
+    const adsEl = document.getElementById('filet-sidebar-listings');
+    if (adsEl) adsEl.innerHTML = d.featuredAds?.length ? d.featuredAds.map(l => renderSidebarAdCard(l, 'right')).join('') : PLACEHOLDER_CHOICE;
+    const adsM = document.getElementById('mobile-filet-strip');
+    if (adsM) adsM.innerHTML = d.featuredAds?.length ? d.featuredAds.map(renderMobileAdCard).join('') : '';
+
+    const cattleGrid = document.getElementById('featured-cattle-grid');
+    if (d.featuredCattle?.length) setupRotation('cattle', d.featuredCattle, 'featured-cattle-grid', 'cattle-dots', 'cattle-count', 'cattle-rotate-badge', 15);
+    else if (cattleGrid) cattleGrid.innerHTML = PLACEHOLDER_PAID;
+
+    const equipGrid = document.getElementById('featured-equip-grid');
+    if (d.featuredEquipment?.length) setupRotation('equip', d.featuredEquipment, 'featured-equip-grid', 'equip-dots', 'equip-count', 'equip-rotate-badge', 10);
+    else if (equipGrid) equipGrid.innerHTML = PLACEHOLDER_PAID;
+
+    const recentGrid = document.getElementById('recent-listings-grid');
+    if (recentGrid) recentGrid.innerHTML = d.recent?.length ? d.recent.map(renderCompactCard).join('') : '<div style="grid-column:1/-1;color:#aaa;padding:20px;text-align:center">No listings yet</div>';
+  } catch(e) {
+    console.error('Homepage load:', e);
+    ['ftf-scroll-track','tbone-sidebar-listings','filet-sidebar-listings','featured-cattle-grid','featured-equip-grid','recent-listings-grid'].forEach(id => {
+      const el = document.getElementById(id); if (el && el.querySelector('.loading')) el.innerHTML = '<div style="color:#aaa;text-align:center;padding:16px">Unable to load</div>';
+    });
+  }
 }
 
 // Keep old name working for boot call

@@ -277,36 +277,74 @@ router.get('/recent-sales', async (req, res) => {
 
 const SECTION_COLS = `l.id, l.title, l.category, l.breed, l.price, l.price_type,
   l.quantity, l.state, l.city, l.tier, l.is_featured, l.created_at,
-  u.name AS seller_name, u.is_verified AS seller_verified,
+  u.name AS seller_name, u.is_verified AS seller_verified,`;
+
+const SECTION_COLS_FULL = SECTION_COLS + `
   (SELECT url FROM listing_photos WHERE listing_id=l.id ORDER BY sort_order LIMIT 1) AS thumb,
   (SELECT thumb_url FROM listing_photos WHERE listing_id=l.id ORDER BY sort_order LIMIT 1) AS thumb_small`;
 
+// ── Combined homepage endpoint — single API call for all sections ──
+router.get('/homepage', async (_req, res) => {
+  try {
+    const { getCached, setCached } = global.apiCache || {};
+    if (getCached) { const c = getCached('homepage-all'); if (c) { res.set('Cache-Control', 'public, max-age=300'); return res.json(c); } }
+
+    const ACTIVE = "l.status='active' AND (l.expires_at IS NULL OR l.expires_at>NOW())";
+    const Q = (where, limit) => query(`SELECT ${SECTION_COLS_FULL} FROM listings l JOIN users u ON u.id=l.user_id WHERE ${where} AND ${ACTIVE} ORDER BY RANDOM() LIMIT ${limit}`);
+
+    const [stakeholders, featuredAds, featuredCattle, featuredEquipment, farmToTable, recent] = await Promise.all([
+      Q("l.tier='filet'", 6),
+      Q("l.tier='t_bone'", 12),
+      Q("l.tier IN ('sirloin','ribeye') AND l.category IN ('bulls','bred_heifers','bred_cows','open_heifers','open_cows','cow_calf_pairs','feeder_stocker','showstock','dairy','bottle_calves','beef_cattle','fat_cattle','embryos','semen','full_herd')", 15),
+      Q("l.tier IN ('sirloin','ribeye') AND l.category IN ('equipment','trailers','chutes_pens')", 8),
+      Q("l.category='farm_to_table'", 8),
+      query(`SELECT ${SECTION_COLS_FULL} FROM listings l JOIN users u ON u.id=l.user_id WHERE l.status='active' ORDER BY l.created_at DESC LIMIT 12`),
+    ]);
+
+    const result = {
+      stakeholders: stakeholders.rows,
+      featuredAds: featuredAds.rows,
+      featuredCattle: featuredCattle.rows,
+      featuredEquipment: featuredEquipment.rows,
+      farmToTable: farmToTable.rows,
+      recent: recent.rows,
+    };
+
+    if (setCached) setCached('homepage-all', result, 300);
+    res.set('Cache-Control', 'public, max-age=300');
+    res.json(result);
+  } catch (e) {
+    console.error('Homepage query error:', e.message);
+    res.status(500).json({ error: e.message });
+  }
+});
+
 router.get('/stakeholders', async (_req, res) => {
-  try { const { rows } = await query(`SELECT ${SECTION_COLS} FROM listings l JOIN users u ON u.id=l.user_id WHERE l.tier='filet' AND l.status='active' AND (l.expires_at IS NULL OR l.expires_at>NOW()) ORDER BY RANDOM() LIMIT 6`); res.json(rows); }
+  try { const { rows } = await query(`SELECT ${SECTION_COLS_FULL} FROM listings l JOIN users u ON u.id=l.user_id WHERE l.tier='filet' AND l.status='active' AND (l.expires_at IS NULL OR l.expires_at>NOW()) ORDER BY RANDOM() LIMIT 6`); res.json(rows); }
   catch (e) { res.json([]); }
 });
 router.get('/featured-ads', async (_req, res) => {
-  try { const { rows } = await query(`SELECT ${SECTION_COLS} FROM listings l JOIN users u ON u.id=l.user_id WHERE l.tier='t_bone' AND l.status='active' AND (l.expires_at IS NULL OR l.expires_at>NOW()) ORDER BY RANDOM() LIMIT 12`); res.json(rows); }
+  try { const { rows } = await query(`SELECT ${SECTION_COLS_FULL} FROM listings l JOIN users u ON u.id=l.user_id WHERE l.tier='t_bone' AND l.status='active' AND (l.expires_at IS NULL OR l.expires_at>NOW()) ORDER BY RANDOM() LIMIT 12`); res.json(rows); }
   catch (e) { res.json([]); }
 });
 router.get('/farm-to-table', async (_req, res) => {
-  try { const { rows } = await query(`SELECT ${SECTION_COLS} FROM listings l JOIN users u ON u.id=l.user_id WHERE l.category='farm_to_table' AND l.status='active' AND (l.expires_at IS NULL OR l.expires_at>NOW()) ORDER BY RANDOM() LIMIT 8`); res.json(rows); }
+  try { const { rows } = await query(`SELECT ${SECTION_COLS_FULL} FROM listings l JOIN users u ON u.id=l.user_id WHERE l.category='farm_to_table' AND l.status='active' AND (l.expires_at IS NULL OR l.expires_at>NOW()) ORDER BY RANDOM() LIMIT 8`); res.json(rows); }
   catch (e) { res.json([]); }
 });
 router.get('/featured-cattle', async (_req, res) => {
-  try { const { rows } = await query(`SELECT ${SECTION_COLS} FROM listings l JOIN users u ON u.id=l.user_id WHERE l.tier IN ('sirloin','ribeye') AND l.category IN ('bulls','bred_heifers','bred_cows','open_heifers','open_cows','cow_calf_pairs','feeder_stocker','showstock','dairy','bottle_calves','beef_cattle','fat_cattle','embryos','semen','full_herd') AND l.status='active' AND (l.expires_at IS NULL OR l.expires_at>NOW()) ORDER BY RANDOM() LIMIT 15`); res.json(rows); }
+  try { const { rows } = await query(`SELECT ${SECTION_COLS_FULL} FROM listings l JOIN users u ON u.id=l.user_id WHERE l.tier IN ('sirloin','ribeye') AND l.category IN ('bulls','bred_heifers','bred_cows','open_heifers','open_cows','cow_calf_pairs','feeder_stocker','showstock','dairy','bottle_calves','beef_cattle','fat_cattle','embryos','semen','full_herd') AND l.status='active' AND (l.expires_at IS NULL OR l.expires_at>NOW()) ORDER BY RANDOM() LIMIT 15`); res.json(rows); }
   catch (e) { res.json([]); }
 });
 router.get('/featured-equipment', async (_req, res) => {
-  try { const { rows } = await query(`SELECT ${SECTION_COLS} FROM listings l JOIN users u ON u.id=l.user_id WHERE l.tier IN ('sirloin','ribeye') AND l.category IN ('equipment','trailers','chutes_pens') AND l.status='active' AND (l.expires_at IS NULL OR l.expires_at>NOW()) ORDER BY RANDOM() LIMIT 8`); res.json(rows); }
+  try { const { rows } = await query(`SELECT ${SECTION_COLS_FULL} FROM listings l JOIN users u ON u.id=l.user_id WHERE l.tier IN ('sirloin','ribeye') AND l.category IN ('equipment','trailers','chutes_pens') AND l.status='active' AND (l.expires_at IS NULL OR l.expires_at>NOW()) ORDER BY RANDOM() LIMIT 8`); res.json(rows); }
   catch (e) { res.json([]); }
 });
 router.get('/working-dogs', async (_req, res) => {
-  try { const { rows } = await query(`SELECT ${SECTION_COLS} FROM listings l JOIN users u ON u.id=l.user_id WHERE l.tier IN ('sirloin','ribeye') AND l.category='working_dogs' AND l.status='active' AND (l.expires_at IS NULL OR l.expires_at>NOW()) ORDER BY RANDOM() LIMIT 6`); res.json(rows); }
+  try { const { rows } = await query(`SELECT ${SECTION_COLS_FULL} FROM listings l JOIN users u ON u.id=l.user_id WHERE l.tier IN ('sirloin','ribeye') AND l.category='working_dogs' AND l.status='active' AND (l.expires_at IS NULL OR l.expires_at>NOW()) ORDER BY RANDOM() LIMIT 6`); res.json(rows); }
   catch (e) { res.json([]); }
 });
 router.get('/hay-feed', async (_req, res) => {
-  try { const { rows } = await query(`SELECT ${SECTION_COLS} FROM listings l JOIN users u ON u.id=l.user_id WHERE l.tier IN ('sirloin','ribeye') AND l.category='feed_hay' AND l.status='active' AND (l.expires_at IS NULL OR l.expires_at>NOW()) ORDER BY RANDOM() LIMIT 6`); res.json(rows); }
+  try { const { rows } = await query(`SELECT ${SECTION_COLS_FULL} FROM listings l JOIN users u ON u.id=l.user_id WHERE l.tier IN ('sirloin','ribeye') AND l.category='feed_hay' AND l.status='active' AND (l.expires_at IS NULL OR l.expires_at>NOW()) ORDER BY RANDOM() LIMIT 6`); res.json(rows); }
   catch (e) { res.json([]); }
 });
 
