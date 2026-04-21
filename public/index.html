@@ -2805,51 +2805,67 @@ const SHOP_DOMAIN = 'd5rnzr-j8.myshopify.com';
 const STOREFRONT_TOKEN = '8342d3d74cb03d12a0e4ca3f39fcfdf2';
 const API_URL = 'https://'+SHOP_DOMAIN+'/api/2024-01/graphql.json';
 
-let merchProducts=[], merchFilter='all', merchVisible=12, merchCartId=null, merchCartCount=0;
+let merchProducts=[], merchCollections=[], merchFilter='all', merchVisible=12, merchCartId=null, merchCartCount=0;
 
 async function shopifyGQL(q,vars){
   const r=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'application/json','X-Shopify-Storefront-Access-Token':STOREFRONT_TOKEN},body:JSON.stringify({query:q,variables:vars||{}})});
   return r.json();
 }
 
-// Fetch all products with pagination (Storefront API returns max 250 per page)
-async function fetchAllProducts(){
-  const PRODUCT_FIELDS=`id handle title description productType tags priceRange{minVariantPrice{amount currencyCode} maxVariantPrice{amount currencyCode}} images(first:20){edges{node{url altText id}}} variants(first:30){edges{node{id title availableForSale price{amount currencyCode} selectedOptions{name value} image{url altText id}}}} options{name values}`;
-  let all=[], cursor=null, hasNext=true;
-  while(hasNext){
-    const after=cursor?`after:"${cursor}",`:'';
-    const res=await shopifyGQL(`{products(first:50,${after}sortKey:TITLE){edges{node{${PRODUCT_FIELDS}} cursor} pageInfo{hasNextPage endCursor}}}`);
-    const edges=res.data?.products?.edges||[];
-    all=all.concat(edges.map(e=>e.node));
-    hasNext=res.data?.products?.pageInfo?.hasNextPage||false;
-    cursor=res.data?.products?.pageInfo?.endCursor||null;
-    // Safety: max 5 pages (250 products)
-    if(all.length>250)break;
-  }
-  return all;
-}
+// Fetch all collections with their products in one call
+const COLLECTIONS_QUERY=`{
+  collections(first:20){edges{node{
+    id title handle
+    products(first:50){edges{node{
+      id handle title description productType tags
+      priceRange{minVariantPrice{amount currencyCode} maxVariantPrice{amount currencyCode}}
+      images(first:20){edges{node{url altText id}}}
+      variants(first:30){edges{node{id title availableForSale price{amount currencyCode} selectedOptions{name value} image{url altText id}}}}
+      options{name values}
+    }}}
+  }}}
+}`;
 
 async function loadMerchProducts(){
   document.getElementById('merch-loading').style.display='';
   document.getElementById('merch-grid').innerHTML='';
   try{
-    merchProducts=await fetchAllProducts();
-    if(!merchProducts.length){document.getElementById('merch-loading').textContent='No products available right now. Products must be published to the Online Store channel in Shopify.';return;}
+    const res=await shopifyGQL(COLLECTIONS_QUERY);
+    if(res.errors)throw new Error(res.errors[0].message);
+    const rawCollections=(res.data?.collections?.edges||[]).map(e=>e.node);
+
+    // Filter out empty collections and frontpage
+    merchCollections=rawCollections.filter(c=>c.products.edges.length>0&&c.handle!=='frontpage');
+
+    // Deduplicate products across collections, track which collections each belongs to
+    const productMap=new Map();
+    merchCollections.forEach(col=>{
+      col.products.edges.forEach(e=>{
+        if(!productMap.has(e.node.id)){
+          productMap.set(e.node.id,{...e.node,_collections:[]});
+        }
+        productMap.get(e.node.id)._collections.push(col.handle);
+      });
+    });
+    merchProducts=Array.from(productMap.values());
+
+    if(!merchProducts.length){document.getElementById('merch-loading').textContent='No products available right now.';return;}
     document.getElementById('merch-loading').style.display='none';
     renderMerchFilters();
     renderMerchGrid();
   }catch(e){
     console.error('Shopify load error:',e);
-    document.getElementById('merch-loading').textContent='Unable to load products. Please refresh.';
+    document.getElementById('merch-loading').innerHTML='Unable to load products. <a href="https://herdhub.myshopify.com" target="_blank" style="color:var(--gold)">Shop directly &rarr;</a>';
   }
 }
 
 function renderMerchFilters(){
-  const types=[...new Set(merchProducts.map(p=>p.productType).filter(Boolean))];
-  const filtered=merchFilter==='all'?merchProducts:merchProducts.filter(p=>p.productType===merchFilter);
   const el=document.getElementById('merch-filters');
   el.innerHTML='<button class="merch-chip'+(merchFilter==='all'?' active':'')+'" onclick="setMerchFilter(\'all\')">All ('+merchProducts.length+')</button>'+
-    types.map(t=>{const c=merchProducts.filter(p=>p.productType===t).length;return'<button class="merch-chip'+(merchFilter===t?' active':'')+'" onclick="setMerchFilter(\''+escHtml(t)+'\')">'+escHtml(t)+' ('+c+')</button>';}).join('');
+    merchCollections.map(c=>{
+      const count=c.products.edges.length;
+      return'<button class="merch-chip'+(merchFilter===c.handle?' active':'')+'" onclick="setMerchFilter(\''+escHtml(c.handle)+'\')">'+escHtml(c.title)+' ('+count+')</button>';
+    }).join('');
 }
 
 window.setMerchFilter=function(f){merchFilter=f;merchVisible=12;renderMerchFilters();renderMerchGrid();};
@@ -2861,7 +2877,7 @@ function getVariantForColor(p,color){return p.variants.edges.find(e=>e.node.sele
 function allVariantsSoldOut(p){return p.variants.edges.every(e=>!e.node.availableForSale);}
 
 function renderMerchGrid(){
-  let list=merchFilter==='all'?merchProducts:merchProducts.filter(p=>p.productType===merchFilter);
+  let list=merchFilter==='all'?merchProducts:merchProducts.filter(p=>p._collections&&p._collections.includes(merchFilter));
   const showing=list.slice(0,merchVisible);
   const grid=document.getElementById('merch-grid');
   grid.innerHTML=showing.map((p,i)=>{
@@ -2917,7 +2933,7 @@ function renderMerchGrid(){
 
 // Card swatch hover — swap front image to color variant image
 window.swatchCardHover=function(idx,colorName){
-  const list=merchFilter==='all'?merchProducts:merchProducts.filter(p=>p.productType===merchFilter);
+  const list=merchFilter==='all'?merchProducts:merchProducts.filter(p=>p._collections&&p._collections.includes(merchFilter));
   const p=list[idx];if(!p)return;
   const v=getVariantForColor(p,colorName);
   const img=document.getElementById('merch-card-front-'+idx);
@@ -2935,7 +2951,7 @@ window.merchShowMore=function(){merchVisible+=12;renderMerchGrid();};
 
 // Product modal
 window.openMerchProduct=function(idx){
-  const list=merchFilter==='all'?merchProducts:merchProducts.filter(p=>p.productType===merchFilter);
+  const list=merchFilter==='all'?merchProducts:merchProducts.filter(p=>p._collections&&p._collections.includes(merchFilter));
   const p=list[idx];if(!p)return;
   const images=p.images.edges.map(e=>e.node);
   const variants=p.variants.edges.map(e=>e.node);
