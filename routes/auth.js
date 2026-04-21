@@ -163,13 +163,20 @@ router.get('/me', authenticateToken, async (req, res) => {
 router.put('/me', authenticateToken, async (req, res) => {
   try {
     const { name, phone, state, city, bio } = req.body;
-    await query(
+    if (!name || name.trim().length < 2)
+      return res.status(400).json({ error: 'Name must be at least 2 characters' });
+    const { rows } = await query(
       `UPDATE users
-       SET name=$1, phone=$2, state=$3, city=$4, bio=$5
-       WHERE id=$6`,
-      [name, phone || null, state || null, city || null, bio || null, req.user.id]
+       SET name=$1, phone=$2, state=$3, city=$4, bio=$5, updated_at=NOW()
+       WHERE id=$6
+       RETURNING id, email, name, phone, state, city, bio, role, avatar_url, created_at`,
+      [name.trim(), phone || null, state || null, city || null, bio || null, req.user.id]
     );
-    res.json({ message: 'Profile updated' });
+    if (!rows.length) return res.status(404).json({ error: 'User not found' });
+    const user = rows[0];
+    const token = signToken({ id: user.id, email: user.email, name: user.name, role: user.role });
+    setAuthCookie(res, token);
+    res.json({ user, token });
   } catch (err) {
     res.status(500).json({ error: 'Update failed' });
   }

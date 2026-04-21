@@ -5184,6 +5184,7 @@ async function unsaveListing(id, btn) {
 }
 
 async function saveProfile() {
+  const errEl = document.getElementById('profile-error');
   const sucEl = document.getElementById('profile-success');
   errEl.style.display = 'none'; sucEl.style.display = 'none';
   try {
@@ -5200,7 +5201,8 @@ async function saveProfile() {
     });
     const d = await r.json();
     if (!r.ok) { errEl.textContent = d.error; errEl.style.display='block'; return; }
-    currentUser = { ...currentUser, ...d };
+    currentUser = { ...currentUser, ...d.user };
+    if (d.token) authToken = d.token;
     document.getElementById('acct-fullname').textContent = currentUser.name;
     document.getElementById('account-name').textContent = currentUser.name.split(' ')[0];
     document.getElementById('acct-avatar').textContent = currentUser.name[0].toUpperCase();
