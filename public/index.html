@@ -316,8 +316,13 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
 .ftf-mini-title{font-family:'Playfair Display',serif;font-size:11px;font-weight:700;color:var(--cream);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ftf-mini-loc{font-size:9px;color:var(--tan)}
 .ftf-mini-price{font-family:'Playfair Display',serif;font-size:12px;font-weight:700;color:var(--gold);margin-top:3px}
-.ftf-check{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:400;cursor:pointer;padding:3px 0}
-.ftf-check input[type=checkbox]{accent-color:#5a7a4a}
+.ftf-check{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:400;cursor:pointer;padding:4px 0;white-space:nowrap}
+.ftf-check input[type=checkbox]{accent-color:#5a7a4a;flex-shrink:0}
+.ftf-radio-label{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:400;cursor:pointer;padding:5px 0;white-space:nowrap}
+.ftf-radio-label input[type=radio]{flex-shrink:0}
+.ftf-opsize-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px 16px}
+.ftf-checkbox-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px 12px}
+@media(max-width:600px){.ftf-opsize-grid{grid-template-columns:1fr}.ftf-checkbox-grid{grid-template-columns:1fr 1fr}}
 .ftf-pill{display:inline-block;background:rgba(90,122,74,.12);color:#5a7a4a;font-family:'Oswald',sans-serif;font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:4px 10px;border-radius:12px;margin:2px}
 .ftf-detail-section{border-top:1px solid var(--light-tan);padding-top:14px;margin-top:14px}
 .ftf-detail-label{font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#888;margin-bottom:6px}
@@ -1895,13 +1900,13 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
 
 <!-- FARM TO TABLE LISTING MODAL -->
 <div class="modal-overlay" id="modal-farm-to-table-listing" role="dialog" aria-modal="true" aria-hidden="true" aria-label="List your farm to table operation">
-  <div class="modal" style="max-width:660px">
+  <div class="modal" style="max-width:760px">
     <button class="modal-close" data-action="close-modal" data-modal="farm-to-table-listing" aria-label="Close dialog">✕</button>
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
-      <div style="width:40px;height:40px;background:#5a7a4a;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px">🌿</div>
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:4px">
+      <div style="width:48px;height:48px;background:#5a7a4a;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">🌿</div>
       <div>
-        <h2 style="margin:0;font-size:22px">Farm to Table Listing</h2>
-        <div style="font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:#5a7a4a">Direct from the Ranch — Free to List</div>
+        <h2 style="margin:0;font-size:24px;font-weight:900">Farm to Table Listing</h2>
+        <div style="font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:#5a7a4a;font-weight:600">Direct from the Ranch — Free to List</div>
       </div>
     </div>
 
@@ -1922,11 +1927,11 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
         <div class="sf"><label for="ftf-website">Farm Website</label><input id="ftf-website" type="url" placeholder="https://"></div>
       </div>
       <div class="sf"><label>Operation Size</label>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
-          <label style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:400;cursor:pointer"><input type="radio" name="ftf-op-size" value="family_farm"> Family Farm (&lt;50 acres)</label>
-          <label style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:400;cursor:pointer"><input type="radio" name="ftf-op-size" value="small_ranch"> Small Ranch (50-500 acres)</label>
-          <label style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:400;cursor:pointer"><input type="radio" name="ftf-op-size" value="mid_size"> Mid-Size (500-2000 acres)</label>
-          <label style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:400;cursor:pointer"><input type="radio" name="ftf-op-size" value="large"> Large Operation (2000+ acres)</label>
+        <div class="ftf-opsize-grid">
+          <label class="ftf-radio-label"><input type="radio" name="ftf-op-size" value="family_farm"> Family Farm (&lt;50 acres)</label>
+          <label class="ftf-radio-label"><input type="radio" name="ftf-op-size" value="small_ranch"> Small Ranch (50-500 acres)</label>
+          <label class="ftf-radio-label"><input type="radio" name="ftf-op-size" value="mid_size"> Mid-Size (500-2000 acres)</label>
+          <label class="ftf-radio-label"><input type="radio" name="ftf-op-size" value="large"> Large Operation (2000+ acres)</label>
         </div>
       </div>
       <div class="sf"><label>Farm Tours / Visits Available?</label>
@@ -1939,7 +1944,7 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
       <legend style="font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:#5a7a4a;padding:0 8px">What Are You Selling?</legend>
       <div style="font-size:12px;color:#888;margin-bottom:10px">Select all that apply</div>
       <div style="font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--mid-brown);margin-bottom:6px">Specialty Proteins</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:14px">
+      <div class="ftf-checkbox-grid" style="margin-bottom:14px">
         <label class="ftf-check"><input type="checkbox" name="ftf-proteins" value="beef"> Beef</label>
         <label class="ftf-check"><input type="checkbox" name="ftf-proteins" value="wagyu_beef"> Wagyu Beef</label>
         <label class="ftf-check"><input type="checkbox" name="ftf-proteins" value="bison"> Bison</label>
@@ -1954,7 +1959,7 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
         <label class="ftf-check"><input type="checkbox" name="ftf-proteins" value="other_protein"> Other</label>
       </div>
       <div style="font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--mid-brown);margin-bottom:6px">Product Forms</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">
+      <div class="ftf-checkbox-grid">
         <label class="ftf-check"><input type="checkbox" name="ftf-forms" value="whole_animal"> Whole Animal</label>
         <label class="ftf-check"><input type="checkbox" name="ftf-forms" value="half_animal"> Half Animal</label>
         <label class="ftf-check"><input type="checkbox" name="ftf-forms" value="quarter_animal"> Quarter Animal</label>
@@ -1976,7 +1981,7 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
     <!-- Section 3: Production Methods -->
     <fieldset style="border:1px solid var(--light-tan);border-radius:6px;padding:16px;margin:16px 0 0">
       <legend style="font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:#5a7a4a;padding:0 8px">Production Methods</legend>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">
+      <div class="ftf-checkbox-grid">
         <label class="ftf-check"><input type="checkbox" name="ftf-methods" value="grass_fed"> 100% Grass-Fed</label>
         <label class="ftf-check"><input type="checkbox" name="ftf-methods" value="grain_fed"> Grain-Fed</label>
         <label class="ftf-check"><input type="checkbox" name="ftf-methods" value="grass_grain_finished"> Grass-Fed / Grain-Finished</label>
@@ -2035,7 +2040,7 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
     <!-- Section 6: Certifications -->
     <fieldset style="border:1px solid var(--light-tan);border-radius:6px;padding:16px;margin:16px 0 0">
       <legend style="font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:#5a7a4a;padding:0 8px">Certifications (Optional)</legend>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">
+      <div class="ftf-checkbox-grid">
         <label class="ftf-check"><input type="checkbox" name="ftf-certs" value="usda_organic"> USDA Organic Certified</label>
         <label class="ftf-check"><input type="checkbox" name="ftf-certs" value="animal_welfare"> Animal Welfare Approved</label>
         <label class="ftf-check"><input type="checkbox" name="ftf-certs" value="certified_humane"> Certified Humane</label>
