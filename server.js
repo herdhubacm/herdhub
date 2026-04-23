@@ -503,6 +503,25 @@ async function start() {
       await query(`ALTER TABLE listings ADD COLUMN IF NOT EXISTS lng NUMERIC(9,6)`);
       await query(`ALTER TABLE listings ADD COLUMN IF NOT EXISTS sold_at TIMESTAMPTZ`);
 
+      // Farm to Table columns
+      await query(`ALTER TABLE listings ADD COLUMN IF NOT EXISTS farm_name VARCHAR(150)`);
+      await query(`ALTER TABLE listings ADD COLUMN IF NOT EXISTS farm_proteins TEXT[]`);
+      await query(`ALTER TABLE listings ADD COLUMN IF NOT EXISTS farm_product_forms TEXT[]`);
+      await query(`ALTER TABLE listings ADD COLUMN IF NOT EXISTS farm_production_methods TEXT[]`);
+      await query(`ALTER TABLE listings ADD COLUMN IF NOT EXISTS farm_processing TEXT[]`);
+      await query(`ALTER TABLE listings ADD COLUMN IF NOT EXISTS farm_delivery TEXT[]`);
+      await query(`ALTER TABLE listings ADD COLUMN IF NOT EXISTS farm_availability VARCHAR(50)`);
+      await query(`ALTER TABLE listings ADD COLUMN IF NOT EXISTS farm_harvest_date DATE`);
+      await query(`ALTER TABLE listings ADD COLUMN IF NOT EXISTS farm_certifications TEXT[]`);
+      await query(`ALTER TABLE listings ADD COLUMN IF NOT EXISTS farm_price_hanging DECIMAL(8,2)`);
+      await query(`ALTER TABLE listings ADD COLUMN IF NOT EXISTS farm_price_takehome DECIMAL(8,2)`);
+      await query(`ALTER TABLE listings ADD COLUMN IF NOT EXISTS farm_deposit_required BOOLEAN DEFAULT FALSE`);
+      await query(`ALTER TABLE listings ADD COLUMN IF NOT EXISTS farm_deposit_amount DECIMAL(8,2)`);
+      await query(`ALTER TABLE listings ADD COLUMN IF NOT EXISTS farm_call_for_price BOOLEAN DEFAULT FALSE`);
+      await query(`ALTER TABLE listings ADD COLUMN IF NOT EXISTS farm_tours BOOLEAN DEFAULT FALSE`);
+      await query(`ALTER TABLE listings ADD COLUMN IF NOT EXISTS farm_operation_size VARCHAR(50)`);
+      await query(`ALTER TABLE listings ADD COLUMN IF NOT EXISTS farm_years INTEGER`);
+
       // Saved searches table
       await query(`CREATE TABLE IF NOT EXISTS saved_searches (
         id          BIGSERIAL    PRIMARY KEY,

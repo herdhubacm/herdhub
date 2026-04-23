@@ -55,13 +55,13 @@ function tierPhotoLimit(tier) {
   if (tier === 't_bone')       return parseInt(process.env.MAX_PHOTOS_TBONE)  || 5;
   if (tier === 'ribeye')       return parseInt(process.env.MAX_PHOTOS_RIBEYE) || 3;
   if (tier === 'sirloin')      return parseInt(process.env.MAX_PHOTOS_SIRLOIN) || 3;
-  if (tier === 'farm_to_table') return 3;
+  if (tier === 'farm_to_table') return 8;
   if (tier === 'burger')       return 1;
   return parseInt(process.env.MAX_PHOTOS_BASIC) || 1;
 }
 function expiresAt(tier) {
-  // t_bone = recurring (90 day window), filet = 30 day one-time, ribeye = 90 day featured, basic = 30 day free
-  const days = (tier === 't_bone' || tier === 'ribeye') ? 90 : 30;
+  // t_bone = recurring (90 day window), filet = 30 day one-time, ribeye = 90 day featured, farm_to_table = 90 day free, basic = 30 day free
+  const days = (tier === 't_bone' || tier === 'ribeye' || tier === 'farm_to_table') ? 90 : 30;
   return new Date(Date.now() + days * 86400000);
 }
 
@@ -297,7 +297,7 @@ router.get('/homepage', async (_req, res) => {
       Q("l.tier='t_bone'", 12),
       Q("l.tier IN ('sirloin','ribeye') AND l.category IN ('bulls','bred_heifers','bred_cows','open_heifers','open_cows','cow_calf_pairs','feeder_stocker','showstock','dairy','bottle_calves','beef_cattle','fat_cattle','embryos','semen','full_herd')", 15),
       Q("l.tier IN ('sirloin','ribeye') AND l.category IN ('equipment','trailers','chutes_pens')", 8),
-      Q("l.category='farm_to_table'", 8),
+      query(`SELECT ${SECTION_COLS_FULL}, l.farm_name, l.farm_proteins, l.farm_production_methods, l.farm_operation_size FROM listings l JOIN users u ON u.id=l.user_id WHERE l.category='farm_to_table' AND ${ACTIVE} ORDER BY RANDOM() LIMIT 8`),
       query(`SELECT ${SECTION_COLS_FULL} FROM listings l JOIN users u ON u.id=l.user_id WHERE l.status='active' ORDER BY l.created_at DESC LIMIT 12`),
     ]);
 
@@ -328,7 +328,7 @@ router.get('/featured-ads', async (_req, res) => {
   catch (e) { res.json([]); }
 });
 router.get('/farm-to-table', async (_req, res) => {
-  try { const { rows } = await query(`SELECT ${SECTION_COLS_FULL} FROM listings l JOIN users u ON u.id=l.user_id WHERE l.category='farm_to_table' AND l.status='active' AND (l.expires_at IS NULL OR l.expires_at>NOW()) ORDER BY RANDOM() LIMIT 8`); res.json(rows); }
+  try { const { rows } = await query(`SELECT ${SECTION_COLS_FULL}, l.farm_name, l.farm_proteins, l.farm_production_methods, l.farm_operation_size FROM listings l JOIN users u ON u.id=l.user_id WHERE l.category='farm_to_table' AND l.status='active' AND (l.expires_at IS NULL OR l.expires_at>NOW()) ORDER BY RANDOM() LIMIT 8`); res.json(rows); }
   catch (e) { res.json([]); }
 });
 router.get('/featured-cattle', async (_req, res) => {
@@ -435,8 +435,14 @@ router.post('/', authenticateToken, upload.array('photos', 20), async (req, res)
       `INSERT INTO listings
          (user_id, title, description, category, subcategory, breed,
           price, price_type, quantity, weight_lbs, age_months, sex,
-          state, city, zip, tier, is_featured, expires_at, payment_status, website_url)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20)
+          state, city, zip, tier, is_featured, expires_at, payment_status, website_url,
+          farm_name, farm_proteins, farm_product_forms, farm_production_methods,
+          farm_processing, farm_delivery, farm_availability, farm_harvest_date,
+          farm_certifications, farm_price_hanging, farm_price_takehome,
+          farm_deposit_required, farm_deposit_amount, farm_call_for_price,
+          farm_tours, farm_operation_size, farm_years)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,
+               $21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37)
        RETURNING id`,
       [
         req.user.id, title, description, category,
@@ -449,6 +455,24 @@ router.post('/', authenticateToken, upload.array('photos', 20), async (req, res)
         safeTier, isFeatured, expiresAt(safeTier),
         (safeTier === 'burger' || safeTier === 'farm_to_table') ? 'free' : 'pending',
         req.body.website_url || null,
+        // Farm to Table fields
+        req.body.farm_name || null,
+        req.body.farm_proteins ? JSON.parse(req.body.farm_proteins) : null,
+        req.body.farm_product_forms ? JSON.parse(req.body.farm_product_forms) : null,
+        req.body.farm_production_methods ? JSON.parse(req.body.farm_production_methods) : null,
+        req.body.farm_processing ? JSON.parse(req.body.farm_processing) : null,
+        req.body.farm_delivery ? JSON.parse(req.body.farm_delivery) : null,
+        req.body.farm_availability || null,
+        req.body.farm_harvest_date || null,
+        req.body.farm_certifications ? JSON.parse(req.body.farm_certifications) : null,
+        req.body.farm_price_hanging ? +req.body.farm_price_hanging : null,
+        req.body.farm_price_takehome ? +req.body.farm_price_takehome : null,
+        req.body.farm_deposit_required === 'true',
+        req.body.farm_deposit_amount ? +req.body.farm_deposit_amount : null,
+        req.body.farm_call_for_price === 'true',
+        req.body.farm_tours === 'true',
+        req.body.farm_operation_size || null,
+        req.body.farm_years ? +req.body.farm_years : null,
       ]
     );
     const listingId = rows[0].id;
