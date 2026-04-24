@@ -897,6 +897,33 @@ async function start() {
       console.log(`🌍  Environment: ${process.env.NODE_ENV || 'development'}\n`);
     });
 
+    // ── Geocoding backfill — fill missing lat/lng on startup ──
+    async function geocodeExistingListings() {
+      try {
+        const { rows } = await pool.query(
+          "SELECT id, city, state FROM listings WHERE lat IS NULL AND lng IS NULL AND status = 'active' LIMIT 50"
+        );
+        if (!rows.length) return;
+        console.log(`🌍  Geocoding ${rows.length} listings with missing coordinates...`);
+        for (const listing of rows) {
+          try {
+            const q = encodeURIComponent(`${listing.city}, ${listing.state}, USA`);
+            const resp = await fetch(`https://nominatim.openstreetmap.org/search?q=${q}&format=json&limit=1`, {
+              headers: { 'User-Agent': 'HerdHub/1.0 (ad@theherdhub.com)' }
+            });
+            const data = await resp.json();
+            if (data && data[0]) {
+              await pool.query('UPDATE listings SET lat=$1, lng=$2 WHERE id=$3',
+                [parseFloat(data[0].lat), parseFloat(data[0].lon), listing.id]);
+            }
+            await new Promise(r => setTimeout(r, 1100)); // Nominatim rate limit: 1 req/sec
+          } catch(e) { console.error(`  Geocode failed for listing ${listing.id}:`, e.message); }
+        }
+        console.log('✅  Geocoding backfill complete');
+      } catch(e) { console.error('Geocoding backfill error:', e.message); }
+    }
+    setTimeout(geocodeExistingListings, 5000);
+
     // ── Silent auction cron — check for ended auctions every hour ──
     const { endExpiredAuctions } = require('./routes/sales');
     setInterval(endExpiredAuctions, 60 * 60 * 1000); // every hour

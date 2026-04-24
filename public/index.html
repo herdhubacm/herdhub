@@ -1352,39 +1352,11 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
     <div class="section-header">
       <h2 id="listings-title">All <span>Listings</span></h2>
       <div style="display:flex;gap:8px;align-items:center">
-        <button id="view-toggle-map" class="btn-secondary" style="padding:7px 14px;font-size:12px;display:flex;align-items:center;gap:6px" onclick="toggleMapView()">🗺️ Map View</button>
+        <button id="view-toggle-map" class="btn-secondary" style="padding:7px 14px;font-size:12px;display:flex;align-items:center;gap:6px" data-action="page" data-page="map">🗺️ Map View</button>
         <a class="see-all" data-action="page" data-page="home">← Back to Home</a>
       </div>
     </div>
-    <!-- Map view container (hidden by default) -->
-    <div id="map-view-container" style="display:none;margin-bottom:24px">
-      <div style="background:var(--dark-brown);border-radius:8px;padding:16px;margin-bottom:12px;display:flex;flex-wrap:wrap;gap:12px;align-items:center">
-        <div style="display:flex;align-items:center;gap:8px">
-          <span style="font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold)">Radius</span>
-          <select id="map-radius" onchange="updateMapListings()" style="padding:6px 10px;background:rgba(255,255,255,.1);border:1px solid rgba(201,169,110,.3);color:var(--cream);border-radius:4px;font-size:13px">
-            <option value="50">50 miles</option>
-            <option value="100" selected>100 miles</option>
-            <option value="200">200 miles</option>
-            <option value="500">500 miles</option>
-            <option value="">Nationwide</option>
-          </select>
-        </div>
-        <div style="display:flex;align-items:center;gap:8px">
-          <span style="font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold)">Center on</span>
-          <input type="text" id="map-center-input" placeholder="Enter city, state or zip…" style="padding:6px 12px;background:rgba(255,255,255,.1);border:1px solid rgba(201,169,110,.3);color:var(--cream);border-radius:4px;font-size:13px;width:200px" placeholder="Enter city, state or ZIP…">
-          <button onclick="geocodeAndCenter()" style="padding:6px 14px;background:var(--gold);color:var(--dark-brown);border:none;border-radius:4px;font-family:'Oswald',sans-serif;font-size:12px;font-weight:700;cursor:pointer">Go</button>
-        </div>
-        <button onclick="useMyLocation()" style="padding:6px 14px;background:rgba(255,255,255,.08);border:1px solid rgba(201,169,110,.2);color:var(--cream);border-radius:4px;font-family:'Oswald',sans-serif;font-size:12px;cursor:pointer">📍 Use My Location</button>
-        <span id="map-count" style="font-size:12px;color:rgba(245,239,224,.5);margin-left:auto"></span>
-      </div>
-      <div id="map-container" style="height:480px;border-radius:8px;overflow:hidden;background:#e8dcc8;position:relative">
-        <div id="map-placeholder" style="height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;color:#888">
-          <div style="font-size:40px">🗺️</div>
-          <div style="font-family:'Oswald',sans-serif;font-size:14px">Loading map…</div>
-        </div>
-      </div>
-      <div id="map-results" style="margin-top:16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px"></div>
-    </div>
+    <!-- Map is now a full page: see #page-map -->
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px;align-items:center;width:100%">
       <select id="f-category" onchange="loadListings()" aria-label="Filter by category" style="padding:8px 12px;border:1.5px solid var(--light-tan);border-radius:4px;font-family:'Source Serif 4',serif;font-size:14px;outline:none">
         <option value="">All Categories</option>
@@ -2925,6 +2897,99 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
 
 <!-- TOAST NOTIFICATION -->
 <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+
+<!-- ══════════════════════════════════════════════════════════
+     MAP PAGE
+═══════════════════════════════════════════════════════════ -->
+<div id="page-map" style="display:none">
+<style>
+.map-cat-btn{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:4px;border:1px solid rgba(201,169,110,.15);background:transparent;color:var(--tan);font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:.06em;cursor:pointer;text-align:left;transition:background .15s}
+.map-cat-btn:hover{background:rgba(139,50,20,.15)!important;color:var(--cream)!important}
+.map-cat-btn.active{background:rgba(139,50,20,.3)!important;color:var(--cream)!important}
+.herd-popup .leaflet-popup-content-wrapper{background:#F5EFE0;border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,.4);padding:0;overflow:hidden}
+.herd-popup .leaflet-popup-content{margin:0}
+.herd-popup .leaflet-popup-tip{background:#F5EFE0}
+@media(max-width:768px){
+  #map-page-layout{flex-direction:column!important;height:auto!important}
+  #map-sidebar{width:100%!important;height:auto!important;flex-direction:row!important;flex-wrap:wrap!important;gap:8px!important;padding:10px!important;border-right:none!important;border-bottom:1px solid rgba(201,169,110,.15)!important;overflow-x:auto!important;overflow-y:hidden!important}
+  #map-sidebar>div:first-child{display:none}
+  #map-sidebar .map-legend{display:none}
+  #map-category-filters{flex-direction:row!important;overflow-x:auto;flex-wrap:nowrap!important}
+  #map-category-filters .map-cat-btn{white-space:nowrap;flex-shrink:0}
+  #map-container{min-height:350px!important}
+  #map-results-strip{height:150px!important}
+}
+</style>
+  <div id="map-page-layout" style="display:flex;height:calc(100vh - 70px);gap:0">
+    <!-- Left sidebar -->
+    <div id="map-sidebar" style="width:270px;flex-shrink:0;background:var(--dark-brown);border-right:1px solid rgba(201,169,110,.15);overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:14px">
+      <div style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:var(--cream)">🗺 Browse Map</div>
+
+      <div>
+        <label style="font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--tan);display:block;margin-bottom:6px">Search Location</label>
+        <div style="display:flex;gap:6px">
+          <input id="map-location-input" type="text" placeholder="City, State or ZIP" style="flex:1;padding:8px 10px;background:rgba(255,255,255,.06);border:1px solid rgba(201,169,110,.2);border-radius:4px;color:var(--cream);font-size:13px;outline:none" onkeydown="if(event.key==='Enter')searchMapLocation()">
+          <button onclick="searchMapLocation()" style="padding:8px 12px;background:var(--rust);border:none;border-radius:4px;color:var(--cream);cursor:pointer;font-size:14px">→</button>
+        </div>
+        <button onclick="useMyMapLocation()" style="width:100%;margin-top:6px;padding:7px;background:transparent;border:1px solid rgba(201,169,110,.2);border-radius:4px;color:var(--tan);font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:.08em;cursor:pointer">📍 Use My Location</button>
+      </div>
+
+      <div>
+        <label style="font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--tan);display:block;margin-bottom:6px">Category</label>
+        <div style="display:flex;flex-direction:column;gap:4px" id="map-category-filters">
+          <button class="map-cat-btn active" onclick="setMapCategory('all',this)">🗺 All Listings</button>
+          <button class="map-cat-btn" onclick="setMapCategory('cattle',this)">🐄 Cattle</button>
+          <button class="map-cat-btn" onclick="setMapCategory('farm_to_table',this)">🌿 Farm to Table</button>
+          <button class="map-cat-btn" onclick="setMapCategory('equipment',this)">🚜 Equipment</button>
+          <button class="map-cat-btn" onclick="setMapCategory('feed_hay',this)">🌾 Hay &amp; Feed</button>
+          <button class="map-cat-btn" onclick="setMapCategory('working_dogs',this)">🐕 Working Dogs</button>
+        </div>
+      </div>
+
+      <div>
+        <label style="font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--tan);display:block;margin-bottom:6px">Search Radius</label>
+        <select id="map-radius-select" onchange="refreshMapListings()" style="width:100%;padding:8px 10px;background:rgba(255,255,255,.06);border:1px solid rgba(201,169,110,.2);border-radius:4px;color:var(--cream);font-size:13px">
+          <option value="50">Within 50 miles</option>
+          <option value="100" selected>Within 100 miles</option>
+          <option value="200">Within 200 miles</option>
+          <option value="500">Within 500 miles</option>
+          <option value="0">Nationwide</option>
+        </select>
+      </div>
+
+      <div>
+        <label style="font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--tan);display:block;margin-bottom:6px">Max Price</label>
+        <select id="map-max-price" onchange="refreshMapListings()" style="width:100%;padding:8px 10px;background:rgba(255,255,255,.06);border:1px solid rgba(201,169,110,.2);border-radius:4px;color:var(--cream);font-size:13px">
+          <option value="0">Any Price</option>
+          <option value="1000">Under $1,000</option>
+          <option value="5000">Under $5,000</option>
+          <option value="10000">Under $10,000</option>
+          <option value="25000">Under $25,000</option>
+          <option value="50000">Under $50,000</option>
+        </select>
+      </div>
+
+      <div id="map-results-count" style="font-family:'Oswald',sans-serif;font-size:11px;color:var(--muted);padding:8px 0;border-top:1px solid rgba(255,255,255,.06)">Loading listings...</div>
+
+      <div class="map-legend" style="border-top:1px solid rgba(255,255,255,.06);padding-top:14px">
+        <div style="font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Legend</div>
+        <div style="display:flex;flex-direction:column;gap:5px;font-size:11px;color:var(--tan)">
+          <div style="display:flex;align-items:center;gap:8px"><span style="width:10px;height:10px;border-radius:50%;background:#8B3214;display:inline-block"></span> Cattle</div>
+          <div style="display:flex;align-items:center;gap:8px"><span style="width:10px;height:10px;border-radius:50%;background:#5a7a4a;display:inline-block"></span> Farm to Table</div>
+          <div style="display:flex;align-items:center;gap:8px"><span style="width:10px;height:10px;border-radius:50%;background:#8B6914;display:inline-block"></span> Equipment</div>
+          <div style="display:flex;align-items:center;gap:8px"><span style="width:10px;height:10px;border-radius:50%;background:#C9A96E;display:inline-block"></span> Hay &amp; Feed</div>
+          <div style="display:flex;align-items:center;gap:8px"><span style="width:10px;height:10px;border-radius:50%;background:#5a5a8a;display:inline-block"></span> Working Dogs</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Map + results strip -->
+    <div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+      <div id="map-container" style="flex:1;min-height:400px;background:#1a0f06"></div>
+      <div id="map-results-strip" style="height:190px;overflow-x:auto;overflow-y:hidden;background:var(--dark-brown);border-top:1px solid rgba(201,169,110,.1);display:flex;gap:10px;padding:10px;align-items:stretch;scrollbar-width:thin"></div>
+    </div>
+  </div>
+</div>
 
 <!-- ══════════════════════════════════════════════════════════
      MERCH PAGE
@@ -5335,7 +5400,7 @@ function showPage(page) {
   document.querySelectorAll('nav a[data-page], nav a[data-cat]').forEach(a => {
     a.removeAttribute('aria-current');
   });
-  ['home','listings','forum','account','about','pricing','articles','article-detail','privacy','terms','user-agreement','beef-boxes','merch','contact','seller'].forEach(p => {
+  ['home','listings','forum','account','about','pricing','articles','article-detail','privacy','terms','user-agreement','beef-boxes','map','merch','contact','seller'].forEach(p => {
     const el = document.getElementById('page-' + p);
     if (el) el.style.display = p === page ? 'block' : 'none';
   });
@@ -5348,6 +5413,7 @@ function showPage(page) {
   if (page === 'contact') buildFAQ();
   if (page === 'articles') loadArticlesPage();
   if (page === 'beef-boxes') loadBeefBoxCount();
+  if (page === 'map') setTimeout(initHerdMap, 100);
   if (page === 'merch' && window._initShopifyMerch) window._initShopifyMerch();
   if (window._trackPage) window._trackPage(page);
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -5951,161 +6017,202 @@ async function deleteSavedSearch(id, btn) {
 }
 
 // ── Map View ────────────────────────────────────────────
-let _map = null;
-let _mapMarkers = [];
-let _mapCenter = { lat: 39.5, lng: -98.35 };
-let _mapListings = [];
+let herdMap = null;
+let mapMarkers = [];
+let mapCenter = { lat: 39.5, lng: -98.35 };
+let mapCategory = 'all';
+let mapAllListings = [];
 
-function toggleMapView() {
-  const container = document.getElementById('map-view-container');
-  const btn       = document.getElementById('view-toggle-map');
-  const grid      = document.getElementById('all-listings');
-  const paging    = document.getElementById('pagination');
-  const isOpen    = container.style.display !== 'none';
-  if (isOpen) {
-    container.style.display = 'none';
-    grid.style.display = '';
-    paging.style.display = '';
-    btn.textContent = '🗺️ Map View';
-  } else {
-    container.style.display = 'block';
-    grid.style.display = 'none';
-    paging.style.display = 'none';
-    btn.textContent = '☰ List View';
-    initMap();
-  }
+const CATTLE_CATS = ['bulls','bucking_bulls','bred_heifers','bred_cows','open_heifers','open_cows','feeder_stocker','fat_cattle','bottle_calves','cow_calf_pairs','embryos','semen','showstock','dairy'];
+
+function getMarkerColor(cat) {
+  if (CATTLE_CATS.includes(cat)) return '#8B3214';
+  if (cat === 'farm_to_table') return '#5a7a4a';
+  if (['equipment','trailers','chutes_pens'].includes(cat)) return '#8B6914';
+  if (cat === 'feed_hay') return '#C9A96E';
+  if (cat === 'working_dogs') return '#5a5a8a';
+  return '#888';
+}
+function mapCatEmoji(cat) {
+  if (CATTLE_CATS.includes(cat)) return '🐄';
+  if (cat === 'farm_to_table') return '🌿';
+  if (['equipment','trailers','chutes_pens'].includes(cat)) return '🚜';
+  if (cat === 'feed_hay') return '🌾';
+  if (cat === 'working_dogs') return '🐕';
+  return '📋';
 }
 
-function initMap() {
-  if (_map) { updateMapListings(); return; }
-  if (!window.L) {
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
-    document.head.appendChild(link);
-    const script = document.createElement('script');
-    script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
-    script.onload = () => createMap();
-    document.head.appendChild(script);
-  } else {
-    createMap();
-  }
+function initHerdMap() {
+  if (herdMap) { herdMap.invalidateSize(); return; }
+  if (typeof L !== 'undefined') { buildHerdMap(); return; }
+  const link = document.createElement('link');
+  link.rel = 'stylesheet'; link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+  document.head.appendChild(link);
+  const script = document.createElement('script');
+  script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+  script.onload = buildHerdMap;
+  document.head.appendChild(script);
 }
 
-function createMap() {
-  document.getElementById('map-placeholder').style.display = 'none';
-  _map = L.map('map-container').setView([_mapCenter.lat, _mapCenter.lng], 5);
+function buildHerdMap() {
+  if (herdMap) return;
+  herdMap = L.map('map-container', { zoomControl: true }).setView([mapCenter.lat, mapCenter.lng], 5);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-    maxZoom: 18
-  }).addTo(_map);
-  updateMapListings();
+    attribution: '&copy; OpenStreetMap contributors', maxZoom: 18
+  }).addTo(herdMap);
+  herdMap.on('moveend', updateMapStrip);
+  loadMapListings();
 }
 
-async function updateMapListings() {
-  if (!_map) return;
-  const cat   = document.getElementById('f-category')?.value || '';
-  const state = document.getElementById('f-state')?.value || '';
-  const q     = document.getElementById('f-q')?.value || '';
-  const params = new URLSearchParams({ limit: 200, sort: 'newest' });
-  if (cat)   params.set('category', cat);
-  if (state) params.set('state', state);
-  if (q)     params.set('q', q);
+async function loadMapListings() {
+  document.getElementById('map-results-count').textContent = 'Loading listings...';
   try {
-    const r = await fetch(`${API}/api/listings?${params}`);
-    const d = await r.json();
-    _mapListings = (d.listings || []).filter(l => l.lat && l.lng);
-    renderMapMarkers(document.getElementById('map-radius')?.value || '');
-  } catch(e) {}
-}
-
-function renderMapMarkers(radius) {
-  _mapMarkers.forEach(m => m.remove());
-  _mapMarkers = [];
-  const mapResults = document.getElementById('map-results');
-  const mapCount   = document.getElementById('map-count');
-  let visible = _mapListings;
-  if (radius && _mapCenter) {
-    visible = _mapListings.filter(l => haversineDistance(_mapCenter.lat, _mapCenter.lng, l.lat, l.lng) <= parseFloat(radius));
-  }
-  mapCount.textContent = `${visible.length} listing${visible.length!==1?'s':''} in this area`;
-  const icon = L.divIcon({
-    className: '',
-    html: '<div style="width:14px;height:14px;background:#8b3214;border:2px solid white;border-radius:50%;box-shadow:0 1px 4px rgba(0,0,0,.4)"></div>',
-    iconSize: [14, 14], iconAnchor: [7, 7]
-  });
-  visible.forEach(l => {
-    const price = l.price ? `$${Number(l.price).toLocaleString()}` : 'Call';
-    const popup = L.popup({ maxWidth: 220 }).setContent(`
-      <div style="font-family:Georgia,serif;padding:4px">
-        <div style="font-size:13px;font-weight:700;color:#2c1a0e;margin-bottom:4px;line-height:1.3">${l.title}</div>
-        <div style="font-size:11px;color:#888;margin-bottom:6px">${l.city||''}, ${l.state} · ${price}</div>
-        <button onclick="window._openListingFromMap(${l.id})" style="background:#8b3214;color:white;border:none;padding:6px 12px;border-radius:3px;font-size:11px;cursor:pointer;width:100%">View Listing →</button>
-      </div>`);
-    const marker = L.marker([l.lat, l.lng], { icon }).addTo(_map).bindPopup(popup);
-    _mapMarkers.push(marker);
-  });
-  if (visible.length) {
-    mapResults.innerHTML = visible.slice(0,20).map(l => `
-      <div onclick="window._openListingFromMap(${l.id})" style="background:white;border:1px solid var(--light-tan);border-radius:6px;overflow:hidden;cursor:pointer;transition:box-shadow .2s" onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,.12)'" onmouseout="this.style.boxShadow=''">
-        ${l.thumb?`<img src="${l.thumb}" style="width:100%;height:100px;object-fit:cover;object-position:center top">`:`<div style="height:100px;background:var(--light-tan);display:flex;align-items:center;justify-content:center;font-size:28px">${catEmoji(l.category)}</div>`}
-        <div style="padding:10px">
-          <div style="font-size:12px;font-weight:700;color:var(--dark-brown);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${l.title}</div>
-          <div style="font-size:11px;color:#888">${l.city||''}, ${l.state} · ${l.price?'$'+Number(l.price).toLocaleString():'Call'}</div>
-        </div>
-      </div>`).join('');
-    if (visible.length > 20) mapResults.innerHTML += `<div style="grid-column:1/-1;text-align:center;padding:12px;font-size:13px;color:#888">+ ${visible.length-20} more — zoom in or add filters to narrow results</div>`;
-  } else {
-    mapResults.innerHTML = '<p style="color:#888;font-size:13px;grid-column:1/-1;text-align:center;padding:20px">No listings found in this area. Try a larger radius or clear filters.</p>';
-  }
-  if (_mapMarkers.length && _mapMarkers.length < 100) {
-    try { _map.fitBounds(L.featureGroup(_mapMarkers).getBounds().pad(0.1)); } catch(e) {}
+    const r = await fetch(`${API}/api/listings?limit=500&status=active`);
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const data = await r.json();
+    mapAllListings = (data.listings || []).filter(l => l.lat && l.lng);
+    refreshMapListings();
+  } catch(e) {
+    console.error('Map load error:', e);
+    document.getElementById('map-results-count').textContent = 'Unable to load listings';
   }
 }
 
-window._openListingFromMap = function(id) {
-  if (_map) _map.closePopup();
+function applyMapFilters(listings) {
+  const maxPrice = parseInt(document.getElementById('map-max-price')?.value || '0');
+  return listings.filter(l => {
+    if (mapCategory !== 'all') {
+      if (mapCategory === 'cattle' && !CATTLE_CATS.includes(l.category)) return false;
+      if (mapCategory === 'equipment' && !['equipment','trailers','chutes_pens'].includes(l.category)) return false;
+      if (mapCategory !== 'cattle' && mapCategory !== 'equipment' && l.category !== mapCategory) return false;
+    }
+    if (maxPrice > 0 && l.price && parseFloat(l.price) > maxPrice) return false;
+    return true;
+  });
+}
+
+function refreshMapListings() {
+  const filtered = applyMapFilters(mapAllListings);
+  renderMapMarkers(filtered);
+}
+
+function renderMapMarkers(listings) {
+  if (!herdMap) return;
+  mapMarkers.forEach(m => herdMap.removeLayer(m));
+  mapMarkers = [];
+
+  listings.forEach(l => {
+    const color = getMarkerColor(l.category);
+    const isFeatured = ['sirloin','ribeye','t_bone','filet'].includes(l.tier);
+    const sz = isFeatured ? 16 : 12;
+    const bdr = isFeatured ? '2px solid #C9A96E' : '2px solid rgba(255,255,255,.5)';
+    const icon = L.divIcon({
+      className: '', iconSize: [sz, sz], iconAnchor: [sz/2, sz/2], popupAnchor: [0, -(sz/2+4)],
+      html: '<div style="width:'+sz+'px;height:'+sz+'px;border-radius:50%;background:'+color+';border:'+bdr+';box-shadow:0 2px 6px rgba(0,0,0,.5);cursor:pointer"></div>'
+    });
+
+    const price = l.price ? '$' + parseFloat(l.price).toLocaleString() : 'Contact for price';
+    const imgHtml = l.thumb ? '<img src="'+l.thumb+'" style="width:100%;height:80px;object-fit:cover;margin-bottom:6px;border-radius:4px">' : '';
+    const featBadge = isFeatured ? '<span style="display:inline-block;background:#C9A96E;color:#1C0F06;font-size:8px;padding:2px 6px;border-radius:8px;font-family:Oswald,sans-serif;font-weight:700;margin-bottom:4px">FEATURED</span>' : '';
+
+    const popup = L.popup({ maxWidth: 220, className: 'herd-popup' }).setContent(
+      '<div style="font-family:Source Serif 4,serif;min-width:180px;padding:'+(imgHtml?'0':'8px')+'">'+
+        imgHtml+
+        '<div style="padding:'+(imgHtml?'0 8px 8px':'0')+'">'+
+          featBadge+
+          '<div style="font-family:Playfair Display,serif;font-weight:700;font-size:13px;color:#1C0F06;line-height:1.3;margin-bottom:3px">'+escHtml(l.title)+'</div>'+
+          '<div style="font-size:12px;color:#8B3214;font-weight:700;margin-bottom:2px">'+price+'</div>'+
+          '<div style="font-size:11px;color:#666;margin-bottom:6px">'+escHtml(l.city||'')+', '+escHtml(l.state||'')+'</div>'+
+          '<button onclick="viewListingFromMap('+l.id+')" style="width:100%;padding:6px;background:#8b3214;color:white;border:none;border-radius:4px;font-size:11px;font-family:Oswald,sans-serif;letter-spacing:.06em;cursor:pointer">View Listing</button>'+
+        '</div>'+
+      '</div>'
+    );
+
+    const m = L.marker([parseFloat(l.lat), parseFloat(l.lng)], { icon }).bindPopup(popup).addTo(herdMap);
+    mapMarkers.push(m);
+  });
+
+  if (mapMarkers.length > 0 && mapMarkers.length < 200) {
+    herdMap.fitBounds(L.featureGroup(mapMarkers).getBounds().pad(0.1));
+  }
+
+  document.getElementById('map-results-count').textContent = listings.length + ' listing' + (listings.length !== 1 ? 's' : '') + ' on map';
+  updateMapStrip();
+}
+
+function updateMapStrip() {
+  if (!herdMap) return;
+  const bounds = herdMap.getBounds();
+  const visible = applyMapFilters(mapAllListings).filter(function(l) {
+    return l.lat && l.lng && bounds.contains([parseFloat(l.lat), parseFloat(l.lng)]);
+  });
+  const strip = document.getElementById('map-results-strip');
+  if (!strip) return;
+  if (!visible.length) {
+    strip.innerHTML = '<div style="display:flex;align-items:center;padding:0 20px;color:var(--muted);font-size:13px;white-space:nowrap">No listings in current view — zoom out or adjust filters</div>';
+    return;
+  }
+  strip.innerHTML = visible.slice(0, 50).map(function(l) {
+    var price = l.price ? '$' + parseFloat(l.price).toLocaleString() : 'Contact';
+    var color = getMarkerColor(l.category);
+    var img = l.thumb || l.thumb_small || '';
+    return '<div onclick="viewListingFromMap('+l.id+')" style="flex-shrink:0;width:155px;background:rgba(255,255,255,.04);border:1px solid rgba(201,169,110,.12);border-radius:6px;overflow:hidden;cursor:pointer;transition:border-color .2s" onmouseenter="this.style.borderColor=\'rgba(201,169,110,.4)\'" onmouseleave="this.style.borderColor=\'rgba(201,169,110,.12)\'">'+
+      '<div style="height:75px;background:'+color+'11;position:relative">'+
+        (img ? '<img src="'+img+'" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display=\'none\'">' : '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:28px">'+mapCatEmoji(l.category)+'</div>')+
+        '<div style="position:absolute;top:4px;left:4px;width:8px;height:8px;border-radius:50%;background:'+color+'"></div>'+
+      '</div>'+
+      '<div style="padding:8px">'+
+        '<div style="font-size:11px;font-weight:700;color:var(--cream);line-height:1.3;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+escHtml(l.title)+'</div>'+
+        '<div style="font-size:11px;color:var(--gold);font-family:Oswald,sans-serif;font-weight:700">'+price+'</div>'+
+        '<div style="font-size:10px;color:var(--muted);margin-top:2px">'+escHtml(l.city||'')+', '+escHtml(l.state||'')+'</div>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+
+function setMapCategory(cat, btn) {
+  mapCategory = cat;
+  document.querySelectorAll('.map-cat-btn').forEach(function(b) { b.classList.remove('active'); });
+  if (btn) btn.classList.add('active');
+  refreshMapListings();
+}
+
+function viewListingFromMap(id) {
+  if (herdMap) herdMap.closePopup();
   openListing(id);
-};
+}
 
 function haversineDistance(lat1, lng1, lat2, lng2) {
-  const R = 3958.8;
-  const dLat = (lat2-lat1)*Math.PI/180;
-  const dLng = (lng2-lng1)*Math.PI/180;
-  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
+  var R = 3958.8;
+  var dLat = (lat2 - lat1) * Math.PI / 180;
+  var dLng = (lng2 - lng1) * Math.PI / 180;
+  var a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 }
 
-function useMyLocation() {
-  if (!navigator.geolocation) { showToast('Geolocation not supported'); return; }
-  navigator.geolocation.getCurrentPosition(pos => {
-    _mapCenter = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-    if (_map) _map.setView([_mapCenter.lat, _mapCenter.lng], 9);
-    else initMap();
-    renderMapMarkers(document.getElementById('map-radius')?.value || '');
-    showToast('📍 Centered on your location');
-  }, () => showToast('Could not get your location'));
-}
-
-async function geocodeAndCenter() {
-  const input = document.getElementById('map-center-input')?.value?.trim();
+async function searchMapLocation() {
+  var input = document.getElementById('map-location-input')?.value;
   if (!input) return;
   try {
-    const r = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(input+' USA')}&format=json&limit=1`);
-    const results = await r.json();
-    if (!results.length) { showToast('Location not found — try city, state or ZIP'); return; }
-    _mapCenter = { lat: parseFloat(results[0].lat), lng: parseFloat(results[0].lon) };
-    if (_map) _map.setView([_mapCenter.lat, _mapCenter.lng], 9);
-    else initMap();
-    renderMapMarkers(document.getElementById('map-radius')?.value || '');
-    showToast(`📍 ${results[0].display_name.split(',').slice(0,2).join(',')}`);
-  } catch(e) { showToast('Could not find location'); }
+    var r = await fetch('https://nominatim.openstreetmap.org/search?q='+encodeURIComponent(input+', USA')+'&format=json&limit=1', {
+      headers: { 'User-Agent': 'HerdHub/1.0 (ad@theherdhub.com)' }
+    });
+    var data = await r.json();
+    if (data[0]) {
+      mapCenter = { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
+      herdMap.setView([mapCenter.lat, mapCenter.lng], 8);
+    } else { showToast('Location not found'); }
+  } catch(e) { showToast('Search error'); }
 }
 
-function renderMapListings(listings) {
-  if (!_map) return;
-  _mapListings = (listings||[]).filter(l => l.lat && l.lng);
-  renderMapMarkers(document.getElementById('map-radius')?.value || '');
+function useMyMapLocation() {
+  if (!navigator.geolocation) { showToast('Geolocation not available'); return; }
+  navigator.geolocation.getCurrentPosition(function(pos) {
+    mapCenter = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+    if (herdMap) herdMap.setView([mapCenter.lat, mapCenter.lng], 8);
+    showToast('Centered on your location');
+  }, function() { showToast('Unable to get your location'); });
+}
 }
 
 // ── Seller Profile ──────────────────────────────────────

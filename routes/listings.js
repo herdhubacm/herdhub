@@ -104,7 +104,7 @@ router.get('/', optionalAuth, async (req, res) => {
       weight_desc:  'l.weight_lbs DESC NULLS LAST',
     };
     const order  = tsRank + (orderMap[sort] || orderMap.featured);
-    const safeLimit  = Math.min(Math.max(1, parseInt(limit)  || 24), 100); // max 100 per request
+    const safeLimit  = Math.min(Math.max(1, parseInt(limit)  || 24), 500); // max 500 per request (map needs higher limit)
     const safePage   = Math.max(1, parseInt(page) || 1);
     const offset = (safePage - 1) * safeLimit;
 
@@ -113,7 +113,9 @@ router.get('/', optionalAuth, async (req, res) => {
       query(
         `SELECT l.id, l.title, l.category, l.breed, l.price, l.price_type,
                 l.quantity, l.state, l.city, l.tier, l.is_featured,
-                l.views, l.created_at, u.name AS seller_name, u.is_verified AS seller_verified,
+                l.views, l.created_at, l.lat, l.lng,
+                l.farm_name, l.farm_proteins, l.farm_production_methods,
+                u.name AS seller_name, u.is_verified AS seller_verified,
                 (SELECT url FROM listing_photos WHERE listing_id=l.id ORDER BY sort_order LIMIT 1) AS thumb,
                 (SELECT thumb_url FROM listing_photos WHERE listing_id=l.id ORDER BY sort_order LIMIT 1) AS thumb_small
          FROM listings l
