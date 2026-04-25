@@ -466,9 +466,11 @@ router.get('/featured', async (req, res) => {
 // ── POST /api/admin/listings/:id/feature ─────────────
 router.post('/listings/:id/feature', async (req, res) => {
   try {
-    const { is_featured, tier } = req.body;
-    await query('UPDATE listings SET is_featured=$1, tier=$2 WHERE id=$3',
-      [is_featured !== false, tier || 'burger', parseInt(req.params.id)]);
+    const { is_featured, tier, category } = req.body;
+    await query(
+      'UPDATE listings SET is_featured=$1, tier=$2, category=COALESCE($3, category) WHERE id=$4',
+      [is_featured !== false, tier || 'burger', category || null, parseInt(req.params.id)]
+    );
     res.json({ ok: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -476,10 +478,12 @@ router.post('/listings/:id/feature', async (req, res) => {
 // ── POST /api/admin/listings/bulk-feature ────────────
 router.post('/listings/bulk-feature', async (req, res) => {
   try {
-    const { ids, is_featured, tier } = req.body;
+    const { ids, is_featured, tier, category } = req.body;
     if (!ids?.length) return res.status(400).json({ error: 'No IDs' });
-    await query('UPDATE listings SET is_featured=$1, tier=$2 WHERE id=ANY($3)',
-      [is_featured !== false, tier || 't_bone', ids]);
+    await query(
+      'UPDATE listings SET is_featured=$1, tier=$2, category=COALESCE($3, category) WHERE id=ANY($4)',
+      [is_featured !== false, tier || 't_bone', category || null, ids]
+    );
     res.json({ ok: true, count: ids.length });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });

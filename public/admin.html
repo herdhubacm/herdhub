@@ -499,11 +499,12 @@ tr:hover td{background:rgba(255,255,255,.02)}
           </div>
           <div id="feat-bulk-bar" style="display:none;background:rgba(201,169,110,.1);border:1px solid rgba(201,169,110,.2);border-radius:6px;padding:10px 16px;margin-bottom:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
             <span style="font-size:12px;color:var(--gold);font-weight:600" id="feat-sel-count">0 selected</span>
+            <button class="btn" style="font-size:11px;padding:5px 10px;background:#5a7a4a;color:white" onclick="bulkFeature('farm_to_table','farm_to_table')">🌿 Farm to Table</button>
             <button class="btn" style="font-size:11px;padding:5px 10px;background:#a855f7;color:white" onclick="bulkFeature('filet')">👑 Prime (Stakeholder)</button>
             <button class="btn" style="font-size:11px;padding:5px 10px;background:var(--gold);color:var(--bg)" onclick="bulkFeature('t_bone')">⭐ Choice (Sidebar)</button>
             <button class="btn" style="font-size:11px;padding:5px 10px;background:var(--rust);color:white" onclick="bulkFeature('sirloin')">🥩 Sirloin (Featured)</button>
             <button class="btn" style="font-size:11px;padding:5px 10px;background:#e06030;color:white" onclick="bulkFeature('ribeye')">🥩 Ribeye (Featured)</button>
-            <button class="btn" style="font-size:11px;padding:5px 10px;background:var(--red);color:white" onclick="bulkUnfeature()">Unfeature</button>
+            <button class="btn" style="font-size:11px;padding:5px 10px;background:var(--red);color:white" onclick="bulkUnfeature()">Reset</button>
           </div>
           <div class="table-wrap">
             <table>
@@ -1530,8 +1531,8 @@ async function loadFeaturedListings(filters) {
     featSelectedIds.clear();
     updateBulkBar();
     if (!rows.length) { tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:24px">No listings found</td></tr>'; return; }
-    const tierNames = { burger: 'Burger', sirloin: 'Sirloin', ribeye: 'Ribeye', filet: 'Prime', t_bone: 'Choice' };
-    const tierColors = { burger: 'var(--muted)', sirloin: 'var(--rust)', ribeye: '#e06030', filet: '#a855f7', t_bone: 'var(--gold)' };
+    const tierNames = { burger: 'Burger', sirloin: 'Sirloin', ribeye: 'Ribeye', filet: 'Prime', t_bone: 'Choice', farm_to_table: 'Farm to Table' };
+    const tierColors = { burger: 'var(--muted)', sirloin: 'var(--rust)', ribeye: '#e06030', filet: '#a855f7', t_bone: 'var(--gold)', farm_to_table: '#5a7a4a' };
     const cattleCats = new Set(['bulls','bred_heifers','bred_cows','open_heifers','open_cows','cow_calf_pairs','feeder_stocker','showstock','dairy','bottle_calves','beef_cattle','fat_cattle','embryos','semen','full_herd']);
     const equipCats = new Set(['equipment','trailers','chutes_pens']);
     function getSection(tier,cat){
@@ -1558,25 +1559,27 @@ async function loadFeaturedListings(filters) {
         <td style="font-size:11px">${section}</td>
         <td>${statusBadge(l.status)}</td>
         <td style="white-space:nowrap">
-          ${l.is_featured ? `<button class="btn btn-danger" style="font-size:10px;padding:4px 8px" onclick="setFeatured(${l.id},false,'burger')">✕ Reset</button>` : `<button class="btn btn-success" style="font-size:10px;padding:4px 8px" onclick="setFeatured(${l.id},true,'sirloin')">⭐ Feature</button>`}
-          <select style="font-size:11px;padding:3px;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:4px" onchange="setFeatured(${l.id},true,this.value)">
-            <option value="burger"${l.tier==='burger'?' selected':''}>Burger (Browse)</option>
-            <option value="sirloin"${l.tier==='sirloin'?' selected':''}>🥩 Sirloin</option>
-            <option value="ribeye"${l.tier==='ribeye'?' selected':''}>🥩 Ribeye</option>
-            <option value="t_bone"${l.tier==='t_bone'?' selected':''}>⭐ Choice (Sidebar)</option>
-            <option value="filet"${l.tier==='filet'?' selected':''}>👑 Prime (Stakeholder)</option>
-          </select>
+          <div style="display:flex;gap:3px;flex-wrap:wrap">
+            <button class="btn" style="font-size:9px;padding:3px 6px;background:${l.tier==='farm_to_table'&&l.category==='farm_to_table'?'#5a7a4a':'transparent'};color:${l.tier==='farm_to_table'&&l.category==='farm_to_table'?'white':'#5a7a4a'};border:1px solid #5a7a4a" onclick="setFeatured(${l.id},true,'farm_to_table','farm_to_table')" title="Move to Farm to Table">🌿</button>
+            <button class="btn" style="font-size:9px;padding:3px 6px;background:${l.tier==='sirloin'?'var(--rust)':'transparent'};color:${l.tier==='sirloin'?'white':'var(--rust)'};border:1px solid var(--rust)" onclick="setFeatured(${l.id},true,'sirloin')" title="Feature as Sirloin">🐄</button>
+            <button class="btn" style="font-size:9px;padding:3px 6px;background:${l.tier==='ribeye'?'#e06030':'transparent'};color:${l.tier==='ribeye'?'white':'#e06030'};border:1px solid #e06030" onclick="setFeatured(${l.id},true,'ribeye')" title="Feature as Ribeye">🥩</button>
+            <button class="btn" style="font-size:9px;padding:3px 6px;background:${l.tier==='filet'?'#a855f7':'transparent'};color:${l.tier==='filet'?'white':'#a855f7'};border:1px solid #a855f7" onclick="setFeatured(${l.id},true,'filet')" title="Prime (Stakeholder)">👑</button>
+            <button class="btn" style="font-size:9px;padding:3px 6px;background:${l.tier==='t_bone'?'var(--gold)':'transparent'};color:${l.tier==='t_bone'?'var(--bg)':'var(--gold)'};border:1px solid var(--gold)" onclick="setFeatured(${l.id},true,'t_bone')" title="Choice (Sidebar)">⭐</button>
+            <button class="btn" style="font-size:9px;padding:3px 6px;background:transparent;color:var(--muted);border:1px solid var(--border)" onclick="setFeatured(${l.id},false,'burger')" title="Reset to Browse Only">✕</button>
+          </div>
         </td>
       </tr>`;
     }).join('');
   } catch (e) { tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--red)">Failed: ' + e.message + '</td></tr>'; }
 }
 
-async function setFeatured(id, featured, tier) {
+async function setFeatured(id, featured, tier, category) {
   try {
+    const body = { is_featured: featured, tier };
+    if (category) body.category = category;
     await fetch(`${API}/api/admin/listings/${id}/feature`, {
       method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ is_featured: featured, tier })
+      body: JSON.stringify(body)
     });
     loadFeaturedListings();
   } catch { alert('Failed'); }
@@ -1600,11 +1603,13 @@ function updateBulkBar() {
   document.getElementById('feat-sel-count').textContent = featSelectedIds.size + ' selected';
 }
 
-async function bulkFeature(tier) {
+async function bulkFeature(tier, category) {
   try {
+    const body = { ids: [...featSelectedIds], is_featured: true, tier };
+    if (category) body.category = category;
     await fetch(`${API}/api/admin/listings/bulk-feature`, {
       method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ ids: [...featSelectedIds], is_featured: true, tier })
+      body: JSON.stringify(body)
     });
     loadFeaturedListings();
   } catch { alert('Failed'); }
