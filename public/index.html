@@ -4566,10 +4566,6 @@ async function loadListings(page=1) {
     if (!d.listings.length) { el.innerHTML = '<p style="color:#888;padding:20px">No listings found. <a href="javascript:void(0)" onclick="clearFilters()" style="color:var(--rust)">Clear filters →</a></p>'; document.getElementById('pagination').innerHTML = ''; return; }
     el.innerHTML = d.listings.map(renderListingCard).join('');
     renderPagination(d.pagination);
-    // Also update map if visible
-    if (document.getElementById('map-view-container')?.style.display !== 'none') {
-      renderMapListings(d.listings);
-    }
   } catch(e) {
     el.innerHTML = '<p style="color:#888;padding:20px">Could not load listings.</p>';
   }
