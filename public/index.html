@@ -679,7 +679,7 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
         <div style="font-family:'Oswald',sans-serif;font-size:9px;letter-spacing:.25em;text-transform:uppercase;color:var(--sage);margin-bottom:5px">Direct from the Ranch</div>
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
           <div style="font-family:'Playfair Display',serif;font-size:16px;font-weight:900;color:var(--cream)">Farm to Table</div>
-          <a class="hcs-see-all" style="color:var(--tan)" data-action="category" data-cat="farm_to_table">Shop All →</a>
+          <a class="hcs-see-all" style="color:var(--tan)" data-action="category" data-cat="farm_to_table" data-label="Farm to Table">Shop All →</a>
         </div>
         <div class="ftf-scroll-track" id="ftf-scroll-track">
           <div class="loading" style="color:var(--tan);font-size:12px">Loading…</div>
@@ -695,7 +695,7 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
           </div>
           <div style="display:flex;align-items:center;gap:8px">
             <span class="rotate-badge" id="cattle-rotate-badge" style="display:none">🔄 Rotates every 4hrs</span>
-            <a class="hcs-see-all" data-action="category" data-cat="beef_cattle">View All →</a>
+            <a class="hcs-see-all" data-action="category" data-cat="beef_cattle" data-label="Featured Cattle">View All →</a>
           </div>
         </div>
         <div class="compact-grid" id="featured-cattle-grid">
@@ -775,7 +775,7 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
           </div>
           <div style="display:flex;align-items:center;gap:8px">
             <span class="rotate-badge" id="equip-rotate-badge" style="display:none">🔄 Rotates every 4hrs</span>
-            <a class="hcs-see-all" data-action="category" data-cat="equipment">View All →</a>
+            <a class="hcs-see-all" data-action="category" data-cat="equipment" data-label="Featured Equipment">View All →</a>
           </div>
         </div>
         <div class="compact-grid" id="featured-equip-grid">
@@ -3885,7 +3885,8 @@ function initEventDelegation() {
     else if (action === 'close-modal') closeModal(el.dataset.modal);
     else if (action === 'tab')         switchTab(el.dataset.tab);
     else if (action === 'page')        showPage(el.dataset.page);
-    else if (action === 'category')    filterCategory(el.dataset.cat);
+    else if (action === 'category')    filterCategory(el.dataset.cat, el.dataset.label);
+    else if (action === 'see-all')      showAllListings();
     else if (action === 'breed')       filterBreed(el.dataset.breed);
     else if (action === 'state')       filterState(el.dataset.state);
     else if (action === 'all-listings') showAllListings();
@@ -4511,10 +4512,11 @@ function fmtCat(cat) { return (cat||'').replace(/_/g,' ').replace(/\b\w/g,c=>c.t
 
 // ── Listings Page ──────────────────────────────────────
 function showAllListings() { showPage('listings'); loadListings(); }
-function filterCategory(cat) {
+function filterCategory(cat, label) {
   showPage('listings');
   document.getElementById('f-category').value = cat;
-  document.getElementById('listings-title').innerHTML = `${fmtCat(cat)} <span>Listings</span>`;
+  const heading = label || fmtCat(cat);
+  document.getElementById('listings-title').innerHTML = `${heading} <span>Listings</span>`;
   loadListings();
 }
 function filterState(state) {

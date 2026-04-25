@@ -471,6 +471,7 @@ router.post('/listings/:id/feature', async (req, res) => {
       'UPDATE listings SET is_featured=$1, tier=$2, category=COALESCE($3, category) WHERE id=$4',
       [is_featured !== false, tier || 'burger', category || null, parseInt(req.params.id)]
     );
+    if (global.apiCache?.clearListingCache) global.apiCache.clearListingCache();
     res.json({ ok: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -484,6 +485,7 @@ router.post('/listings/bulk-feature', async (req, res) => {
       'UPDATE listings SET is_featured=$1, tier=$2, category=COALESCE($3, category) WHERE id=ANY($4)',
       [is_featured !== false, tier || 't_bone', category || null, ids]
     );
+    if (global.apiCache?.clearListingCache) global.apiCache.clearListingCache();
     res.json({ ok: true, count: ids.length });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });

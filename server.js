@@ -46,8 +46,12 @@ function setCached(key, data, ttlSeconds = 300) {
   apiCache.set(key, { data, expires: Date.now() + ttlSeconds * 1000 });
 }
 setInterval(() => { const now = Date.now(); for (const [k, v] of apiCache) { if (now > v.expires) apiCache.delete(k); } }, 3600000);
+function clearListingCache() {
+  apiCache.clear();
+  console.log('📦 Listing cache cleared');
+}
 // Available globally via require from routes
-global.apiCache = { getCached, setCached };
+global.apiCache = { getCached, setCached, clearListingCache };
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
