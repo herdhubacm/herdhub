@@ -695,7 +695,7 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
           </div>
           <div style="display:flex;align-items:center;gap:8px">
             <span class="rotate-badge" id="cattle-rotate-badge" style="display:none">🔄 Rotates every 4hrs</span>
-            <a class="hcs-see-all" data-action="category" data-cat="beef_cattle" data-label="Featured Cattle">View All →</a>
+            <a class="hcs-see-all" href="javascript:void(0)" onclick="showFeaturedCattleAll()">View All →</a>
           </div>
         </div>
         <div class="compact-grid" id="featured-cattle-grid">
@@ -775,7 +775,7 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
           </div>
           <div style="display:flex;align-items:center;gap:8px">
             <span class="rotate-badge" id="equip-rotate-badge" style="display:none">🔄 Rotates every 4hrs</span>
-            <a class="hcs-see-all" data-action="category" data-cat="equipment" data-label="Featured Equipment">View All →</a>
+            <a class="hcs-see-all" href="javascript:void(0)" onclick="showFeaturedEquipAll()">View All →</a>
           </div>
         </div>
         <div class="compact-grid" id="featured-equip-grid">
@@ -1360,17 +1360,33 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px;align-items:center;width:100%">
       <select id="f-category" onchange="loadListings()" aria-label="Filter by category" style="padding:8px 12px;border:1.5px solid var(--light-tan);border-radius:4px;font-family:'Source Serif 4',serif;font-size:14px;outline:none">
         <option value="">All Categories</option>
-        <option value="beef_cattle">Beef Cattle</option>
-        <option value="dairy">Dairy</option>
-        <option value="bulls">Bulls</option>
-            <option value="bucking_bulls">Bucking Bulls</option>
-        <option value="heifers">Heifers</option>
-        <option value="calves">Calves</option>
-        <option value="equipment">Equipment</option>
-        <option value="trucks_trailers">Trucks & Trailers</option>
-        <option value="working_dogs">Working Dogs</option>
-        <option value="farm_to_table">Farm to Table</option>
-        <option value="feed_hay">Feed & Hay</option>
+        <optgroup label="🐄 Cattle">
+          <option value="bulls">Bulls</option>
+          <option value="bucking_bulls">Bucking Bulls</option>
+          <option value="bred_heifers">Bred Heifers</option>
+          <option value="bred_cows">Bred Cows</option>
+          <option value="open_heifers">Open Heifers</option>
+          <option value="open_cows">Open Cows</option>
+          <option value="cow_calf_pairs">Cow-Calf Pairs</option>
+          <option value="feeder_stocker">Feeder &amp; Stocker</option>
+          <option value="fat_cattle">Fat Cattle</option>
+          <option value="bottle_calves">Bottle Calves</option>
+          <option value="showstock">Show Cattle</option>
+          <option value="dairy">Dairy</option>
+          <option value="embryos">Embryos</option>
+          <option value="semen">Semen</option>
+          <option value="full_herd">Full Herd</option>
+        </optgroup>
+        <optgroup label="🚜 Equipment &amp; Supplies">
+          <option value="equipment">Equipment</option>
+          <option value="trailers">Trailers</option>
+          <option value="chutes_pens">Chutes &amp; Pens</option>
+          <option value="feed_hay">Hay &amp; Feed</option>
+        </optgroup>
+        <optgroup label="Other">
+          <option value="working_dogs">Working Dogs</option>
+          <option value="farm_to_table">Farm to Table</option>
+        </optgroup>
       </select>
       <select id="f-state" onchange="loadListings()" aria-label="Filter by state" style="padding:8px 12px;border:1.5px solid var(--light-tan);border-radius:4px;font-family:'Source Serif 4',serif;font-size:14px;outline:none">
         <option value="">All States</option>
@@ -4511,7 +4527,41 @@ function catEmoji(cat) {
 function fmtCat(cat) { return (cat||'').replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase()); }
 
 // ── Listings Page ──────────────────────────────────────
-function showAllListings() { showPage('listings'); loadListings(); }
+function showAllListings() { showPage('listings'); document.getElementById('f-category').value=''; document.getElementById('listings-title').innerHTML='All <span>Listings</span>'; loadListings(); }
+
+async function showFeaturedCattleAll() {
+  showPage('listings');
+  document.getElementById('f-category').value = '';
+  document.getElementById('listings-title').innerHTML = 'Featured <span>Cattle</span>';
+  const el = document.getElementById('all-listings');
+  el.innerHTML = '<div class="loading">Loading…</div>';
+  try {
+    const cats = 'bulls,bucking_bulls,bred_heifers,bred_cows,open_heifers,open_cows,cow_calf_pairs,feeder_stocker,fat_cattle,bottle_calves,showstock,dairy,embryos,semen,full_herd';
+    const r = await fetch(`${API}/api/listings?categories=${cats}&sort=featured&limit=100`);
+    const d = await r.json();
+    const listings = d.listings || [];
+    if (!listings.length) { el.innerHTML = '<p style="color:#888;padding:20px;text-align:center">No featured cattle listings yet.</p>'; return; }
+    el.innerHTML = listings.map(renderListingCard).join('');
+    document.getElementById('pagination').innerHTML = '';
+  } catch(e) { el.innerHTML = '<p style="color:#888;padding:20px">Could not load listings.</p>'; }
+}
+
+async function showFeaturedEquipAll() {
+  showPage('listings');
+  document.getElementById('f-category').value = '';
+  document.getElementById('listings-title').innerHTML = 'Featured <span>Equipment</span>';
+  const el = document.getElementById('all-listings');
+  el.innerHTML = '<div class="loading">Loading…</div>';
+  try {
+    const cats = 'equipment,trailers,chutes_pens';
+    const r = await fetch(`${API}/api/listings?categories=${cats}&sort=featured&limit=100`);
+    const d = await r.json();
+    const listings = d.listings || [];
+    if (!listings.length) { el.innerHTML = '<p style="color:#888;padding:20px;text-align:center">No featured equipment listings yet.</p>'; return; }
+    el.innerHTML = listings.map(renderListingCard).join('');
+    document.getElementById('pagination').innerHTML = '';
+  } catch(e) { el.innerHTML = '<p style="color:#888;padding:20px">Could not load listings.</p>'; }
+}
 function filterCategory(cat, label) {
   showPage('listings');
   document.getElementById('f-category').value = cat;

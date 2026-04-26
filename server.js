@@ -928,6 +928,22 @@ async function start() {
     }
     setTimeout(geocodeExistingListings, 5000);
 
+    // ── Category validation — check for unknown categories on startup ──
+    async function validateCategories() {
+      try {
+        const { rows } = await pool.query("SELECT DISTINCT category FROM listings WHERE status='active'");
+        const valid = new Set(['bulls','bucking_bulls','bred_heifers','bred_cows','open_heifers','open_cows',
+          'feeder_stocker','fat_cattle','bottle_calves','cow_calf_pairs','embryos','semen','showstock','dairy',
+          'equipment','trailers','chutes_pens','working_dogs','feed_hay','farm_to_table',
+          'sale_barns','ranches_farms','breed_associations','livestock_services','feed_stores',
+          'insurance_finance','full_herd','beef_cattle']);
+        const unknown = rows.map(r => r.category).filter(c => !valid.has(c));
+        if (unknown.length) console.warn('⚠️  Unknown listing categories in DB:', unknown.join(', '));
+        else console.log('✅  All listing categories valid');
+      } catch(e) { /* non-fatal */ }
+    }
+    setTimeout(validateCategories, 3000);
+
     // ── Silent auction cron — check for ended auctions every hour ──
     const { endExpiredAuctions } = require('./routes/sales');
     setInterval(endExpiredAuctions, 60 * 60 * 1000); // every hour

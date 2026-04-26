@@ -69,7 +69,7 @@ function expiresAt(tier) {
 router.get('/', optionalAuth, async (req, res) => {
   try {
     const {
-      category, state, breed, sex, min_price, max_price,
+      category, categories, state, breed, sex, min_price, max_price,
       min_weight, max_weight,
       q, page = 1, limit = 24, sort = 'featured',
       tier, status = 'active',
@@ -83,11 +83,21 @@ router.get('/', optionalAuth, async (req, res) => {
       conditions.push(`l.search_vector @@ plainto_tsquery('english', $${p})`);
       params.push(q); p++;
     }
-    if (category)   { conditions.push(`l.category = $${p}`);        params.push(category);       p++; }
+    // Multi-category filter (comma-separated) takes priority over single category
+    if (categories) {
+      const catArr = categories.split(',').map(c => c.trim()).filter(Boolean);
+      if (catArr.length) { conditions.push(`l.category = ANY($${p})`); params.push(catArr); p++; }
+    } else if (category) {
+      conditions.push(`l.category = $${p}`); params.push(category); p++;
+    }
     if (state)      { conditions.push(`l.state = $${p}`);           params.push(state);          p++; }
     if (breed)      { conditions.push(`l.breed ILIKE $${p}`);       params.push(`%${breed}%`);   p++; }
     if (sex)        { conditions.push(`l.sex = $${p}`);             params.push(sex);            p++; }
-    if (tier)       { conditions.push(`l.tier = $${p}`);            params.push(tier);           p++; }
+    if (tier) {
+      const tierArr = tier.split(',').map(t => t.trim()).filter(Boolean);
+      if (tierArr.length === 1) { conditions.push(`l.tier = $${p}`); params.push(tierArr[0]); p++; }
+      else if (tierArr.length > 1) { conditions.push(`l.tier = ANY($${p})`); params.push(tierArr); p++; }
+    }
     if (min_price)  { conditions.push(`l.price >= $${p}`);          params.push(+min_price);     p++; }
     if (max_price)  { conditions.push(`l.price <= $${p}`);          params.push(+max_price);     p++; }
     if (min_weight) { conditions.push(`l.weight_lbs >= $${p}`);     params.push(+min_weight);    p++; }
