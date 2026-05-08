@@ -1473,13 +1473,13 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
     </div><!-- end listings-list-view -->
 
     <!-- MAP VIEW (Zillow-style) -->
-    <div id="listings-map-view" style="display:none;border-radius:8px;overflow:hidden;border:1px solid rgba(201,169,110,.12)">
-      <div style="display:flex;height:calc(100vh - 200px)">
-        <div style="flex:1;position:relative">
-          <div id="browse-map" style="width:100%;height:calc(100vh - 200px)"></div>
+    <div id="listings-map-view" style="display:none;border-radius:8px;overflow:hidden;border:1px solid rgba(201,169,110,.12);height:calc(100vh - 180px)">
+      <div style="display:flex;width:100%;height:100%">
+        <div style="flex:1;position:relative;min-width:0">
+          <div id="browse-map" style="position:absolute;inset:0;z-index:1"></div>
           <div id="browse-map-count" style="position:absolute;top:12px;left:50%;transform:translateX(-50%);background:rgba(28,15,6,.85);color:var(--cream);padding:6px 16px;border-radius:20px;font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:.08em;z-index:1000;pointer-events:none">Loading…</div>
         </div>
-        <div id="map-listings-panel" style="width:340px;flex-shrink:0;overflow-y:auto;background:var(--dark-brown);border-left:1px solid rgba(201,169,110,.12)">
+        <div id="map-listings-panel" style="width:340px;flex-shrink:0;overflow-y:auto;background:#1C0F06;border-left:1px solid rgba(201,169,110,.12)">
           <div style="padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.06);font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:.1em;color:var(--muted)">LISTINGS IN VIEW — <span id="map-panel-count">0</span></div>
           <div id="map-panel-cards" style="padding:10px;display:flex;flex-direction:column;gap:8px"></div>
         </div>
@@ -6367,12 +6367,13 @@ function setListingsView(view) {
     if (mapView) mapView.style.display = 'block';
     if (listBtn) { listBtn.style.background = 'transparent'; listBtn.style.color = 'var(--tan)'; }
     if (mapBtn) { mapBtn.style.background = 'var(--rust)'; mapBtn.style.color = 'var(--cream)'; }
-    setTimeout(initBrowseMap, 100);
+    setTimeout(initBrowseMap, 150);
   } else {
     if (listView) listView.style.display = '';
     if (mapView) mapView.style.display = 'none';
     if (listBtn) { listBtn.style.background = 'var(--rust)'; listBtn.style.color = 'var(--cream)'; }
     if (mapBtn) { mapBtn.style.background = 'transparent'; mapBtn.style.color = 'var(--tan)'; }
+    loadListings(1);
   }
 }
 
@@ -6394,7 +6395,9 @@ function initBrowseMap() {
     attribution: '&copy; OpenStreetMap', maxZoom: 18
   }).addTo(browseMap);
   browseMap.on('moveend', updateBrowsePanel);
-  setTimeout(function() { browseMap.invalidateSize(); }, 200);
+  setTimeout(function() { if (browseMap) browseMap.invalidateSize(); }, 300);
+  setTimeout(function() { if (browseMap) browseMap.invalidateSize(); }, 800);
+  window.addEventListener('resize', function() { if (browseMap) browseMap.invalidateSize(); });
   loadBrowseMapListings();
 }
 
