@@ -1349,14 +1349,17 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
 <!-- LISTINGS PAGE -->
 <div id="page-listings" style="display:none">
   <div class="section">
-    <div class="section-header">
-      <h2 id="listings-title">All <span>Listings</span></h2>
-      <div style="display:flex;gap:8px;align-items:center">
-        <button id="view-toggle-map" class="btn-secondary" style="padding:7px 14px;font-size:12px;display:flex;align-items:center;gap:6px" data-action="page" data-page="map">🗺️ Map View</button>
-        <a class="see-all" data-action="page" data-page="home">← Back to Home</a>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px">
+      <div style="display:flex;align-items:center;gap:12px">
+        <h2 id="listings-title" style="margin:0">All <span>Listings</span></h2>
+        <a class="see-all" data-action="page" data-page="home" style="font-size:11px">← Home</a>
+      </div>
+      <div style="display:flex;gap:0;border:1px solid rgba(201,169,110,.25);border-radius:6px;overflow:hidden">
+        <button id="view-list-btn" onclick="setListingsView('list')" style="display:flex;align-items:center;gap:6px;padding:9px 18px;background:var(--rust);color:var(--cream);border:none;cursor:pointer;font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:.08em;font-weight:600;transition:all .15s">☰ List</button>
+        <button id="view-map-btn" onclick="setListingsView('map')" style="display:flex;align-items:center;gap:6px;padding:9px 18px;background:transparent;color:var(--tan);border:none;border-left:1px solid rgba(201,169,110,.25);cursor:pointer;font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:.08em;font-weight:600;transition:all .15s">🗺 Map</button>
       </div>
     </div>
-    <!-- Map is now a full page: see #page-map -->
+    <div id="listings-list-view">
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px;align-items:center;width:100%">
       <select id="f-category" onchange="loadListings()" aria-label="Filter by category" style="padding:8px 12px;border:1.5px solid var(--light-tan);border-radius:4px;font-family:'Source Serif 4',serif;font-size:14px;outline:none">
         <option value="">All Categories</option>
@@ -1467,6 +1470,22 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
     </div>
     <div class="listings-grid" id="all-listings"><div class="loading">Loading listings…</div></div>
     <div style="text-align:center;margin-top:30px" id="pagination"></div>
+    </div><!-- end listings-list-view -->
+
+    <!-- MAP VIEW (Zillow-style) -->
+    <div id="listings-map-view" style="display:none;height:calc(100vh - 200px);border-radius:8px;overflow:hidden;border:1px solid rgba(201,169,110,.12)">
+      <div style="display:flex;height:100%">
+        <div style="flex:1;position:relative;min-height:400px">
+          <div id="browse-map" style="width:100%;height:100%"></div>
+          <div id="browse-map-count" style="position:absolute;top:12px;left:50%;transform:translateX(-50%);background:rgba(28,15,6,.85);color:var(--cream);padding:6px 16px;border-radius:20px;font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:.08em;z-index:1000;pointer-events:none">Loading…</div>
+        </div>
+        <div id="map-listings-panel" style="width:340px;flex-shrink:0;overflow-y:auto;background:var(--dark-brown);border-left:1px solid rgba(201,169,110,.12)">
+          <div style="padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.06);font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:.1em;color:var(--muted)">LISTINGS IN VIEW — <span id="map-panel-count">0</span></div>
+          <div id="map-panel-cards" style="padding:10px;display:flex;flex-direction:column;gap:8px"></div>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -1908,8 +1927,10 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
       <div class="sf"><label for="ftf-your-name">Your Name *</label><input id="ftf-your-name" type="text" placeholder="Full name" required></div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
         <div class="sf"><label for="ftf-state">State *</label><select id="ftf-state" required><option value="">Select</option><option>Alabama</option><option>Alaska</option><option>Arizona</option><option>Arkansas</option><option>California</option><option>Colorado</option><option>Connecticut</option><option>Delaware</option><option>Florida</option><option>Georgia</option><option>Hawaii</option><option>Idaho</option><option>Illinois</option><option>Indiana</option><option>Iowa</option><option>Kansas</option><option>Kentucky</option><option>Louisiana</option><option>Maine</option><option>Maryland</option><option>Massachusetts</option><option>Michigan</option><option>Minnesota</option><option>Mississippi</option><option>Missouri</option><option>Montana</option><option>Nebraska</option><option>Nevada</option><option>New Hampshire</option><option>New Jersey</option><option>New Mexico</option><option>New York</option><option>North Carolina</option><option>North Dakota</option><option>Ohio</option><option>Oklahoma</option><option>Oregon</option><option>Pennsylvania</option><option>Rhode Island</option><option>South Carolina</option><option>South Dakota</option><option>Tennessee</option><option>Texas</option><option>Utah</option><option>Vermont</option><option>Virginia</option><option>Washington</option><option>West Virginia</option><option>Wisconsin</option><option>Wyoming</option></select></div>
-        <div class="sf"><label for="ftf-city">City *</label><input id="ftf-city" type="text" placeholder="City" required></div>
+        <div class="sf"><label for="ftf-city">City *</label><input id="ftf-city" type="text" placeholder="City" required oninput="validateFtfLocation()"></div>
       </div>
+      <div id="ftf-location-indicator" style="margin-top:-4px;margin-bottom:8px;min-height:18px"></div>
+      <input type="hidden" id="ftf-lat"><input type="hidden" id="ftf-lng">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
         <div class="sf"><label for="ftf-years">Years in Operation</label><input id="ftf-years" type="number" min="0" max="200" placeholder="e.g. 15"></div>
         <div class="sf"><label for="ftf-website">Farm Website</label><input id="ftf-website" type="url" placeholder="https://"></div>
@@ -2458,7 +2479,7 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
       </div>
     </div>
     <div class="form-row">
-      <div class="form-group"><label>State</label><select id="pl-state"><option value="">Select State…</option>
+      <div class="form-group"><label>State</label><select id="pl-state" onchange="validatePlLocation()"><option value="">Select State…</option>
 <option>AL</option><option>AK</option><option>AZ</option><option>AR</option><option>CA</option>
 <option>CO</option><option>CT</option><option>DE</option><option>FL</option><option>GA</option>
 <option>HI</option><option>ID</option><option>IL</option><option>IN</option><option>IA</option>
@@ -2469,8 +2490,10 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
 <option>OK</option><option>OR</option><option>PA</option><option>RI</option><option>SC</option>
 <option>SD</option><option>TN</option><option selected>TX</option><option>UT</option><option>VT</option>
 <option>VA</option><option>WA</option><option>WV</option><option>WI</option><option>WY</option></select></div>
-      <div class="form-group"><label for="pl-city">City</label><input type="text" id="pl-city" placeholder="Amarillo"></div>
+      <div class="form-group"><label for="pl-city">City</label><input type="text" id="pl-city" placeholder="Amarillo" oninput="validatePlLocation()"></div>
     </div>
+    <div id="pl-location-indicator" style="margin:-16px 0 12px;min-height:18px"></div>
+    <input type="hidden" id="pl-lat"><input type="hidden" id="pl-lng">
     <div class="form-row">
       <div class="form-group"><label for="pl-quantity">Quantity</label><input type="number" id="pl-quantity" value="1" min="1"></div>
       <!-- hidden tier field — set by plan card selection -->
@@ -2934,6 +2957,11 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
   #map-category-filters .map-cat-btn{white-space:nowrap;flex-shrink:0}
   #map-container{min-height:350px!important}
   #map-results-strip{height:150px!important}
+  #listings-map-view>div{flex-direction:column!important}
+  #listings-map-view>div>div:first-child{height:55vh!important}
+  #map-listings-panel{width:100%!important;height:200px!important;border-left:none!important;border-top:1px solid rgba(201,169,110,.12)!important;overflow-x:auto!important;overflow-y:hidden!important}
+  #map-panel-cards{flex-direction:row!important;flex-wrap:nowrap!important}
+  #map-panel-cards>div{flex-shrink:0!important;width:200px!important}
 }
 </style>
   <div id="map-page-layout" style="display:flex;height:calc(100vh - 70px);gap:0">
@@ -3916,7 +3944,7 @@ function initEventDelegation() {
     else if (action === 'share-native') {
       nativeShareListing(el.dataset.id, el.dataset.title);
     }
-    else if (action === 'search-listings') loadListings();
+    else if (action === 'search-listings') { loadListings(); if (currentView === 'map') loadBrowseMapListings(); }
     else if (action === 'login')       doLogin();
     else if (action === 'register')    doRegister();
     else if (action === 'post-listing') doPostListing();
@@ -5045,6 +5073,9 @@ async function doPostListing() {
   formData.append('state', state);
   formData.append('city', city);
   formData.append('tier', tier);
+  const plLat = document.getElementById('pl-lat')?.value;
+  const plLng = document.getElementById('pl-lng')?.value;
+  if (plLat && plLng) { formData.append('lat', plLat); formData.append('lng', plLng); }
   Array.from(photos).forEach(f => formData.append('photos', f));
 
   try {
@@ -5135,6 +5166,9 @@ async function doPostFtfListing() {
   formData.append('state', state);
   formData.append('city', city);
   formData.append('tier', 'farm_to_table');
+  const ftfLat = document.getElementById('ftf-lat')?.value;
+  const ftfLng = document.getElementById('ftf-lng')?.value;
+  if (ftfLat && ftfLng) { formData.append('lat', ftfLat); formData.append('lng', ftfLng); }
   formData.append('farm_name', farmName);
   formData.append('farm_years', document.getElementById('ftf-years').value || '');
   formData.append('farm_operation_size', getRadioValue('ftf-op-size'));
@@ -6277,6 +6311,148 @@ function useMyMapLocation() {
     if (herdMap) herdMap.setView([mapCenter.lat, mapCenter.lng], 8);
     showToast('Centered on your location');
   }, function() { showToast('Unable to get your location'); });
+}
+
+// ── Location Validation ─────────────────────────────────
+let _geoTimer = null;
+function validateLocation(cityId, stateId, latId, lngId, indicatorId) {
+  const city = document.getElementById(cityId)?.value?.trim() || '';
+  const state = document.getElementById(stateId)?.value || '';
+  const ind = document.getElementById(indicatorId);
+  if (!ind) return;
+  if (!city || !state) { ind.innerHTML = ''; return; }
+  ind.innerHTML = '<span style="color:var(--muted);font-size:12px">Checking location...</span>';
+  clearTimeout(_geoTimer);
+  _geoTimer = setTimeout(async function() {
+    try {
+      var r = await fetch('https://nominatim.openstreetmap.org/search?q=' + encodeURIComponent(city + ', ' + state + ', USA') + '&format=json&limit=1&countrycodes=us', { headers: { 'User-Agent': 'HerdHub/1.0' } });
+      var data = await r.json();
+      if (data && data[0]) {
+        var latEl = document.getElementById(latId);
+        var lngEl = document.getElementById(lngId);
+        if (latEl) latEl.value = data[0].lat;
+        if (lngEl) lngEl.value = data[0].lon;
+        var display = data[0].display_name.split(',').slice(0, 2).join(',').trim();
+        ind.innerHTML = '<span style="color:#2e7d4f;font-size:12px">✓ ' + escHtml(display) + '</span>';
+      } else {
+        ind.innerHTML = '<span style="color:#c0392b;font-size:12px">✗ Location not found</span>';
+      }
+    } catch(e) { ind.innerHTML = ''; }
+  }, 800);
+}
+function validatePlLocation() { validateLocation('pl-city', 'pl-state', 'pl-lat', 'pl-lng', 'pl-location-indicator'); }
+function validateFtfLocation() { validateLocation('ftf-city', 'ftf-state', 'ftf-lat', 'ftf-lng', 'ftf-location-indicator'); }
+
+// ── Browse Map (Zillow-style toggle) ────────────────────
+let browseMap = null;
+let browseMapMarkers = [];
+let currentView = 'list';
+
+function setListingsView(view) {
+  currentView = view;
+  var listView = document.getElementById('listings-list-view');
+  var mapView = document.getElementById('listings-map-view');
+  var listBtn = document.getElementById('view-list-btn');
+  var mapBtn = document.getElementById('view-map-btn');
+  if (view === 'map') {
+    if (listView) listView.style.display = 'none';
+    if (mapView) mapView.style.display = 'block';
+    if (listBtn) { listBtn.style.background = 'transparent'; listBtn.style.color = 'var(--tan)'; }
+    if (mapBtn) { mapBtn.style.background = 'var(--rust)'; mapBtn.style.color = 'var(--cream)'; }
+    setTimeout(initBrowseMap, 100);
+  } else {
+    if (listView) listView.style.display = '';
+    if (mapView) mapView.style.display = 'none';
+    if (listBtn) { listBtn.style.background = 'var(--rust)'; listBtn.style.color = 'var(--cream)'; }
+    if (mapBtn) { mapBtn.style.background = 'transparent'; mapBtn.style.color = 'var(--tan)'; }
+  }
+}
+
+function initBrowseMap() {
+  if (browseMap) { browseMap.invalidateSize(); loadBrowseMapListings(); return; }
+  if (typeof L === 'undefined') { initHerdMap(); setTimeout(initBrowseMap, 500); return; }
+  browseMap = L.map('browse-map', { center: [39.5, -98.35], zoom: 5 });
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap', maxZoom: 18
+  }).addTo(browseMap);
+  browseMap.on('moveend', updateBrowsePanel);
+  loadBrowseMapListings();
+}
+
+async function loadBrowseMapListings() {
+  if (!browseMap) return;
+  try {
+    var cat = document.getElementById('f-category')?.value || '';
+    var state = document.getElementById('f-state')?.value || '';
+    var q = document.getElementById('f-q')?.value || '';
+    var params = new URLSearchParams({ status: 'active', limit: 500, sort: 'featured' });
+    if (cat) params.set('category', cat);
+    if (state) params.set('state', state);
+    if (q) params.set('q', q);
+    var r = await fetch(API + '/api/listings?' + params);
+    var data = await r.json();
+    var listings = (data.listings || []).filter(function(l) { return l.lat && l.lng; });
+    browseMapMarkers.forEach(function(m) { browseMap.removeLayer(m); });
+    browseMapMarkers = [];
+    var countEl = document.getElementById('browse-map-count');
+    if (countEl) countEl.textContent = listings.length + ' listings with locations';
+    listings.forEach(function(l) {
+      var color = getMarkerColor(l.category);
+      var featured = ['sirloin','ribeye','t_bone','filet'].includes(l.tier);
+      var sz = featured ? 16 : 12;
+      var icon = L.divIcon({
+        className: '', iconSize: [sz, sz], iconAnchor: [sz/2, sz/2], popupAnchor: [0, -(sz/2+4)],
+        html: '<div style="width:'+sz+'px;height:'+sz+'px;border-radius:50%;background:'+color+';border:2px solid '+(featured?'#C9A96E':'rgba(255,255,255,.5)')+';box-shadow:0 2px 6px rgba(0,0,0,.5);cursor:pointer"></div>'
+      });
+      var price = l.price ? '$' + parseFloat(l.price).toLocaleString() : 'Contact';
+      var img = l.thumb || l.thumb_small || '';
+      var popup = L.popup({ maxWidth: 220, className: 'herd-popup' }).setContent(
+        '<div style="font-family:sans-serif;min-width:180px">' +
+          (img ? '<img src="'+img+'" style="width:100%;height:80px;object-fit:cover;border-radius:4px 4px 0 0;display:block">' : '') +
+          '<div style="padding:'+(img?'8px':'4px')+'">' +
+            '<div style="font-weight:700;font-size:13px;color:#1C0F06;line-height:1.3;margin-bottom:3px">'+escHtml(l.title)+'</div>' +
+            '<div style="font-size:12px;color:#8B3214;font-weight:700;margin-bottom:2px">'+price+'</div>' +
+            '<div style="font-size:11px;color:#666;margin-bottom:8px">'+escHtml((l.city||'')+', '+(l.state||''))+'</div>' +
+            '<button onclick="browseMap?.closePopup();openListing('+l.id+')" style="width:100%;padding:7px;background:#8b3214;color:white;border:none;border-radius:4px;font-size:11px;cursor:pointer;font-family:Oswald,sans-serif;letter-spacing:.06em">View Listing</button>' +
+          '</div></div>'
+      );
+      var m = L.marker([parseFloat(l.lat), parseFloat(l.lng)], { icon: icon }).bindPopup(popup).addTo(browseMap);
+      m._listing = l;
+      browseMapMarkers.push(m);
+    });
+    if (browseMapMarkers.length > 0 && browseMapMarkers.length < 300) {
+      browseMap.fitBounds(L.featureGroup(browseMapMarkers).getBounds().pad(0.1));
+    }
+    updateBrowsePanel();
+  } catch(e) { console.error('Browse map error:', e); }
+}
+
+function updateBrowsePanel() {
+  if (!browseMap) return;
+  var bounds = browseMap.getBounds();
+  var visible = browseMapMarkers.filter(function(m) { return bounds.contains(m.getLatLng()); }).map(function(m) { return m._listing; }).filter(Boolean);
+  var countEl = document.getElementById('map-panel-count');
+  if (countEl) countEl.textContent = visible.length;
+  var panel = document.getElementById('map-panel-cards');
+  if (!panel) return;
+  if (!visible.length) {
+    panel.innerHTML = '<div style="text-align:center;padding:32px 16px;color:var(--muted);font-size:13px">No listings in this area. Zoom out or pan to find listings.</div>';
+    return;
+  }
+  panel.innerHTML = visible.slice(0, 50).map(function(l) {
+    var price = l.price ? '$' + parseFloat(l.price).toLocaleString() : 'Contact';
+    var img = l.thumb || l.thumb_small || '';
+    var color = getMarkerColor(l.category);
+    return '<div onclick="openListing('+l.id+')" style="display:flex;gap:10px;padding:10px;border-radius:6px;border:1px solid rgba(201,169,110,.12);cursor:pointer;background:rgba(255,255,255,.03)" onmouseenter="this.style.borderColor=\'rgba(201,169,110,.4)\'" onmouseleave="this.style.borderColor=\'rgba(201,169,110,.12)\'">' +
+      '<div style="width:56px;height:56px;flex-shrink:0;border-radius:4px;overflow:hidden;background:'+color+'22">' +
+        (img ? '<img src="'+img+'" style="width:100%;height:100%;object-fit:cover">' : '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:22px">'+mapCatEmoji(l.category)+'</div>') +
+      '</div>' +
+      '<div style="flex:1;min-width:0">' +
+        '<div style="font-size:12px;font-weight:700;color:var(--cream);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px">'+escHtml(l.title)+'</div>' +
+        '<div style="font-size:12px;color:var(--gold);font-family:Oswald,sans-serif;font-weight:700">'+price+'</div>' +
+        '<div style="font-size:10px;color:var(--muted);margin-top:2px">'+escHtml((l.city||'')+', '+(l.state||''))+'</div>' +
+      '</div></div>';
+  }).join('');
 }
 
 // ── Seller Profile ──────────────────────────────────────

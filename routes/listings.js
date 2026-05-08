@@ -442,19 +442,22 @@ router.post('/', authenticateToken, upload.array('photos', 20), async (req, res)
 
     await client.query('BEGIN');
 
-    // 1. Insert listing
+    // 1. Insert listing (with optional client-side lat/lng)
+    const clientLat = req.body.lat ? parseFloat(req.body.lat) : null;
+    const clientLng = req.body.lng ? parseFloat(req.body.lng) : null;
     const { rows } = await client.query(
       `INSERT INTO listings
          (user_id, title, description, category, subcategory, breed,
           price, price_type, quantity, weight_lbs, age_months, sex,
           state, city, zip, tier, is_featured, expires_at, payment_status, website_url,
+          lat, lng,
           farm_name, farm_proteins, farm_product_forms, farm_production_methods,
           farm_processing, farm_delivery, farm_availability, farm_harvest_date,
           farm_certifications, farm_price_hanging, farm_price_takehome,
           farm_deposit_required, farm_deposit_amount, farm_call_for_price,
           farm_tours, farm_operation_size, farm_years)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,
-               $21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37)
+               $21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,$38,$39)
        RETURNING id`,
       [
         req.user.id, title, description, category,
@@ -467,6 +470,7 @@ router.post('/', authenticateToken, upload.array('photos', 20), async (req, res)
         safeTier, isFeatured, expiresAt(safeTier),
         (safeTier === 'burger' || safeTier === 'farm_to_table') ? 'free' : 'pending',
         req.body.website_url || null,
+        clientLat, clientLng,
         // Farm to Table fields
         req.body.farm_name || null,
         req.body.farm_proteins ? JSON.parse(req.body.farm_proteins) : null,
@@ -489,8 +493,8 @@ router.post('/', authenticateToken, upload.array('photos', 20), async (req, res)
     );
     const listingId = rows[0].id;
 
-    // Geocode city+state → lat/lng (non-blocking)
-    if (city && state) {
+    // Geocode city+state → lat/lng (fallback if client didn't provide coordinates)
+    if (!clientLat && !clientLng && city && state) {
       (async () => {
         try {
           const geo = await fetch(
