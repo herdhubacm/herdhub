@@ -1473,15 +1473,20 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
     </div><!-- end listings-list-view -->
 
     <!-- MAP VIEW (Zillow-style) -->
-    <div id="listings-map-view" style="display:none;border-radius:8px;overflow:hidden;border:1px solid rgba(201,169,110,.12);height:calc(100vh - 180px)">
-      <div style="display:flex;width:100%;height:100%">
-        <div style="flex:1;position:relative;min-width:0">
-          <div id="browse-map" style="position:absolute;inset:0;z-index:1"></div>
-          <div id="browse-map-count" style="position:absolute;top:12px;left:50%;transform:translateX(-50%);background:rgba(28,15,6,.85);color:var(--cream);padding:6px 16px;border-radius:20px;font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:.08em;z-index:1000;pointer-events:none">Loading…</div>
-        </div>
-        <div id="map-listings-panel" style="width:340px;flex-shrink:0;overflow-y:auto;background:#1C0F06;border-left:1px solid rgba(201,169,110,.12)">
-          <div style="padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.06);font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:.1em;color:var(--muted)">LISTINGS IN VIEW — <span id="map-panel-count">0</span></div>
-          <div id="map-panel-cards" style="padding:10px;display:flex;flex-direction:column;gap:8px"></div>
+    <style>
+    @media(max-width:768px){
+      #listings-map-view>div{flex-direction:column!important;height:auto!important}
+      #browse-map{width:100%!important;height:350px!important}
+      #map-listings-panel{width:100%!important;height:250px!important;border-left:none!important;border-top:1px solid rgba(201,169,110,.12)!important;overflow-x:auto!important;overflow-y:hidden!important}
+      #map-panel-cards{flex-direction:row!important;flex-wrap:nowrap!important}
+    }
+    </style>
+    <div id="listings-map-view" style="display:none;width:100%;position:relative">
+      <div style="display:flex;width:100%;height:600px;border-radius:8px;overflow:hidden;border:1px solid rgba(201,169,110,.12)">
+        <div id="browse-map" style="width:65%;height:600px;flex-shrink:0;position:relative"></div>
+        <div id="map-listings-panel" style="width:35%;height:600px;overflow-y:auto;background:#1C0F06;border-left:1px solid rgba(201,169,110,.12);flex-shrink:0">
+          <div style="padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.08);font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:.1em;color:#8C7560">LISTINGS IN VIEW — <span id="map-panel-count">0</span></div>
+          <div id="map-panel-cards" style="padding:12px;display:flex;flex-direction:column;gap:8px"></div>
         </div>
       </div>
     </div>
@@ -6367,7 +6372,8 @@ function setListingsView(view) {
     if (mapView) mapView.style.display = 'block';
     if (listBtn) { listBtn.style.background = 'transparent'; listBtn.style.color = 'var(--tan)'; }
     if (mapBtn) { mapBtn.style.background = 'var(--rust)'; mapBtn.style.color = 'var(--cream)'; }
-    setTimeout(initBrowseMap, 150);
+    // Delay to ensure container is visible with dimensions before Leaflet init
+    setTimeout(initBrowseMap, 200);
   } else {
     if (listView) listView.style.display = '';
     if (mapView) mapView.style.display = 'none';
@@ -6378,7 +6384,14 @@ function setListingsView(view) {
 }
 
 function initBrowseMap() {
-  if (browseMap) { browseMap.invalidateSize(); loadBrowseMapListings(); return; }
+  if (browseMap) {
+    setTimeout(function() { browseMap.invalidateSize(true); }, 100);
+    setTimeout(function() { browseMap.invalidateSize(true); }, 400);
+    loadBrowseMapListings();
+    return;
+  }
+  var container = document.getElementById('browse-map');
+  if (!container) { console.error('browse-map not found'); return; }
   // Ensure Leaflet is loaded
   if (typeof L === 'undefined') {
     var link = document.createElement('link');
@@ -6386,20 +6399,29 @@ function initBrowseMap() {
     document.head.appendChild(link);
     var script = document.createElement('script');
     script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
-    script.onload = function() { initBrowseMap(); };
+    script.onload = function() { setTimeout(initBrowseMap, 100); };
     document.head.appendChild(script);
     return;
   }
-  browseMap = L.map('browse-map', { center: [39.5, -98.35], zoom: 5 });
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; OpenStreetMap', maxZoom: 18
-  }).addTo(browseMap);
-  browseMap.on('moveend', updateBrowsePanel);
-  setTimeout(function() { if (browseMap) browseMap.invalidateSize(); }, 300);
-  setTimeout(function() { if (browseMap) browseMap.invalidateSize(); }, 800);
-  window.addEventListener('resize', function() { if (browseMap) browseMap.invalidateSize(); });
-  loadBrowseMapListings();
+  // Init with delay so container has resolved dimensions
+  setTimeout(function() {
+    try {
+      browseMap = L.map('browse-map', { center: [39.5, -98.35], zoom: 5, preferCanvas: true });
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap', maxZoom: 18, crossOrigin: true
+      }).addTo(browseMap);
+      browseMap.on('moveend', updateBrowsePanel);
+      browseMap.on('zoomend', updateBrowsePanel);
+      setTimeout(function() { browseMap.invalidateSize(true); }, 100);
+      setTimeout(function() { browseMap.invalidateSize(true); }, 300);
+      setTimeout(function() { browseMap.invalidateSize(true); }, 600);
+      loadBrowseMapListings();
+    } catch(e) { console.error('Map init error:', e); }
+  }, 200);
 }
+window.addEventListener('resize', function() {
+  if (browseMap && currentView === 'map') browseMap.invalidateSize(true);
+});
 
 async function loadBrowseMapListings() {
   if (!browseMap) return;
