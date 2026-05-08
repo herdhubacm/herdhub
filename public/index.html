@@ -1473,10 +1473,10 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
     </div><!-- end listings-list-view -->
 
     <!-- MAP VIEW (Zillow-style) -->
-    <div id="listings-map-view" style="display:none;height:calc(100vh - 200px);border-radius:8px;overflow:hidden;border:1px solid rgba(201,169,110,.12)">
-      <div style="display:flex;height:100%">
-        <div style="flex:1;position:relative;min-height:400px">
-          <div id="browse-map" style="width:100%;height:100%"></div>
+    <div id="listings-map-view" style="display:none;border-radius:8px;overflow:hidden;border:1px solid rgba(201,169,110,.12)">
+      <div style="display:flex;height:calc(100vh - 200px)">
+        <div style="flex:1;position:relative">
+          <div id="browse-map" style="width:100%;height:calc(100vh - 200px)"></div>
           <div id="browse-map-count" style="position:absolute;top:12px;left:50%;transform:translateX(-50%);background:rgba(28,15,6,.85);color:var(--cream);padding:6px 16px;border-radius:20px;font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:.08em;z-index:1000;pointer-events:none">Loading…</div>
         </div>
         <div id="map-listings-panel" style="width:340px;flex-shrink:0;overflow-y:auto;background:var(--dark-brown);border-left:1px solid rgba(201,169,110,.12)">
@@ -4640,12 +4640,19 @@ async function loadListings(page=1) {
 
   try {
     const r = await fetch(`${API}/api/listings?${params}`);
+    if (!r.ok) throw new Error('HTTP ' + r.status);
     const d = await r.json();
-    if (!d.listings.length) { el.innerHTML = '<p style="color:#888;padding:20px">No listings found. <a href="javascript:void(0)" onclick="clearFilters()" style="color:var(--rust)">Clear filters →</a></p>'; document.getElementById('pagination').innerHTML = ''; return; }
-    el.innerHTML = d.listings.map(renderListingCard).join('');
-    renderPagination(d.pagination);
+    const listings = d.listings || (Array.isArray(d) ? d : []);
+    if (!listings.length) {
+      el.innerHTML = '<p style="color:#888;padding:20px">No listings found. <a href="javascript:void(0)" onclick="clearFilters()" style="color:var(--rust)">Clear filters →</a></p>';
+      document.getElementById('pagination').innerHTML = '';
+      return;
+    }
+    el.innerHTML = listings.map(renderListingCard).join('');
+    if (d.pagination) renderPagination(d.pagination);
   } catch(e) {
-    el.innerHTML = '<p style="color:#888;padding:20px">Could not load listings.</p>';
+    console.error('loadListings error:', e);
+    el.innerHTML = '<p style="color:#888;padding:20px">Could not load listings. <a href="javascript:void(0)" onclick="loadListings()" style="color:var(--rust)">Try again →</a></p>';
   }
 }
 
@@ -5495,6 +5502,7 @@ function showPage(page) {
   if (page === 'contact') buildFAQ();
   if (page === 'articles') loadArticlesPage();
   if (page === 'beef-boxes') loadBeefBoxCount();
+  if (page === 'listings') setTimeout(loadListings, 50);
   if (page === 'map') setTimeout(initHerdMap, 100);
   if (page === 'merch' && window._initShopifyMerch) window._initShopifyMerch();
   if (window._trackPage) window._trackPage(page);
@@ -6370,12 +6378,23 @@ function setListingsView(view) {
 
 function initBrowseMap() {
   if (browseMap) { browseMap.invalidateSize(); loadBrowseMapListings(); return; }
-  if (typeof L === 'undefined') { initHerdMap(); setTimeout(initBrowseMap, 500); return; }
+  // Ensure Leaflet is loaded
+  if (typeof L === 'undefined') {
+    var link = document.createElement('link');
+    link.rel = 'stylesheet'; link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+    document.head.appendChild(link);
+    var script = document.createElement('script');
+    script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+    script.onload = function() { initBrowseMap(); };
+    document.head.appendChild(script);
+    return;
+  }
   browseMap = L.map('browse-map', { center: [39.5, -98.35], zoom: 5 });
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; OpenStreetMap', maxZoom: 18
   }).addTo(browseMap);
   browseMap.on('moveend', updateBrowsePanel);
+  setTimeout(function() { browseMap.invalidateSize(); }, 200);
   loadBrowseMapListings();
 }
 
