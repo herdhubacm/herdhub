@@ -178,7 +178,8 @@ router.put('/me', authenticateToken, async (req, res) => {
     setAuthCookie(res, token);
     res.json({ user, token });
   } catch (err) {
-    res.status(500).json({ error: 'Update failed' });
+    console.error('PUT /api/auth/me error:', err.message);
+    res.status(500).json({ error: 'Update failed: ' + err.message });
   }
 });
 

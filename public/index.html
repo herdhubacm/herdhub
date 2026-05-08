@@ -5719,29 +5719,46 @@ async function unsaveListing(id, btn) {
 async function saveProfile() {
   const errEl = document.getElementById('profile-error');
   const sucEl = document.getElementById('profile-success');
-  errEl.style.display = 'none'; sucEl.style.display = 'none';
+  if (errEl) errEl.style.display = 'none';
+  if (sucEl) sucEl.style.display = 'none';
+
+  const name  = document.getElementById('acct-name')?.value?.trim();
+  const phone = document.getElementById('acct-phone')?.value?.trim();
+  const state = document.getElementById('acct-state')?.value;
+  const city  = document.getElementById('acct-city')?.value?.trim();
+  const bio   = document.getElementById('acct-bio')?.value?.trim();
+
+  if (!name || name.length < 2) {
+    if (errEl) { errEl.textContent = 'Name must be at least 2 characters.'; errEl.style.display = 'block'; }
+    return;
+  }
+
   try {
     const r = await fetch(`${API}/api/auth/me`, {
       method: 'PUT',
+      credentials: 'include',
       headers: { 'Content-Type':'application/json', Authorization: `Bearer ${authToken}` },
-      body: JSON.stringify({
-        name:  document.getElementById('acct-name').value,
-        phone: document.getElementById('acct-phone').value,
-        state: document.getElementById('acct-state').value,
-        city:  document.getElementById('acct-city').value,
-        bio:   document.getElementById('acct-bio').value,
-      })
+      body: JSON.stringify({ name, phone, state, city, bio })
     });
     const d = await r.json();
-    if (!r.ok) { errEl.textContent = d.error; errEl.style.display='block'; return; }
-    currentUser = { ...currentUser, ...d.user };
+    if (!r.ok) {
+      if (errEl) { errEl.textContent = d.error || 'Save failed'; errEl.style.display = 'block'; }
+      return;
+    }
+    if (d.user) currentUser = { ...currentUser, ...d.user };
     if (d.token) authToken = d.token;
-    document.getElementById('acct-fullname').textContent = currentUser.name;
-    document.getElementById('account-name').textContent = currentUser.name.split(' ')[0];
-    document.getElementById('acct-avatar').textContent = currentUser.name[0].toUpperCase();
-    sucEl.textContent = '✅ Profile saved!'; sucEl.style.display='block';
-    setTimeout(() => sucEl.style.display='none', 3000);
-  } catch(e) { errEl.textContent = 'Connection error'; errEl.style.display='block'; }
+    const fullnameEl = document.getElementById('acct-fullname');
+    const accountNameEl = document.getElementById('account-name');
+    const avatarEl = document.getElementById('acct-avatar');
+    if (fullnameEl) fullnameEl.textContent = currentUser.name;
+    if (accountNameEl) accountNameEl.textContent = currentUser.name.split(' ')[0];
+    if (avatarEl) avatarEl.textContent = currentUser.name[0].toUpperCase();
+    if (sucEl) { sucEl.textContent = 'Profile saved!'; sucEl.style.display = 'block'; }
+    setTimeout(() => { if (sucEl) sucEl.style.display = 'none'; }, 3000);
+  } catch(e) {
+    console.error('Profile save error:', e);
+    if (errEl) { errEl.textContent = 'Connection error — please try again'; errEl.style.display = 'block'; }
+  }
 }
 
 async function changePassword() {
