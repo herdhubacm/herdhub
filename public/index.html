@@ -1472,23 +1472,11 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
     <div style="text-align:center;margin-top:30px" id="pagination"></div>
     </div><!-- end listings-list-view -->
 
-    <!-- MAP VIEW (Zillow-style) -->
-    <style>
-    @media(max-width:768px){
-      #listings-map-view>div{flex-direction:column!important;height:auto!important}
-      #browse-map{width:100%!important;height:350px!important}
-      #map-listings-panel{width:100%!important;height:250px!important;border-left:none!important;border-top:1px solid rgba(201,169,110,.12)!important;overflow-x:auto!important;overflow-y:hidden!important}
-      #map-panel-cards{flex-direction:row!important;flex-wrap:nowrap!important}
-    }
-    </style>
-    <div id="listings-map-view" style="display:none;width:100%;position:relative">
-      <div style="display:flex;width:100%;height:600px;border-radius:8px;overflow:hidden;border:1px solid rgba(201,169,110,.12)">
-        <div id="browse-map" style="width:65%;height:600px;flex-shrink:0;position:relative"></div>
-        <div id="map-listings-panel" style="width:35%;height:600px;overflow-y:auto;background:#1C0F06;border-left:1px solid rgba(201,169,110,.12);flex-shrink:0">
-          <div style="padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.08);font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:.1em;color:#8C7560">LISTINGS IN VIEW — <span id="map-panel-count">0</span></div>
-          <div id="map-panel-cards" style="padding:12px;display:flex;flex-direction:column;gap:8px"></div>
-        </div>
-      </div>
+    <!-- MAP VIEW — simple layout, no flex on map container -->
+    <div id="listings-map-view" style="display:none">
+      <div id="browse-map" style="width:100%;height:550px;display:block;position:relative;z-index:1;border-radius:8px;overflow:hidden;border:1px solid rgba(201,169,110,.12)"></div>
+      <div style="padding:10px 16px;margin-top:8px;font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:.1em;color:var(--muted)"><span id="map-panel-count">0</span> listings in view</div>
+      <div id="map-panel-cards" style="display:flex;gap:10px;overflow-x:auto;padding:0 0 12px;margin-top:4px"></div>
     </div>
 
   </div>
@@ -6372,10 +6360,9 @@ function setListingsView(view) {
     if (mapView) mapView.style.display = 'block';
     if (listBtn) { listBtn.style.background = 'transparent'; listBtn.style.color = 'var(--tan)'; }
     if (mapBtn) { mapBtn.style.background = 'var(--rust)'; mapBtn.style.color = 'var(--cream)'; }
-    // Delay to ensure container is visible with dimensions before Leaflet init
-    setTimeout(initBrowseMap, 200);
+    initBrowseMap();
   } else {
-    if (listView) listView.style.display = '';
+    if (listView) listView.style.display = 'block';
     if (mapView) mapView.style.display = 'none';
     if (listBtn) { listBtn.style.background = 'var(--rust)'; listBtn.style.color = 'var(--cream)'; }
     if (mapBtn) { mapBtn.style.background = 'transparent'; mapBtn.style.color = 'var(--tan)'; }
@@ -6384,40 +6371,43 @@ function setListingsView(view) {
 }
 
 function initBrowseMap() {
+  var mapView = document.getElementById('listings-map-view');
+  if (mapView) mapView.style.display = 'block';
   if (browseMap) {
-    setTimeout(function() { browseMap.invalidateSize(true); }, 100);
-    setTimeout(function() { browseMap.invalidateSize(true); }, 400);
+    browseMap.invalidateSize(true);
     loadBrowseMapListings();
     return;
   }
-  var container = document.getElementById('browse-map');
-  if (!container) { console.error('browse-map not found'); return; }
-  // Ensure Leaflet is loaded
   if (typeof L === 'undefined') {
-    var link = document.createElement('link');
-    link.rel = 'stylesheet'; link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
-    document.head.appendChild(link);
+    if (!document.getElementById('leaflet-css')) {
+      var link = document.createElement('link');
+      link.id = 'leaflet-css'; link.rel = 'stylesheet';
+      link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+      document.head.appendChild(link);
+    }
     var script = document.createElement('script');
     script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
-    script.onload = function() { setTimeout(initBrowseMap, 100); };
+    script.onload = function() { initBrowseMap(); };
     document.head.appendChild(script);
     return;
   }
-  // Init with delay so container has resolved dimensions
+  var el = document.getElementById('browse-map');
+  if (!el) return;
+  // Delay so container has layout dimensions
   setTimeout(function() {
-    try {
-      browseMap = L.map('browse-map', { center: [39.5, -98.35], zoom: 5, preferCanvas: true });
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap', maxZoom: 18, crossOrigin: true
-      }).addTo(browseMap);
-      browseMap.on('moveend', updateBrowsePanel);
-      browseMap.on('zoomend', updateBrowsePanel);
-      setTimeout(function() { browseMap.invalidateSize(true); }, 100);
-      setTimeout(function() { browseMap.invalidateSize(true); }, 300);
-      setTimeout(function() { browseMap.invalidateSize(true); }, 600);
-      loadBrowseMapListings();
-    } catch(e) { console.error('Map init error:', e); }
-  }, 200);
+    console.log('browse-map size:', el.offsetWidth, 'x', el.offsetHeight);
+    if (!el.offsetWidth || !el.offsetHeight) { console.error('browse-map has 0 size'); return; }
+    browseMap = L.map('browse-map').setView([39.5, -98.35], 4);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors', maxZoom: 19
+    }).addTo(browseMap);
+    setTimeout(function() { browseMap.invalidateSize(true); }, 100);
+    setTimeout(function() { browseMap.invalidateSize(true); }, 500);
+    setTimeout(function() { browseMap.invalidateSize(true); }, 1000);
+    browseMap.on('moveend', updateBrowsePanel);
+    browseMap.on('zoomend', updateBrowsePanel);
+    loadBrowseMapListings();
+  }, 300);
 }
 window.addEventListener('resize', function() {
   if (browseMap && currentView === 'map') browseMap.invalidateSize(true);
@@ -6474,26 +6464,26 @@ async function loadBrowseMapListings() {
 function updateBrowsePanel() {
   if (!browseMap) return;
   var bounds = browseMap.getBounds();
-  var visible = browseMapMarkers.filter(function(m) { return bounds.contains(m.getLatLng()); }).map(function(m) { return m._listing; }).filter(Boolean);
+  var visible = browseMapMarkers.filter(function(m) { return bounds.contains(m.getLatLng()); }).map(function(m) { return m._listing; }).filter(Boolean).slice(0, 30);
   var countEl = document.getElementById('map-panel-count');
   if (countEl) countEl.textContent = visible.length;
   var panel = document.getElementById('map-panel-cards');
   if (!panel) return;
   if (!visible.length) {
-    panel.innerHTML = '<div style="text-align:center;padding:32px 16px;color:var(--muted);font-size:13px">No listings in this area. Zoom out or pan to find listings.</div>';
+    panel.innerHTML = '<div style="padding:20px;color:var(--muted);font-size:13px;white-space:nowrap">No listings in this area — zoom out to find listings</div>';
     return;
   }
-  panel.innerHTML = visible.slice(0, 50).map(function(l) {
+  panel.innerHTML = visible.map(function(l) {
     var price = l.price ? '$' + parseFloat(l.price).toLocaleString() : 'Contact';
     var img = l.thumb || l.thumb_small || '';
     var color = getMarkerColor(l.category);
-    return '<div onclick="openListing('+l.id+')" style="display:flex;gap:10px;padding:10px;border-radius:6px;border:1px solid rgba(201,169,110,.12);cursor:pointer;background:rgba(255,255,255,.03)" onmouseenter="this.style.borderColor=\'rgba(201,169,110,.4)\'" onmouseleave="this.style.borderColor=\'rgba(201,169,110,.12)\'">' +
-      '<div style="width:56px;height:56px;flex-shrink:0;border-radius:4px;overflow:hidden;background:'+color+'22">' +
-        (img ? '<img src="'+img+'" style="width:100%;height:100%;object-fit:cover">' : '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:22px">'+mapCatEmoji(l.category)+'</div>') +
+    return '<div onclick="openListing('+l.id+')" style="flex-shrink:0;width:150px;border-radius:6px;overflow:hidden;border:1px solid rgba(201,169,110,.15);cursor:pointer;background:rgba(255,255,255,.04);transition:border-color .2s" onmouseenter="this.style.borderColor=\'rgba(201,169,110,.4)\'" onmouseleave="this.style.borderColor=\'rgba(201,169,110,.15)\'">' +
+      '<div style="height:90px;background:'+color+'22;overflow:hidden">' +
+        (img ? '<img src="'+img+'" style="width:100%;height:100%;object-fit:cover">' : '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:32px">'+mapCatEmoji(l.category)+'</div>') +
       '</div>' +
-      '<div style="flex:1;min-width:0">' +
-        '<div style="font-size:12px;font-weight:700;color:var(--cream);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px">'+escHtml(l.title)+'</div>' +
-        '<div style="font-size:12px;color:var(--gold);font-family:Oswald,sans-serif;font-weight:700">'+price+'</div>' +
+      '<div style="padding:8px">' +
+        '<div style="font-size:11px;font-weight:700;color:var(--cream);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px">'+escHtml(l.title)+'</div>' +
+        '<div style="font-size:11px;color:var(--gold);font-family:Oswald,sans-serif;font-weight:700">'+price+'</div>' +
         '<div style="font-size:10px;color:var(--muted);margin-top:2px">'+escHtml((l.city||'')+', '+(l.state||''))+'</div>' +
       '</div></div>';
   }).join('');
