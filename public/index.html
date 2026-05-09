@@ -6400,10 +6400,9 @@ function initBrowseMap() {
   browseMap.whenReady(function() {
     setTimeout(function() { browseMap.invalidateSize(true); }, 200);
   });
-    browseMap.on('moveend', updateBrowsePanel);
-    browseMap.on('zoomend', updateBrowsePanel);
-    loadBrowseMapListings();
-  }, 300);
+  browseMap.on('moveend', updateBrowsePanel);
+  browseMap.on('zoomend', updateBrowsePanel);
+  loadBrowseMapListings();
 }
 window.addEventListener('resize', function() {
   if (browseMap && currentView === 'map') browseMap.invalidateSize(true);
