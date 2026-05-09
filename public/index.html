@@ -4475,8 +4475,9 @@ const PLACEHOLDER_FTF = `<p style="color:rgba(201,169,110,.5);font-size:13px;pad
 async function loadHomepageSections() {
   try {
     const r = await fetch(`${API}/api/listings/homepage`);
-    if (!r.ok) throw new Error('HTTP ' + r.status);
+    if (!r.ok) { console.error('Homepage API error:', r.status); throw new Error('HTTP ' + r.status); }
     const d = await r.json();
+    console.log('Homepage data loaded:', Object.keys(d).map(k => k + ':' + (d[k]?.length || 0)).join(', '));
 
     const track = document.getElementById('ftf-scroll-track');
     if (track) track.innerHTML = d.farmToTable?.length ? d.farmToTable.map(renderFtfMiniCard).join('') : PLACEHOLDER_FTF;
