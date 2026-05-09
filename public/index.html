@@ -1359,6 +1359,7 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
         <button id="view-map-btn" onclick="setListingsView('map')" style="display:flex;align-items:center;gap:6px;padding:9px 18px;background:transparent;color:var(--tan);border:none;border-left:1px solid rgba(201,169,110,.25);cursor:pointer;font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:.08em;font-weight:600;transition:all .15s">🗺 Map</button>
       </div>
     </div>
+    <div style="position:relative;min-height:400px">
     <div id="listings-list-view">
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px;align-items:center;width:100%">
       <select id="f-category" onchange="loadListings()" aria-label="Filter by category" style="padding:8px 12px;border:1.5px solid var(--light-tan);border-radius:4px;font-family:'Source Serif 4',serif;font-size:14px;outline:none">
@@ -1472,12 +1473,13 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
     <div style="text-align:center;margin-top:30px" id="pagination"></div>
     </div><!-- end listings-list-view -->
 
-    <!-- MAP VIEW — simple layout, no flex on map container -->
-    <div id="listings-map-view" style="display:none">
+    <!-- MAP VIEW — uses visibility:hidden not display:none so Leaflet can measure -->
+    <div id="listings-map-view" style="position:absolute;visibility:hidden;pointer-events:none;width:100%;top:0;left:0">
       <div id="browse-map" style="width:100%;height:550px;display:block;position:relative;z-index:1;border-radius:8px;overflow:hidden;border:1px solid rgba(201,169,110,.12)"></div>
       <div style="padding:10px 16px;margin-top:8px;font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:.1em;color:var(--muted)"><span id="map-panel-count">0</span> listings in view</div>
       <div id="map-panel-cards" style="display:flex;gap:10px;overflow-x:auto;padding:0 0 12px;margin-top:4px"></div>
     </div>
+    </div><!-- end position:relative wrapper -->
 
   </div>
 </div>
@@ -6357,13 +6359,16 @@ function setListingsView(view) {
   var mapBtn = document.getElementById('view-map-btn');
   if (view === 'map') {
     if (listView) listView.style.display = 'none';
-    if (mapView) mapView.style.display = 'block';
+    // Show map with visibility (not display) so Leaflet has real dimensions
+    if (mapView) { mapView.style.position = 'relative'; mapView.style.visibility = 'visible'; mapView.style.pointerEvents = 'auto'; }
     if (listBtn) { listBtn.style.background = 'transparent'; listBtn.style.color = 'var(--tan)'; }
     if (mapBtn) { mapBtn.style.background = 'var(--rust)'; mapBtn.style.color = 'var(--cream)'; }
-    initBrowseMap();
+    if (!browseMap) initBrowseMap();
+    else { setTimeout(function() { browseMap.invalidateSize(true); loadBrowseMapListings(); }, 100); }
   } else {
     if (listView) listView.style.display = 'block';
-    if (mapView) mapView.style.display = 'none';
+    // Hide map with visibility (keeps dimensions for Leaflet)
+    if (mapView) { mapView.style.position = 'absolute'; mapView.style.visibility = 'hidden'; mapView.style.pointerEvents = 'none'; }
     if (listBtn) { listBtn.style.background = 'var(--rust)'; listBtn.style.color = 'var(--cream)'; }
     if (mapBtn) { mapBtn.style.background = 'transparent'; mapBtn.style.color = 'var(--tan)'; }
     loadListings(1);
@@ -6371,13 +6376,7 @@ function setListingsView(view) {
 }
 
 function initBrowseMap() {
-  var mapView = document.getElementById('listings-map-view');
-  if (mapView) mapView.style.display = 'block';
-  if (browseMap) {
-    browseMap.invalidateSize(true);
-    loadBrowseMapListings();
-    return;
-  }
+  if (browseMap) { browseMap.invalidateSize(true); loadBrowseMapListings(); return; }
   if (typeof L === 'undefined') {
     if (!document.getElementById('leaflet-css')) {
       var link = document.createElement('link');
@@ -6393,17 +6392,14 @@ function initBrowseMap() {
   }
   var el = document.getElementById('browse-map');
   if (!el) return;
-  // Delay so container has layout dimensions
-  setTimeout(function() {
-    console.log('browse-map size:', el.offsetWidth, 'x', el.offsetHeight);
-    if (!el.offsetWidth || !el.offsetHeight) { console.error('browse-map has 0 size'); return; }
-    browseMap = L.map('browse-map').setView([39.5, -98.35], 4);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors', maxZoom: 19
-    }).addTo(browseMap);
-    setTimeout(function() { browseMap.invalidateSize(true); }, 100);
-    setTimeout(function() { browseMap.invalidateSize(true); }, 500);
-    setTimeout(function() { browseMap.invalidateSize(true); }, 1000);
+  console.log('browse-map size:', el.offsetWidth, 'x', el.offsetHeight);
+  browseMap = L.map('browse-map').setView([39.5, -98.35], 4);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors', maxZoom: 19
+  }).addTo(browseMap);
+  browseMap.whenReady(function() {
+    setTimeout(function() { browseMap.invalidateSize(true); }, 200);
+  });
     browseMap.on('moveend', updateBrowsePanel);
     browseMap.on('zoomend', updateBrowsePanel);
     loadBrowseMapListings();
