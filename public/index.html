@@ -84,7 +84,7 @@ nav a:hover{color:var(--gold);background:rgba(255,255,255,.05)}
 .btn-signin{font-family:'Inter',sans-serif;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--tan);text-decoration:none;padding:8px 16px;border:1px solid rgba(201,169,110,.4);border-radius:3px;transition:all .2s;cursor:pointer;background:none}
 .btn-signin:hover{color:var(--gold);border-color:var(--gold)}
 .hero{position:relative;height:560px;overflow:hidden;background:#0A0A0A}
-.hero-bg{position:absolute;inset:0;background:linear-gradient(135deg,rgba(10,10,10,.88) 0%,rgba(10,10,10,.4) 50%,rgba(10,10,10,.72) 100%),url('https://images.unsplash.com/photo-1500595046743-cd271d694d30?w=1600&q=80') center/cover no-repeat;transform:scale(1.02);animation:heroZoom 20s ease-in-out infinite alternate}
+.hero-bg{position:absolute;inset:0;background:linear-gradient(135deg,rgba(10,10,10,.7) 0%,rgba(10,10,10,.3) 50%,rgba(10,10,10,.6) 100%),url('https://images.unsplash.com/photo-1500595046743-cd271d694d30?w=1600&q=80') center/cover no-repeat;transform:scale(1.02);animation:heroZoom 20s ease-in-out infinite alternate}
 @keyframes heroZoom{from{transform:scale(1.02)}to{transform:scale(1.08)}}
 .hero-content{position:relative;z-index:2;max-width:1280px;margin:0 auto;padding:70px 24px 40px;display:grid;grid-template-columns:1fr 380px;gap:40px;align-items:center;height:100%}
 .hero-text h1{font-family:'Libre Baskerville',serif;font-size:clamp(36px,4.5vw,60px);font-weight:900;color:var(--cream);line-height:1.08;margin-bottom:18px;text-shadow:2px 4px 20px rgba(0,0,0,.5)}
@@ -386,7 +386,7 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
 .lt-tab-desc{font-size:9px;font-weight:400;display:block;letter-spacing:.04em;margin-top:2px;opacity:.8;text-transform:none}
 @keyframes ccFadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
 .cc-animate{animation:ccFadeIn .35s ease}
-@media(max-width:1100px){.home-3col{grid-template-columns:180px 1fr 180px}}
+@media(max-width:1100px){.home-3col{grid-template-columns:1fr!important}.home-sidebar{display:none!important}.mobile-ad-strips{display:block}}
 /* old breakpoints removed — see consolidated below */
 
 /* ── Mobile Ad Strips ───────────────────────────────── */
