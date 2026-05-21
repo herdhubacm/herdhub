@@ -6,39 +6,39 @@
   <title>Herd Hub Digital Catalog Generator</title>
   <link rel="icon" type="image/png" href="/logo.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Oswald:wght@400;600;700&family=Source+Serif+4:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     *,*::before,*::after{box-sizing:border-box}
     :root{
       --dark-brown:#0A0A0A;--rust:#8B3214;--gold:#C9A96E;--cream:#F5EFE0;
       --light-tan:#E8DCC8;--tan:#C4A882;--warm-white:#FAF6EF;--sage:#7A8C6E;
     }
-    body{font-family:'Source Serif 4',serif;background:var(--warm-white);margin:0;padding:0;color:var(--dark-brown)}
+    body{font-family:'Libre Baskerville',serif;background:var(--warm-white);margin:0;padding:0;color:var(--dark-brown)}
     header{background:var(--dark-brown);padding:16px 24px;display:flex;align-items:center;gap:16px}
-    header h1{font-family:'Playfair Display',serif;font-size:22px;font-weight:900;color:var(--cream);margin:0}
+    header h1{font-family:'Libre Baskerville',serif;font-size:22px;font-weight:900;color:var(--cream);margin:0}
     header span{color:var(--gold)}
-    header p{font-size:12px;color:rgba(245,239,224,.6);margin:0;font-family:'Oswald',sans-serif;letter-spacing:.08em}
+    header p{font-size:12px;color:rgba(245,239,224,.6);margin:0;font-family:'Inter',sans-serif;letter-spacing:.08em}
     .container{max-width:1100px;margin:0 auto;padding:32px 24px}
     .card{background:white;border:1px solid var(--light-tan);border-radius:8px;padding:24px;margin-bottom:20px}
-    label{font-size:12px;font-weight:600;color:var(--dark-brown);display:block;margin-bottom:5px;font-family:'Oswald',sans-serif;letter-spacing:.06em;text-transform:uppercase}
-    input,textarea,select{width:100%;padding:10px 12px;border:1.5px solid var(--light-tan);border-radius:4px;font-family:'Source Serif 4',serif;font-size:14px;color:var(--dark-brown);outline:none;background:white;margin-bottom:16px}
+    label{font-size:12px;font-weight:600;color:var(--dark-brown);display:block;margin-bottom:5px;font-family:'Inter',sans-serif;letter-spacing:.06em;text-transform:uppercase}
+    input,textarea,select{width:100%;padding:10px 12px;border:1.5px solid var(--light-tan);border-radius:4px;font-family:'Libre Baskerville',serif;font-size:14px;color:var(--dark-brown);outline:none;background:white;margin-bottom:16px}
     input:focus,textarea:focus{border-color:var(--rust)}
     .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-    .btn{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;border-radius:4px;font-family:'Oswald',sans-serif;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;border:none;transition:all .15s}
+    .btn{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;border-radius:4px;font-family:'Inter',sans-serif;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;border:none;transition:all .15s}
     .btn-primary{background:var(--rust);color:white}
     .btn-primary:hover{background:#7a2b10}
     .btn-gold{background:var(--gold);color:var(--dark-brown)}
     .btn-gold:hover{background:#b8944f}
     .btn-ghost{background:transparent;color:var(--dark-brown);border:1.5px solid var(--light-tan)}
-    h2{font-family:'Playfair Display',serif;font-size:20px;font-weight:900;color:var(--dark-brown);margin:0 0 16px}
-    h3{font-family:'Oswald',sans-serif;font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--rust);margin:0 0 12px}
+    h2{font-family:'Libre Baskerville',serif;font-size:20px;font-weight:900;color:var(--dark-brown);margin:0 0 16px}
+    h3{font-family:'Inter',sans-serif;font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--rust);margin:0 0 12px}
     .listing-row{display:flex;gap:12px;background:var(--warm-white);border:1px solid var(--light-tan);border-radius:6px;padding:12px;margin-bottom:8px;align-items:center}
     .listing-row img{width:72px;height:56px;object-fit:cover;border-radius:4px;background:var(--light-tan);flex-shrink:0}
     .listing-row .info{flex:1;min-width:0}
     .listing-row .info .title{font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .listing-row .info .meta{font-size:12px;color:#888;margin-top:2px}
-    .listing-row .price{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--rust);white-space:nowrap}
-    .tag{display:inline-block;background:var(--cream);border:1px solid var(--light-tan);border-radius:12px;padding:2px 10px;font-size:11px;font-family:'Oswald',sans-serif;margin-right:4px;margin-bottom:4px}
+    .listing-row .price{font-family:'Libre Baskerville',serif;font-size:16px;font-weight:700;color:var(--rust);white-space:nowrap}
+    .tag{display:inline-block;background:var(--cream);border:1px solid var(--light-tan);border-radius:12px;padding:2px 10px;font-size:11px;font-family:'Inter',sans-serif;margin-right:4px;margin-bottom:4px}
     #preview{display:none}
 
     /* ── Print / PDF Styles ── */
@@ -51,28 +51,28 @@
     }
 
     /* ── PDF Page Template ── */
-    .pdf-page{width:8.5in;min-height:11in;background:white;margin:0 auto;padding:0.6in 0.65in;position:relative;font-family:'Source Serif 4',serif}
+    .pdf-page{width:8.5in;min-height:11in;background:white;margin:0 auto;padding:0.6in 0.65in;position:relative;font-family:'Libre Baskerville',serif}
     .pdf-header{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #0A0A0A;padding-bottom:16px;margin-bottom:24px}
-    .pdf-logo-text{font-family:'Playfair Display',serif;font-size:28px;font-weight:900;color:#0A0A0A}
+    .pdf-logo-text{font-family:'Libre Baskerville',serif;font-size:28px;font-weight:900;color:#0A0A0A}
     .pdf-logo-text span{color:#C9A96E}
-    .pdf-tagline{font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:#888;margin-top:3px}
-    .pdf-ranch-name{font-family:'Playfair Display',serif;font-size:22px;font-weight:900;color:#0A0A0A;text-align:right}
-    .pdf-ranch-contact{font-family:'Oswald',sans-serif;font-size:11px;color:#666;text-align:right;margin-top:4px;line-height:1.8}
+    .pdf-tagline{font-family:'Inter',sans-serif;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:#888;margin-top:3px}
+    .pdf-ranch-name{font-family:'Libre Baskerville',serif;font-size:22px;font-weight:900;color:#0A0A0A;text-align:right}
+    .pdf-ranch-contact{font-family:'Inter',sans-serif;font-size:11px;color:#666;text-align:right;margin-top:4px;line-height:1.8}
     .pdf-hero{background:#0A0A0A;border-radius:6px;padding:20px 24px;margin-bottom:20px;display:flex;gap:20px;align-items:center}
     .pdf-hero-text{flex:1}
-    .pdf-hero-eyebrow{font-family:'Oswald',sans-serif;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:#C9A96E;margin-bottom:6px}
-    .pdf-hero-title{font-family:'Playfair Display',serif;font-size:20px;font-weight:900;color:#F5EFE0;line-height:1.3;margin-bottom:8px}
+    .pdf-hero-eyebrow{font-family:'Inter',sans-serif;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:#C9A96E;margin-bottom:6px}
+    .pdf-hero-title{font-family:'Libre Baskerville',serif;font-size:20px;font-weight:900;color:#F5EFE0;line-height:1.3;margin-bottom:8px}
     .pdf-hero-desc{font-size:12px;color:rgba(245,239,224,.7);line-height:1.6}
     .pdf-listing-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
     .pdf-listing-card{border:1px solid #E8DCC8;border-radius:5px;overflow:hidden}
     .pdf-listing-img{width:100%;height:140px;object-fit:cover;background:#E8DCC8;display:flex;align-items:center;justify-content:center;font-size:32px}
     .pdf-listing-body{padding:10px 12px}
-    .pdf-listing-cat{font-family:'Oswald',sans-serif;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#8B3214;margin-bottom:3px}
-    .pdf-listing-title{font-family:'Playfair Display',serif;font-size:13px;font-weight:700;color:#0A0A0A;margin-bottom:3px;line-height:1.3}
+    .pdf-listing-cat{font-family:'Inter',sans-serif;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#8B3214;margin-bottom:3px}
+    .pdf-listing-title{font-family:'Libre Baskerville',serif;font-size:13px;font-weight:700;color:#0A0A0A;margin-bottom:3px;line-height:1.3}
     .pdf-listing-meta{font-size:10px;color:#888;margin-bottom:5px}
-    .pdf-listing-price{font-family:'Playfair Display',serif;font-size:14px;font-weight:700;color:#8B3214}
+    .pdf-listing-price{font-family:'Libre Baskerville',serif;font-size:14px;font-weight:700;color:#8B3214}
     .pdf-listing-desc{font-size:10px;color:#555;line-height:1.5;margin-top:4px}
-    .pdf-footer{position:absolute;bottom:0.4in;left:0.65in;right:0.65in;border-top:1px solid #E8DCC8;padding-top:10px;display:flex;justify-content:space-between;font-family:'Oswald',sans-serif;font-size:9px;color:#aaa;letter-spacing:.05em}
+    .pdf-footer{position:absolute;bottom:0.4in;left:0.65in;right:0.65in;border-top:1px solid #E8DCC8;padding-top:10px;display:flex;justify-content:space-between;font-family:'Inter',sans-serif;font-size:9px;color:#aaa;letter-spacing:.05em}
   </style>
 </head>
 <body>
@@ -257,7 +257,7 @@ function generateCatalog() {
         </div>
       </div>` : ''}
 
-      <div style="font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--rust);margin-bottom:14px">Current Listings &mdash; ${new Date().toLocaleDateString('en-US',{month:'long',year:'numeric'})}</div>
+      <div style="font-family:'Inter',sans-serif;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--rust);margin-bottom:14px">Current Listings &mdash; ${new Date().toLocaleDateString('en-US',{month:'long',year:'numeric'})}</div>
 
       <div class="pdf-listing-grid">${listingsHtml}</div>
 

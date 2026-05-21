@@ -7,45 +7,45 @@
 <meta name="description" content="Track ranch income, expenses, and profit. Break-even calculators, budget tracking, and tax year exports for cattle operations.">
 <meta name="theme-color" content="#0A0A0A">
 <link rel="icon" type="image/png" href="/logo.png">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Oswald:wght@300;400;500;600;700&family=Source+Serif+4:wght@300;400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{--dark:#000000;--brown:#0A0A0A;--rust:#8B3214;--rust2:#A63D1A;--gold:#C9A96E;--gold2:#E8C87A;--cream:#F5EFE0;--tan:#C4A882;--muted:#8C7560;--light:#E8DCC8;--danger:#C0392B;--warn:#D4820A;--good:#2E7D4F;--sage:#6B7C5E}
 html{scroll-behavior:smooth}
-body{font-family:'Source Serif 4',serif;background:var(--dark);color:var(--cream);min-height:100vh;overflow-x:hidden}
+body{font-family:'Libre Baskerville',serif;background:var(--dark);color:var(--cream);min-height:100vh;overflow-x:hidden}
 body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:0;opacity:.6}
 
 .site-header{background:var(--brown);border-bottom:2px solid var(--rust);padding:0 40px;display:flex;align-items:center;justify-content:space-between;height:64px;position:sticky;top:0;z-index:100}
-.logo{font-family:'Playfair Display',serif;font-size:22px;font-weight:900;color:var(--cream);text-decoration:none}.logo span{color:var(--gold)}
-.back-link{font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--tan);text-decoration:none;transition:color .2s}.back-link:hover{color:var(--gold)}
+.logo{font-family:'Libre Baskerville',serif;font-size:22px;font-weight:900;color:var(--cream);text-decoration:none}.logo span{color:var(--gold)}
+.back-link{font-family:'Inter',sans-serif;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--tan);text-decoration:none;transition:color .2s}.back-link:hover{color:var(--gold)}
 
 .container{max-width:1100px;margin:0 auto;padding:24px 40px 80px;position:relative;z-index:1}
 
 .auth-gate{text-align:center;padding:120px 40px;position:relative;z-index:1}
-.auth-gate h1{font-family:'Playfair Display',serif;font-size:48px;font-weight:900;color:var(--cream);margin-bottom:12px}
+.auth-gate h1{font-family:'Libre Baskerville',serif;font-size:48px;font-weight:900;color:var(--cream);margin-bottom:12px}
 .auth-gate h1 em{font-style:italic;color:var(--gold)}
 .auth-gate p{font-size:16px;color:var(--muted);margin-bottom:32px}
-.auth-gate a{display:inline-block;font-family:'Oswald',sans-serif;font-size:14px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;background:var(--rust);color:white;padding:16px 40px;border-radius:4px;text-decoration:none}
+.auth-gate a{display:inline-block;font-family:'Inter',sans-serif;font-size:14px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;background:var(--rust);color:white;padding:16px 40px;border-radius:4px;text-decoration:none}
 
 /* Section */
 .section{margin-bottom:40px}
-.section-eyebrow{font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--rust2);margin-bottom:6px}
-.section-title{font-family:'Playfair Display',serif;font-size:26px;font-weight:900;color:var(--cream);margin-bottom:6px}
+.section-eyebrow{font-family:'Inter',sans-serif;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--rust2);margin-bottom:6px}
+.section-title{font-family:'Libre Baskerville',serif;font-size:26px;font-weight:900;color:var(--cream);margin-bottom:6px}
 .section-desc{font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:20px}
 
 .card{background:rgba(44,26,14,.6);border:1px solid rgba(201,169,110,.12);border-radius:8px;padding:24px;margin-bottom:16px}
-.card-title{font-family:'Oswald',sans-serif;font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:16px}
+.card-title{font-family:'Inter',sans-serif;font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:16px}
 
 /* Stats */
 .stats-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
 .stat-card{background:rgba(44,26,14,.6);border:1px solid rgba(201,169,110,.12);border-radius:8px;padding:18px;text-align:center}
-.stat-card .num{font-family:'Playfair Display',serif;font-size:30px;font-weight:700;color:var(--gold)}
+.stat-card .num{font-family:'Libre Baskerville',serif;font-size:30px;font-weight:700;color:var(--gold)}
 .stat-card .num.profit{color:var(--good)}.stat-card .num.loss{color:var(--danger)}
-.stat-card .lbl{font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-top:4px}
+.stat-card .lbl{font-family:'Inter',sans-serif;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-top:4px}
 
 /* Buttons */
-.btn{font-family:'Oswald',sans-serif;font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:10px 20px;border-radius:4px;border:none;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:6px}
+.btn{font-family:'Inter',sans-serif;font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:10px 20px;border-radius:4px;border:none;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:6px}
 .btn-primary{background:var(--rust);color:white}.btn-primary:hover{background:var(--rust2)}
 .btn-ghost{background:transparent;color:var(--tan);border:1px solid rgba(201,169,110,.3)}.btn-ghost:hover{border-color:var(--gold);color:var(--gold)}
 .btn-sm{padding:6px 12px;font-size:11px}
@@ -54,8 +54,8 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 
 /* Fields */
 .field{margin-bottom:14px}
-.field label{display:block;font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--tan);margin-bottom:5px}
-.field input,.field select,.field textarea{width:100%;padding:10px 12px;background:rgba(28,15,6,.6);border:1px solid rgba(201,169,110,.2);border-radius:4px;color:var(--cream);font-family:'Source Serif 4',serif;font-size:14px}
+.field label{display:block;font-family:'Inter',sans-serif;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--tan);margin-bottom:5px}
+.field input,.field select,.field textarea{width:100%;padding:10px 12px;background:rgba(28,15,6,.6);border:1px solid rgba(201,169,110,.2);border-radius:4px;color:var(--cream);font-family:'Libre Baskerville',serif;font-size:14px}
 .field input:focus,.field select:focus{outline:none;border-color:var(--gold)}
 .field select option{background:var(--brown);color:var(--cream)}
 .field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -64,24 +64,24 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 
 /* Table */
 .tx-table{width:100%;border-collapse:collapse}
-.tx-table th{font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-align:left;padding:10px;border-bottom:1px solid rgba(201,169,110,.15);cursor:pointer}
+.tx-table th{font-family:'Inter',sans-serif;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-align:left;padding:10px;border-bottom:1px solid rgba(201,169,110,.15);cursor:pointer}
 .tx-table td{padding:10px;font-size:13px;border-bottom:1px solid rgba(201,169,110,.06)}
 .tx-table tr.income td{background:rgba(46,125,79,.04)}.tx-table tr.expense td{background:rgba(192,57,43,.04)}
 .tx-table tr:hover td{background:rgba(201,169,110,.06)}
 
 /* Budget bars */
 .budget-row{margin-bottom:14px}
-.budget-label{display:flex;justify-content:space-between;font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:.06em;color:var(--tan);margin-bottom:4px}
+.budget-label{display:flex;justify-content:space-between;font-family:'Inter',sans-serif;font-size:11px;letter-spacing:.06em;color:var(--tan);margin-bottom:4px}
 .budget-bar{height:20px;background:rgba(28,15,6,.6);border-radius:4px;overflow:hidden;position:relative}
 .budget-fill{height:100%;border-radius:4px;transition:width .4s}
 .budget-fill.under{background:linear-gradient(90deg,var(--rust),var(--gold))}.budget-fill.over{background:linear-gradient(90deg,var(--danger),#e74c3c)}
-.budget-pct{position:absolute;right:8px;top:2px;font-family:'Oswald',sans-serif;font-size:10px;color:white;font-weight:600}
+.budget-pct{position:absolute;right:8px;top:2px;font-family:'Inter',sans-serif;font-size:10px;color:white;font-weight:600}
 
 /* Result stat cards */
 .result-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin:20px 0}
 .result-stat{background:rgba(28,15,6,.5);border:1px solid rgba(201,169,110,.12);border-radius:6px;padding:18px;text-align:center}
-.result-stat .lbl{font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
-.result-stat .val{font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:var(--gold)}
+.result-stat .lbl{font-family:'Inter',sans-serif;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.result-stat .val{font-family:'Libre Baskerville',serif;font-size:24px;font-weight:700;color:var(--gold)}
 .result-stat .sub{font-size:12px;color:var(--tan);margin-top:2px}
 .result-stat.profit .val{color:var(--good)}.result-stat.loss .val{color:var(--danger)}
 
@@ -95,7 +95,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 
 /* Tabs */
 .tab-bar{display:flex;gap:4px;border-bottom:1px solid rgba(201,169,110,.12);margin-bottom:20px;overflow-x:auto}
-.tab-btn{font-family:'Oswald',sans-serif;font-size:12px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;padding:10px 18px;background:transparent;border:none;border-bottom:2px solid transparent;color:var(--muted);cursor:pointer;transition:all .2s;white-space:nowrap}
+.tab-btn{font-family:'Inter',sans-serif;font-size:12px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;padding:10px 18px;background:transparent;border:none;border-bottom:2px solid transparent;color:var(--muted);cursor:pointer;transition:all .2s;white-space:nowrap}
 .tab-btn:hover{color:var(--cream)}.tab-btn.active{color:var(--gold);border-bottom-color:var(--gold)}
 .tab-content{display:none}.tab-content.active{display:block}
 
@@ -103,13 +103,13 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;align-items:flex-start;justify-content:center;padding:40px 20px;overflow-y:auto}
 .modal-overlay.open{display:flex}
 .modal-box{background:var(--brown);border:1px solid rgba(201,169,110,.2);border-radius:10px;padding:32px;max-width:560px;width:100%;position:relative;margin:auto}
-.modal-box h3{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--cream);margin-bottom:20px}
+.modal-box h3{font-family:'Libre Baskerville',serif;font-size:22px;font-weight:700;color:var(--cream);margin-bottom:20px}
 .modal-close{position:absolute;top:12px;right:16px;background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer}.modal-close:hover{color:var(--cream)}
 
 /* Year selector */
 .year-select{display:flex;align-items:center;gap:12px;margin-bottom:20px}
-.year-select label{font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--tan)}
-.year-select select{padding:8px 14px;background:rgba(28,15,6,.6);border:1px solid rgba(201,169,110,.2);border-radius:4px;color:var(--cream);font-family:'Oswald',sans-serif;font-size:13px}
+.year-select label{font-family:'Inter',sans-serif;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--tan)}
+.year-select select{padding:8px 14px;background:rgba(28,15,6,.6);border:1px solid rgba(201,169,110,.2);border-radius:4px;color:var(--cream);font-family:'Inter',sans-serif;font-size:13px}
 
 /* Disclaimer */
 .disclaimer{margin-top:40px;padding:16px 20px;background:rgba(44,26,14,.4);border:1px solid rgba(201,169,110,.08);border-radius:6px;font-size:13px;color:var(--muted);line-height:1.7}
@@ -149,7 +149,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 <div class="container">
 
   <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:8px">
-    <h2 style="font-family:'Playfair Display',serif;font-size:28px;font-weight:900">Ranch <span style="color:var(--gold)">Finance</span></h2>
+    <h2 style="font-family:'Libre Baskerville',serif;font-size:28px;font-weight:900">Ranch <span style="color:var(--gold)">Finance</span></h2>
     <div class="year-select">
       <label>Tax Year:</label>
       <select id="year-sel" onchange="loadAll()"></select>
@@ -197,10 +197,10 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px">
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
         <input type="text" class="field" id="ledger-search" placeholder="Search..." style="padding:8px 12px;width:200px;margin:0;background:rgba(28,15,6,.6);border:1px solid rgba(201,169,110,.2);border-radius:4px;color:var(--cream);font-size:13px" oninput="renderLedger()">
-        <select id="ledger-type" style="padding:8px;background:rgba(28,15,6,.6);border:1px solid rgba(201,169,110,.2);border-radius:4px;color:var(--cream);font-family:'Oswald',sans-serif;font-size:11px" onchange="renderLedger()">
+        <select id="ledger-type" style="padding:8px;background:rgba(28,15,6,.6);border:1px solid rgba(201,169,110,.2);border-radius:4px;color:var(--cream);font-family:'Inter',sans-serif;font-size:11px" onchange="renderLedger()">
           <option value="">All Types</option><option value="income">Income</option><option value="expense">Expense</option>
         </select>
-        <select id="ledger-cat" style="padding:8px;background:rgba(28,15,6,.6);border:1px solid rgba(201,169,110,.2);border-radius:4px;color:var(--cream);font-family:'Oswald',sans-serif;font-size:11px" onchange="renderLedger()">
+        <select id="ledger-cat" style="padding:8px;background:rgba(28,15,6,.6);border:1px solid rgba(201,169,110,.2);border-radius:4px;color:var(--cream);font-family:'Inter',sans-serif;font-size:11px" onchange="renderLedger()">
           <option value="">All Categories</option>
         </select>
       </div>
@@ -311,7 +311,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
       <div class="field"><label>Weight (lbs)</label><input type="number" id="tx-wt" step="0.1"></div>
       <div class="field"><label>Price/CWT ($)</label><input type="number" id="tx-cwt" step="0.01"></div>
     </div>
-    <div class="field"><label>Notes</label><textarea id="tx-notes" rows="2" style="width:100%;padding:10px;background:rgba(28,15,6,.6);border:1px solid rgba(201,169,110,.2);border-radius:4px;color:var(--cream);font-family:'Source Serif 4',serif;font-size:14px;resize:vertical"></textarea></div>
+    <div class="field"><label>Notes</label><textarea id="tx-notes" rows="2" style="width:100%;padding:10px;background:rgba(28,15,6,.6);border:1px solid rgba(201,169,110,.2);border-radius:4px;color:var(--cream);font-family:'Libre Baskerville',serif;font-size:14px;resize:vertical"></textarea></div>
     <div style="display:flex;gap:10px;margin-top:16px">
       <button class="btn btn-primary" onclick="saveTx()">Save</button>
       <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
@@ -376,7 +376,7 @@ function renderDashboard(){
   donutChart=new Chart(document.getElementById('donut-chart'),{
     type:'doughnut',
     data:{labels:['Income','Expenses'],datasets:[{data:[s.total_income,s.total_expenses],backgroundColor:['rgba(46,125,79,.7)','rgba(192,57,43,.7)'],borderColor:['#2E7D4F','#C0392B'],borderWidth:2}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#C4A882',font:{family:'Oswald',size:11}}}}}
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#C4A882',font:{family:'Inter',size:11}}}}}
   });
 
   // Monthly bar
@@ -394,8 +394,8 @@ function renderDashboard(){
       {label:'Income',data:mInc,backgroundColor:'rgba(46,125,79,.6)',borderRadius:3},
       {label:'Expenses',data:mExp,backgroundColor:'rgba(192,57,43,.6)',borderRadius:3}
     ]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#C4A882',font:{family:'Oswald',size:11}}},tooltip:{backgroundColor:'#0A0A0A',titleColor:'#F5EFE0',bodyColor:'#C9A96E'}},
-    scales:{x:{ticks:{color:'#8C7560',font:{family:'Oswald',size:10}},grid:{color:'rgba(201,169,110,.06)'}},y:{ticks:{color:'#8C7560',font:{family:'Oswald',size:10},callback:v=>'$'+commas(v)},grid:{color:'rgba(201,169,110,.06)'}}}}
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#C4A882',font:{family:'Inter',size:11}}},tooltip:{backgroundColor:'#0A0A0A',titleColor:'#F5EFE0',bodyColor:'#C9A96E'}},
+    scales:{x:{ticks:{color:'#8C7560',font:{family:'Inter',size:10}},grid:{color:'rgba(201,169,110,.06)'}},y:{ticks:{color:'#8C7560',font:{family:'Inter',size:10},callback:v=>'$'+commas(v)},grid:{color:'rgba(201,169,110,.06)'}}}}
   });
 
   // Top cats
