@@ -337,7 +337,8 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
 /* Compact 5-col listing grid */
 .compact-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;width:100%;box-sizing:border-box;padding:0 16px}
 .compact-card{background:white;border-radius:4px;overflow:hidden;border:1px solid var(--light-tan);cursor:pointer;transition:box-shadow .15s}
-.compact-card:hover{box-shadow:0 3px 12px rgba(10,10,10,.1)}
+.compact-card{transition:transform .2s ease,box-shadow .2s ease}
+.compact-card:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(10,10,10,.15)}
 .cc-img{height:140px;display:flex;align-items:center;justify-content:center;font-size:22px;background:var(--cream);position:relative;overflow:hidden}
 .cc-img img{width:100%;height:100%;object-fit:cover;object-position:center top;position:absolute;inset:0}
 .cc-badge{position:absolute;top:5px;left:5px;font-family:'Inter',sans-serif;font-size:8px;letter-spacing:.06em;text-transform:uppercase;padding:2px 5px;border-radius:2px;z-index:1}
@@ -411,7 +412,17 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
   .mobile-ad-card-title{font-family:'Libre Baskerville',serif;font-size:12px;font-weight:700;color:var(--dark-brown);line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
   .mobile-ad-card-loc{font-size:10px;color:#aaa;margin-top:4px}
 }
-@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}.hero-bg{animation:none!important}.toast{transition:none!important}}
+/* Micro-animations */
+.fade-up{opacity:0;transform:translateY(20px);transition:opacity .5s ease,transform .5s ease}
+.fade-up.visible{opacity:1;transform:translateY(0)}
+header{transition:background .3s ease,backdrop-filter .3s ease,box-shadow .3s ease}
+header.scrolled{background:rgba(10,10,10,.92)!important;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:0 1px 0 rgba(201,169,110,.1)}
+.hero-text h1{animation:heroSlideUp .8s ease forwards;animation-delay:.1s;opacity:0}
+.hero-text p{animation:heroSlideUp .8s ease forwards;animation-delay:.25s;opacity:0}
+.hero-btns{animation:heroSlideUp .8s ease forwards;animation-delay:.4s;opacity:0}
+@keyframes heroSlideUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+[class*="btn"]:active:not(:disabled){transform:scale(.97)!important;opacity:.9}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}.hero-bg{animation:none!important}.toast{transition:none!important}.fade-up{opacity:1;transform:none;transition:none}.hero-text h1,.hero-text p,.hero-btns{animation:none;opacity:1}}
 @media(prefers-contrast:more){:focus-visible{outline:4px solid #000!important;outline-offset:3px!important}.btn-primary{border:2px solid #000!important}.btn-secondary{border:2px solid #000!important}}
 
 /* ── Newsletter + Beef Boxes Banner ─────────────────── */
@@ -3905,6 +3916,64 @@ document.addEventListener('DOMContentLoaded', () => {
   if (sharedListingId) {
     setTimeout(() => openListing(sharedListingId), 800);
   }
+
+  // ── Micro-animations ──────────────────────────────────
+  if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+
+    // 1. Stat counter animation
+    function animateCounter(el, target, duration, suffix) {
+      if (!el) return;
+      const start = performance.now();
+      function update(now) {
+        const progress = Math.min((now - start) / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 4);
+        const current = Math.round(target * eased);
+        el.textContent = current === target && suffix ? current + suffix : String(current);
+        if (progress < 1) requestAnimationFrame(update);
+      }
+      requestAnimationFrame(update);
+    }
+    setTimeout(() => {
+      animateCounter(document.getElementById('stat-members'), 350, 1500, '+');
+      // stat-total is loaded from API, skip it
+      animateCounter(document.getElementById('stat-sales'), 25, 1400, 'K+');
+      // States — no ID, find by label text
+      document.querySelectorAll('.stat-item').forEach(item => {
+        const label = item.querySelector('.label');
+        const num = item.querySelector('.num');
+        if (label && label.textContent.includes('States') && num && !num.id) {
+          animateCounter(num, 50, 1200, '');
+        }
+      });
+    }, 300);
+
+    // 2. Fade-up on scroll
+    const fadeObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          fadeObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+    document.querySelectorAll('.tool-card').forEach((card, i) => {
+      card.classList.add('fade-up');
+      card.style.transitionDelay = (i * 80) + 'ms';
+      fadeObserver.observe(card);
+    });
+    document.querySelectorAll('.hcs-title, .hcs-eyebrow, .home-center-section > .section-header').forEach(el => {
+      el.classList.add('fade-up');
+      fadeObserver.observe(el);
+    });
+
+    // 3. Glass nav on scroll
+    window.addEventListener('scroll', () => {
+      const header = document.querySelector('header');
+      if (header) header.classList.toggle('scrolled', window.scrollY > 60);
+    }, { passive: true });
+
+  } // end reduced-motion check
 });
 
 // ── Event Delegation ───────────────────────────────────
