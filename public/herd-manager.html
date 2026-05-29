@@ -880,11 +880,11 @@ document.addEventListener('DOMContentLoaded', initAuth);
 function makePDF(title) {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
-  doc.setFillColor(44, 26, 14); doc.rect(0, 0, 210, 20, 'F');
+  doc.setFillColor(10, 10, 10); doc.rect(0, 0, 210, 20, 'F');
   doc.setFillColor(201, 169, 110); doc.rect(0, 20, 210, 2, 'F');
   doc.setTextColor(245, 239, 224); doc.setFontSize(14); doc.text('HERD HUB', 14, 13);
   doc.setFontSize(8); doc.text('American Cattle Marketplace', 50, 13);
-  doc.setTextColor(44, 26, 14); doc.setFontSize(16); doc.text(title, 14, 34);
+  doc.setTextColor(10, 10, 10); doc.setFontSize(16); doc.text(title, 14, 34);
   doc.setFontSize(9); doc.setTextColor(120, 120, 120);
   doc.text('Generated: ' + new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString(), 14, 40);
   return { doc, y: 48 };
@@ -917,7 +917,7 @@ async function exportAnimalPDF(id) {
     let y = y0;
     const age = a.birth_date ? calcAge(a.birth_date) : '—';
     const lastW = a.weights && a.weights.length ? parseFloat(a.weights[0].weight).toLocaleString() + ' lbs' : '—';
-    doc.setFontSize(11); doc.setTextColor(44, 26, 14);
+    doc.setFontSize(11); doc.setTextColor(10, 10, 10);
     doc.text((a.name || a.tag_id || 'Unnamed'), 14, y); y += 8;
     const details = [
       ['Tag ID', a.tag_id || '—'],
@@ -937,12 +937,12 @@ async function exportAnimalPDF(id) {
     ];
     y = addTable(doc, y, ['Field', 'Value'], details);
     if (a.weights && a.weights.length) {
-      y += 4; doc.setFontSize(10); doc.setTextColor(44, 26, 14); doc.text('Weight History', 14, y); y += 6;
+      y += 4; doc.setFontSize(10); doc.setTextColor(10, 10, 10); doc.text('Weight History', 14, y); y += 6;
       const wRows = a.weights.slice(0, 20).map(w => [fmtDate(w.weigh_date), parseFloat(w.weight).toLocaleString() + ' lbs', w.notes || '']);
       y = addTable(doc, y, ['Date', 'Weight', 'Notes'], wRows);
     }
     if (a.health_records && a.health_records.length) {
-      y += 4; doc.setFontSize(10); doc.setTextColor(44, 26, 14); doc.text('Health Records', 14, y); y += 6;
+      y += 4; doc.setFontSize(10); doc.setTextColor(10, 10, 10); doc.text('Health Records', 14, y); y += 6;
       const hRows = a.health_records.slice(0, 20).map(h => [fmtDate(h.event_date), h.event_type || '', h.product || '', h.cost ? '$' + h.cost : '']);
       y = addTable(doc, y, ['Date', 'Event', 'Product', 'Cost'], hRows);
     }

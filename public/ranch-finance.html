@@ -656,11 +656,11 @@ document.getElementById('tx-modal').addEventListener('click',e=>{if(e.target.id=
 function makePDF(title) {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
-  doc.setFillColor(44, 26, 14); doc.rect(0, 0, 210, 20, 'F');
+  doc.setFillColor(10, 10, 10); doc.rect(0, 0, 210, 20, 'F');
   doc.setFillColor(201, 169, 110); doc.rect(0, 20, 210, 2, 'F');
   doc.setTextColor(245, 239, 224); doc.setFontSize(14); doc.text('HERD HUB', 14, 13);
   doc.setFontSize(8); doc.text('American Cattle Marketplace', 50, 13);
-  doc.setTextColor(44, 26, 14); doc.setFontSize(16); doc.text(title, 14, 34);
+  doc.setTextColor(10, 10, 10); doc.setFontSize(16); doc.text(title, 14, 34);
   doc.setFontSize(9); doc.setTextColor(120, 120, 120);
   doc.text('Generated: ' + new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString(), 14, 40);
   return { doc, y: 48 };
@@ -690,7 +690,7 @@ function exportPnLPDF() {
   const s = summaryData;
   const { doc, y: y0 } = makePDF('Ranch Financial Report — ' + getYear());
   let y = y0;
-  doc.setFontSize(11); doc.setTextColor(44, 26, 14);
+  doc.setFontSize(11); doc.setTextColor(10, 10, 10);
   doc.text('Tax Year: ' + getYear(), 14, y); y += 10;
   // Summary stats
   const summaryRows = [
@@ -703,14 +703,14 @@ function exportPnLPDF() {
   // Income by category
   const incCats = s.by_category.filter(c => c.type === 'income');
   if (incCats.length) {
-    y += 4; doc.setFontSize(10); doc.setTextColor(44, 26, 14); doc.text('Income by Category', 14, y); y += 6;
+    y += 4; doc.setFontSize(10); doc.setTextColor(10, 10, 10); doc.text('Income by Category', 14, y); y += 6;
     const incRows = incCats.map(c => [c.category, '$' + commas(Math.round(parseFloat(c.total)))]);
     y = addTable(doc, y, ['Category', 'Total'], incRows);
   }
   // Expenses by category
   const expCats = s.by_category.filter(c => c.type === 'expense');
   if (expCats.length) {
-    y += 4; doc.setFontSize(10); doc.setTextColor(44, 26, 14); doc.text('Expenses by Category', 14, y); y += 6;
+    y += 4; doc.setFontSize(10); doc.setTextColor(10, 10, 10); doc.text('Expenses by Category', 14, y); y += 6;
     const expRows = expCats.map(c => [c.category, '$' + commas(Math.round(parseFloat(c.total)))]);
     y = addTable(doc, y, ['Category', 'Total'], expRows);
   }

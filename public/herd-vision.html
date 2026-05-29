@@ -1678,7 +1678,7 @@ function searchBulls() {
 function makePDF(title) {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
-  doc.setFillColor(44, 26, 14);
+  doc.setFillColor(10, 10, 10);
   doc.rect(0, 0, 210, 20, 'F');
   doc.setFillColor(201, 169, 110);
   doc.rect(0, 20, 210, 2, 'F');
@@ -1687,7 +1687,7 @@ function makePDF(title) {
   doc.text('HERD HUB', 14, 13);
   doc.setFontSize(8);
   doc.text('American Cattle Marketplace', 50, 13);
-  doc.setTextColor(44, 26, 14);
+  doc.setTextColor(10, 10, 10);
   doc.setFontSize(16);
   doc.text(title, 14, 34);
   doc.setFontSize(9);
@@ -1731,7 +1731,7 @@ function exportComparisonPDF() {
   let y = y0;
   const b1n = document.getElementById('res-b1-name').textContent || 'Bull A';
   const b2n = document.getElementById('res-b2-name').textContent || 'Bull B';
-  doc.setFontSize(11); doc.setTextColor(44, 26, 14);
+  doc.setFontSize(11); doc.setTextColor(10, 10, 10);
   doc.text('Comparing: ' + b1n + '  vs.  ' + b2n, 14, y); y += 10;
   const headers = ['Trait', b1n.slice(0,14), b2n.slice(0,14), 'Edge'];
   const rows = [];
@@ -1743,7 +1743,7 @@ function exportComparisonPDF() {
   const insights = [];
   document.querySelectorAll('.insight-box').forEach(el => { if (el.textContent.trim()) insights.push(el.textContent.trim()); });
   if (insights.length) {
-    doc.setFontSize(10); doc.setTextColor(44, 26, 14); doc.text('Key Insights', 14, y); y += 6;
+    doc.setFontSize(10); doc.setTextColor(10, 10, 10); doc.text('Key Insights', 14, y); y += 6;
     doc.setFontSize(8); doc.setTextColor(60, 60, 60);
     insights.forEach(ins => {
       if (y > 270) { doc.addPage(); y = 20; }
@@ -1760,7 +1760,7 @@ function exportWizardPDF() {
   let y = y0;
   const goalName = document.querySelector('.rec-goal-name')?.textContent || '';
   const goalDesc = document.querySelector('.rec-goal-desc')?.textContent || '';
-  if (goalName) { doc.setFontSize(11); doc.setTextColor(44, 26, 14); doc.text('Goal: ' + goalName, 14, y); y += 6; }
+  if (goalName) { doc.setFontSize(11); doc.setTextColor(10, 10, 10); doc.text('Goal: ' + goalName, 14, y); y += 6; }
   if (goalDesc) { doc.setFontSize(9); doc.setTextColor(80, 80, 80); const ls = doc.splitTextToSize(goalDesc, 180); doc.text(ls, 14, y); y += ls.length * 4 + 6; }
   const headers = ['Trait (EPD)', 'Priority', 'Target Range', 'Notes'];
   const rows = [];
@@ -1775,7 +1775,7 @@ function exportWizardPDF() {
   const warnings = [];
   document.querySelectorAll('.warning-box').forEach(el => { if (el.textContent.trim()) warnings.push(el.textContent.trim()); });
   if (warnings.length) {
-    doc.setFontSize(10); doc.setTextColor(44, 26, 14); doc.text('Warnings', 14, y); y += 6;
+    doc.setFontSize(10); doc.setTextColor(10, 10, 10); doc.text('Warnings', 14, y); y += 6;
     doc.setFontSize(8); doc.setTextColor(60, 60, 60);
     warnings.forEach(w => {
       if (y > 270) { doc.addPage(); y = 20; }
@@ -1786,7 +1786,7 @@ function exportWizardPDF() {
   const insights = [];
   document.querySelectorAll('.insight-good').forEach(el => { if (el.textContent.trim()) insights.push(el.textContent.trim()); });
   if (insights.length) {
-    y += 4; doc.setFontSize(10); doc.setTextColor(44, 26, 14); doc.text('Insights', 14, y); y += 6;
+    y += 4; doc.setFontSize(10); doc.setTextColor(10, 10, 10); doc.text('Insights', 14, y); y += 6;
     doc.setFontSize(8); doc.setTextColor(60, 60, 60);
     insights.forEach(ins => {
       if (y > 270) { doc.addPage(); y = 20; }
