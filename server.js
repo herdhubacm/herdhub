@@ -260,6 +260,32 @@ app.use('/api/genetics', limiter(100), require('./routes/genetics'));
 app.use('/api/ranch',    limiter(100), require('./routes/ranch'));
 app.use('/api/sales',    limiter(100), require('./routes/sales'));
 
+// ── GET /api/articles (public) ────────────────────────
+app.get('/api/articles', async (req, res) => {
+  try {
+    const limit = Math.min(Math.max(1, parseInt(req.query.limit) || 10), 50);
+    const category = req.query.category;
+    let sql = 'SELECT id, title, excerpt, category, image_url, author, created_at FROM articles WHERE published = true';
+    const params = [];
+    if (category) { sql += ' AND category = $1'; params.push(category); }
+    sql += ' ORDER BY created_at DESC LIMIT $' + (params.length + 1);
+    params.push(limit);
+    const { rows } = await query(sql, params);
+    res.json(rows);
+  } catch (e) { res.json([]); }
+});
+
+app.get('/api/articles/:id', async (req, res) => {
+  try {
+    const { rows } = await query(
+      'SELECT id, title, excerpt, body, category, image_url, author, created_at FROM articles WHERE id = $1 AND published = true',
+      [parseInt(req.params.id)]
+    );
+    if (!rows.length) return res.status(404).json({ error: 'Article not found' });
+    res.json(rows[0]);
+  } catch (e) { res.status(500).json({ error: 'Failed to load article' }); }
+});
+
 // ── GET /api/settings (public — stats bar) ───────────
 app.get('/api/settings', async (req, res) => {
   try {
