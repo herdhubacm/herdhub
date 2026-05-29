@@ -23,7 +23,7 @@
   };
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preload" as="image" href="https://images.unsplash.com/photo-1500595046743-cd271d694d30?w=1600&q=80" fetchpriority="high">
+<link rel="preload" as="image" href="/hero_mark.png" fetchpriority="high">
 <link rel="icon" type="image/png" href="/logo.png">
 <link rel="apple-touch-icon" href="/logo.png">
 <link rel="manifest" href="/manifest.json">
@@ -84,9 +84,9 @@ nav a:hover{color:var(--gold);background:rgba(255,255,255,.05)}
 .btn-signin{font-family:'Inter',sans-serif;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--tan);text-decoration:none;padding:8px 16px;border:1px solid rgba(201,169,110,.4);border-radius:3px;transition:all .2s;cursor:pointer;background:none}
 .btn-signin:hover{color:var(--gold);border-color:var(--gold)}
 .hero{position:relative;height:560px;overflow:hidden;background:#0A0A0A}
-.hero-bg{position:absolute;inset:0;background:linear-gradient(135deg,rgba(10,10,10,.7) 0%,rgba(10,10,10,.3) 50%,rgba(10,10,10,.6) 100%),url('https://images.unsplash.com/photo-1500595046743-cd271d694d30?w=1600&q=80') center/cover no-repeat;transform:scale(1.02);animation:heroZoom 20s ease-in-out infinite alternate}
-@keyframes heroZoom{from{transform:scale(1.02)}to{transform:scale(1.08)}}
-.hero-content{position:relative;z-index:2;max-width:1280px;margin:0 auto;padding:70px 24px 40px;display:grid;grid-template-columns:1fr 380px;gap:40px;align-items:center;height:100%}
+.hero-bg{position:absolute;inset:0;background:#0A0A0A}
+@media(max-width:768px){.hero-mark-wrap{display:none!important}}
+.hero-content{position:relative;z-index:2;max-width:1280px;margin:0 auto;padding:70px 24px 40px;display:grid;grid-template-columns:1fr 420px;gap:40px;align-items:center;height:100%}
 .hero-text h1{font-family:'Libre Baskerville',serif;font-size:clamp(36px,4.5vw,60px);font-weight:900;color:var(--cream);line-height:1.08;margin-bottom:18px;text-shadow:2px 4px 20px rgba(0,0,0,.5)}
 .hero-text h1 em{font-style:italic;color:var(--gold)}
 .hero-text p{font-size:17px;color:rgba(245,239,224,.85);line-height:1.7;max-width:500px;margin-bottom:28px}
@@ -95,8 +95,7 @@ nav a:hover{color:var(--gold);background:rgba(255,255,255,.05)}
 .btn-primary:hover{background:var(--dark-rust);transform:translateY(-1px);box-shadow:0 6px 20px rgba(181,69,27,.4)}
 .btn-secondary{display:inline-flex;align-items:center;gap:8px;background:transparent;color:var(--cream);font-family:'Inter',sans-serif;font-size:14px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;padding:12px 26px;border-radius:3px;text-decoration:none;border:2px solid rgba(245,239,224,.5);transition:all .2s;cursor:pointer}
 .btn-secondary:hover{border-color:var(--gold);color:var(--gold)}
-.hero-search{background:rgba(10,10,10,.92);border:1px solid rgba(201,169,110,.25);border-radius:6px;padding:24px;backdrop-filter:blur(8px);box-shadow:0 20px 60px rgba(0,0,0,.5)}
-.hero-search h3{font-family:'Libre Baskerville',serif;font-size:18px;color:var(--cream);margin-bottom:16px;border-bottom:1px solid rgba(201,169,110,.2);padding-bottom:10px}
+/* hero-search removed — brand mark replaces it */
 .sf{margin-bottom:10px}
 .sf label{display:block;font-family:'Inter',sans-serif;font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--tan);margin-bottom:5px}
 .sf select,.sf input{width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(201,169,110,.25);border-radius:3px;color:var(--cream);font-family:'Libre Baskerville',serif;font-size:13px;padding:9px 10px;outline:none;transition:border-color .2s}
@@ -579,74 +578,8 @@ header.scrolled{background:rgba(10,10,10,.92)!important;backdrop-filter:blur(12p
         <button class="btn-secondary" data-action="modal" data-modal="farm-to-table-listing" style="background:#5a7a4a;border-color:#5a7a4a;color:var(--cream)">🌿 Farm to Table</button>
       </div>
     </div>
-    <div class="hero-search" role="search" aria-label="Search cattle listings">
-      <h3>🔍 Search Listings</h3>
-      <div class="sf"><label for="hs-cat">Category</label>
-        <select id="hs-cat">
-          <option value="">All Categories</option>
-          <option value="beef_cattle">Beef Cattle</option>
-          <option value="dairy">Dairy Cattle</option>
-          <option value="bulls">Bulls</option>
-            <option value="bucking_bulls">Bucking Bulls</option>
-          <option value="heifers">Bred Heifers</option>
-          <option value="calves">Calves</option>
-          <option value="full_herd">Full Herds</option>
-          <option value="equipment">Equipment</option>
-          <option value="trucks_trailers">Trucks & Trailers</option>
-          <option value="working_dogs">Working Dogs</option>
-          <option value="farm_to_table">Farm to Table</option>
-          <option value="feed_hay">Feed & Hay</option>
-        </select>
-      </div>
-      <div class="sf-row">
-        <div class="sf"><label for="hs-state">State</label>
-          <select id="hs-state">
-            <option value="">All States</option>
-            <option>AL</option><option>AK</option><option>AZ</option><option>AR</option><option>CA</option>
-            <option>CO</option><option>CT</option><option>DE</option><option>FL</option><option>GA</option>
-            <option>HI</option><option>ID</option><option>IL</option><option>IN</option><option>IA</option>
-            <option>KS</option><option>KY</option><option>LA</option><option>ME</option><option>MD</option>
-            <option>MA</option><option>MI</option><option>MN</option><option>MS</option><option>MO</option>
-            <option>MT</option><option>NE</option><option>NV</option><option>NH</option><option>NJ</option>
-            <option>NM</option><option>NY</option><option>NC</option><option>ND</option><option>OH</option>
-            <option>OK</option><option>OR</option><option>PA</option><option>RI</option><option>SC</option>
-            <option>SD</option><option>TN</option><option>TX</option><option>UT</option><option>VT</option>
-            <option>VA</option><option>WA</option><option>WV</option><option>WI</option><option>WY</option>
-          </select>
-        </div>
-        <div class="sf"><label for="hs-breed">Breed</label>
-          <select id="hs-breed">
-            <option value="">All Breeds</option>
-            <optgroup label="Beef Breeds">
-            <option>Angus</option><option>Black Angus</option><option>Red Angus</option>
-            <option>Hereford</option><option>Polled Hereford</option>
-            <option>Simmental</option><option>Charolais</option><option>Limousin</option>
-            <option>Gelbvieh</option><option>Maine-Anjou</option><option>Chianina</option>
-            <option>Shorthorn</option><option>Brahman</option><option>Brangus</option>
-            <option>Beefmaster</option><option>Santa Gertrudis</option><option>Simbrah</option>
-            <option>Texas Longhorn</option><option>Scottish Highland</option>
-            <option>Wagyu</option><option>Piedmontese</option><option>Belted Galloway</option>
-            <option>Dexter</option><option>Murray Grey</option><option>Salers</option>
-            <option>Tarentaise</option><option>Blonde d'Aquitaine</option>
-            </optgroup>
-            <optgroup label="Dairy Breeds">
-            <option>Holstein</option><option>Jersey</option><option>Guernsey</option>
-            <option>Brown Swiss</option><option>Ayrshire</option><option>Milking Shorthorn</option>
-            </optgroup>
-            <optgroup label="Dual Purpose">
-            <option>Red Poll</option><option>Pinzgauer</option><option>Normande</option>
-            </optgroup>
-            <optgroup label="Crossbred / Commercial">
-            <option>Commercial Angus Cross</option><option>F1 Cross</option>
-            <option>Baldie</option><option>Black Baldy</option><option>Other Cross</option>
-            </optgroup>
-          </select>
-        </div>
-      </div>
-      <div class="sf"><label>Keywords</label>
-        <input type="text" id="hs-q" placeholder="e.g. 'registered Angus bulls'" aria-label="Search listings by keyword">
-      </div>
-      <button class="btn-primary" style="width:100%;justify-content:center;margin-top:6px" data-action="hero-search">Search Listings</button>
+    <div class="hero-mark-wrap" style="display:flex;align-items:center;justify-content:center;opacity:0;animation:heroSlideUp 1s ease forwards;animation-delay:.3s">
+      <img src="/hero_mark.png" alt="Herd Hub" loading="eager" fetchpriority="high" style="width:100%;max-width:420px;height:auto;opacity:.85;filter:drop-shadow(0 0 60px rgba(201,169,110,.15))">
     </div>
   </div>
 </section>
