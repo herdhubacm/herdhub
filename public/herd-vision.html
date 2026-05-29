@@ -1676,8 +1676,9 @@ function searchBulls() {
 
 // ── PDF Helpers ───────────────────────────────────────────────────────────────
 function makePDF(title) {
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
+  var JsPDF = (window.jspdf && window.jspdf.jsPDF) || window.jsPDF || (typeof jsPDF !== 'undefined' ? jsPDF : null);
+  if (!JsPDF) { alert('PDF library not loaded. Please wait a moment and try again.'); throw new Error('jsPDF not available'); }
+  var doc = new JsPDF();
   doc.setFillColor(10, 10, 10);
   doc.rect(0, 0, 210, 20, 'F');
   doc.setFillColor(201, 169, 110);
