@@ -1509,6 +1509,7 @@ function runComparison() {
       cw:gv('b2-cw'),rea:gv('b2-rea'),marb:gv('b2-marb'),sb:gv('b2-sb'),sm:gv('b2-sm'),sw:gv('b2-sw'),sf:gv('b2-sf') },
     insights: Array.from(document.querySelectorAll('#insights-area .insight-box')).map(el => el.innerText.trim()).filter(t => t.length > 0)
   };
+  console.log('_herdVisionData captured:', window._herdVisionData);
 }
 
 // ── Bull Selection Wizard ─────────────────────────────────────────────────────
