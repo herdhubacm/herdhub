@@ -1705,11 +1705,11 @@ function pdfHeader(doc, title, subtitle) {
   doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(201,169,110);
   doc.text('AMERICAN CATTLE MARKETPLACE', m, 21);
   doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor(245,239,224);
-  doc.text(title.toUpperCase(), W-m, 13, {align:'right'});
+  doc.text(title.toUpperCase().slice(0,35), W-m, 13, {align:'right'});
   doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(140,117,96);
   doc.text(new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'}), W-m, 21, {align:'right'});
   var y = 40;
-  if (subtitle) { doc.setFontSize(9); doc.setTextColor(80,80,80); doc.text(subtitle, m, y); y += 8; }
+  if (subtitle) { doc.setFontSize(9); doc.setTextColor(80,80,80); var sl=doc.splitTextToSize(String(subtitle),W-m*2); doc.text(sl, m, y); y += sl.length*5+3; }
   return y;
 }
 function pdfSection(doc, title, y) {
@@ -1785,8 +1785,8 @@ function exportComparisonPDF() {
         doc.text(fmt(v2), m+cW*0.75, y+5, {align:'right'});
         doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(100,80,60);
         if (!isNaN(n1)&&!isNaN(n2)) {
-          var diff=Math.abs(n1-n2).toFixed(1), winner=b1w?d.bull1.name.split(' ')[0]:b2w?d.bull2.name.split(' ')[0]:'Equal';
-          doc.text(winner+(diff!=='0.0'?' +'+diff:''), W-m-4, y+5, {align:'right'});
+          var diff=Math.abs(n1-n2).toFixed(1), winner=b1w?d.bull1.name.split(' ')[0].slice(0,10):b2w?d.bull2.name.split(' ')[0].slice(0,10):'Equal';
+          doc.text((winner+(diff!=='0.0'?' +'+diff:'')).slice(0,20), W-m-4, y+5, {align:'right'});
         }
         y+=7; alt=!alt;
       });

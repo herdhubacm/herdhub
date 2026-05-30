@@ -669,11 +669,11 @@ function pdfHeader(doc, title, subtitle) {
   doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(201,169,110);
   doc.text('AMERICAN CATTLE MARKETPLACE', m, 21);
   doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor(245,239,224);
-  doc.text(title.toUpperCase(), W-m, 13, {align:'right'});
+  doc.text(title.toUpperCase().slice(0,35), W-m, 13, {align:'right'});
   doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(140,117,96);
   doc.text(new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'}), W-m, 21, {align:'right'});
   var y = 40;
-  if (subtitle) { doc.setFontSize(9); doc.setTextColor(80,80,80); doc.text(subtitle, m, y); y += 8; }
+  if (subtitle) { doc.setFontSize(9); doc.setTextColor(80,80,80); var sl=doc.splitTextToSize(String(subtitle),W-m*2); doc.text(sl, m, y); y += sl.length*5+3; }
   return y;
 }
 function pdfSection(doc, title, y) {
@@ -703,7 +703,7 @@ function pdfTable(doc, headers, rows, y, toolName) {
     if(y>265){pdfFooter(doc,toolName);doc.addPage();y=20;}
     if(alt){doc.setFillColor(250,248,245);doc.rect(m,y,cW,7,'F');}
     doc.setFont('helvetica','normal');doc.setFontSize(8.5);doc.setTextColor(50,50,50);
-    r.forEach(function(c,i){doc.text(String(c||'—'),m+4+i*colW,y+5);});
+    r.forEach(function(c,i){var cv=String(c||'—');if(cv.length>colW/2)cv=cv.slice(0,Math.floor(colW/2));doc.text(cv,m+4+i*colW,y+5);});
     y+=7;alt=!alt;
   });
   return y+4;
