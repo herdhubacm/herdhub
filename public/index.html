@@ -85,7 +85,7 @@ nav a:hover{color:var(--gold);background:rgba(255,255,255,.05)}
 .btn-signin:hover{color:var(--gold);border-color:var(--gold)}
 .hero{position:relative;height:560px;overflow:hidden;background:#0A0A0A}
 .hero-bg{position:absolute;inset:0;background:#0A0A0A}
-@media(max-width:768px){.hero-watermark{opacity:.05!important;width:120%!important}}
+@media(max-width:768px){.hero-watermark{opacity:.05!important;width:120%!important}#news-articles-list>div{grid-template-columns:1fr!important}}
 .hero-content{position:relative;z-index:2;max-width:1280px;margin:0 auto;padding:70px 24px 40px;display:grid;grid-template-columns:1fr 380px;gap:40px;align-items:center;height:100%}
 .hero-text h1{font-family:'Libre Baskerville',serif;font-size:clamp(36px,4.5vw,60px);font-weight:900;color:var(--cream);line-height:1.08;margin-bottom:18px;text-shadow:2px 4px 20px rgba(0,0,0,.5)}
 .hero-text h1 em{font-style:italic;color:var(--gold)}
@@ -3621,15 +3621,15 @@ function timeAgo(iso) {
 }
 
 function renderArticleCard(a, onclickExpr) {
-  const img = a.image_url
-    ? `<img class="article-img-el" role="img" src="${a.image_url}" alt="" onerror="this.style.display='none'">`
-    : `<div style="width:110px;height:82px;background:var(--light-tan);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:28px">📰</div>`;
-  return `<div class="article-card" style="cursor:pointer" onclick="${onclickExpr}">
-    ${img}
-    <div>
-      <div class="article-meta">${a.category} · ${fmtDate(a.created_at)}</div>
-      <div class="article-title">${a.title}</div>
-      <div class="article-excerpt">${a.excerpt || ''}</div>
+  const excerpt = (a.excerpt || a.body || '').replace(/<[^>]*>/g, '').slice(0, 120);
+  const date = fmtDate(a.created_at);
+  return `<div onclick="${onclickExpr}" style="background:rgba(255,255,255,.04);border:1px solid rgba(201,169,110,.12);border-radius:8px;padding:20px;cursor:pointer;transition:border-color .2s,transform .2s" onmouseenter="this.style.borderColor='rgba(201,169,110,.35)';this.style.transform='translateY(-2px)'" onmouseleave="this.style.borderColor='rgba(201,169,110,.12)';this.style.transform=''">
+    <div style="display:inline-block;background:rgba(139,50,20,.3);color:var(--rust);font-family:'Inter',sans-serif;font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:3px 10px;border-radius:20px;margin-bottom:10px;border:1px solid rgba(139,50,20,.3)">${escHtml(a.category)}</div>
+    <div style="font-family:'Libre Baskerville',serif;font-size:15px;font-weight:700;color:var(--cream);line-height:1.4;margin-bottom:8px">${escHtml(a.title)}</div>
+    <div style="font-family:'Inter',sans-serif;font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:12px">${escHtml(excerpt)}${excerpt.length >= 120 ? '...' : ''}</div>
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <div style="font-family:'Inter',sans-serif;font-size:11px;color:var(--muted)">${date}</div>
+      <div style="font-family:'Inter',sans-serif;font-size:12px;font-weight:600;color:var(--gold)">Read More &rarr;</div>
     </div>
   </div>`;
 }
@@ -3638,12 +3638,12 @@ async function loadNewsArticles() {
   const el = document.getElementById('news-articles-list');
   if (!el) return;
   try {
-    const r = await fetch(`${API}/api/articles?limit=4`);
+    const r = await fetch(`${API}/api/articles?limit=3`);
     const articles = await r.json();
-    if (!articles.length) { el.innerHTML = '<p style="color:#888;font-size:14px;padding:16px 0">No articles yet.</p>'; return; }
-    el.innerHTML = articles.map(a => renderArticleCard(a, `openArticle(${a.id})`)).join('');
+    if (!articles.length) { el.innerHTML = '<p style="color:var(--muted);font-size:14px;padding:16px 0">No articles yet. Check back soon!</p>'; return; }
+    el.innerHTML = '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px">' + articles.map(a => renderArticleCard(a, `openArticle(${a.id})`)).join('') + '</div>';
   } catch(e) {
-    el.innerHTML = '<p style="color:#888;font-size:14px">Could not load articles.</p>';
+    el.innerHTML = '<p style="color:var(--muted);font-size:14px">Could not load articles.</p>';
   }
 }
 
@@ -3924,22 +3924,21 @@ document.addEventListener('DOMContentLoaded', () => {
   // ── Micro-animations ──────────────────────────────────
   if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
 
-    // 1. Stat counter animation
-    function animateCounter(el, target, duration, suffix) {
+    // 1. Stat counter animation (global so loadStats can use it)
+    window.animateCounter = function(el, target, duration, suffix) {
       if (!el) return;
-      const start = performance.now();
+      var start = performance.now();
       function update(now) {
-        const progress = Math.min((now - start) / duration, 1);
-        const eased = 1 - Math.pow(1 - progress, 4);
-        const current = Math.round(target * eased);
+        var progress = Math.min((now - start) / duration, 1);
+        var eased = 1 - Math.pow(1 - progress, 4);
+        var current = Math.round(target * eased);
         el.textContent = current === target && suffix ? current + suffix : String(current);
         if (progress < 1) requestAnimationFrame(update);
       }
       requestAnimationFrame(update);
-    }
+    };
     setTimeout(() => {
       animateCounter(document.getElementById('stat-members'), 350, 1500, '+');
-      // stat-total is loaded from API, skip it
       animateCounter(document.getElementById('stat-sales'), 25, 1400, 'K+');
       // States — no ID, find by label text
       document.querySelectorAll('.stat-item').forEach(item => {
@@ -4362,7 +4361,12 @@ async function loadStats() {
     const d = await statsRes.json();
     const s = await settingsRes.json();
 
-    document.getElementById('stat-total').textContent = d.total_active.toLocaleString() + '+';
+    const statTotalEl = document.getElementById('stat-total');
+    if (statTotalEl && typeof animateCounter === 'function' && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      animateCounter(statTotalEl, d.total_active, 1600, '+');
+    } else if (statTotalEl) {
+      statTotalEl.textContent = d.total_active.toLocaleString() + '+';
+    }
 
     // Stats from settings (admin-controlled)
     const membersEl = document.getElementById('stat-members');
