@@ -606,42 +606,64 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 // ── PDF Helpers ───────────────────────────────────────────────────────────────
-function makePDF(title) {
-  var JsPDF = (window.jspdf && window.jspdf.jsPDF) || window.jsPDF || (typeof jsPDF !== 'undefined' ? jsPDF : null);
-  if (!JsPDF) { alert('PDF library not loaded. Please wait a moment and try again.'); throw new Error('jsPDF not available'); }
-  var doc = new JsPDF();
-  doc.setFillColor(10, 10, 10); doc.rect(0, 0, 210, 20, 'F');
-  doc.setFillColor(201, 169, 110); doc.rect(0, 20, 210, 2, 'F');
-  doc.setTextColor(245, 239, 224); doc.setFontSize(14); doc.text('HERD HUB', 14, 13);
-  doc.setFontSize(8); doc.text('American Cattle Marketplace', 50, 13);
-  doc.setTextColor(10, 10, 10); doc.setFontSize(16); doc.text(title, 14, 34);
-  doc.setFontSize(9); doc.setTextColor(120, 120, 120);
-  doc.text('Generated: ' + new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString(), 14, 40);
-  return { doc, y: 48 };
+// ── PDF Helpers (branded layout) ──────────────────────────────────────────────
+function getJsPDF() {
+  if (typeof window.jspdf !== 'undefined' && window.jspdf.jsPDF) return window.jspdf.jsPDF;
+  if (typeof window.jsPDF !== 'undefined') return window.jsPDF;
+  if (typeof jsPDF !== 'undefined') return jsPDF;
+  return null;
 }
-function addTable(doc, y, headers, rows) {
-  doc.setFontSize(8); doc.setTextColor(100, 100, 100);
-  const colW = 182 / headers.length;
-  headers.forEach((h, i) => doc.text(h, 14 + i * colW, y));
-  y += 2; doc.setDrawColor(201, 169, 110); doc.line(14, y, 196, y); y += 5;
-  doc.setTextColor(30, 30, 30); doc.setFontSize(9);
-  rows.forEach(row => {
-    if (y > 270) { doc.addPage(); y = 20; }
-    row.forEach((cell, i) => doc.text(String(cell || ''), 14 + i * colW, y)); y += 5;
+function pdfHeader(doc, title, subtitle) {
+  var W = doc.internal.pageSize.getWidth(), m = 18;
+  doc.setFillColor(10,10,10); doc.rect(0,0,W,30,'F');
+  doc.setFillColor(139,50,20); doc.rect(0,30,W,2.5,'F');
+  doc.setFont('helvetica','bold'); doc.setFontSize(16); doc.setTextColor(245,239,224);
+  doc.text('HERD HUB', m, 13);
+  doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(201,169,110);
+  doc.text('AMERICAN CATTLE MARKETPLACE', m, 21);
+  doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor(245,239,224);
+  doc.text(title.toUpperCase(), W-m, 13, {align:'right'});
+  doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(140,117,96);
+  doc.text(new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'}), W-m, 21, {align:'right'});
+  var y = 40;
+  if (subtitle) { doc.setFontSize(9); doc.setTextColor(80,80,80); doc.text(subtitle, m, y); y += 8; }
+  return y;
+}
+function pdfSection(doc, title, y) {
+  var W = doc.internal.pageSize.getWidth(), m = 18, cW = W-m*2;
+  doc.setFillColor(245,239,224); doc.rect(m,y,cW,7.5,'F');
+  doc.setFillColor(139,50,20); doc.rect(m,y,3,7.5,'F');
+  doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(10,10,10);
+  doc.text(title.toUpperCase(), m+7, y+5.2);
+  return y + 11;
+}
+function pdfFooter(doc, toolName) {
+  var W = doc.internal.pageSize.getWidth(), H = doc.internal.pageSize.getHeight(), m = 18;
+  var pg = doc.internal.getCurrentPageInfo().pageNumber;
+  doc.setDrawColor(201,169,110); doc.setLineWidth(0.4); doc.line(m,H-14,W-m,H-14);
+  doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(140,117,96);
+  doc.text('theherdhub.com', m, H-8);
+  doc.text('Page '+pg, W-m, H-8, {align:'right'});
+  doc.setTextColor(180,160,130); doc.text(toolName||'', W/2, H-8, {align:'center'});
+}
+function pdfTable(doc, headers, rows, y, toolName) {
+  var W = doc.internal.pageSize.getWidth(), m = 18, cW = W-m*2, colW = cW/headers.length;
+  doc.setFillColor(10,10,10); doc.rect(m,y,cW,7.5,'F');
+  doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(201,169,110);
+  headers.forEach(function(h,i){doc.text(h.toUpperCase(),m+4+i*colW,y+5.2);});
+  y+=9; var alt=false;
+  rows.forEach(function(r){
+    if(y>265){pdfFooter(doc,toolName);doc.addPage();y=20;}
+    if(alt){doc.setFillColor(250,248,245);doc.rect(m,y,cW,7,'F');}
+    doc.setFont('helvetica','normal');doc.setFontSize(8.5);doc.setTextColor(50,50,50);
+    r.forEach(function(c,i){doc.text(String(c||'—'),m+4+i*colW,y+5);});
+    y+=7;alt=!alt;
   });
-  return y + 5;
-}
-function addFooter(doc) {
-  const pages = doc.internal.getNumberOfPages();
-  for (let i = 1; i <= pages; i++) {
-    doc.setPage(i); doc.setFontSize(7); doc.setTextColor(150, 150, 150);
-    doc.text('theherdhub.com — Generated ' + new Date().toLocaleDateString(), 14, 290);
-    doc.text('Page ' + i + ' of ' + pages, 180, 290);
-  }
+  return y+4;
 }
 
 function exportMarketPDF() {
-  const { doc, y: y0 } = makePDF('Market Price Intelligence Report');
+  var JsPDF=getJsPDF();if(!JsPDF){alert('PDF loading.');return;}var doc=new JsPDF();var y0=pdfHeader(doc,'Market Price Intelligence Report');
   let y = y0;
   // Price board
   const headers = ['Category', 'Price', 'Range', 'Change'];
@@ -653,7 +675,7 @@ function exportMarketPDF() {
     const change = card.querySelector('.change')?.textContent || '';
     if (cat && cat !== 'Loading...') rows.push([cat, price, range, change]);
   });
-  if (rows.length) y = addTable(doc, y, headers, rows);
+  if (rows.length) y = pdfTable(doc, headers, rows, y, "Herd Hub");
   // Break-even result if visible
   const beResult = document.getElementById('be-result');
   if (beResult && beResult.style.display !== 'none' && beResult.textContent.trim()) {
@@ -664,9 +686,9 @@ function exportMarketPDF() {
       const val = s.querySelector('.val')?.textContent || '';
       if (lbl) stats.push([lbl, val]);
     });
-    if (stats.length) y = addTable(doc, y, ['Metric', 'Value'], stats);
+    if (stats.length) y = pdfTable(doc, ['Metric', 'Value'], stats, y, "Herd Hub");
   }
-  addFooter(doc);
+  pdfFooter(doc,'Herd Hub');
   doc.save('MarketIntelligence_' + new Date().toISOString().slice(0,10) + '.pdf');
 }
 </script>

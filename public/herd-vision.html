@@ -1688,129 +1688,158 @@ function searchBulls() {
   window.location.href = `/?category=${cat}#listings`;
 }
 
-// ── PDF Helpers ───────────────────────────────────────────────────────────────
-function makePDF(title) {
-  var JsPDF = (window.jspdf && window.jspdf.jsPDF) || window.jsPDF || (typeof jsPDF !== 'undefined' ? jsPDF : null);
-  if (!JsPDF) { alert('PDF library not loaded. Please wait a moment and try again.'); throw new Error('jsPDF not available'); }
-  var doc = new JsPDF();
-  doc.setFillColor(10, 10, 10);
-  doc.rect(0, 0, 210, 20, 'F');
-  doc.setFillColor(201, 169, 110);
-  doc.rect(0, 20, 210, 2, 'F');
-  doc.setTextColor(245, 239, 224);
-  doc.setFontSize(14);
-  doc.text('HERD HUB', 14, 13);
-  doc.setFontSize(8);
-  doc.text('American Cattle Marketplace', 50, 13);
-  doc.setTextColor(10, 10, 10);
-  doc.setFontSize(16);
-  doc.text(title, 14, 34);
-  doc.setFontSize(9);
-  doc.setTextColor(120, 120, 120);
-  doc.text('Generated: ' + new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString(), 14, 40);
-  return { doc, y: 48 };
+// ── PDF Helpers (branded layout) ──────────────────────────────────────────────
+function getJsPDF() {
+  if (typeof window.jspdf !== 'undefined' && window.jspdf.jsPDF) return window.jspdf.jsPDF;
+  if (typeof window.jsPDF !== 'undefined') return window.jsPDF;
+  if (typeof jsPDF !== 'undefined') return jsPDF;
+  return null;
 }
-
-function addTable(doc, y, headers, rows) {
-  doc.setFontSize(8);
-  doc.setTextColor(100, 100, 100);
-  const colW = 182 / headers.length;
-  headers.forEach((h, i) => doc.text(h, 14 + i * colW, y));
-  y += 2;
-  doc.setDrawColor(201, 169, 110);
-  doc.line(14, y, 196, y);
-  y += 5;
-  doc.setTextColor(30, 30, 30);
-  doc.setFontSize(9);
-  rows.forEach(row => {
-    if (y > 270) { doc.addPage(); y = 20; }
-    row.forEach((cell, i) => doc.text(String(cell || ''), 14 + i * colW, y));
-    y += 5;
-  });
-  return y + 5;
+function pdfHeader(doc, title, subtitle) {
+  var W = doc.internal.pageSize.getWidth(), m = 18;
+  doc.setFillColor(10,10,10); doc.rect(0,0,W,30,'F');
+  doc.setFillColor(139,50,20); doc.rect(0,30,W,2.5,'F');
+  doc.setFont('helvetica','bold'); doc.setFontSize(16); doc.setTextColor(245,239,224);
+  doc.text('HERD HUB', m, 13);
+  doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(201,169,110);
+  doc.text('AMERICAN CATTLE MARKETPLACE', m, 21);
+  doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor(245,239,224);
+  doc.text(title.toUpperCase(), W-m, 13, {align:'right'});
+  doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(140,117,96);
+  doc.text(new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'}), W-m, 21, {align:'right'});
+  var y = 40;
+  if (subtitle) { doc.setFontSize(9); doc.setTextColor(80,80,80); doc.text(subtitle, m, y); y += 8; }
+  return y;
 }
-
-function addFooter(doc) {
-  const pages = doc.internal.getNumberOfPages();
-  for (let i = 1; i <= pages; i++) {
-    doc.setPage(i);
-    doc.setFontSize(7);
-    doc.setTextColor(150, 150, 150);
-    doc.text('theherdhub.com — Generated ' + new Date().toLocaleDateString(), 14, 290);
-    doc.text('Page ' + i + ' of ' + pages, 180, 290);
-  }
+function pdfSection(doc, title, y) {
+  var W = doc.internal.pageSize.getWidth(), m = 18, cW = W-m*2;
+  doc.setFillColor(245,239,224); doc.rect(m,y,cW,7.5,'F');
+  doc.setFillColor(139,50,20); doc.rect(m,y,3,7.5,'F');
+  doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(10,10,10);
+  doc.text(title.toUpperCase(), m+7, y+5.2);
+  return y + 11;
+}
+function pdfFooter(doc, toolName) {
+  var W = doc.internal.pageSize.getWidth(), H = doc.internal.pageSize.getHeight(), m = 18;
+  var pg = doc.internal.getCurrentPageInfo().pageNumber;
+  doc.setDrawColor(201,169,110); doc.setLineWidth(0.4); doc.line(m,H-14,W-m,H-14);
+  doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(140,117,96);
+  doc.text('theherdhub.com', m, H-8);
+  doc.text('Page '+pg, W-m, H-8, {align:'right'});
+  doc.setTextColor(180,160,130); doc.text(toolName||'', W/2, H-8, {align:'center'});
+}
+function pdfInsight(doc, text, y, type) {
+  var W = doc.internal.pageSize.getWidth(), m = 18, cW = W-m*2;
+  var lines = doc.splitTextToSize(text, cW-10), h = lines.length*5+6;
+  if (type==='warning') { doc.setFillColor(255,248,240); doc.rect(m,y,cW,h,'F'); doc.setFillColor(212,130,10); doc.rect(m,y,2.5,h,'F'); doc.setTextColor(100,60,10); }
+  else { doc.setFillColor(245,252,248); doc.rect(m,y,cW,h,'F'); doc.setFillColor(46,125,79); doc.rect(m,y,2.5,h,'F'); doc.setTextColor(20,80,50); }
+  doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.text(lines, m+6, y+5); doc.setTextColor(10,10,10);
+  return y+h+4;
 }
 
 function exportComparisonPDF() {
-  const { doc, y: y0 } = makePDF('EPD Comparison Report');
-  let y = y0;
-  const b1n = document.getElementById('res-b1-name').textContent || 'Bull A';
-  const b2n = document.getElementById('res-b2-name').textContent || 'Bull B';
-  doc.setFontSize(11); doc.setTextColor(10, 10, 10);
-  doc.text('Comparing: ' + b1n + '  vs.  ' + b2n, 14, y); y += 10;
-  const headers = ['Trait', b1n.slice(0,14), b2n.slice(0,14), 'Edge'];
-  const rows = [];
-  document.querySelectorAll('.trait-row').forEach(row => {
-    const cells = row.querySelectorAll('.trait-name, .val-b1, .val-b2, .trait-winner');
-    if (cells.length >= 4) rows.push([cells[0].textContent, cells[1].textContent, cells[2].textContent, cells[3].textContent]);
-  });
-  if (rows.length) y = addTable(doc, y, headers, rows);
-  const insights = [];
-  document.querySelectorAll('.insight-box').forEach(el => { if (el.textContent.trim()) insights.push(el.textContent.trim()); });
-  if (insights.length) {
-    doc.setFontSize(10); doc.setTextColor(10, 10, 10); doc.text('Key Insights', 14, y); y += 6;
-    doc.setFontSize(8); doc.setTextColor(60, 60, 60);
-    insights.forEach(ins => {
-      if (y > 270) { doc.addPage(); y = 20; }
-      const lines = doc.splitTextToSize('• ' + ins, 180);
-      doc.text(lines, 14, y); y += lines.length * 4 + 3;
+  var JsPDF = getJsPDF(); if (!JsPDF) { alert('PDF library loading — please try again.'); return; }
+  var d = window._herdVisionData;
+  if (!d) { alert('Please run a comparison first.'); return; }
+  try {
+    var doc = new JsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+    var W = doc.internal.pageSize.getWidth(), m = 18, cW = W-m*2, y;
+    y = pdfHeader(doc, 'Herd Vision — EPD Report', d.bull1.name+' vs '+d.bull2.name+(d.isHeifer?' | Heifer Mode':''));
+    function fmt(v) { if(v===null||v===undefined||isNaN(v))return'—'; return(v>0?'+':'')+parseFloat(v).toFixed(1); }
+    function np() { pdfFooter(doc,'Herd Vision EPD Comparison'); doc.addPage(); y=20; }
+    // Column headers
+    doc.setFillColor(10,10,10); doc.rect(m,y,cW,7.5,'F');
+    doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(201,169,110);
+    doc.text('TRAIT', m+4, y+5.2);
+    doc.text(d.bull1.name.slice(0,16).toUpperCase(), m+cW*0.5, y+5.2, {align:'right'});
+    doc.text(d.bull2.name.slice(0,16).toUpperCase(), m+cW*0.75, y+5.2, {align:'right'});
+    doc.text('EDGE', W-m-4, y+5.2, {align:'right'});
+    y += 9;
+    var traits = [
+      {g:'Calving Traits',r:[['CE — Calving Ease','ce',true],['BW — Birth Weight','bw',false]]},
+      {g:'Growth Traits',r:[['WW — Weaning Weight','ww',true],['YW — Yearling Weight','yw',true]]},
+      {g:'Maternal Traits',r:[['MM — Milk','mm',true],['MWW — Maternal Weaning Wt.','mww',true]]},
+      {g:'Carcass Traits',r:[['CW — Carcass Weight','cw',true],['REA — Ribeye Area','rea',true],['MARB — Marbling','marb',true]]},
+      {g:'Selection Indexes',r:[['$B — Beef Value','sb',true],['$M — Maternal Value','sm',true],['$W — Weaning Value','sw',true],['$F — Feedlot Value','sf',true]]}
+    ];
+    var alt = false;
+    traits.forEach(function(group) {
+      var hasData = group.r.some(function(t) { return d.bull1[t[1]]!==null || d.bull2[t[1]]!==null; });
+      if (!hasData) return;
+      if (y>250) np();
+      y = pdfSection(doc, group.g, y);
+      group.r.forEach(function(t) {
+        var v1=d.bull1[t[1]], v2=d.bull2[t[1]], hb=t[2];
+        if (v1===null&&v2===null) return;
+        if (y>265) np();
+        if (alt) { doc.setFillColor(250,248,245); doc.rect(m,y,cW,7,'F'); }
+        doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(60,60,60);
+        doc.text(t[0], m+4, y+5);
+        var n1=parseFloat(v1), n2=parseFloat(v2);
+        var b1w=!isNaN(n1)&&!isNaN(n2)&&(hb?n1>n2:n1<n2);
+        var b2w=!isNaN(n1)&&!isNaN(n2)&&(hb?n2>n1:n2<n1);
+        doc.setFont('helvetica',b1w?'bold':'normal'); doc.setTextColor(b1w?139:80,b1w?50:80,b1w?20:80);
+        doc.text(fmt(v1), m+cW*0.5, y+5, {align:'right'});
+        doc.setFont('helvetica',b2w?'bold':'normal'); doc.setTextColor(b2w?20:80,b2w?80:80,b2w?50:80);
+        doc.text(fmt(v2), m+cW*0.75, y+5, {align:'right'});
+        doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(100,80,60);
+        if (!isNaN(n1)&&!isNaN(n2)) {
+          var diff=Math.abs(n1-n2).toFixed(1), winner=b1w?d.bull1.name.split(' ')[0]:b2w?d.bull2.name.split(' ')[0]:'Equal';
+          doc.text(winner+(diff!=='0.0'?' +'+diff:''), W-m-4, y+5, {align:'right'});
+        }
+        y+=7; alt=!alt;
+      });
     });
-  }
-  addFooter(doc);
-  doc.save('HerdVision_Comparison_' + new Date().toISOString().slice(0,10) + '.pdf');
+    if (d.insights&&d.insights.length) {
+      y+=4; if(y>250)np(); y=pdfSection(doc,'Key Insights & Warnings',y);
+      d.insights.forEach(function(ins) { if(y>255)np(); y=pdfInsight(doc,ins,y,ins.includes('⚠')||ins.toLowerCase().includes('risk')?'warning':'insight'); });
+    }
+    y+=4; doc.setFillColor(250,248,245); doc.rect(m,y,cW,12,'F');
+    doc.setFont('helvetica','italic'); doc.setFontSize(7.5); doc.setTextColor(120,100,80);
+    doc.text(doc.splitTextToSize('EPDs are breed-specific and not comparable across breeds. Accuracy below 0.50 may shift. Consult your breed association.',cW-8),m+4,y+5);
+    pdfFooter(doc,'Herd Vision EPD Comparison — theherdhub.com');
+    doc.save('HerdVision_'+d.bull1.name.replace(/[^a-z0-9]/gi,'_').slice(0,12)+'_vs_'+d.bull2.name.replace(/[^a-z0-9]/gi,'_').slice(0,12)+'_'+new Date().toISOString().split('T')[0]+'.pdf');
+  } catch(e) { console.error('PDF error:',e); alert('PDF error: '+e.message); }
 }
 
 function exportWizardPDF() {
-  const { doc, y: y0 } = makePDF('Bull Selection Wizard Report');
-  let y = y0;
-  const goalName = document.querySelector('.rec-goal-name')?.textContent || '';
-  const goalDesc = document.querySelector('.rec-goal-desc')?.textContent || '';
-  if (goalName) { doc.setFontSize(11); doc.setTextColor(10, 10, 10); doc.text('Goal: ' + goalName, 14, y); y += 6; }
-  if (goalDesc) { doc.setFontSize(9); doc.setTextColor(80, 80, 80); const ls = doc.splitTextToSize(goalDesc, 180); doc.text(ls, 14, y); y += ls.length * 4 + 6; }
-  const headers = ['Trait (EPD)', 'Priority', 'Target Range', 'Notes'];
-  const rows = [];
-  document.querySelectorAll('.epd-target-card').forEach(card => {
-    const name = card.querySelector('.epd-target-name')?.textContent || '';
-    const range = card.querySelector('.epd-target-range')?.textContent || '';
-    const label = card.querySelector('.epd-target-label')?.textContent || '';
-    const priority = card.querySelector('.priority-badge')?.textContent || '';
-    rows.push([name, priority, range, label.slice(0, 40)]);
-  });
-  if (rows.length) y = addTable(doc, y, headers, rows);
-  const warnings = [];
-  document.querySelectorAll('.warning-box').forEach(el => { if (el.textContent.trim()) warnings.push(el.textContent.trim()); });
-  if (warnings.length) {
-    doc.setFontSize(10); doc.setTextColor(10, 10, 10); doc.text('Warnings', 14, y); y += 6;
-    doc.setFontSize(8); doc.setTextColor(60, 60, 60);
-    warnings.forEach(w => {
-      if (y > 270) { doc.addPage(); y = 20; }
-      const lines = doc.splitTextToSize('• ' + w, 180);
-      doc.text(lines, 14, y); y += lines.length * 4 + 3;
+  var JsPDF = getJsPDF(); if (!JsPDF) { alert('PDF library loading.'); return; }
+  try {
+    var doc = new JsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+    var W = doc.internal.pageSize.getWidth(), m = 18, cW = W-m*2;
+    var goalName = document.querySelector('.rec-goal-name')?.textContent || '';
+    var goalDesc = document.querySelector('.rec-goal-desc')?.textContent || '';
+    var y = pdfHeader(doc, 'Bull Selection Wizard', 'Goal: '+goalName);
+    if (goalDesc) { doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(80,80,80); var ls=doc.splitTextToSize(goalDesc,cW); doc.text(ls,m,y); y+=ls.length*5+6; }
+    // EPD targets table
+    var rows = []; document.querySelectorAll('.epd-target-card').forEach(function(card) {
+      var name=card.querySelector('.epd-target-name')?.textContent||'', range=card.querySelector('.epd-target-range')?.textContent||'';
+      var label=card.querySelector('.epd-target-label')?.textContent||'', priority=card.querySelector('.priority-badge')?.textContent||'';
+      rows.push([name,priority,range,label.slice(0,40)]);
     });
-  }
-  const insights = [];
-  document.querySelectorAll('.insight-good').forEach(el => { if (el.textContent.trim()) insights.push(el.textContent.trim()); });
-  if (insights.length) {
-    y += 4; doc.setFontSize(10); doc.setTextColor(10, 10, 10); doc.text('Insights', 14, y); y += 6;
-    doc.setFontSize(8); doc.setTextColor(60, 60, 60);
-    insights.forEach(ins => {
-      if (y > 270) { doc.addPage(); y = 20; }
-      const lines = doc.splitTextToSize('• ' + ins, 180);
-      doc.text(lines, 14, y); y += lines.length * 4 + 3;
-    });
-  }
-  addFooter(doc);
-  doc.save('HerdVision_Wizard_' + new Date().toISOString().slice(0,10) + '.pdf');
+    if (rows.length) {
+      y = pdfSection(doc,'EPD Target Ranges',y);
+      doc.setFillColor(10,10,10); doc.rect(m,y,cW,7,'F');
+      doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(201,169,110);
+      ['TRAIT','PRIORITY','TARGET','NOTES'].forEach(function(h,i){doc.text(h,m+4+i*(cW/4),y+5);});
+      y+=9; var alt=false;
+      rows.forEach(function(r) {
+        if(y>265){pdfFooter(doc,'Bull Selection Wizard');doc.addPage();y=20;}
+        if(alt){doc.setFillColor(250,248,245);doc.rect(m,y,cW,7,'F');}
+        doc.setFont('helvetica','normal');doc.setFontSize(8.5);doc.setTextColor(60,60,60);
+        r.forEach(function(c,i){doc.text(String(c||''),m+4+i*(cW/4),y+5);});
+        y+=7;alt=!alt;
+      });
+    }
+    // Warnings
+    var warnings=[]; document.querySelectorAll('.warning-box').forEach(function(el){if(el.textContent.trim())warnings.push(el.textContent.trim());});
+    if(warnings.length){y+=4;y=pdfSection(doc,'Warnings',y);warnings.forEach(function(w){if(y>255){pdfFooter(doc,'Bull Selection Wizard');doc.addPage();y=20;}y=pdfInsight(doc,w,y,'warning');});}
+    // Insights
+    var insights=[]; document.querySelectorAll('.insight-good').forEach(function(el){if(el.textContent.trim())insights.push(el.textContent.trim());});
+    if(insights.length){y+=4;y=pdfSection(doc,'Bull Pen Insights',y);insights.forEach(function(ins){if(y>255){pdfFooter(doc,'Bull Selection Wizard');doc.addPage();y=20;}y=pdfInsight(doc,ins,y,'insight');});}
+    pdfFooter(doc,'Bull Selection Wizard — theherdhub.com');
+    doc.save('HerdVision_Wizard_'+new Date().toISOString().split('T')[0]+'.pdf');
+  } catch(e) { console.error('PDF error:',e); alert('PDF error: '+e.message); }
 }
 </script>
 
