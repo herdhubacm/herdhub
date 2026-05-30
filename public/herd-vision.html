@@ -1495,6 +1495,20 @@ function runComparison() {
   document.getElementById('comparison-results').classList.add('visible');
   document.getElementById('comparison-results').scrollIntoView({ behavior:'smooth', block:'start' });
   document.getElementById('compare-export').style.display='flex';
+
+  // Store structured data for PDF export
+  function gv(id) { return parseFloat(document.getElementById(id)?.value) || null; }
+  window._herdVisionData = {
+    type: 'comparison', generatedAt: new Date().toLocaleString(),
+    isHeifer: document.getElementById('heifer-toggle')?.checked || false,
+    bull1: { name: b1n, breed: document.getElementById('b1-breed')?.value || '',
+      ce:gv('b1-ce'),bw:gv('b1-bw'),ww:gv('b1-ww'),yw:gv('b1-yw'),mm:gv('b1-mm'),mww:gv('b1-mww'),
+      cw:gv('b1-cw'),rea:gv('b1-rea'),marb:gv('b1-marb'),sb:gv('b1-sb'),sm:gv('b1-sm'),sw:gv('b1-sw'),sf:gv('b1-sf') },
+    bull2: { name: b2n, breed: document.getElementById('b2-breed')?.value || '',
+      ce:gv('b2-ce'),bw:gv('b2-bw'),ww:gv('b2-ww'),yw:gv('b2-yw'),mm:gv('b2-mm'),mww:gv('b2-mww'),
+      cw:gv('b2-cw'),rea:gv('b2-rea'),marb:gv('b2-marb'),sb:gv('b2-sb'),sm:gv('b2-sm'),sw:gv('b2-sw'),sf:gv('b2-sf') },
+    insights: Array.from(document.querySelectorAll('#insights-area .insight-box')).map(el => el.innerText.trim()).filter(t => t.length > 0)
+  };
 }
 
 // ── Bull Selection Wizard ─────────────────────────────────────────────────────
