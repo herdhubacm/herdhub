@@ -1175,10 +1175,13 @@ async function loadAdminArticles() {
           <td style="max-width:260px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${a.title}</td>
           <td>${a.category}</td>
           <td>${a.author}</td>
-          <td><span style="padding:3px 8px;border-radius:3px;font-size:11px;font-weight:600;background:${a.published ? 'rgba(74,222,128,.15)' : 'rgba(156,163,175,.15)'};color:${a.published ? '#4ade80' : '#9ca3af'}">${a.published ? 'Published' : 'Draft'}</span></td>
+          <td><span style="padding:3px 8px;border-radius:10px;font-size:10px;font-weight:600;background:${a.published ? 'rgba(46,125,79,.2)' : 'rgba(255,255,255,.06)'};color:${a.published ? '#2e7d4f' : 'var(--muted)'}">&#x25CF; ${a.published ? 'Published' : 'Draft'}</span></td>
           <td style="white-space:nowrap">${new Date(a.created_at).toLocaleDateString()}</td>
           <td style="white-space:nowrap">
-            <button class="btn-action" onclick="openArticleEditor(${a.id})" style="margin-right:6px">Edit</button>
+            ${a.published
+              ? `<button class="btn-action" onclick="quickToggleArticle(${a.id},false)" style="margin-right:4px;font-size:10px">Unpublish</button>`
+              : `<button class="btn-action" onclick="quickToggleArticle(${a.id},true)" style="margin-right:4px;background:#2e7d4f;color:white;border-color:#2e7d4f;font-size:10px">&#x2713; Publish</button>`}
+            <button class="btn-action" onclick="openArticleEditor(${a.id})" style="margin-right:4px">Edit</button>
             <button class="btn-action danger" onclick="deleteArticle(${a.id},'${a.title.replace(/'/g,"\\'")}')">Delete</button>
           </td>
         </tr>`).join('');
@@ -1283,6 +1286,17 @@ async function saveArticle() {
   } finally {
     if (btn) { btn.textContent = 'Save Article'; btn.disabled = false; }
   }
+}
+
+async function quickToggleArticle(id, publish) {
+  try {
+    await fetch(`${API}/api/admin/articles/${id}/toggle-publish`, {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ published: publish })
+    });
+    loadAdminArticles();
+  } catch(e) { alert('Failed: ' + e.message); }
 }
 
 async function deleteArticle(id, title) {
