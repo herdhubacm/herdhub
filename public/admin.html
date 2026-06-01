@@ -164,6 +164,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
       <button class="nav-item" onclick="switchPanel('featured')"><span class="icon">⭐</span><span>Featured</span><span class="nav-badge" id="featured-badge" style="display:none;background:var(--gold)">0</span></button>
       <button class="nav-item" onclick="switchPanel('verifications')"><span class="icon">✅</span><span>Verifications</span><span class="nav-badge" id="verify-badge" style="display:none">0</span></button>
       <button class="nav-item" onclick="switchPanel('payments')"><span class="icon">💳</span><span>Payments</span></button>
+      <button class="nav-item" onclick="switchPanel('catalog')"><span class="icon">📬</span><span>Catalog List</span><span class="nav-badge" id="catalog-badge" style="display:none;background:var(--rust)">0</span></button>
       <button class="nav-item" onclick="switchPanel('settings')"><span class="icon">⚙️</span><span>Settings</span></button>
     </nav>
     <div class="sidebar-footer">
@@ -582,6 +583,35 @@ tr:hover td{background:rgba(255,255,255,.02)}
       </div>
 
 
+      <!-- Catalog Mailing List panel -->
+      <div class="panel" id="panel-catalog">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px">
+          <div style="font-size:13px;color:var(--muted)">People requesting a free Herd Hub print catalog</div>
+          <div style="display:flex;gap:8px">
+            <button class="btn" onclick="downloadCatalogCSV()" style="background:var(--rust);color:white;font-size:11px;padding:7px 14px">&#x2B07; Download CSV</button>
+            <button class="btn" onclick="loadCatalogSignups()" style="font-size:11px;padding:7px 14px">&#x21BB; Refresh</button>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px">
+          <div style="background:rgba(255,255,255,.04);border:1px solid rgba(201,169,110,.12);border-radius:6px;padding:14px;text-align:center"><div id="cat-stat-total" style="font-size:24px;font-weight:700;color:var(--gold)">-</div><div style="font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-top:4px">Total Signups</div></div>
+          <div style="background:rgba(255,255,255,.04);border:1px solid rgba(201,169,110,.12);border-radius:6px;padding:14px;text-align:center"><div id="cat-stat-sent" style="font-size:24px;font-weight:700;color:#2e7d4f">-</div><div style="font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-top:4px">Catalogs Sent</div></div>
+          <div style="background:rgba(255,255,255,.04);border:1px solid rgba(201,169,110,.12);border-radius:6px;padding:14px;text-align:center"><div id="cat-stat-pending" style="font-size:24px;font-weight:700;color:var(--rust)">-</div><div style="font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-top:4px">Pending Send</div></div>
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+          <input id="cat-search" type="text" placeholder="Search name, email, city, state, ZIP..." oninput="filterCatTable()" style="flex:1;min-width:180px;padding:8px 12px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px">
+          <select id="cat-filter-sent" onchange="filterCatTable()" style="padding:8px 12px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px"><option value="">All</option><option value="false">Not Sent</option><option value="true">Sent</option></select>
+        </div>
+        <div id="cat-bulk" style="display:none;background:rgba(139,50,20,.1);border:1px solid rgba(139,50,20,.2);border-radius:6px;padding:8px 14px;margin-bottom:10px;align-items:center;gap:10px">
+          <span id="cat-sel-count" style="font-size:12px;color:var(--gold)">0 selected</span>
+          <button class="btn btn-success" onclick="bulkCatSent(true)" style="font-size:11px;padding:4px 10px">&#x2713; Mark Sent</button>
+          <button class="btn" onclick="bulkCatSent(false)" style="font-size:11px;padding:4px 10px">Mark Unsent</button>
+        </div>
+        <div class="table-wrap"><table>
+          <thead><tr><th style="width:30px"><input type="checkbox" id="cat-check-all" onchange="toggleAllCat(this.checked)"></th><th>Name</th><th>Email</th><th>Street</th><th>City</th><th>ST</th><th>ZIP</th><th>Date</th><th>Sent</th><th>Action</th></tr></thead>
+          <tbody id="cat-tbody"><tr><td colspan="10" style="text-align:center;color:var(--muted);padding:24px">Click Catalog List to load...</td></tr></tbody>
+        </table></div>
+      </div>
+
   </div><!-- /main -->
 </div><!-- /admin-app -->
 
@@ -744,6 +774,7 @@ const panelTitles = {
   payments:  ['Payments', 'Paid listings and subscription status'],
   verifications: ['Verification Requests', 'Review seller verification requests'],
   settings:  ['Settings', 'Platform configuration and quick actions'],
+  catalog:   ['Catalog Mailing List', 'Print catalog signup requests'],
 };
 
 function switchPanel(name) {
@@ -765,6 +796,7 @@ function switchPanel(name) {
   if (name === 'payments')  { loadPayments(); }
   if (name === 'verifications') { loadVerifications(); }
   if (name === 'settings')  { loadSettings(); }
+  if (name === 'catalog')   { loadCatalogSignups(); }
 }
 
 // ── Dashboard ─────────────────────────────────────────
@@ -1721,6 +1753,79 @@ async function loadPayments() {
 function escHtml(str) {
   if (!str) return '';
   return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── Catalog Mailing List ──────────────────────────────
+let catSignups=[], catFiltered=[], catSelected=new Set();
+
+async function loadCatalogSignups() {
+  try {
+    const r = await fetch(`${API}/api/admin/catalog-signups`, {headers:{Authorization:`Bearer ${token}`}});
+    catSignups = await r.json();
+    catFiltered = [...catSignups];
+    const sent = catSignups.filter(s=>s.catalog_sent).length;
+    document.getElementById('cat-stat-total').textContent = catSignups.length;
+    document.getElementById('cat-stat-sent').textContent = sent;
+    document.getElementById('cat-stat-pending').textContent = catSignups.length - sent;
+    const badge = document.getElementById('catalog-badge');
+    if (badge) { badge.textContent = catSignups.length; badge.style.display = catSignups.length ? '' : 'none'; }
+    renderCatTable();
+  } catch(e) { document.getElementById('cat-tbody').innerHTML = '<tr><td colspan="10" style="text-align:center;color:var(--muted);padding:24px">Failed: '+e.message+'</td></tr>'; }
+}
+
+function filterCatTable() {
+  const q = (document.getElementById('cat-search')?.value||'').toLowerCase();
+  const sf = document.getElementById('cat-filter-sent')?.value||'';
+  catFiltered = catSignups.filter(s => {
+    if (q && !(s.name||'').toLowerCase().includes(q) && !(s.email||'').toLowerCase().includes(q) && !(s.city||'').toLowerCase().includes(q) && !(s.state||'').toLowerCase().includes(q) && !(s.zip||'').includes(q)) return false;
+    if (sf && String(s.catalog_sent) !== sf) return false;
+    return true;
+  });
+  renderCatTable();
+}
+
+function renderCatTable() {
+  const tbody = document.getElementById('cat-tbody');
+  if (!catFiltered.length) { tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:var(--muted);padding:24px">No signups found</td></tr>'; return; }
+  tbody.innerHTML = catFiltered.map((s,i) => {
+    const sent = s.catalog_sent ? '<span class="badge" style="background:#2e7d4f;color:white">Sent</span>' : '<span class="badge" style="background:var(--rust);color:white">Pending</span>';
+    return `<tr style="${i%2?'':'background:rgba(255,255,255,.02)'}">
+      <td><input type="checkbox" ${catSelected.has(s.id)?'checked':''} onchange="toggleCatSel(${s.id},this.checked)"></td>
+      <td style="font-weight:500">${escHtml(s.name)}</td>
+      <td style="font-size:12px">${escHtml(s.email)}</td>
+      <td style="font-size:12px;color:var(--muted)">${escHtml(s.street||'')}</td>
+      <td>${escHtml(s.city||'')}</td>
+      <td style="font-weight:600">${escHtml(s.state||'')}</td>
+      <td>${escHtml(s.zip||'')}</td>
+      <td style="font-size:11px;color:var(--muted)">${new Date(s.created_at).toLocaleDateString()}</td>
+      <td>${sent}</td>
+      <td><button class="btn" onclick="toggleCatSentOne(${s.id},${!s.catalog_sent})" style="font-size:10px;padding:3px 8px">${s.catalog_sent?'Unsend':'Mark Sent'}</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function toggleCatSel(id,checked){if(checked)catSelected.add(id);else catSelected.delete(id);updateCatBulk();}
+function toggleAllCat(checked){catSelected.clear();if(checked)catFiltered.forEach(s=>catSelected.add(s.id));renderCatTable();updateCatBulk();}
+function updateCatBulk(){const bar=document.getElementById('cat-bulk');bar.style.display=catSelected.size>0?'flex':'none';document.getElementById('cat-sel-count').textContent=catSelected.size+' selected';}
+
+async function toggleCatSentOne(id,sent){
+  await fetch(`${API}/api/admin/catalog-signups/bulk-sent`,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},body:JSON.stringify({ids:[id],catalog_sent:sent})});
+  loadCatalogSignups();
+}
+async function bulkCatSent(sent){
+  if(!catSelected.size)return;
+  await fetch(`${API}/api/admin/catalog-signups/bulk-sent`,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},body:JSON.stringify({ids:Array.from(catSelected),catalog_sent:sent})});
+  catSelected.clear();loadCatalogSignups();
+}
+
+function downloadCatalogCSV(){
+  const heads=['Name','Email','Street','City','State','ZIP','Date','Sent'];
+  const rows=catSignups.map(s=>[s.name,s.email,s.street,s.city,s.state,s.zip,new Date(s.created_at).toLocaleDateString(),s.catalog_sent?'Yes':'No']);
+  const csv=[heads,...rows].map(r=>r.map(c=>'"'+String(c||'').replace(/"/g,'""')+'"').join(',')).join('\n');
+  const blob=new Blob([csv],{type:'text/csv'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='HerdHub_Catalog_Mailing_List_'+new Date().toISOString().split('T')[0]+'.csv';
+  a.click();
 }
 
 </script>
