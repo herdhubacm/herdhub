@@ -367,8 +367,12 @@ function getJsPDF() {
   if (typeof jsPDF !== 'undefined') return jsPDF;
   return null;
 }
+function stripEmoji(str) {
+  if (!str) return '';
+  return String(str).replace(/[\u{1F000}-\u{1FFFF}]/gu,'').replace(/[\u{2600}-\u{27BF}]/gu,'').replace(/[\u{FE00}-\u{FE0F}]/gu,'').replace(/[\u{200D}]/gu,'').replace(/[\u{20E3}]/gu,'').replace(/[\u{E0020}-\u{E007F}]/gu,'').replace(/\s+/g,' ').trim();
+}
 function pdfHeader(doc, title, subtitle) {
-  var W = doc.internal.pageSize.getWidth(), m = 18;
+  var W = doc.internal.pageSize.getWidth(), m = 18, cW = W-m*2;
   doc.setFillColor(10,10,10); doc.rect(0,0,W,30,'F');
   doc.setFillColor(139,50,20); doc.rect(0,30,W,2.5,'F');
   doc.setFont('helvetica','bold'); doc.setFontSize(16); doc.setTextColor(245,239,224);
@@ -376,11 +380,15 @@ function pdfHeader(doc, title, subtitle) {
   doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(201,169,110);
   doc.text('AMERICAN CATTLE MARKETPLACE', m, 21);
   doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor(245,239,224);
-  doc.text(title.toUpperCase().slice(0,35), W-m, 13, {align:'right'});
+  doc.text(stripEmoji(title).toUpperCase().slice(0,35), W-m, 13, {align:'right'});
   doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(140,117,96);
   doc.text(new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'}), W-m, 21, {align:'right'});
   var y = 40;
-  if (subtitle) { doc.setFontSize(9); doc.setTextColor(80,80,80); var sl=doc.splitTextToSize(String(subtitle),W-m*2); doc.text(sl, m, y); y += sl.length*5+3; }
+  if (subtitle) {
+    doc.setFontSize(9); doc.setTextColor(80,80,80);
+    var sl = doc.splitTextToSize(stripEmoji(subtitle), cW);
+    doc.text(sl, m, y); y += sl.length * 5.5 + 4;
+  }
   return y;
 }
 function pdfSection(doc, title, y) {
@@ -388,7 +396,7 @@ function pdfSection(doc, title, y) {
   doc.setFillColor(245,239,224); doc.rect(m,y,cW,7.5,'F');
   doc.setFillColor(139,50,20); doc.rect(m,y,3,7.5,'F');
   doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(10,10,10);
-  doc.text(title.toUpperCase(), m+7, y+5.2);
+  doc.text(stripEmoji(title).toUpperCase().slice(0,60), m+7, y+5.2);
   return y + 11;
 }
 function pdfFooter(doc, toolName) {
@@ -398,19 +406,19 @@ function pdfFooter(doc, toolName) {
   doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(140,117,96);
   doc.text('theherdhub.com', m, H-8);
   doc.text('Page '+pg, W-m, H-8, {align:'right'});
-  doc.setTextColor(180,160,130); doc.text(toolName||'', W/2, H-8, {align:'center'});
+  doc.setTextColor(180,160,130); doc.text(stripEmoji(toolName||'').slice(0,50), W/2, H-8, {align:'center'});
 }
 function pdfTable(doc, headers, rows, y, toolName) {
   var W = doc.internal.pageSize.getWidth(), m = 18, cW = W-m*2, colW = cW/headers.length;
   doc.setFillColor(10,10,10); doc.rect(m,y,cW,7.5,'F');
   doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(201,169,110);
-  headers.forEach(function(h,i){doc.text(h.toUpperCase(),m+4+i*colW,y+5.2);});
+  headers.forEach(function(h,i){doc.text(stripEmoji(h).toUpperCase().slice(0,Math.floor(colW/2)),m+4+i*colW,y+5.2);});
   y+=9; var alt=false;
   rows.forEach(function(r){
     if(y>265){pdfFooter(doc,toolName);doc.addPage();y=20;}
     if(alt){doc.setFillColor(250,248,245);doc.rect(m,y,cW,7,'F');}
     doc.setFont('helvetica','normal');doc.setFontSize(8.5);doc.setTextColor(50,50,50);
-    r.forEach(function(c,i){var cv=String(c||'—');if(cv.length>colW/2)cv=cv.slice(0,Math.floor(colW/2));doc.text(cv,m+4+i*colW,y+5);});
+    r.forEach(function(c,i){var cv=stripEmoji(String(c||'--')).slice(0,Math.floor(colW/2));doc.text(cv,m+4+i*colW,y+5);});
     y+=7;alt=!alt;
   });
   return y+4;

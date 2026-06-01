@@ -1696,8 +1696,12 @@ function getJsPDF() {
   if (typeof jsPDF !== 'undefined') return jsPDF;
   return null;
 }
+function stripEmoji(str) {
+  if (!str) return '';
+  return String(str).replace(/[\u{1F000}-\u{1FFFF}]/gu,'').replace(/[\u{2600}-\u{27BF}]/gu,'').replace(/[\u{FE00}-\u{FE0F}]/gu,'').replace(/[\u{200D}]/gu,'').replace(/[\u{20E3}]/gu,'').replace(/[\u{E0020}-\u{E007F}]/gu,'').replace(/\s+/g,' ').trim();
+}
 function pdfHeader(doc, title, subtitle) {
-  var W = doc.internal.pageSize.getWidth(), m = 18;
+  var W = doc.internal.pageSize.getWidth(), m = 18, cW = W-m*2;
   doc.setFillColor(10,10,10); doc.rect(0,0,W,30,'F');
   doc.setFillColor(139,50,20); doc.rect(0,30,W,2.5,'F');
   doc.setFont('helvetica','bold'); doc.setFontSize(16); doc.setTextColor(245,239,224);
@@ -1705,11 +1709,15 @@ function pdfHeader(doc, title, subtitle) {
   doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(201,169,110);
   doc.text('AMERICAN CATTLE MARKETPLACE', m, 21);
   doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor(245,239,224);
-  doc.text(title.toUpperCase().slice(0,35), W-m, 13, {align:'right'});
+  doc.text(stripEmoji(title).toUpperCase().slice(0,35), W-m, 13, {align:'right'});
   doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(140,117,96);
   doc.text(new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'}), W-m, 21, {align:'right'});
   var y = 40;
-  if (subtitle) { doc.setFontSize(9); doc.setTextColor(80,80,80); var sl=doc.splitTextToSize(String(subtitle),W-m*2); doc.text(sl, m, y); y += sl.length*5+3; }
+  if (subtitle) {
+    doc.setFontSize(9); doc.setTextColor(80,80,80);
+    var sl = doc.splitTextToSize(stripEmoji(subtitle), cW);
+    doc.text(sl, m, y); y += sl.length * 5.5 + 4;
+  }
   return y;
 }
 function pdfSection(doc, title, y) {
@@ -1717,7 +1725,7 @@ function pdfSection(doc, title, y) {
   doc.setFillColor(245,239,224); doc.rect(m,y,cW,7.5,'F');
   doc.setFillColor(139,50,20); doc.rect(m,y,3,7.5,'F');
   doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(10,10,10);
-  doc.text(title.toUpperCase(), m+7, y+5.2);
+  doc.text(stripEmoji(title).toUpperCase().slice(0,60), m+7, y+5.2);
   return y + 11;
 }
 function pdfFooter(doc, toolName) {
@@ -1727,15 +1735,17 @@ function pdfFooter(doc, toolName) {
   doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(140,117,96);
   doc.text('theherdhub.com', m, H-8);
   doc.text('Page '+pg, W-m, H-8, {align:'right'});
-  doc.setTextColor(180,160,130); doc.text(toolName||'', W/2, H-8, {align:'center'});
+  doc.setTextColor(180,160,130); doc.text(stripEmoji(toolName||'').slice(0,50), W/2, H-8, {align:'center'});
 }
 function pdfInsight(doc, text, y, type) {
   var W = doc.internal.pageSize.getWidth(), m = 18, cW = W-m*2;
-  var lines = doc.splitTextToSize(text, cW-10), h = lines.length*5+6;
+  var clean = stripEmoji(text);
+  var lines = doc.splitTextToSize(clean, cW-12);
+  var h = Math.max(10, lines.length * 5.5 + 6);
   if (type==='warning') { doc.setFillColor(255,248,240); doc.rect(m,y,cW,h,'F'); doc.setFillColor(212,130,10); doc.rect(m,y,2.5,h,'F'); doc.setTextColor(100,60,10); }
   else { doc.setFillColor(245,252,248); doc.rect(m,y,cW,h,'F'); doc.setFillColor(46,125,79); doc.rect(m,y,2.5,h,'F'); doc.setTextColor(20,80,50); }
   doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.text(lines, m+6, y+5); doc.setTextColor(10,10,10);
-  return y+h+4;
+  return y + h + 3;
 }
 
 function exportComparisonPDF() {
@@ -1745,23 +1755,24 @@ function exportComparisonPDF() {
   try {
     var doc = new JsPDF({orientation:'portrait',unit:'mm',format:'a4'});
     var W = doc.internal.pageSize.getWidth(), m = 18, cW = W-m*2, y;
-    y = pdfHeader(doc, 'Herd Vision — EPD Report', d.bull1.name+' vs '+d.bull2.name+(d.isHeifer?' | Heifer Mode':''));
-    function fmt(v) { if(v===null||v===undefined||isNaN(v))return'—'; return(v>0?'+':'')+parseFloat(v).toFixed(1); }
+    var b1 = stripEmoji(d.bull1.name), b2 = stripEmoji(d.bull2.name);
+    y = pdfHeader(doc, 'Herd Vision EPD Report', b1+' vs '+b2+(d.isHeifer?' | Heifer Mode: ON':''));
+    function fmt(v) { if(v===null||v===undefined||isNaN(v))return'--'; return(v>0?'+':'')+parseFloat(v).toFixed(1); }
     function np() { pdfFooter(doc,'Herd Vision EPD Comparison'); doc.addPage(); y=20; }
-    // Column headers
+    // Column headers — trait 43%, bull1 17%, bull2 17%, edge 23%
     doc.setFillColor(10,10,10); doc.rect(m,y,cW,7.5,'F');
     doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(201,169,110);
     doc.text('TRAIT', m+4, y+5.2);
-    doc.text(d.bull1.name.slice(0,16).toUpperCase(), m+cW*0.5, y+5.2, {align:'right'});
-    doc.text(d.bull2.name.slice(0,16).toUpperCase(), m+cW*0.75, y+5.2, {align:'right'});
-    doc.text('EDGE', W-m-4, y+5.2, {align:'right'});
+    doc.text(b1.slice(0,14).toUpperCase(), m+cW*0.6-2, y+5.2, {align:'right'});
+    doc.text(b2.slice(0,14).toUpperCase(), m+cW*0.77-2, y+5.2, {align:'right'});
+    doc.text('ADVANTAGE', W-m-4, y+5.2, {align:'right'});
     y += 9;
     var traits = [
-      {g:'Calving Traits',r:[['CE — Calving Ease','ce',true],['BW — Birth Weight','bw',false]]},
-      {g:'Growth Traits',r:[['WW — Weaning Weight','ww',true],['YW — Yearling Weight','yw',true]]},
-      {g:'Maternal Traits',r:[['MM — Milk','mm',true],['MWW — Maternal Weaning Wt.','mww',true]]},
-      {g:'Carcass Traits',r:[['CW — Carcass Weight','cw',true],['REA — Ribeye Area','rea',true],['MARB — Marbling','marb',true]]},
-      {g:'Selection Indexes',r:[['$B — Beef Value','sb',true],['$M — Maternal Value','sm',true],['$W — Weaning Value','sw',true],['$F — Feedlot Value','sf',true]]}
+      {g:'Calving Traits',r:[['CE - Calving Ease','ce',true],['BW - Birth Weight','bw',false]]},
+      {g:'Growth Traits',r:[['WW - Weaning Weight','ww',true],['YW - Yearling Weight','yw',true]]},
+      {g:'Maternal Traits',r:[['MM - Milk','mm',true],['MWW - Maternal Weaning Wt','mww',true]]},
+      {g:'Carcass Traits',r:[['CW - Carcass Weight','cw',true],['REA - Ribeye Area','rea',true],['MARB - Marbling','marb',true]]},
+      {g:'Selection Indexes',r:[['$B - Beef Value','sb',true],['$M - Maternal Value','sm',true],['$W - Weaning Value','sw',true],['$F - Feedlot Value','sf',true]]}
     ];
     var alt = false;
     traits.forEach(function(group) {
@@ -1780,26 +1791,37 @@ function exportComparisonPDF() {
         var b1w=!isNaN(n1)&&!isNaN(n2)&&(hb?n1>n2:n1<n2);
         var b2w=!isNaN(n1)&&!isNaN(n2)&&(hb?n2>n1:n2<n1);
         doc.setFont('helvetica',b1w?'bold':'normal'); doc.setTextColor(b1w?139:80,b1w?50:80,b1w?20:80);
-        doc.text(fmt(v1), m+cW*0.5, y+5, {align:'right'});
+        doc.text(fmt(v1), m+cW*0.6-2, y+5, {align:'right'});
         doc.setFont('helvetica',b2w?'bold':'normal'); doc.setTextColor(b2w?20:80,b2w?80:80,b2w?50:80);
-        doc.text(fmt(v2), m+cW*0.75, y+5, {align:'right'});
+        doc.text(fmt(v2), m+cW*0.77-2, y+5, {align:'right'});
         doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(100,80,60);
         if (!isNaN(n1)&&!isNaN(n2)) {
-          var diff=Math.abs(n1-n2).toFixed(1), winner=b1w?d.bull1.name.split(' ')[0].slice(0,10):b2w?d.bull2.name.split(' ')[0].slice(0,10):'Equal';
-          doc.text((winner+(diff!=='0.0'?' +'+diff:'')).slice(0,20), W-m-4, y+5, {align:'right'});
+          var diff = Math.abs(n1-n2).toFixed(1);
+          var wName = b1w ? b1.split(' ')[0].slice(0,12) : b2w ? b2.split(' ')[0].slice(0,12) : 'Equal';
+          var edgeTxt = (b1w||b2w) ? wName+' +'+diff : 'Equal';
+          doc.text(edgeTxt.slice(0,22), W-m-4, y+5, {align:'right'});
         }
         y+=7; alt=!alt;
       });
     });
     if (d.insights&&d.insights.length) {
-      y+=4; if(y>250)np(); y=pdfSection(doc,'Key Insights & Warnings',y);
-      d.insights.forEach(function(ins) { if(y>255)np(); y=pdfInsight(doc,ins,y,ins.includes('⚠')||ins.toLowerCase().includes('risk')?'warning':'insight'); });
+      y+=4; if(y>250)np(); y=pdfSection(doc,'Key Insights and Warnings',y);
+      d.insights.forEach(function(ins) {
+        if(y>255)np();
+        var isWarn = ins.toLowerCase().indexOf('risk')>=0 || ins.toLowerCase().indexOf('warn')>=0 || ins.indexOf('elevated')>=0;
+        y=pdfInsight(doc,ins,y,isWarn?'warning':'insight');
+      });
     }
-    y+=4; doc.setFillColor(250,248,245); doc.rect(m,y,cW,12,'F');
+    y+=4;
+    if(y>255)np();
+    var discLines = doc.splitTextToSize('EPDs are breed-specific and not directly comparable across breeds without adjustment factors. Accuracy values below 0.50 may shift significantly as more progeny data becomes available. Consult your breed association or extension specialist for herd-specific recommendations.',cW-8);
+    var discH = discLines.length*4.5+6;
+    doc.setFillColor(250,248,245); doc.rect(m,y,cW,discH,'F');
     doc.setFont('helvetica','italic'); doc.setFontSize(7.5); doc.setTextColor(120,100,80);
-    doc.text(doc.splitTextToSize('EPDs are breed-specific and not comparable across breeds. Accuracy below 0.50 may shift. Consult your breed association.',cW-8),m+4,y+5);
-    pdfFooter(doc,'Herd Vision EPD Comparison — theherdhub.com');
-    doc.save('HerdVision_'+d.bull1.name.replace(/[^a-z0-9]/gi,'_').slice(0,12)+'_vs_'+d.bull2.name.replace(/[^a-z0-9]/gi,'_').slice(0,12)+'_'+new Date().toISOString().split('T')[0]+'.pdf');
+    doc.text(discLines,m+4,y+5);
+    pdfFooter(doc,'Herd Vision EPD Comparison');
+    var fn = 'HerdVision_'+b1.replace(/[^a-z0-9]/gi,'_').slice(0,12)+'_vs_'+b2.replace(/[^a-z0-9]/gi,'_').slice(0,12)+'_'+new Date().toISOString().split('T')[0]+'.pdf';
+    doc.save(fn);
   } catch(e) { console.error('PDF error:',e); alert('PDF error: '+e.message); }
 }
 
