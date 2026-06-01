@@ -1073,8 +1073,7 @@ select option { background: var(--brown); color: var(--cream); }
     <div class="comparison-results" id="comparison-results">
       <div style="height:1px;background:rgba(255,255,255,.06);margin:40px 0 32px"></div>
       <div id="compare-export" style="display:none;margin-bottom:12px;gap:8px">
-        <button class="btn btn-primary btn-sm" onclick="exportComparisonPDF()">&#x1F4C4; Download PDF</button>
-        <button class="btn btn-ghost btn-sm" onclick="printAsPDF(exportComparisonPDF)">&#x1F5A8; Print</button>
+        <button class="btn btn-primary btn-sm" onclick="exportComparisonPDF()">&#x1F4C4; Download PDF / Print</button>
       </div>
       <div class="results-header">
         <div class="results-bull-name b1" id="res-b1-name">Bull A</div>
@@ -1272,8 +1271,7 @@ select option { background: var(--brown); color: var(--cream); }
       <div class="recommendation" id="wizard-results">
         <div style="height:1px;background:rgba(255,255,255,.06);margin:40px 0 32px"></div>
         <div id="wizard-export" style="display:none;margin-bottom:12px;gap:8px">
-          <button class="btn btn-primary btn-sm" onclick="exportWizardPDF()">&#x1F4C4; Download PDF</button>
-          <button class="btn btn-ghost btn-sm" onclick="printAsPDF(exportWizardPDF)">&#x1F5A8; Print</button>
+          <button class="btn btn-primary btn-sm" onclick="exportWizardPDF()">&#x1F4C4; Download PDF / Print</button>
         </div>
         <div class="rec-header" id="rec-header"></div>
         <div id="epd-targets"></div>
@@ -1905,8 +1903,6 @@ function exportWizardPDF() {
     doc.save('HerdVision_Wizard_'+new Date().toISOString().split('T')[0]+'.pdf');
   } catch(e) { console.error('PDF error:',e); alert('PDF error: '+e.message); }
 }
-
-
 
 function printAsPDF(exportFn) {
   try {

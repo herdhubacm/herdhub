@@ -238,8 +238,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px">
     <h2 style="font-family:'Libre Baskerville',serif;font-size:24px;font-weight:900;cursor:pointer" onclick="showView('dashboard')">&larr; <span style="color:var(--gold)">Herd</span> List</h2>
     <div style="display:flex;gap:8px;flex-wrap:wrap">
-      <button class="btn btn-primary btn-sm" onclick="exportRosterPDF()">&#x1F4C4; Export Roster PDF</button>
-      <button class="btn btn-ghost btn-sm" onclick="printAsPDF(exportRosterPDF)">&#x1F5A8; Print</button>
+      <button class="btn btn-primary btn-sm" onclick="exportRosterPDF()">&#x1F4C4; Export Roster PDF / Print</button>
       <button class="btn btn-primary" onclick="showAddAnimal()">+ Add Animal</button>
     </div>
   </div>
@@ -547,7 +546,7 @@ async function openProfile(id) {
         '<button class="btn btn-ghost btn-sm" onclick="showSingleWeight(' + a.id + ')">+ Weight</button>' +
         '<button class="btn btn-ghost btn-sm" onclick="showSingleHealth(' + a.id + ')">+ Health</button>' +
         '<button class="btn btn-ghost btn-sm" onclick="showSingleProduction(' + a.id + ')">+ Production</button>' +
-        '<button class="btn btn-primary btn-sm" onclick="exportAnimalPDF(' + a.id + ')">&#x1F4C4; Export PDF</button>' +
+        '<button class="btn btn-primary btn-sm" onclick="exportAnimalPDF(' + a.id + ')">&#x1F4C4; Export PDF / Print</button>' +
         '<button class="btn btn-danger btn-sm" onclick="deleteAnimal(' + a.id + ')">Delete</button>' +
       '</div></div></div>';
 
