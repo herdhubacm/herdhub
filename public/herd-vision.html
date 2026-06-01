@@ -1074,7 +1074,7 @@ select option { background: var(--brown); color: var(--cream); }
       <div style="height:1px;background:rgba(255,255,255,.06);margin:40px 0 32px"></div>
       <div id="compare-export" style="display:none;margin-bottom:12px;gap:8px">
         <button class="btn btn-primary btn-sm" onclick="exportComparisonPDF()">&#x1F4C4; Download PDF</button>
-        <button class="btn btn-ghost btn-sm" onclick="window.print()">&#x1F5A8; Print</button>
+        <button class="btn btn-ghost btn-sm" onclick="printToolResults()">&#x1F5A8; Print</button>
       </div>
       <div class="results-header">
         <div class="results-bull-name b1" id="res-b1-name">Bull A</div>
@@ -1273,7 +1273,7 @@ select option { background: var(--brown); color: var(--cream); }
         <div style="height:1px;background:rgba(255,255,255,.06);margin:40px 0 32px"></div>
         <div id="wizard-export" style="display:none;margin-bottom:12px;gap:8px">
           <button class="btn btn-primary btn-sm" onclick="exportWizardPDF()">&#x1F4C4; Download PDF</button>
-          <button class="btn btn-ghost btn-sm" onclick="window.print()">&#x1F5A8; Print</button>
+          <button class="btn btn-ghost btn-sm" onclick="printToolResults()">&#x1F5A8; Print</button>
         </div>
         <div class="rec-header" id="rec-header"></div>
         <div id="epd-targets"></div>
@@ -1709,10 +1709,16 @@ function getJsPDF() {
 }
 function stripEmoji(str) {
   if (!str) return '';
-  return String(str)
-    .replace(/&#[\d]+;/g,'').replace(/&#x[0-9a-fA-F]+;/g,'')
-    .replace(/[^\x20-\x7E]/g,'')
-    .replace(/\s{2,}/g,' ').replace(/^[\s\-:]+/,'').trim();
+  var s = String(str);
+  s = s.replace(/&nbsp;/g,' ').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>');
+  s = s.replace(/&#\d+;/g,'').replace(/&#x[\dA-Fa-f]+;/g,'').replace(/&[a-zA-Z]+;/g,' ');
+  s = s.replace(/[^\x20-\x7E]/g,'');
+  s = s.replace(/\s{2,}/g,' ').trim();
+  return s;
+}
+function safeText(el) {
+  if (!el) return '';
+  return stripEmoji(el.textContent || '');
 }
 function pdfHeader(doc, title, subtitle) {
   var W = doc.internal.pageSize.getWidth(), m = 18, cW = W-m*2;
@@ -1850,43 +1856,64 @@ function exportWizardPDF() {
     if (goalDesc) { doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(80,80,80); var ls=doc.splitTextToSize(goalDesc,cW); doc.text(ls,m,y); y+=ls.length*5.5+4; }
     // EPD targets table
     var rows = []; document.querySelectorAll('.epd-target-card').forEach(function(card) {
-      var name=stripEmoji(card.querySelector('.epd-target-name')?.textContent||'');
-      var range=stripEmoji(card.querySelector('.epd-target-range')?.textContent||'');
-      var label=stripEmoji(card.querySelector('.epd-target-label')?.textContent||'');
-      var priority=stripEmoji(card.querySelector('.priority-badge')?.textContent||'');
-      rows.push([name,priority,range,label]);
+      rows.push([
+        safeText(card.querySelector('.epd-target-name')),
+        safeText(card.querySelector('.priority-badge')),
+        safeText(card.querySelector('.epd-target-range')),
+        safeText(card.querySelector('.epd-target-label'))
+      ]);
     });
     if (rows.length) {
       y = pdfSection(doc,'EPD Target Ranges',y);
-      var colW = [cW*0.28, cW*0.16, cW*0.18, cW*0.38];
-      var colX = [m+3, m+3+colW[0], m+3+colW[0]+colW[1], m+3+colW[0]+colW[1]+colW[2]];
+      // Fixed column positions (mm from left edge)
+      var c0X=m, c1X=m+62, c2X=m+94, c3X=m+120;
+      var c0W=58, c1W=28, c2W=22, c3W=cW-120+m;
       doc.setFillColor(10,10,10); doc.rect(m,y,cW,7,'F');
       doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(201,169,110);
-      ['TRAIT','PRIORITY','TARGET','NOTES'].forEach(function(h,i){doc.text(h,colX[i],y+5);});
+      doc.text('TRAIT',c0X+2,y+5); doc.text('PRIORITY',c1X+2,y+5);
+      doc.text('TARGET',c2X+2,y+5); doc.text('NOTES',c3X+2,y+5);
       y+=9; var alt=false;
       rows.forEach(function(r) {
-        if(y>260){pdfFooter(doc,'Bull Selection Wizard');doc.addPage();y=20;}
-        var cellLines = r.map(function(c,i){ return doc.splitTextToSize(stripEmoji(String(c||'')),colW[i]-4); });
-        var maxL = Math.max.apply(null,cellLines.map(function(l){return l.length;}));
-        var rowH = Math.max(7, maxL*5+2);
+        if(y>258){pdfFooter(doc,'Bull Selection Wizard');doc.addPage();y=20;}
+        var t0=doc.splitTextToSize(r[0],c0W-4);
+        var t1=doc.splitTextToSize(r[1],c1W-4);
+        var t2=doc.splitTextToSize(r[2],c2W-4);
+        var t3=doc.splitTextToSize(r[3],c3W-4);
+        var maxL=Math.max(t0.length,t1.length,t2.length,t3.length);
+        var rowH=Math.max(8, maxL*5.2+4);
         if(alt){doc.setFillColor(250,248,245);doc.rect(m,y,cW,rowH,'F');}
-        doc.setFont('helvetica','normal');doc.setFontSize(8.5);doc.setTextColor(60,60,60);
-        cellLines.forEach(function(lines,i){
-          if(i===1){doc.setFont('helvetica','bold');doc.setTextColor(139,50,20);}
-          else{doc.setFont('helvetica','normal');doc.setTextColor(60,60,60);}
-          doc.text(lines,colX[i],y+5);
-        });
-        y+=rowH+1;alt=!alt;
+        doc.setFontSize(8.5);
+        doc.setFont('helvetica','normal'); doc.setTextColor(50,50,50);
+        doc.text(t0, c0X+2, y+5);
+        var isKey=r[1].indexOf('KEY')>=0||r[1].indexOf('Key')>=0;
+        doc.setFont('helvetica',isKey?'bold':'normal');
+        doc.setTextColor(isKey?139:80, isKey?50:80, isKey?20:80);
+        doc.text(t1, c1X+2, y+5);
+        doc.setFont('helvetica','bold'); doc.setTextColor(10,10,10);
+        doc.text(t2, c2X+2, y+5);
+        doc.setFont('helvetica','normal'); doc.setTextColor(50,50,50);
+        doc.text(t3, c3X+2, y+5);
+        y+=rowH+1; alt=!alt;
       });
     }
     // Warnings
-    var warnings=[]; document.querySelectorAll('.warning-box').forEach(function(el){var t=stripEmoji(el.textContent);if(t)warnings.push(t);});
+    var warnings=[]; document.querySelectorAll('.warning-box').forEach(function(el){var t=safeText(el);if(t)warnings.push(t);});
     if(warnings.length){y+=4;y=pdfSection(doc,'Warnings',y);warnings.forEach(function(w){if(y>255){pdfFooter(doc,'Bull Selection Wizard');doc.addPage();y=20;}y=pdfInsight(doc,w,y,'warning');});}
-    var insights=[]; document.querySelectorAll('.insight-good').forEach(function(el){var t=stripEmoji(el.textContent);if(t)insights.push(t);});
+    var insights=[]; document.querySelectorAll('.insight-good').forEach(function(el){var t=safeText(el);if(t)insights.push(t);});
     if(insights.length){y+=4;y=pdfSection(doc,'Bull Pen Insights',y);insights.forEach(function(ins){if(y>255){pdfFooter(doc,'Bull Selection Wizard');doc.addPage();y=20;}y=pdfInsight(doc,ins,y,'insight');});}
-    pdfFooter(doc,'Bull Selection Wizard — theherdhub.com');
+    pdfFooter(doc,'Bull Selection Wizard');
     doc.save('HerdVision_Wizard_'+new Date().toISOString().split('T')[0]+'.pdf');
   } catch(e) { console.error('PDF error:',e); alert('PDF error: '+e.message); }
+}
+
+function printToolResults() {
+  var el = document.getElementById('comparison-results');
+  if (!el || !el.classList.contains('visible')) el = document.getElementById('wizard-results');
+  if (!el || !el.classList.contains('visible')) { alert('Please run a comparison or wizard first.'); return; }
+  var w = window.open('','_blank','width=800,height=600');
+  w.document.write('<!DOCTYPE html><html><head><title>Herd Hub EPD Report</title><style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:Georgia,serif;color:#1a1a1a;padding:20px;font-size:11pt}.ph{border-bottom:2px solid #8B3214;padding-bottom:12px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:flex-end}.ph .logo{font-size:22pt;font-weight:700}.ph .logo span{color:#8B3214}.ph .tag{font-family:sans-serif;font-size:8pt;color:#8C7560;letter-spacing:.1em;text-transform:uppercase;margin-top:3px}.ph .ri{text-align:right;font-family:sans-serif}.ph .rn{font-size:10pt;font-weight:700}.ph .rd{font-size:8pt;color:#8C7560;margin-top:2px}table{width:100%;border-collapse:collapse;margin-bottom:16px;font-size:10pt}th{background:#1a1a1a;color:#C9A96E;padding:6px 8px;text-align:left;font-family:sans-serif;font-size:8pt;letter-spacing:.06em;text-transform:uppercase}td{padding:5px 8px;border-bottom:.5px solid #e8e0d0}tr:nth-child(even) td{background:#fafaf8}.pf{margin-top:20px;padding-top:8px;border-top:.5px solid #C9A96E;font-family:sans-serif;font-size:8pt;color:#8C7560;display:flex;justify-content:space-between}@media print{body{padding:0}button{display:none!important}}</style></head><body><div class="ph"><div><div class="logo">HERD <span>HUB</span></div><div class="tag">American Cattle Marketplace</div></div><div class="ri"><div class="rn">EPD Report</div><div class="rd">'+new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'})+'</div></div></div><div>'+el.innerHTML+'</div><div class="pf"><span>theherdhub.com</span><span>Herd Vision Tool</span></div></body></html>');
+  w.document.close();
+  setTimeout(function(){w.print();},500);
 }
 </script>
 

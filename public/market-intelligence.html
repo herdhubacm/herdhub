@@ -615,10 +615,16 @@ function getJsPDF() {
 }
 function stripEmoji(str) {
   if (!str) return '';
-  return String(str)
-    .replace(/&#[\d]+;/g,'').replace(/&#x[0-9a-fA-F]+;/g,'')
-    .replace(/[^\x20-\x7E]/g,'')
-    .replace(/\s{2,}/g,' ').replace(/^[\s\-:]+/,'').trim();
+  var s = String(str);
+  s = s.replace(/&nbsp;/g,' ').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>');
+  s = s.replace(/&#\d+;/g,'').replace(/&#x[\dA-Fa-f]+;/g,'').replace(/&[a-zA-Z]+;/g,' ');
+  s = s.replace(/[^\x20-\x7E]/g,'');
+  s = s.replace(/\s{2,}/g,' ').trim();
+  return s;
+}
+function safeText(el) {
+  if (!el) return '';
+  return stripEmoji(el.textContent || '');
 }
 function pdfHeader(doc, title, subtitle) {
   var W = doc.internal.pageSize.getWidth(), m = 18, cW = W-m*2;
