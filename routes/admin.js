@@ -490,6 +490,23 @@ router.post('/listings/bulk-feature', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+// ── Catalog Mailing List ──────────────────────────────
+router.get('/catalog-signups', async (req, res) => {
+  try {
+    const { rows } = await query('SELECT * FROM catalog_signups ORDER BY created_at DESC');
+    res.json(rows);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+router.post('/catalog-signups/bulk-sent', async (req, res) => {
+  try {
+    const { ids, catalog_sent } = req.body;
+    if (!ids?.length) return res.status(400).json({ error: 'No IDs' });
+    await query('UPDATE catalog_signups SET catalog_sent=$1 WHERE id=ANY($2)', [catalog_sent, ids]);
+    res.json({ ok: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 // ── GET /api/settings (public — for frontend stats bar) ─
 // Mounted separately in server.js as /api/settings
 

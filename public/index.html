@@ -510,7 +510,7 @@ header.scrolled{background:rgba(10,10,10,.92)!important;backdrop-filter:blur(12p
   <a href="javascript:void(0)" data-action="scroll" data-target="market">Market Prices</a>
   <a href="javascript:void(0)" data-action="scroll" data-target="forum">Ranch News</a>
   <a href="javascript:void(0)" data-action="page" data-page="forum">Community Forum</a>
-  <a href="javascript:void(0)" data-action="modal" data-modal="auth" data-tab="register">Free Newsletter</a>
+  <a href="javascript:void(0)" data-action="modal" data-modal="catalog-signup">Free Catalog</a>
   <a href="javascript:void(0)" data-action="page" data-page="pricing">Advertise With Us</a>
 </div>
 
@@ -872,16 +872,12 @@ header.scrolled{background:rgba(10,10,10,.92)!important;backdrop-filter:blur(12p
   <!-- ══ NEWSLETTER + BEEF BOXES — Full width, centered, above articles ══ -->
   <div class="nl-bb-banner">
 
-    <!-- Newsletter half -->
+    <!-- Print Catalog half -->
     <div class="nl-bb-half nl-bb-newsletter">
-      <div class="nl-bb-eyebrow">Stay Connected</div>
-      <h3 class="nl-bb-heading">Herd <span style="color:var(--gold)">Hub</span> Monthly Newsletter</h3>
-      <p class="nl-bb-body">Cattle prices, featured listings, ranch news, and exclusive deals — delivered to your inbox every month.</p>
-      <div class="nl-bb-form">
-        <label for="nl-email" class="sr-only">Email address for newsletter</label>
-        <input type="email" id="nl-email" placeholder="Your email address" aria-label="Email address for newsletter" class="nl-bb-input">
-        <button class="btn-primary nl-bb-btn" data-action="subscribe">Join →</button>
-      </div>
+      <div class="nl-bb-eyebrow">Free by Mail</div>
+      <h3 class="nl-bb-heading">Herd <span style="color:var(--gold)">Hub</span> Print Catalog</h3>
+      <p class="nl-bb-body">Premium cattle listings, farm-to-table operations, and brand partners — a professional print catalog mailed free to producers nationwide.</p>
+      <button class="btn-primary nl-bb-btn" data-action="modal" data-modal="catalog-signup" style="width:auto">Request My Free Copy →</button>
     </div>
 
     <!-- Beef Boxes half -->
@@ -1864,6 +1860,30 @@ header.scrolled{background:rgba(10,10,10,.92)!important;backdrop-filter:blur(12p
         <div style="font-size:12px;color:#aaa" id="ob-progress">0 of 4 complete</div>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- CATALOG SIGNUP MODAL -->
+<div class="modal-overlay" id="modal-catalog-signup" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Request a free catalog">
+  <div class="modal" style="max-width:500px">
+    <button class="modal-close" data-action="close-modal" data-modal="catalog-signup" aria-label="Close">&#x2715;</button>
+    <div style="text-align:center;margin-bottom:20px">
+      <div style="font-size:36px;margin-bottom:8px">&#x1F4D6;</div>
+      <h2 style="font-family:'Libre Baskerville',serif;font-size:22px;font-weight:900;margin-bottom:6px">Request Your Free Catalog</h2>
+      <p style="font-size:13px;color:var(--muted);line-height:1.6;max-width:380px;margin:0 auto">The Herd Hub Print Catalog &mdash; featuring premium cattle listings, farm-to-table operations, and brand partners. Mailed free to producers nationwide.</p>
+    </div>
+    <div id="catalog-form-error" class="form-error" style="display:none"></div>
+    <div id="catalog-form-success" class="form-success" style="display:none"></div>
+    <div class="sf"><label for="catalog-name">Full Name *</label><input type="text" id="catalog-name" placeholder="Jake Harrington" required></div>
+    <div class="sf"><label for="catalog-email">Email Address *</label><input type="email" id="catalog-email" placeholder="you@email.com" required></div>
+    <div class="sf"><label for="catalog-street">Street Address *</label><input type="text" id="catalog-street" placeholder="123 Ranch Road" required></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="sf"><label for="catalog-city">City *</label><input type="text" id="catalog-city" placeholder="Amarillo" required></div>
+      <div class="sf"><label for="catalog-state">State *</label><select id="catalog-state" required><option value="">Select</option><option>AL</option><option>AK</option><option>AZ</option><option>AR</option><option>CA</option><option>CO</option><option>CT</option><option>DE</option><option>FL</option><option>GA</option><option>HI</option><option>ID</option><option>IL</option><option>IN</option><option>IA</option><option>KS</option><option>KY</option><option>LA</option><option>ME</option><option>MD</option><option>MA</option><option>MI</option><option>MN</option><option>MS</option><option>MO</option><option>MT</option><option>NE</option><option>NV</option><option>NH</option><option>NJ</option><option>NM</option><option>NY</option><option>NC</option><option>ND</option><option>OH</option><option>OK</option><option>OR</option><option>PA</option><option>RI</option><option>SC</option><option>SD</option><option>TN</option><option>TX</option><option>UT</option><option>VT</option><option>VA</option><option>WA</option><option>WV</option><option>WI</option><option>WY</option></select></div>
+    </div>
+    <div class="sf"><label for="catalog-zip">ZIP Code *</label><input type="text" id="catalog-zip" placeholder="79101" maxlength="10" required></div>
+    <button id="catalog-submit-btn" class="btn-primary" style="width:100%;justify-content:center;margin-top:8px" onclick="submitCatalogSignup()">Send Me the Catalog &rarr;</button>
+    <p style="font-size:11px;color:var(--muted);text-align:center;margin-top:12px;line-height:1.5">We respect your privacy. Your address is used only to mail your catalog. We never sell or share mailing lists.</p>
   </div>
 </div>
 
@@ -4017,7 +4037,7 @@ function initEventDelegation() {
     else if (action === 'post-listing') doPostListing();
     else if (action === 'post-ftf-listing') doPostFtfListing();
     else if (action === 'post-topic')  doPostTopic();
-    else if (action === 'subscribe')   subscribeNewsletter();
+    else if (action === 'subscribe')   submitCatalogSignup();
     else if (action === 'bb-signup')   doBeefBoxSignup();
     else if (action === 'report-listing') {
       const listingId = document.querySelector('#modal-listing-detail [data-listing-id]')?.dataset?.listingId
@@ -6712,20 +6732,55 @@ function buildFAQ() {
     </div>`).join('');
 }
 
-// ── Newsletter Mailchimp ────────────────────────────────
-async function subscribeNewsletter() {
-  const email = document.getElementById('nl-email')?.value?.trim();
-  if (!email || !email.includes('@')) { showToast('Please enter a valid email address'); return; }
+// ── Catalog Signup ──────────────────────────────────────
+async function submitCatalogSignup() {
+  var name = document.getElementById('catalog-name')?.value?.trim();
+  var email = document.getElementById('catalog-email')?.value?.trim();
+  var street = document.getElementById('catalog-street')?.value?.trim();
+  var city = document.getElementById('catalog-city')?.value?.trim();
+  var state = document.getElementById('catalog-state')?.value;
+  var zip = document.getElementById('catalog-zip')?.value?.trim();
+  var errEl = document.getElementById('catalog-form-error');
+  var sucEl = document.getElementById('catalog-form-success');
+  if (errEl) errEl.style.display = 'none';
+  if (sucEl) sucEl.style.display = 'none';
+
+  if (!name || !email || !street || !city || !state || !zip) {
+    if (errEl) { errEl.textContent = 'Please fill in all fields.'; errEl.style.display = 'block'; }
+    return;
+  }
+  if (!/^[\w.\-+]+@[\w.\-]+\.\w{2,}$/.test(email)) {
+    if (errEl) { errEl.textContent = 'Please enter a valid email.'; errEl.style.display = 'block'; }
+    return;
+  }
+  if (!/^\d{5}(-\d{4})?$/.test(zip)) {
+    if (errEl) { errEl.textContent = 'Please enter a valid ZIP code.'; errEl.style.display = 'block'; }
+    return;
+  }
+
+  var btn = document.getElementById('catalog-submit-btn');
+  if (btn) { btn.textContent = 'Sending...'; btn.disabled = true; }
   try {
-    const r = await fetch(`${API}/api/auth/newsletter`, {
+    var r = await fetch(API + '/api/catalog/signup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email })
+      body: JSON.stringify({ name: name, email: email, street: street, city: city, state: state, zip: zip })
     });
-    const d = await r.json();
-    if (r.ok) { showToast('You are subscribed! Welcome to the herd.'); document.getElementById('nl-email').value = ''; }
-    else showToast(d.error || 'Subscription failed');
-  } catch(e) { showToast('Connection error'); }
+    var d = await r.json();
+    if (d.success) {
+      closeModal('catalog-signup');
+      showToast('You are on the list! Your catalog will be mailed to you.');
+      ['catalog-name','catalog-email','catalog-street','catalog-city','catalog-state','catalog-zip'].forEach(function(id) {
+        var el = document.getElementById(id); if (el) el.value = '';
+      });
+    } else {
+      if (errEl) { errEl.textContent = d.error || 'Something went wrong.'; errEl.style.display = 'block'; }
+    }
+  } catch(e) {
+    if (errEl) { errEl.textContent = 'Network error — please try again.'; errEl.style.display = 'block'; }
+  } finally {
+    if (btn) { btn.textContent = 'Send Me the Catalog \u2192'; btn.disabled = false; }
+  }
 }
 
 // ── Recent Sales Ticker ─────────────────────────────────

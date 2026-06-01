@@ -286,6 +286,23 @@ app.get('/api/articles/:id', async (req, res) => {
   } catch (e) { res.status(500).json({ error: 'Failed to load article' }); }
 });
 
+// ── POST /api/catalog/signup (public) ─────────────────
+app.post('/api/catalog/signup', async (req, res) => {
+  try {
+    const { name, email, street, city, state, zip } = req.body;
+    if (!name || !email || !street || !city || !state || !zip)
+      return res.status(400).json({ error: 'All fields are required' });
+    // Check duplicate
+    const existing = await query('SELECT id FROM catalog_signups WHERE email=$1', [email.toLowerCase()]);
+    if (existing.rows.length) return res.json({ success: true, message: 'Already on the list!' });
+    await query(
+      'INSERT INTO catalog_signups (name,email,street,city,state,zip,ip_address) VALUES ($1,$2,$3,$4,$5,$6,$7)',
+      [name, email.toLowerCase(), street, city, state, zip, req.ip || null]
+    );
+    res.json({ success: true, message: 'You are on the list!' });
+  } catch (e) { res.status(500).json({ error: 'Signup failed' }); }
+});
+
 // ── GET /api/settings (public — stats bar) ───────────
 app.get('/api/settings', async (req, res) => {
   try {
@@ -472,6 +489,21 @@ async function start() {
         updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
       )`);
       console.log('✅  Articles table ready');
+
+      await query(`CREATE TABLE IF NOT EXISTS catalog_signups (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(150) NOT NULL,
+        email VARCHAR(255) NOT NULL,
+        street VARCHAR(200) NOT NULL,
+        city VARCHAR(100) NOT NULL,
+        state VARCHAR(50) NOT NULL,
+        zip VARCHAR(20) NOT NULL,
+        ip_address VARCHAR(50),
+        created_at TIMESTAMPTZ DEFAULT NOW(),
+        catalog_sent BOOLEAN DEFAULT FALSE,
+        notes TEXT
+      )`);
+      console.log('✅  Catalog signups table ready');
 
       // Beef Box waitlist table
       await query(`CREATE TABLE IF NOT EXISTS beefbox_waitlist (
