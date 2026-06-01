@@ -1272,7 +1272,10 @@ function getJsPDF() {
 }
 function stripEmoji(str) {
   if (!str) return '';
-  return String(str).replace(/[\u{1F000}-\u{1FFFF}]/gu,'').replace(/[\u{2600}-\u{27BF}]/gu,'').replace(/[\u{FE00}-\u{FE0F}]/gu,'').replace(/[\u{200D}]/gu,'').replace(/[\u{20E3}]/gu,'').replace(/[\u{E0020}-\u{E007F}]/gu,'').replace(/\s+/g,' ').trim();
+  return String(str)
+    .replace(/&#[\d]+;/g,'').replace(/&#x[0-9a-fA-F]+;/g,'')
+    .replace(/[^\x20-\x7E]/g,'')
+    .replace(/\s{2,}/g,' ').replace(/^[\s\-:]+/,'').trim();
 }
 function pdfHeader(doc, title, subtitle) {
   var W = doc.internal.pageSize.getWidth(), m = 18, cW = W-m*2;
