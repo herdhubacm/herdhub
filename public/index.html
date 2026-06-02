@@ -3679,7 +3679,7 @@ function renderArticleCard(a, onclickExpr) {
   var readMin = Math.max(1, Math.round(words/200));
   return '<div onclick="'+onclickExpr+'" style="background:rgba(255,255,255,.04);border-radius:6px;border-left:3px solid '+c.accent+';border-top:1px solid rgba(255,255,255,.06);border-right:1px solid rgba(255,255,255,.06);border-bottom:1px solid rgba(255,255,255,.06);padding:16px 18px;cursor:pointer;transition:background .2s" onmouseenter="this.style.background=\'rgba(255,255,255,.07)\'" onmouseleave="this.style.background=\'rgba(255,255,255,.04)\'">' +
     '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:8px">' +
-      '<span style="font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:3px 10px;border-radius:20px;font-family:Inter,sans-serif;background:'+c.bg+';color:'+c.text+';border:1px solid '+c.border+'">'+escHtml(c.label)+'</span>' +
+      '<span style="font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:3px 10px;border-radius:20px;font-family:Inter,sans-serif;background:'+c.bg+';color:'+c.text+';border:1px solid '+c.border+'">'+escHtml(a.category||'Ranch News')+'</span>' +
       '<span style="font-size:10px;color:#8C7560;font-family:Inter,sans-serif">'+date+' &middot; '+readMin+' min read</span>' +
     '</div>' +
     '<div style="font-family:Libre Baskerville,serif;font-size:15px;font-weight:700;color:#F5EFE0;line-height:1.35;margin-bottom:6px">'+escHtml(a.title)+'</div>' +
