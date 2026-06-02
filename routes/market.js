@@ -19,18 +19,18 @@ const { query } = require('../db/database');
 const { authenticateToken, requireAdmin } = require('../middleware/auth');
 
 const router   = express.Router();
-const BASE_URL = process.env.USDA_AMS_BASE_URL || 'https://marsapi.ams.usda.gov/services/v1.2';
+const BASE_URL = process.env.USDA_AMS_BASE_URL || 'https://mpr.datamart.ams.usda.gov/services/v1.1';
 const CACHE_TTL = parseInt(process.env.MARKET_CACHE_TTL) || 900; // seconds
 
 // ── USDA 403 backoff — stop hammering when blocked ────
 let usdaBackoffUntil = 0;
-const USDA_BACKOFF_MS = 30 * 60 * 1000; // 30 min backoff after a 403
+const USDA_BACKOFF_MS = 10 * 60 * 1000; // 10 min backoff after a 403
 
 const REPORTS = {
-  fed_cattle:     { id: 'LM_CT155', name: '5-Area Weekly Fed Cattle (Negotiated)' },
-  feeder_stocker: { id: 'LM_CT150', name: 'National Weekly Feeder & Stocker Cattle' },
-  boxed_beef:     { id: 'LM_XB459', name: 'National Daily Boxed Beef Cutout' },
-  cattle_on_feed: { id: 'LM_CT166', name: 'Monthly Cattle on Feed' },
+  fed_cattle:     { id: '2700', name: 'National Weekly Fed Cattle Comprehensive' },
+  feeder_stocker: { id: '2700', name: 'National Weekly Fed Cattle Comprehensive' },
+  boxed_beef:     { id: '2461', name: 'National Weekly Boxed Beef Cutout' },
+  cattle_on_feed: { id: '2700', name: 'National Weekly Fed Cattle Comprehensive' },
 };
 
 // ── Cache helpers (PostgreSQL JSONB) ──────────────────
@@ -75,13 +75,11 @@ async function fetchUSDA(reportId) {
   if (Date.now() < usdaBackoffUntil) {
     throw new Error('USDA temporarily unavailable (rate limited)');
   }
-  const url = `${BASE_URL}/reports/${reportId}?allSections=true&_limit=50`;
+  const url = `${BASE_URL}/reports/${reportId}`;
   const resp = await fetch(url, {
     headers: {
-      'Accept': 'application/json, text/plain, */*',
-      'User-Agent': 'Mozilla/5.0 (compatible; HerdHub/1.0; +https://theherdhub.com)',
-      'Accept-Language': 'en-US,en;q=0.9',
-      'Cache-Control': 'no-cache',
+      'Accept': 'application/json',
+      'User-Agent': 'HerdHub/1.0 (https://theherdhub.com)',
     },
     timeout: 15000
   });
@@ -91,7 +89,8 @@ async function fetchUSDA(reportId) {
     throw new Error(`USDA ${resp.status}: ${resp.statusText}`);
   }
   if (!resp.ok) throw new Error(`USDA ${resp.status}: ${resp.statusText}`);
-  return resp.json();
+  const data = await resp.json();
+  return data.results || data;
 }
 
 function parseMarsPrices(rawData) {
