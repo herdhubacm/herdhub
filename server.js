@@ -490,6 +490,13 @@ async function start() {
       )`);
       console.log('✅  Articles table ready');
 
+      // Fix article categories (one-time migration)
+      await query("UPDATE articles SET category='Genetics & Breeding' WHERE category IN ('Cattle','General') AND (title ILIKE '%EPD%' OR title ILIKE '%bull%' OR title ILIKE '%breed%' OR title ILIKE '%genetic%')");
+      await query("UPDATE articles SET category='Ranch Management' WHERE category IN ('Cattle','General') AND (title ILIKE '%Health Record%' OR title ILIKE '%manage%' OR title ILIKE '%ranch%')");
+      await query("UPDATE articles SET category='Markets & Prices' WHERE category IN ('Market','Markets','General') AND (title ILIKE '%feeder%' OR title ILIKE '%price%' OR title ILIKE '%market%' OR title ILIKE '%worth%')");
+      await query("UPDATE articles SET category='Industry & Opinion' WHERE category='General' AND (title ILIKE '%Middleman%' OR title ILIKE '%Lab-Grown%' OR title ILIKE '%lab grown%')");
+      await query("UPDATE articles SET category='Farm & Land' WHERE category='General' AND (title ILIKE '%land%' OR title ILIKE '%pasture%' OR title ILIKE '%succession%')");
+
       await query(`CREATE TABLE IF NOT EXISTS catalog_signups (
         id SERIAL PRIMARY KEY,
         name VARCHAR(150) NOT NULL,
