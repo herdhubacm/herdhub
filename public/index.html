@@ -3656,7 +3656,7 @@ const ARTICLE_CAT_COLORS = {
   'industry-opinion':{'accent':'#7c6aad','bg':'rgba(124,106,173,.15)','text':'#a090e0','border':'rgba(124,106,173,.3)','label':'Industry & Opinion'},
   'health':{'accent':'#3a6ea5','bg':'rgba(58,110,165,.15)','text':'#6a9fd4','border':'rgba(58,110,165,.3)','label':'Health & Vet'},
   'land':{'accent':'#b87333','bg':'rgba(184,115,51,.15)','text':'#d4935a','border':'rgba(184,115,51,.3)','label':'Farm & Land'},
-  'general':{'accent':'#8C7560','bg':'rgba(140,117,96,.12)','text':'#8C7560','border':'rgba(140,117,96,.25)','label':'General'},
+  'general':{'accent':'#8C7560','bg':'rgba(140,117,96,.12)','text':'#8C7560','border':'rgba(140,117,96,.25)','label':'Ranch News'},
 };
 function getArtColors(cat) {
   if (!cat) return ARTICLE_CAT_COLORS['general'];
@@ -3671,7 +3671,7 @@ function getArtColors(cat) {
 }
 
 function renderArticleCard(a, onclickExpr) {
-  var c = getArtColors(a.category);
+  var c = getArtColors(a.category === 'General' ? a.title : a.category);
   var bodyText = (a.body || a.excerpt || '').replace(/<[^>]+>/g,'').replace(/\s+/g,' ').trim();
   var excerpt = bodyText.length > 150 ? bodyText.slice(0,150).trim()+'...' : bodyText;
   var date = fmtDate(a.created_at);
