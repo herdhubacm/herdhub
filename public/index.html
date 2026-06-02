@@ -3661,12 +3661,12 @@ const ARTICLE_CAT_COLORS = {
 function getArtColors(cat) {
   if (!cat) return ARTICLE_CAT_COLORS['general'];
   var c = cat.toLowerCase();
-  if (c.indexOf('genetic')>=0 || c.indexOf('breed')>=0) return ARTICLE_CAT_COLORS['genetics'];
-  if (c.indexOf('market')>=0 || c.indexOf('price')>=0) return ARTICLE_CAT_COLORS['markets'];
-  if (c.indexOf('manage')>=0 || c.indexOf('ranch')>=0) return ARTICLE_CAT_COLORS['management'];
-  if (c.indexOf('opinion')>=0 || c.indexOf('industry')>=0) return ARTICLE_CAT_COLORS['opinion'];
+  if (c.indexOf('genetic')>=0 || c.indexOf('breed')>=0 || c.indexOf('epd')>=0 || c.indexOf('bull')>=0) return ARTICLE_CAT_COLORS['genetics'];
+  if (c.indexOf('market')>=0 || c.indexOf('price')>=0 || c.indexOf('feeder')>=0) return ARTICLE_CAT_COLORS['markets'];
+  if (c.indexOf('manage')>=0 || c.indexOf('ranch')>=0 || c.indexOf('record')>=0) return ARTICLE_CAT_COLORS['management'];
+  if (c.indexOf('opinion')>=0 || c.indexOf('industry')>=0 || c.indexOf('middleman')>=0 || c.indexOf('lab')>=0) return ARTICLE_CAT_COLORS['opinion'];
   if (c.indexOf('health')>=0 || c.indexOf('vet')>=0) return ARTICLE_CAT_COLORS['health'];
-  if (c.indexOf('land')>=0 || c.indexOf('farm')>=0) return ARTICLE_CAT_COLORS['land'];
+  if (c.indexOf('land')>=0 || c.indexOf('farm')>=0 || c.indexOf('pasture')>=0) return ARTICLE_CAT_COLORS['land'];
   return ARTICLE_CAT_COLORS['general'];
 }
 
