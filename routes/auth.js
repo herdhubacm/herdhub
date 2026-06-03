@@ -183,6 +183,30 @@ router.put('/me', authenticateToken, async (req, res) => {
   }
 });
 
+// Alias: PUT /api/auth/profile → same as PUT /api/auth/me
+router.put('/profile', authenticateToken, async (req, res) => {
+  try {
+    const { name, phone, state, city, bio, website_url } = req.body;
+    if (!name || name.trim().length < 2)
+      return res.status(400).json({ error: 'Name must be at least 2 characters' });
+    const { rows } = await query(
+      `UPDATE users
+       SET name=$1, phone=$2, state=$3, city=$4, bio=$5, website_url=$6, updated_at=NOW()
+       WHERE id=$7
+       RETURNING id, email, name, phone, state, city, bio, website_url, role, avatar_url, created_at`,
+      [name.trim(), phone || null, state || null, city || null, bio || null, website_url || null, req.user.id]
+    );
+    if (!rows.length) return res.status(404).json({ error: 'User not found' });
+    const user = rows[0];
+    const token = signToken({ id: user.id, email: user.email, name: user.name, role: user.role });
+    setAuthCookie(res, token);
+    res.json({ success: true, user, token });
+  } catch (err) {
+    console.error('PUT /api/auth/profile error:', err.message);
+    res.status(500).json({ error: 'Update failed: ' + err.message });
+  }
+});
+
 // ── POST /api/auth/change-password ────────────────────
 router.post('/change-password', authenticateToken, async (req, res) => {
   try {

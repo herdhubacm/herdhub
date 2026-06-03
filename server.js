@@ -526,6 +526,14 @@ async function start() {
       await query(`ALTER TABLE beefbox_waitlist ADD COLUMN IF NOT EXISTS zip VARCHAR(20)`);
       console.log('✅  Beef Box waitlist table ready');
 
+      // Ensure columns exist on users table
+      await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW()`);
+      await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS phone VARCHAR(20)`);
+      await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS city VARCHAR(100)`);
+      await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS state VARCHAR(50)`);
+      await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS bio TEXT`);
+      await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS website_url VARCHAR(255)`);
+
       // Ensure updated_at column exists on listings
       await query(`ALTER TABLE listings ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW()`);
 
