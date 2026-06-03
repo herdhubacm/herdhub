@@ -1560,8 +1560,24 @@ header.scrolled{background:rgba(10,10,10,.92)!important;backdrop-filter:blur(12p
 
     <!-- Profile Panel -->
     <div class="acct-panel active" id="acct-panel-profile">
-      <div style="max-width:520px">
-        <h3 style="font-family:'Libre Baskerville',serif;font-size:20px;margin-bottom:20px;color:var(--dark-brown)">Edit Your Profile</h3>
+      <div style="max-width:560px">
+        <!-- Profile Photo + Name Header -->
+        <div style="display:flex;align-items:center;gap:18px;margin-bottom:24px;padding-bottom:18px;border-bottom:1px solid var(--light-tan)">
+          <div style="position:relative">
+            <div id="acct-photo-wrap" style="width:72px;height:72px;border-radius:50%;background:var(--rust);display:flex;align-items:center;justify-content:center;font-size:24px;color:var(--cream);overflow:hidden;flex-shrink:0;border:2px solid rgba(201,169,110,.3)">
+              <span id="acct-photo-initials">?</span>
+              <img id="acct-photo-img" src="" alt="" style="display:none;width:100%;height:100%;object-fit:cover">
+            </div>
+            <label for="acct-photo-input" style="position:absolute;bottom:-2px;right:-2px;width:22px;height:22px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:10px;border:2px solid white">&#x270F;</label>
+            <input type="file" id="acct-photo-input" accept="image/*" style="display:none" onchange="uploadProfilePhoto(this)">
+          </div>
+          <div>
+            <div style="font-family:'Libre Baskerville',serif;font-size:16px;font-weight:700;color:var(--dark-brown)" id="acct-fullname">Your Name</div>
+            <div style="font-size:12px;color:#888;margin-top:2px" id="acct-display-location">Location</div>
+            <div style="display:flex;gap:6px;margin-top:5px" id="acct-badges"></div>
+          </div>
+        </div>
+        <h3 style="font-family:'Libre Baskerville',serif;font-size:18px;margin-bottom:16px;color:var(--dark-brown)">Edit Your Profile</h3>
         <div id="profile-success" class="form-success" style="display:none"></div>
         <div id="profile-error" class="form-error" style="display:none"></div>
         <div class="form-row">
@@ -1586,6 +1602,49 @@ header.scrolled{background:rgba(10,10,10,.92)!important;backdrop-filter:blur(12p
           <div class="form-group"><label for="acct-city">City</label><input type="text" id="acct-city" placeholder="Amarillo"></div>
         </div>
         <div class="form-group"><label for="acct-bio">Bio</label><textarea id="acct-bio" rows="3" placeholder="Tell buyers about your operation…"></textarea></div>
+
+        <!-- Operation Details -->
+        <div style="font-family:'Inter',sans-serif;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#888;margin:20px 0 10px;padding-top:14px;border-top:1px solid var(--light-tan)">Operation Details</div>
+        <div class="form-row">
+          <div class="form-group"><label>Operation Type</label>
+            <select id="acct-operation-type"><option value="">Select...</option><option value="commercial_cow_calf">Commercial Cow-Calf</option><option value="seedstock">Seedstock / Registered</option><option value="stocker_backgrounder">Stocker / Backgrounder</option><option value="feedlot">Feedlot</option><option value="farm_to_table">Farm to Table</option><option value="equipment_dealer">Equipment Dealer</option><option value="hay_feed">Hay &amp; Feed</option><option value="buyer">Buyer Only</option><option value="mixed">Mixed / Diversified</option></select>
+          </div>
+          <div class="form-group"><label>Herd Size</label>
+            <select id="acct-head-count"><option value="">Select...</option><option value="under_50">Under 50 head</option><option value="50_200">50-200 head</option><option value="200_500">200-500 head</option><option value="500_2000">500-2,000 head</option><option value="2000_plus">2,000+ head</option></select>
+          </div>
+        </div>
+        <div class="form-group"><label>Primary Breed(s)</label>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px">
+            <label style="font-size:12px;font-weight:400;display:flex;align-items:center;gap:5px;cursor:pointer"><input type="checkbox" class="breed-check" value="Angus" style="accent-color:var(--rust)"> Angus</label>
+            <label style="font-size:12px;font-weight:400;display:flex;align-items:center;gap:5px;cursor:pointer"><input type="checkbox" class="breed-check" value="Red Angus" style="accent-color:var(--rust)"> Red Angus</label>
+            <label style="font-size:12px;font-weight:400;display:flex;align-items:center;gap:5px;cursor:pointer"><input type="checkbox" class="breed-check" value="Hereford" style="accent-color:var(--rust)"> Hereford</label>
+            <label style="font-size:12px;font-weight:400;display:flex;align-items:center;gap:5px;cursor:pointer"><input type="checkbox" class="breed-check" value="Simmental" style="accent-color:var(--rust)"> Simmental</label>
+            <label style="font-size:12px;font-weight:400;display:flex;align-items:center;gap:5px;cursor:pointer"><input type="checkbox" class="breed-check" value="Charolais" style="accent-color:var(--rust)"> Charolais</label>
+            <label style="font-size:12px;font-weight:400;display:flex;align-items:center;gap:5px;cursor:pointer"><input type="checkbox" class="breed-check" value="Limousin" style="accent-color:var(--rust)"> Limousin</label>
+            <label style="font-size:12px;font-weight:400;display:flex;align-items:center;gap:5px;cursor:pointer"><input type="checkbox" class="breed-check" value="Brahman" style="accent-color:var(--rust)"> Brahman</label>
+            <label style="font-size:12px;font-weight:400;display:flex;align-items:center;gap:5px;cursor:pointer"><input type="checkbox" class="breed-check" value="Brangus" style="accent-color:var(--rust)"> Brangus</label>
+            <label style="font-size:12px;font-weight:400;display:flex;align-items:center;gap:5px;cursor:pointer"><input type="checkbox" class="breed-check" value="Crossbred" style="accent-color:var(--rust)"> Crossbred</label>
+            <label style="font-size:12px;font-weight:400;display:flex;align-items:center;gap:5px;cursor:pointer"><input type="checkbox" class="breed-check" value="Other" style="accent-color:var(--rust)"> Other</label>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label for="acct-county">County</label><input type="text" id="acct-county" placeholder="e.g. Garfield County"></div>
+          <div class="form-group"><label for="acct-years">Years in Operation</label><input type="number" id="acct-years" min="0" max="150" placeholder="e.g. 25"></div>
+        </div>
+        <div class="form-group"><label>Preferred Contact</label>
+          <div style="display:flex;gap:8px"><label style="flex:1;display:flex;align-items:center;justify-content:center;gap:5px;padding:7px;border:1px solid var(--light-tan);border-radius:4px;cursor:pointer;font-size:12px"><input type="radio" name="acct-contact-pref" value="phone" style="accent-color:var(--rust)"> Phone</label><label style="flex:1;display:flex;align-items:center;justify-content:center;gap:5px;padding:7px;border:1px solid var(--light-tan);border-radius:4px;cursor:pointer;font-size:12px"><input type="radio" name="acct-contact-pref" value="email" style="accent-color:var(--rust)"> Email</label><label style="flex:1;display:flex;align-items:center;justify-content:center;gap:5px;padding:7px;border:1px solid var(--light-tan);border-radius:4px;cursor:pointer;font-size:12px"><input type="radio" name="acct-contact-pref" value="text" style="accent-color:var(--rust)"> Text</label><label style="flex:1;display:flex;align-items:center;justify-content:center;gap:5px;padding:7px;border:1px solid var(--light-tan);border-radius:4px;cursor:pointer;font-size:12px"><input type="radio" name="acct-contact-pref" value="either" style="accent-color:var(--rust)" checked> Either</label></div>
+        </div>
+
+        <!-- Social Links -->
+        <div style="font-family:'Inter',sans-serif;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#888;margin:20px 0 10px;padding-top:14px;border-top:1px solid var(--light-tan)">Social Media (Optional)</div>
+        <div class="form-row">
+          <div class="form-group"><label for="acct-facebook">Facebook</label><input type="url" id="acct-facebook" placeholder="facebook.com/yourranch"></div>
+          <div class="form-group"><label for="acct-instagram">Instagram</label><input type="url" id="acct-instagram" placeholder="instagram.com/yourranch"></div>
+        </div>
+
+        <!-- BQA Certification -->
+        <div style="margin:16px 0"><label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px"><input type="checkbox" id="acct-bqa" style="accent-color:var(--rust);width:16px;height:16px"> I am BQA (Beef Quality Assurance) certified</label></div>
+
         <button class="btn-primary" data-action="save-profile" style="margin-top:4px">Save Changes</button>
         <div id="verify-section" style="margin-top:20px;padding:16px;background:var(--cream);border:1.5px solid var(--light-tan);border-radius:6px;display:none"></div>
         <div style="margin-top:28px;padding-top:20px;border-top:1px solid var(--light-tan)">
@@ -5729,6 +5788,37 @@ async function loadAccountPage() {
     document.getElementById('acct-state').value = currentUser.state || '';
     document.getElementById('acct-city').value = currentUser.city || '';
     document.getElementById('acct-bio').value = currentUser.bio || '';
+    // New fields
+    var opEl = document.getElementById('acct-operation-type'); if (opEl) opEl.value = currentUser.operation_type || '';
+    var hcEl = document.getElementById('acct-head-count'); if (hcEl) hcEl.value = currentUser.head_count_range || '';
+    var coEl = document.getElementById('acct-county'); if (coEl) coEl.value = currentUser.county || '';
+    var yrEl = document.getElementById('acct-years'); if (yrEl) yrEl.value = currentUser.years_in_operation || '';
+    var fbEl = document.getElementById('acct-facebook'); if (fbEl) fbEl.value = currentUser.facebook_url || '';
+    var igEl = document.getElementById('acct-instagram'); if (igEl) igEl.value = currentUser.instagram_url || '';
+    var bqEl = document.getElementById('acct-bqa'); if (bqEl) bqEl.checked = currentUser.bqa_certified || false;
+    if (currentUser.breeds && Array.isArray(currentUser.breeds)) {
+      document.querySelectorAll('.breed-check').forEach(function(cb) { cb.checked = currentUser.breeds.includes(cb.value); });
+    }
+    if (currentUser.preferred_contact) {
+      var pc = document.querySelector('input[name="acct-contact-pref"][value="'+currentUser.preferred_contact+'"]');
+      if (pc) pc.checked = true;
+    }
+    // Photo
+    var photoImg = document.getElementById('acct-photo-img');
+    var photoInit = document.getElementById('acct-photo-initials');
+    if (currentUser.photo_url && photoImg) { photoImg.src = currentUser.photo_url; photoImg.style.display = 'block'; if (photoInit) photoInit.style.display = 'none'; }
+    else if (photoInit && currentUser.name) { photoInit.textContent = currentUser.name.split(' ').map(function(n){return n[0];}).join('').slice(0,2).toUpperCase(); }
+    // Display location
+    var dispLoc = document.getElementById('acct-display-location');
+    if (dispLoc) dispLoc.textContent = [currentUser.city, currentUser.state].filter(Boolean).join(', ') || '';
+    // Badges
+    var badges = document.getElementById('acct-badges');
+    if (badges) {
+      var bhtml = '';
+      if (currentUser.is_verified) bhtml += '<span style="background:rgba(46,125,79,.2);color:#2e7d4f;font-size:9px;padding:2px 8px;border-radius:10px;font-weight:700;border:1px solid rgba(46,125,79,.3)">Verified</span>';
+      if (currentUser.bqa_certified) bhtml += '<span style="background:rgba(201,169,110,.15);color:var(--gold);font-size:9px;padding:2px 8px;border-radius:10px;font-weight:700;border:1px solid rgba(201,169,110,.25)">BQA</span>';
+      badges.innerHTML = bhtml;
+    }
   }
 
   // Load listings and verification status
@@ -5887,6 +5977,27 @@ async function unsaveListing(id, btn) {
   } catch(e) { showToast('Could not remove listing'); }
 }
 
+async function uploadProfilePhoto(input) {
+  var file = input.files[0];
+  if (!file) return;
+  if (file.size > 5*1024*1024) { showToast('Photo must be under 5MB','error'); return; }
+  var formData = new FormData();
+  formData.append('photo', file);
+  try {
+    var r = await fetch(API+'/api/auth/profile/photo', {
+      method:'POST', headers:{Authorization:'Bearer '+authToken}, body:formData
+    });
+    var d = await r.json();
+    if (!r.ok) throw new Error(d.error);
+    var img = document.getElementById('acct-photo-img');
+    var init = document.getElementById('acct-photo-initials');
+    if (img) { img.src = d.photo_url; img.style.display = 'block'; }
+    if (init) init.style.display = 'none';
+    if (currentUser) currentUser.photo_url = d.photo_url;
+    showToast('Photo updated!');
+  } catch(e) { showToast('Upload failed: '+e.message,'error'); }
+}
+
 async function saveProfile() {
   const errEl = document.getElementById('profile-error');
   const sucEl = document.getElementById('profile-success');
@@ -5898,6 +6009,15 @@ async function saveProfile() {
   const state = document.getElementById('acct-state')?.value;
   const city  = document.getElementById('acct-city')?.value?.trim();
   const bio   = document.getElementById('acct-bio')?.value?.trim();
+  const operation_type = document.getElementById('acct-operation-type')?.value || '';
+  const breeds = Array.from(document.querySelectorAll('.breed-check:checked')).map(cb => cb.value);
+  const county = document.getElementById('acct-county')?.value?.trim() || '';
+  const years_in_operation = parseInt(document.getElementById('acct-years')?.value) || null;
+  const head_count_range = document.getElementById('acct-head-count')?.value || '';
+  const preferred_contact = document.querySelector('input[name="acct-contact-pref"]:checked')?.value || '';
+  const facebook_url = document.getElementById('acct-facebook')?.value?.trim() || '';
+  const instagram_url = document.getElementById('acct-instagram')?.value?.trim() || '';
+  const bqa_certified = document.getElementById('acct-bqa')?.checked || false;
 
   if (!name || name.length < 2) {
     if (errEl) { errEl.textContent = 'Name must be at least 2 characters.'; errEl.style.display = 'block'; }
@@ -5905,11 +6025,11 @@ async function saveProfile() {
   }
 
   try {
-    const r = await fetch(`${API}/api/auth/me`, {
+    const r = await fetch(`${API}/api/auth/profile`, {
       method: 'PUT',
       credentials: 'include',
       headers: { 'Content-Type':'application/json', Authorization: `Bearer ${authToken}` },
-      body: JSON.stringify({ name, phone, state, city, bio })
+      body: JSON.stringify({ name, phone, state, city, bio, operation_type, breeds, county, years_in_operation, head_count_range, preferred_contact, facebook_url, instagram_url, bqa_certified })
     });
     const d = await r.json();
     if (!r.ok) {

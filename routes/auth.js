@@ -147,8 +147,10 @@ router.post('/login', async (req, res) => {
 router.get('/me', authenticateToken, async (req, res) => {
   try {
     const { rows } = await query(
-      `SELECT id, email, name, phone, state, city, bio, avatar_url, role,
-              is_verified, created_at
+      `SELECT id, email, name, phone, state, city, bio, avatar_url, photo_url, role,
+              is_verified, created_at, operation_type, breeds, county,
+              years_in_operation, head_count_range, preferred_contact,
+              facebook_url, instagram_url, bqa_certified, website_url
        FROM users WHERE id = $1`,
       [req.user.id]
     );
@@ -183,18 +185,30 @@ router.put('/me', authenticateToken, async (req, res) => {
   }
 });
 
-// Alias: PUT /api/auth/profile → same as PUT /api/auth/me
+// PUT /api/auth/profile — full profile save with new fields
 router.put('/profile', authenticateToken, async (req, res) => {
   try {
-    const { name, phone, state, city, bio, website_url } = req.body;
+    const { name, phone, state, city, bio, website_url,
+            operation_type, breeds, county, years_in_operation,
+            head_count_range, preferred_contact, facebook_url,
+            instagram_url, bqa_certified } = req.body;
     if (!name || name.trim().length < 2)
       return res.status(400).json({ error: 'Name must be at least 2 characters' });
     const { rows } = await query(
-      `UPDATE users
-       SET name=$1, phone=$2, state=$3, city=$4, bio=$5, website_url=$6, updated_at=NOW()
-       WHERE id=$7
-       RETURNING id, email, name, phone, state, city, bio, website_url, role, avatar_url, created_at`,
-      [name.trim(), phone || null, state || null, city || null, bio || null, website_url || null, req.user.id]
+      `UPDATE users SET name=$1, phone=$2, state=$3, city=$4, bio=$5, website_url=$6,
+       operation_type=$7, breeds=$8, county=$9, years_in_operation=$10,
+       head_count_range=$11, preferred_contact=$12, facebook_url=$13,
+       instagram_url=$14, bqa_certified=$15, updated_at=NOW()
+       WHERE id=$16
+       RETURNING id, email, name, phone, state, city, bio, website_url, role,
+                 avatar_url, photo_url, created_at, is_verified,
+                 operation_type, breeds, county, years_in_operation,
+                 head_count_range, preferred_contact, facebook_url,
+                 instagram_url, bqa_certified`,
+      [name.trim(), phone||null, state||null, city||null, bio||null, website_url||null,
+       operation_type||null, breeds||null, county||null, years_in_operation||null,
+       head_count_range||null, preferred_contact||null, facebook_url||null,
+       instagram_url||null, bqa_certified===true, req.user.id]
     );
     if (!rows.length) return res.status(404).json({ error: 'User not found' });
     const user = rows[0];

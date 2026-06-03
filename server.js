@@ -533,6 +533,16 @@ async function start() {
       await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS state VARCHAR(50)`);
       await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS bio TEXT`);
       await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS website_url VARCHAR(255)`);
+      await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS photo_url VARCHAR(500)`);
+      await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS operation_type VARCHAR(50)`);
+      await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS breeds TEXT[]`);
+      await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS county VARCHAR(100)`);
+      await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS years_in_operation INTEGER`);
+      await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS preferred_contact VARCHAR(20)`);
+      await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS facebook_url VARCHAR(255)`);
+      await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS instagram_url VARCHAR(255)`);
+      await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS head_count_range VARCHAR(50)`);
+      await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS bqa_certified BOOLEAN DEFAULT FALSE`);
 
       // Ensure updated_at column exists on listings
       await query(`ALTER TABLE listings ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW()`);
