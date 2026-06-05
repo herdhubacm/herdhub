@@ -556,7 +556,25 @@ router.post('/', authenticateToken, upload.array('photos', 20), async (req, res)
     // Clear homepage cache so new listing appears immediately
     if (global.apiCache?.clearListingCache) global.apiCache.clearListingCache();
 
-    res.status(201).json({ id: listingId, message: 'Listing created' });
+    // Beef Box First 1000 Check
+    let show_beef_box_offer = false;
+    let lister_number = null;
+    try {
+      const { rows: prev } = await query('SELECT COUNT(*)::int as cnt FROM listings WHERE user_id=$1 AND id!=$2', [req.user.id, listingId]);
+      if (prev[0].cnt === 0) {
+        const { rows: ud } = await query('SELECT lister_number, beef_box_claimed FROM users WHERE id=$1', [req.user.id]);
+        if (!ud[0].lister_number) {
+          const { rows: ct } = await query('SELECT COUNT(DISTINCT user_id)::int as cnt FROM listings');
+          lister_number = ct[0].cnt;
+          await query('UPDATE users SET lister_number=$1 WHERE id=$2', [lister_number, req.user.id]);
+        } else {
+          lister_number = ud[0].lister_number;
+        }
+        if (lister_number <= 1000 && !ud[0].beef_box_claimed) show_beef_box_offer = true;
+      }
+    } catch(e) { console.error('Beef box check:', e.message); }
+
+    res.status(201).json({ id: listingId, message: 'Listing created', show_beef_box_offer, lister_number });
 
   } catch (err) {
     await client.query('ROLLBACK');
