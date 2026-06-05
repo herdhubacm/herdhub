@@ -552,6 +552,10 @@ router.post('/', authenticateToken, upload.array('photos', 20), async (req, res)
     }
 
     await client.query('COMMIT');
+
+    // Clear homepage cache so new listing appears immediately
+    if (global.apiCache?.clearListingCache) global.apiCache.clearListingCache();
+
     res.status(201).json({ id: listingId, message: 'Listing created' });
 
   } catch (err) {

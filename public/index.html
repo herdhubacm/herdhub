@@ -5300,7 +5300,7 @@ async function doPostListing() {
     sucEl.textContent = '✅ Listing posted! Redirecting to your account…'; sucEl.style.display='block';
     // Check for beef box offer
     if (d.show_beef_box_offer && !localStorage.getItem('beef_box_dismissed')) {
-      setTimeout(function(){ closeModal('post-listing'); showBeefBoxOffer(d.lister_number, d.id); }, 1500);
+      setTimeout(function(){ closeModal('post-listing'); showBeefBoxOffer(d.lister_number, d.id); loadHomepageSections(); loadRecentListings(); }, 1500);
     } else {
       setTimeout(function(){ if(window._trackEvent) window._trackEvent('listings','post_listing','success'); closeModal('post-listing'); showPage('account'); loadHomepageSections(); loadRecentListings(); }, 1500);
     }
