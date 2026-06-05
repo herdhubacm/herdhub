@@ -572,8 +572,9 @@ router.post('/', authenticateToken, upload.array('photos', 20), async (req, res)
         }
         if (lister_number <= 1000 && !ud[0].beef_box_claimed) show_beef_box_offer = true;
       }
-    } catch(e) { console.error('Beef box check:', e.message); }
+    } catch(e) { console.error('Beef box check error:', e.message); }
 
+    console.log(`Listing ${listingId} created by user ${req.user.id} — beef_box: ${show_beef_box_offer}, lister#: ${lister_number}`);
     res.status(201).json({ id: listingId, message: 'Listing created', show_beef_box_offer, lister_number });
 
   } catch (err) {

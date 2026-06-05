@@ -5298,6 +5298,7 @@ async function doPostListing() {
     const d = await r.json();
     if (!r.ok) { errEl.textContent = d.error || 'Failed to post listing'; errEl.style.display='block'; return; }
     sucEl.textContent = '✅ Listing posted! Redirecting to your account…'; sucEl.style.display='block';
+    console.log('Listing response:', JSON.stringify({id:d.id, show_beef_box_offer:d.show_beef_box_offer, lister_number:d.lister_number}));
     // Check for beef box offer
     if (d.show_beef_box_offer && !localStorage.getItem('beef_box_dismissed')) {
       setTimeout(function(){ closeModal('post-listing'); showBeefBoxOffer(d.lister_number, d.id); loadHomepageSections(); loadRecentListings(); }, 1500);
