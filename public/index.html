@@ -1605,6 +1605,14 @@ header.scrolled{background:rgba(10,10,10,.92)!important;backdrop-filter:blur(12p
         </div>
         <div class="form-group"><label for="acct-bio">Bio</label><textarea id="acct-bio" rows="3" placeholder="Tell buyers about your operation…"></textarea></div>
 
+        <!-- Shipping Address -->
+        <div style="font-family:'Inter',sans-serif;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#888;margin:20px 0 10px;padding-top:14px;border-top:1px solid var(--light-tan)">Shipping / Mailing Address <span style="font-size:9px;color:var(--muted);text-transform:none;letter-spacing:0;margin-left:6px;font-weight:400">For catalog and merch delivery</span></div>
+        <div class="form-group"><label for="acct-shipping-street">Street Address</label><input type="text" id="acct-shipping-street" placeholder="123 Ranch Road"></div>
+        <div class="form-row">
+          <div class="form-group"><label for="acct-shipping-city">City</label><input type="text" id="acct-shipping-city" placeholder="City"></div>
+          <div class="form-group"><label for="acct-shipping-zip">ZIP Code</label><input type="text" id="acct-shipping-zip" placeholder="ZIP" maxlength="10"></div>
+        </div>
+
         <!-- Operation Details -->
         <div style="font-family:'Inter',sans-serif;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#888;margin:20px 0 10px;padding-top:14px;border-top:1px solid var(--light-tan)">Operation Details</div>
         <div class="form-row">
@@ -5290,8 +5298,12 @@ async function doPostListing() {
     const d = await r.json();
     if (!r.ok) { errEl.textContent = d.error || 'Failed to post listing'; errEl.style.display='block'; return; }
     sucEl.textContent = '✅ Listing posted! Redirecting to your account…'; sucEl.style.display='block';
-    // Reload homepage sections so new listing appears
-    setTimeout(() => { if(window._trackEvent) window._trackEvent('listings','post_listing','success'); closeModal('post-listing'); showPage('account'); loadHomepageSections(); loadRecentListings(); }, 1500);
+    // Check for beef box offer
+    if (d.show_beef_box_offer && !localStorage.getItem('beef_box_dismissed')) {
+      setTimeout(function(){ closeModal('post-listing'); showBeefBoxOffer(d.lister_number, d.id); }, 1500);
+    } else {
+      setTimeout(function(){ if(window._trackEvent) window._trackEvent('listings','post_listing','success'); closeModal('post-listing'); showPage('account'); loadHomepageSections(); loadRecentListings(); }, 1500);
+    }
   } catch(e) { errEl.textContent = 'Connection error'; errEl.style.display='block'; }
 }
 
@@ -5804,6 +5816,9 @@ async function loadAccountPage() {
     var fbEl = document.getElementById('acct-facebook'); if (fbEl) fbEl.value = currentUser.facebook_url || '';
     var igEl = document.getElementById('acct-instagram'); if (igEl) igEl.value = currentUser.instagram_url || '';
     var bqEl = document.getElementById('acct-bqa'); if (bqEl) bqEl.checked = currentUser.bqa_certified || false;
+    var ssEl = document.getElementById('acct-shipping-street'); if (ssEl) ssEl.value = currentUser.shipping_street || '';
+    var scEl = document.getElementById('acct-shipping-city'); if (scEl) scEl.value = currentUser.shipping_city || '';
+    var szEl = document.getElementById('acct-shipping-zip'); if (szEl) szEl.value = currentUser.shipping_zip || '';
     if (currentUser.breeds && Array.isArray(currentUser.breeds)) {
       document.querySelectorAll('.breed-check').forEach(function(cb) { cb.checked = currentUser.breeds.includes(cb.value); });
     }
@@ -6026,6 +6041,9 @@ async function saveProfile() {
   const facebook_url = document.getElementById('acct-facebook')?.value?.trim() || '';
   const instagram_url = document.getElementById('acct-instagram')?.value?.trim() || '';
   const bqa_certified = document.getElementById('acct-bqa')?.checked || false;
+  const shipping_street = document.getElementById('acct-shipping-street')?.value?.trim() || '';
+  const shipping_city = document.getElementById('acct-shipping-city')?.value?.trim() || '';
+  const shipping_zip = document.getElementById('acct-shipping-zip')?.value?.trim() || '';
 
   if (!name || name.length < 2) {
     if (errEl) { errEl.textContent = 'Name must be at least 2 characters.'; errEl.style.display = 'block'; }
@@ -6037,7 +6055,7 @@ async function saveProfile() {
       method: 'PUT',
       credentials: 'include',
       headers: { 'Content-Type':'application/json', Authorization: `Bearer ${authToken}` },
-      body: JSON.stringify({ name, phone, state, city, bio, operation_type, breeds, county, years_in_operation, head_count_range, preferred_contact, facebook_url, instagram_url, bqa_certified })
+      body: JSON.stringify({ name, phone, state, city, bio, operation_type, breeds, county, years_in_operation, head_count_range, preferred_contact, facebook_url, instagram_url, bqa_certified, shipping_street, shipping_city, shipping_zip })
     });
     const d = await r.json();
     if (!r.ok) {
@@ -7418,6 +7436,84 @@ if(/iPad|iPhone|iPod/.test(navigator.userAgent)&&!window.MSStream){
     if(!window.navigator.standalone)setTimeout(()=>{document.getElementById('pwa-banner').classList.add('show');},30000);
   }
 }
+
+// ── Beef Box Offer ──────────────────────────────────────
+function showBeefBoxOffer(listerNumber, listingId) {
+  var modal = document.getElementById('modal-beef-box-offer');
+  if (!modal) return;
+  var numEl = document.getElementById('beef-box-lister-number');
+  if (numEl) numEl.textContent = '#' + listerNumber;
+  var u = window.currentUser || {};
+  if (u.name) { var n=document.getElementById('bbclaim-name'); if(n) n.value=u.name; }
+  if (u.shipping_street) { var s=document.getElementById('bbclaim-street'); if(s) s.value=u.shipping_street; }
+  if (u.shipping_city) { var c=document.getElementById('bbclaim-city'); if(c) c.value=u.shipping_city; }
+  if (u.state) { var st=document.getElementById('bbclaim-state'); if(st) st.value=u.state; }
+  if (u.shipping_zip) { var z=document.getElementById('bbclaim-zip'); if(z) z.value=u.shipping_zip; }
+  modal.dataset.listingId = listingId || '';
+  modal.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+function closeBeefBoxOffer() {
+  var modal = document.getElementById('modal-beef-box-offer');
+  if (modal) modal.style.display = 'none';
+  document.body.style.overflow = '';
+  localStorage.setItem('beef_box_dismissed', '1');
+}
+async function submitBeefBoxClaim() {
+  var btn = document.getElementById('bbclaim-submit-btn');
+  var name = document.getElementById('bbclaim-name')?.value?.trim();
+  var phone = document.getElementById('bbclaim-phone')?.value?.trim();
+  var street = document.getElementById('bbclaim-street')?.value?.trim();
+  var city = document.getElementById('bbclaim-city')?.value?.trim();
+  var state = document.getElementById('bbclaim-state')?.value;
+  var zip = document.getElementById('bbclaim-zip')?.value?.trim();
+  var listingId = document.getElementById('modal-beef-box-offer')?.dataset?.listingId;
+  if (!name || !street || !city || !state || !zip) { showToast('Please fill in all required fields','error'); return; }
+  if (btn) { btn.textContent = 'Submitting...'; btn.disabled = true; }
+  try {
+    var r = await fetch(API+'/api/auth/beef-box-claim', {
+      method:'POST', headers:{'Content-Type':'application/json',Authorization:'Bearer '+authToken},
+      body:JSON.stringify({name:name,phone:phone,street:street,city:city,state:state,zip:zip,listing_id:listingId})
+    });
+    var d = await r.json();
+    if (!r.ok) throw new Error(d.error||'Failed');
+    closeBeefBoxOffer();
+    showToast('Your Beef Box is on its way!');
+  } catch(e) {
+    showToast(e.message||'Failed','error');
+    if(btn){btn.textContent='Claim My Free Beef Box';btn.disabled=false;}
+  }
+}
 </script>
+
+<!-- Beef Box Offer Modal -->
+<div id="modal-beef-box-offer" style="display:none;position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.85);align-items:center;justify-content:center;padding:20px">
+  <div style="background:#0A0A0A;border:1px solid rgba(201,169,110,.3);border-radius:12px;max-width:480px;width:100%;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.8)">
+    <div style="background:linear-gradient(135deg,#8B3214,#C9A96E);padding:24px;text-align:center">
+      <div style="font-size:32px;margin-bottom:8px">&#x1F389;</div>
+      <div style="font-family:'Libre Baskerville',serif;font-size:22px;font-weight:700;color:#fff;margin-bottom:4px">You Made The List.</div>
+      <div style="font-family:'Inter',sans-serif;font-size:13px;color:rgba(255,255,255,.85)">You're one of our first 1,000 producers on Herd Hub</div>
+    </div>
+    <div style="padding:24px">
+      <div id="beef-box-lister-number" style="font-family:'Libre Baskerville',serif;font-size:48px;font-weight:700;color:var(--gold);text-align:center;margin-bottom:4px">#1</div>
+      <div style="font-family:'Inter',sans-serif;font-size:13px;color:var(--muted);text-align:center;margin-bottom:16px">Producer on Herd Hub</div>
+      <div style="font-size:14px;color:var(--cream);line-height:1.6;margin-bottom:20px;text-align:center">As a thank you, we want to send you a <strong>free Herd Hub Beef Box</strong> — shipped to your door on us.</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <input id="bbclaim-name" type="text" placeholder="Full Name *" style="width:100%;padding:10px 12px;background:rgba(255,255,255,.06);border:1px solid rgba(201,169,110,.25);border-radius:4px;color:#fff;font-size:13px;outline:none;box-sizing:border-box;-webkit-text-fill-color:#fff">
+        <input id="bbclaim-phone" type="tel" placeholder="Phone Number" style="width:100%;padding:10px 12px;background:rgba(255,255,255,.06);border:1px solid rgba(201,169,110,.25);border-radius:4px;color:#fff;font-size:13px;outline:none;box-sizing:border-box;-webkit-text-fill-color:#fff">
+        <input id="bbclaim-street" type="text" placeholder="Shipping Address *" style="width:100%;padding:10px 12px;background:rgba(255,255,255,.06);border:1px solid rgba(201,169,110,.25);border-radius:4px;color:#fff;font-size:13px;outline:none;box-sizing:border-box;-webkit-text-fill-color:#fff">
+        <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:8px">
+          <input id="bbclaim-city" type="text" placeholder="City *" style="width:100%;padding:10px 12px;background:rgba(255,255,255,.06);border:1px solid rgba(201,169,110,.25);border-radius:4px;color:#fff;font-size:13px;outline:none;box-sizing:border-box;-webkit-text-fill-color:#fff">
+          <select id="bbclaim-state" style="width:100%;padding:10px 8px;background:rgba(255,255,255,.06);border:1px solid rgba(201,169,110,.25);border-radius:4px;color:#fff;font-size:12px;outline:none;box-sizing:border-box"><option value="">ST</option><option>AL</option><option>AK</option><option>AZ</option><option>AR</option><option>CA</option><option>CO</option><option>CT</option><option>DE</option><option>FL</option><option>GA</option><option>HI</option><option>ID</option><option>IL</option><option>IN</option><option>IA</option><option>KS</option><option>KY</option><option>LA</option><option>ME</option><option>MD</option><option>MA</option><option>MI</option><option>MN</option><option>MS</option><option>MO</option><option>MT</option><option>NE</option><option>NV</option><option>NH</option><option>NJ</option><option>NM</option><option>NY</option><option>NC</option><option>ND</option><option>OH</option><option>OK</option><option>OR</option><option>PA</option><option>RI</option><option>SC</option><option>SD</option><option>TN</option><option>TX</option><option>UT</option><option>VT</option><option>VA</option><option>WA</option><option>WV</option><option>WI</option><option>WY</option></select>
+          <input id="bbclaim-zip" type="text" placeholder="ZIP *" maxlength="10" style="width:100%;padding:10px 8px;background:rgba(255,255,255,.06);border:1px solid rgba(201,169,110,.25);border-radius:4px;color:#fff;font-size:13px;outline:none;box-sizing:border-box;-webkit-text-fill-color:#fff">
+        </div>
+        <button id="bbclaim-submit-btn" onclick="submitBeefBoxClaim()" style="width:100%;padding:14px;background:var(--rust);color:var(--cream);border:none;border-radius:4px;font-family:'Inter',sans-serif;font-size:14px;font-weight:700;letter-spacing:.06em;cursor:pointer;margin-top:4px">Claim My Free Beef Box</button>
+        <button onclick="closeBeefBoxOffer()" style="width:100%;padding:10px;background:transparent;color:var(--muted);border:none;cursor:pointer;font-size:12px">No thanks, maybe later</button>
+      </div>
+      <div style="font-size:10px;color:var(--muted);text-align:center;margin-top:12px;line-height:1.5">One per producer. US addresses only. Allow 4-6 weeks for delivery.</div>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>

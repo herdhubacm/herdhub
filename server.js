@@ -543,6 +543,30 @@ async function start() {
       await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS instagram_url VARCHAR(255)`);
       await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS head_count_range VARCHAR(50)`);
       await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS bqa_certified BOOLEAN DEFAULT FALSE`);
+      await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS shipping_street VARCHAR(200)`);
+      await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS shipping_city VARCHAR(100)`);
+      await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS shipping_zip VARCHAR(20)`);
+      await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS beef_box_claimed BOOLEAN DEFAULT FALSE`);
+      await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS lister_number INTEGER`);
+
+      await query(`CREATE TABLE IF NOT EXISTS beef_box_claims (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER REFERENCES users(id),
+        name VARCHAR(150) NOT NULL,
+        email VARCHAR(255),
+        phone VARCHAR(20),
+        street VARCHAR(200) NOT NULL,
+        city VARCHAR(100) NOT NULL,
+        state VARCHAR(50) NOT NULL,
+        zip VARCHAR(20) NOT NULL,
+        listing_id INTEGER,
+        lister_number INTEGER,
+        claimed_at TIMESTAMPTZ DEFAULT NOW(),
+        fulfilled BOOLEAN DEFAULT FALSE,
+        fulfilled_at TIMESTAMPTZ,
+        tracking_number VARCHAR(100),
+        notes TEXT
+      )`);
 
       // Ensure updated_at column exists on listings
       await query(`ALTER TABLE listings ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW()`);

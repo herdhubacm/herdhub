@@ -150,7 +150,8 @@ router.get('/me', authenticateToken, async (req, res) => {
       `SELECT id, email, name, phone, state, city, bio, avatar_url, photo_url, role,
               is_verified, created_at, operation_type, breeds, county,
               years_in_operation, head_count_range, preferred_contact,
-              facebook_url, instagram_url, bqa_certified, website_url
+              facebook_url, instagram_url, bqa_certified, website_url,
+              shipping_street, shipping_city, shipping_zip, beef_box_claimed, lister_number
        FROM users WHERE id = $1`,
       [req.user.id]
     );
@@ -198,17 +199,21 @@ router.put('/profile', authenticateToken, async (req, res) => {
       `UPDATE users SET name=$1, phone=$2, state=$3, city=$4, bio=$5, website_url=$6,
        operation_type=$7, breeds=$8, county=$9, years_in_operation=$10,
        head_count_range=$11, preferred_contact=$12, facebook_url=$13,
-       instagram_url=$14, bqa_certified=$15, updated_at=NOW()
-       WHERE id=$16
+       instagram_url=$14, bqa_certified=$15, shipping_street=$16,
+       shipping_city=$17, shipping_zip=$18, updated_at=NOW()
+       WHERE id=$19
        RETURNING id, email, name, phone, state, city, bio, website_url, role,
                  avatar_url, photo_url, created_at, is_verified,
                  operation_type, breeds, county, years_in_operation,
                  head_count_range, preferred_contact, facebook_url,
-                 instagram_url, bqa_certified`,
+                 instagram_url, bqa_certified, shipping_street,
+                 shipping_city, shipping_zip`,
       [name.trim(), phone||null, state||null, city||null, bio||null, website_url||null,
        operation_type||null, breeds||null, county||null, years_in_operation||null,
        head_count_range||null, preferred_contact||null, facebook_url||null,
-       instagram_url||null, bqa_certified===true, req.user.id]
+       instagram_url||null, bqa_certified===true,
+       req.body.shipping_street||null, req.body.shipping_city||null, req.body.shipping_zip||null,
+       req.user.id]
     );
     if (!rows.length) return res.status(404).json({ error: 'User not found' });
     const user = rows[0];
@@ -222,6 +227,23 @@ router.put('/profile', authenticateToken, async (req, res) => {
 });
 
 // ── POST /api/auth/change-password ────────────────────
+// ── Beef Box Claim ────────────────────────────────────
+router.post('/beef-box-claim', authenticateToken, async (req, res) => {
+  try {
+    const { rows: user } = await query('SELECT lister_number, beef_box_claimed FROM users WHERE id=$1', [req.user.id]);
+    if (!user[0]) return res.status(404).json({ error: 'User not found' });
+    if (user[0].beef_box_claimed) return res.status(400).json({ error: 'Already claimed' });
+    if (!user[0].lister_number || user[0].lister_number > 1000) return res.status(400).json({ error: 'Not eligible' });
+    const { name, phone, street, city, state, zip, listing_id } = req.body;
+    if (!name || !street || !city || !state || !zip) return res.status(400).json({ error: 'All address fields required' });
+    await query('INSERT INTO beef_box_claims (user_id,name,email,phone,street,city,state,zip,listing_id,lister_number) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)',
+      [req.user.id, name, req.user.email, phone, street, city, state, zip, listing_id||null, user[0].lister_number]);
+    await query('UPDATE users SET beef_box_claimed=true, shipping_street=$1, shipping_city=$2, shipping_zip=$3 WHERE id=$4',
+      [street, city, zip, req.user.id]);
+    res.json({ success: true });
+  } catch(e) { console.error('Beef box claim error:', e); res.status(500).json({ error: e.message }); }
+});
+
 router.post('/change-password', authenticateToken, async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;
