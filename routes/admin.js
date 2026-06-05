@@ -523,4 +523,21 @@ router.post('/catalog-signups/bulk-sent', async (req, res) => {
 // ── GET /api/settings (public — for frontend stats bar) ─
 // Mounted separately in server.js as /api/settings
 
+// ── Beef Box Claims ───────────────────────────────────
+router.get('/beef-box-claims', async (req, res) => {
+  try {
+    const { rows } = await query('SELECT b.*, u.email as user_email FROM beef_box_claims b LEFT JOIN users u ON b.user_id=u.id ORDER BY b.lister_number ASC');
+    res.json(rows);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+router.post('/beef-box-claims/:id/fulfill', async (req, res) => {
+  try {
+    const { fulfilled, tracking_number } = req.body;
+    await query('UPDATE beef_box_claims SET fulfilled=$1, fulfilled_at=CASE WHEN $1 THEN NOW() ELSE NULL END, tracking_number=$2 WHERE id=$3',
+      [fulfilled !== false, tracking_number || null, req.params.id]);
+    res.json({ ok: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 module.exports = router;

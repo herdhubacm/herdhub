@@ -165,6 +165,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
       <button class="nav-item" onclick="switchPanel('verifications')"><span class="icon">✅</span><span>Verifications</span><span class="nav-badge" id="verify-badge" style="display:none">0</span></button>
       <button class="nav-item" onclick="switchPanel('payments')"><span class="icon">💳</span><span>Payments</span></button>
       <button class="nav-item" onclick="switchPanel('catalog')"><span class="icon">📬</span><span>Catalog List</span><span class="nav-badge" id="catalog-badge" style="display:none;background:var(--rust)">0</span></button>
+      <button class="nav-item" onclick="switchPanel('beefbox')"><span class="icon">🥩</span><span>Beef Box Claims</span><span class="nav-badge" id="beefbox-badge" style="display:none;background:var(--gold)">0</span></button>
       <button class="nav-item" onclick="switchPanel('settings')"><span class="icon">⚙️</span><span>Settings</span></button>
     </nav>
     <div class="sidebar-footer">
@@ -612,6 +613,30 @@ tr:hover td{background:rgba(255,255,255,.02)}
         </table></div>
       </div>
 
+      <!-- Beef Box Claims panel -->
+      <div class="panel" id="panel-beefbox">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+          <div style="font-size:13px;color:var(--muted)">First 1,000 listers — free beef box promotion</div>
+          <div style="display:flex;gap:8px">
+            <button class="btn" onclick="downloadBeefBoxCSV()" style="background:var(--rust);color:white;font-size:11px;padding:7px 14px">&#x2B07; Download CSV</button>
+            <button class="btn" onclick="loadBeefBoxClaims()" style="font-size:11px;padding:7px 14px">&#x21BB; Refresh</button>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px">
+          <div style="background:rgba(255,255,255,.04);border:1px solid rgba(201,169,110,.12);border-radius:6px;padding:14px;text-align:center"><div id="bb-stat-total" style="font-size:24px;font-weight:700;color:var(--gold)">-</div><div style="font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-top:4px">Total Claims</div></div>
+          <div style="background:rgba(255,255,255,.04);border:1px solid rgba(201,169,110,.12);border-radius:6px;padding:14px;text-align:center"><div id="bb-stat-fulfilled" style="font-size:24px;font-weight:700;color:#2e7d4f">-</div><div style="font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-top:4px">Shipped</div></div>
+          <div style="background:rgba(255,255,255,.04);border:1px solid rgba(201,169,110,.12);border-radius:6px;padding:14px;text-align:center"><div id="bb-stat-pending" style="font-size:24px;font-weight:700;color:var(--rust)">-</div><div style="font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-top:4px">Pending Ship</div></div>
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:12px">
+          <select id="bb-filter-status" onchange="filterBBTable()" style="padding:8px 12px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px"><option value="">All</option><option value="false">Pending</option><option value="true">Shipped</option></select>
+          <input id="bb-search" type="text" placeholder="Search name, email, state..." oninput="filterBBTable()" style="flex:1;padding:8px 12px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px">
+        </div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>#</th><th>Lister #</th><th>Name</th><th>Email</th><th>Phone</th><th>Ship To</th><th>Claimed</th><th>Status</th><th>Tracking</th><th>Action</th></tr></thead>
+          <tbody id="bb-tbody"><tr><td colspan="10" style="text-align:center;color:var(--muted);padding:24px">Click to load...</td></tr></tbody>
+        </table></div>
+      </div>
+
   </div><!-- /main -->
 </div><!-- /admin-app -->
 
@@ -775,6 +800,7 @@ const panelTitles = {
   verifications: ['Verification Requests', 'Review seller verification requests'],
   settings:  ['Settings', 'Platform configuration and quick actions'],
   catalog:   ['Catalog Mailing List', 'Print catalog signup requests'],
+  beefbox:   ['Beef Box Claims', 'First 1,000 listers promotion'],
 };
 
 function switchPanel(name) {
@@ -797,6 +823,7 @@ function switchPanel(name) {
   if (name === 'verifications') { loadVerifications(); }
   if (name === 'settings')  { loadSettings(); }
   if (name === 'catalog')   { loadCatalogSignups(); }
+  if (name === 'beefbox')   { loadBeefBoxClaims(); }
 }
 
 // ── Dashboard ─────────────────────────────────────────
@@ -1830,6 +1857,62 @@ async function bulkCatSent(sent){
   if(!catSelected.size)return;
   await fetch(`${API}/api/admin/catalog-signups/bulk-sent`,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},body:JSON.stringify({ids:Array.from(catSelected),catalog_sent:sent})});
   catSelected.clear();loadCatalogSignups();
+}
+
+// ── Beef Box Claims ───────────────────────────────────
+let bbClaims=[], bbFiltered=[];
+async function loadBeefBoxClaims() {
+  try {
+    const r = await fetch(`${API}/api/admin/beef-box-claims`, {headers:{Authorization:`Bearer ${token}`}});
+    bbClaims = await r.json();
+    bbFiltered = [...bbClaims];
+    const shipped = bbClaims.filter(c=>c.fulfilled).length;
+    document.getElementById('bb-stat-total').textContent = bbClaims.length;
+    document.getElementById('bb-stat-fulfilled').textContent = shipped;
+    document.getElementById('bb-stat-pending').textContent = bbClaims.length - shipped;
+    const badge = document.getElementById('beefbox-badge');
+    if (badge) { badge.textContent = bbClaims.length; badge.style.display = bbClaims.length?'':'none'; }
+    renderBBTable();
+  } catch(e) { document.getElementById('bb-tbody').innerHTML = '<tr><td colspan="10" style="text-align:center;color:var(--muted);padding:24px">Failed: '+e.message+'</td></tr>'; }
+}
+function filterBBTable() {
+  const q = (document.getElementById('bb-search')?.value||'').toLowerCase();
+  const sf = document.getElementById('bb-filter-status')?.value||'';
+  bbFiltered = bbClaims.filter(c => {
+    if (q && !(c.name||'').toLowerCase().includes(q) && !(c.email||'').toLowerCase().includes(q) && !(c.state||'').toLowerCase().includes(q)) return false;
+    if (sf && String(c.fulfilled) !== sf) return false;
+    return true;
+  });
+  renderBBTable();
+}
+function renderBBTable() {
+  const tbody = document.getElementById('bb-tbody');
+  if (!bbFiltered.length) { tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:var(--muted);padding:24px">No claims</td></tr>'; return; }
+  tbody.innerHTML = bbFiltered.map((c,i) => {
+    const sent = c.fulfilled ? '<span class="badge" style="background:#2e7d4f;color:white">Shipped</span>' : '<span class="badge" style="background:var(--rust);color:white">Pending</span>';
+    const addr = [c.street,c.city,c.state,c.zip].filter(Boolean).join(', ');
+    return `<tr style="${i%2?'':'background:rgba(255,255,255,.02)'}">
+      <td>${i+1}</td><td style="font-weight:700;color:var(--gold)">#${c.lister_number||'—'}</td>
+      <td style="font-weight:500">${escHtml(c.name||'')}</td><td style="font-size:12px">${escHtml(c.email||c.user_email||'')}</td>
+      <td style="font-size:12px;color:var(--muted)">${escHtml(c.phone||'—')}</td>
+      <td style="font-size:12px">${escHtml(addr)}</td>
+      <td style="font-size:11px;color:var(--muted)">${c.claimed_at?new Date(c.claimed_at).toLocaleDateString():'—'}</td>
+      <td>${sent}</td>
+      <td><input type="text" value="${escHtml(c.tracking_number||'')}" id="bb-track-${c.id}" placeholder="Tracking #" style="width:100px;padding:3px 6px;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:3px;font-size:11px"></td>
+      <td><button class="btn" onclick="markBBShipped(${c.id},${!c.fulfilled})" style="font-size:10px;padding:3px 8px">${c.fulfilled?'Unship':'Ship'}</button></td>
+    </tr>`;
+  }).join('');
+}
+async function markBBShipped(id,fulfilled){
+  const tracking = document.getElementById('bb-track-'+id)?.value?.trim()||null;
+  await fetch(`${API}/api/admin/beef-box-claims/${id}/fulfill`,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},body:JSON.stringify({fulfilled:fulfilled,tracking_number:tracking})});
+  loadBeefBoxClaims();
+}
+function downloadBeefBoxCSV(){
+  const heads=['Lister #','Name','Email','Phone','Street','City','State','ZIP','Claimed','Shipped','Tracking'];
+  const rows=bbClaims.map(c=>[c.lister_number||'',c.name||'',c.email||c.user_email||'',c.phone||'',c.street||'',c.city||'',c.state||'',c.zip||'',c.claimed_at?new Date(c.claimed_at).toLocaleDateString():'',c.fulfilled?'Yes':'No',c.tracking_number||'']);
+  const csv=[heads,...rows].map(r=>r.map(v=>'"'+String(v||'').replace(/"/g,'""')+'"').join(',')).join('\n');
+  const blob=new Blob([csv],{type:'text/csv'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='BeefBox_Claims_'+new Date().toISOString().split('T')[0]+'.csv';a.click();
 }
 
 function downloadCatalogCSV(){
