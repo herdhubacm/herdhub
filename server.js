@@ -409,9 +409,13 @@ if (process.env.ADMIN_PATH_SECRET) {
 }
 
 // ── SPA fallback ──────────────────────────────────────
-// ── Catalog generator page ────────────────────────────
+// ── Catalog signup landing page ───────────────────────
 app.get('/catalog', (_req, res) =>
   res.sendFile(require('path').join(__dirname, 'public', 'catalog.html'))
+);
+// ── Catalog generator (advertiser tool) ──────────────
+app.get('/catalog-generator', (_req, res) =>
+  res.sendFile(require('path').join(__dirname, 'public', 'catalog-generator.html'))
 );
 
 // ── SEO Landing Pages — real URLs Google can index ───

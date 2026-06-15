@@ -516,7 +516,7 @@ header.scrolled{background:rgba(10,10,10,.92)!important;backdrop-filter:blur(12p
   <a href="javascript:void(0)" data-action="scroll" data-target="market">Market Prices</a>
   <a href="javascript:void(0)" data-action="scroll" data-target="forum">Ranch News</a>
   <a href="javascript:void(0)" data-action="page" data-page="forum">Community Forum</a>
-  <a href="javascript:void(0)" data-action="modal" data-modal="catalog-signup">Free Catalog</a>
+  <a href="/catalog">Free Catalog</a>
   <a href="javascript:void(0)" data-action="page" data-page="pricing">Advertise With Us</a>
 </div>
 
@@ -875,16 +875,63 @@ header.scrolled{background:rgba(10,10,10,.92)!important;backdrop-filter:blur(12p
 
   </div><!-- end home-3col -->
 
-  <!-- ══ NEWSLETTER + BEEF BOXES — Full width, centered, above articles ══ -->
-  <div class="nl-bb-banner">
-
-    <!-- Print Catalog half -->
-    <div class="nl-bb-half nl-bb-newsletter">
-      <div class="nl-bb-eyebrow">Free by Mail</div>
-      <h3 class="nl-bb-heading">Herd <span style="color:var(--gold)">Hub</span> Print Catalog</h3>
-      <p class="nl-bb-body">Premium cattle listings, farm-to-table operations, and brand partners — a professional print catalog mailed free to producers nationwide.</p>
-      <button class="btn-primary nl-bb-btn" data-action="modal" data-modal="catalog-signup" style="width:auto">Request My Free Copy →</button>
+  <!-- ══ CATALOG CTA — Prominent section matching social media copy ══ -->
+  <section style="background:#0A0A0A;border-top:1px solid rgba(201,169,110,.15);
+    border-bottom:1px solid rgba(201,169,110,.15);padding:40px 24px">
+    <div style="max-width:860px;margin:0 auto">
+      <div style="display:grid;grid-template-columns:1fr auto;gap:32px;
+           align-items:center;flex-wrap:wrap">
+        <div>
+          <div style="font-family:'Inter',sans-serif;font-size:11px;
+               font-weight:600;letter-spacing:.15em;text-transform:uppercase;
+               color:#8B3214;margin-bottom:8px">
+            📖 Herd Hub Print Catalog
+          </div>
+          <div style="font-family:'Libre Baskerville',serif;font-size:24px;
+               font-weight:700;color:#F5EFE0;margin-bottom:8px;line-height:1.25">
+            Get on the Catalog List.
+          </div>
+          <div style="font-family:'Inter',sans-serif;font-size:14px;
+               color:#8C7560;line-height:1.6;max-width:520px">
+            The Herd Hub Print Catalog is coming — premium cattle listings,
+            market reports, ranch tools, and the brands and operations that
+            make American beef what it is. Mailed free to producers nationwide.
+            Sign up now and we'll ship your copy when it's ready.
+          </div>
+          <div style="display:flex;gap:16px;margin-top:8px;flex-wrap:wrap">
+            <span style="font-size:12px;color:#5a7a4a;font-family:'Inter',sans-serif">
+              ✓ Free — no cost to you
+            </span>
+            <span style="font-size:12px;color:#5a7a4a;font-family:'Inter',sans-serif">
+              ✓ Mailed to your door
+            </span>
+            <span style="font-size:12px;color:#5a7a4a;font-family:'Inter',sans-serif">
+              ✓ First come, first served
+            </span>
+          </div>
+        </div>
+        <div style="flex-shrink:0">
+          <button onclick="openModal('catalog-signup')"
+            style="background:#8B3214;color:#F5EFE0;border:none;
+            padding:16px 32px;border-radius:4px;font-family:'Inter',sans-serif;
+            font-size:14px;font-weight:700;letter-spacing:.06em;
+            text-transform:uppercase;cursor:pointer;white-space:nowrap;
+            transition:opacity .2s"
+            onmouseenter="this.style.opacity='.85'"
+            onmouseleave="this.style.opacity='1'">
+            Get on the Catalog List →
+          </button>
+          <div style="font-size:11px;color:#8C7560;text-align:center;
+               margin-top:8px;font-family:'Inter',sans-serif">
+            No credit card · No spam · Just the catalog
+          </div>
+        </div>
+      </div>
     </div>
+  </section>
+
+  <!-- ══ BEEF BOXES — Full width, centered, above articles ══ -->
+  <div class="nl-bb-banner">
 
     <!-- Beef Boxes half -->
     <div class="nl-bb-half nl-bb-beefbox">

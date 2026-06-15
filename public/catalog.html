@@ -3,289 +3,148 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Herd Hub Digital Catalog Generator</title>
+  <title>Get the Herd Hub Print Catalog — Free</title>
+  <meta name="description" content="Sign up to receive the Herd Hub Print Catalog free by mail. Premium cattle listings, market reports, ranch tools, and the brands that make American beef what it is.">
   <link rel="icon" type="image/png" href="/logo.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     *,*::before,*::after{box-sizing:border-box}
-    :root{
-      --dark-brown:#0A0A0A;--rust:#8B3214;--gold:#C9A96E;--cream:#F5EFE0;
-      --light-tan:#E8DCC8;--tan:#C4A882;--warm-white:#FAF6EF;--sage:#7A8C6E;
-    }
-    body{font-family:'Libre Baskerville',serif;background:var(--warm-white);margin:0;padding:0;color:var(--dark-brown)}
-    header{background:var(--dark-brown);padding:16px 24px;display:flex;align-items:center;gap:16px}
-    header h1{font-family:'Libre Baskerville',serif;font-size:22px;font-weight:900;color:var(--cream);margin:0}
-    header span{color:var(--gold)}
-    header p{font-size:12px;color:rgba(245,239,224,.6);margin:0;font-family:'Inter',sans-serif;letter-spacing:.08em}
-    .container{max-width:1100px;margin:0 auto;padding:32px 24px}
-    .card{background:white;border:1px solid var(--light-tan);border-radius:8px;padding:24px;margin-bottom:20px}
-    label{font-size:12px;font-weight:600;color:var(--dark-brown);display:block;margin-bottom:5px;font-family:'Inter',sans-serif;letter-spacing:.06em;text-transform:uppercase}
-    input,textarea,select{width:100%;padding:10px 12px;border:1.5px solid var(--light-tan);border-radius:4px;font-family:'Libre Baskerville',serif;font-size:14px;color:var(--dark-brown);outline:none;background:white;margin-bottom:16px}
-    input:focus,textarea:focus{border-color:var(--rust)}
-    .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-    .btn{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;border-radius:4px;font-family:'Inter',sans-serif;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;border:none;transition:all .15s}
-    .btn-primary{background:var(--rust);color:white}
-    .btn-primary:hover{background:#7a2b10}
-    .btn-gold{background:var(--gold);color:var(--dark-brown)}
-    .btn-gold:hover{background:#b8944f}
-    .btn-ghost{background:transparent;color:var(--dark-brown);border:1.5px solid var(--light-tan)}
-    h2{font-family:'Libre Baskerville',serif;font-size:20px;font-weight:900;color:var(--dark-brown);margin:0 0 16px}
-    h3{font-family:'Inter',sans-serif;font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--rust);margin:0 0 12px}
-    .listing-row{display:flex;gap:12px;background:var(--warm-white);border:1px solid var(--light-tan);border-radius:6px;padding:12px;margin-bottom:8px;align-items:center}
-    .listing-row img{width:72px;height:56px;object-fit:cover;border-radius:4px;background:var(--light-tan);flex-shrink:0}
-    .listing-row .info{flex:1;min-width:0}
-    .listing-row .info .title{font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .listing-row .info .meta{font-size:12px;color:#888;margin-top:2px}
-    .listing-row .price{font-family:'Libre Baskerville',serif;font-size:16px;font-weight:700;color:var(--rust);white-space:nowrap}
-    .tag{display:inline-block;background:var(--cream);border:1px solid var(--light-tan);border-radius:12px;padding:2px 10px;font-size:11px;font-family:'Inter',sans-serif;margin-right:4px;margin-bottom:4px}
-    #preview{display:none}
+    body{font-family:'Inter',sans-serif;background:#0A0A0A;margin:0;padding:0;color:#F5EFE0;min-height:100vh;display:flex;flex-direction:column}
 
-    /* ── Print / PDF Styles ── */
-    @media print {
-      header,.controls,#step-1,#step-2{display:none!important}
-      #preview{display:block!important;margin:0;padding:0}
-      .pdf-page{page-break-after:always;margin:0;padding:0}
-      .pdf-page:last-child{page-break-after:avoid}
-      body{background:white}
-    }
+    .logo-bar{padding:24px 24px 0;text-align:center}
+    .logo-bar img{width:56px;height:56px;border-radius:12px}
+    .logo-bar .wordmark{font-family:'Libre Baskerville',serif;font-size:20px;font-weight:900;color:#F5EFE0;margin-top:8px}
+    .logo-bar .wordmark span{color:#C9A96E}
 
-    /* ── PDF Page Template ── */
-    .pdf-page{width:8.5in;min-height:11in;background:white;margin:0 auto;padding:0.6in 0.65in;position:relative;font-family:'Libre Baskerville',serif}
-    .pdf-header{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #0A0A0A;padding-bottom:16px;margin-bottom:24px}
-    .pdf-logo-text{font-family:'Libre Baskerville',serif;font-size:28px;font-weight:900;color:#0A0A0A}
-    .pdf-logo-text span{color:#C9A96E}
-    .pdf-tagline{font-family:'Inter',sans-serif;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:#888;margin-top:3px}
-    .pdf-ranch-name{font-family:'Libre Baskerville',serif;font-size:22px;font-weight:900;color:#0A0A0A;text-align:right}
-    .pdf-ranch-contact{font-family:'Inter',sans-serif;font-size:11px;color:#666;text-align:right;margin-top:4px;line-height:1.8}
-    .pdf-hero{background:#0A0A0A;border-radius:6px;padding:20px 24px;margin-bottom:20px;display:flex;gap:20px;align-items:center}
-    .pdf-hero-text{flex:1}
-    .pdf-hero-eyebrow{font-family:'Inter',sans-serif;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:#C9A96E;margin-bottom:6px}
-    .pdf-hero-title{font-family:'Libre Baskerville',serif;font-size:20px;font-weight:900;color:#F5EFE0;line-height:1.3;margin-bottom:8px}
-    .pdf-hero-desc{font-size:12px;color:rgba(245,239,224,.7);line-height:1.6}
-    .pdf-listing-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
-    .pdf-listing-card{border:1px solid #E8DCC8;border-radius:5px;overflow:hidden}
-    .pdf-listing-img{width:100%;height:140px;object-fit:cover;background:#E8DCC8;display:flex;align-items:center;justify-content:center;font-size:32px}
-    .pdf-listing-body{padding:10px 12px}
-    .pdf-listing-cat{font-family:'Inter',sans-serif;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#8B3214;margin-bottom:3px}
-    .pdf-listing-title{font-family:'Libre Baskerville',serif;font-size:13px;font-weight:700;color:#0A0A0A;margin-bottom:3px;line-height:1.3}
-    .pdf-listing-meta{font-size:10px;color:#888;margin-bottom:5px}
-    .pdf-listing-price{font-family:'Libre Baskerville',serif;font-size:14px;font-weight:700;color:#8B3214}
-    .pdf-listing-desc{font-size:10px;color:#555;line-height:1.5;margin-top:4px}
-    .pdf-footer{position:absolute;bottom:0.4in;left:0.65in;right:0.65in;border-top:1px solid #E8DCC8;padding-top:10px;display:flex;justify-content:space-between;font-family:'Inter',sans-serif;font-size:9px;color:#aaa;letter-spacing:.05em}
+    .hero{max-width:520px;margin:0 auto;padding:40px 24px 0;text-align:center}
+    .hero-eyebrow{font-size:11px;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:#8B3214;margin-bottom:12px}
+    .hero h1{font-family:'Libre Baskerville',serif;font-size:28px;font-weight:900;color:#F5EFE0;line-height:1.25;margin:0 0 16px}
+    .hero h1 span{color:#C9A96E}
+    .hero p{font-size:15px;color:#8C7560;line-height:1.7;margin:0 0 24px}
+
+    .checks{display:flex;gap:20px;justify-content:center;flex-wrap:wrap;margin-bottom:32px}
+    .checks span{font-size:12px;color:#5a7a4a}
+
+    .form-card{max-width:440px;margin:0 auto;padding:0 24px 40px;width:100%}
+    .sf{margin-bottom:14px}
+    .sf label{display:block;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#8C7560;margin-bottom:5px}
+    .sf input,.sf select{width:100%;padding:12px 14px;background:rgba(255,255,255,.06);border:1px solid rgba(201,169,110,.25);border-radius:4px;color:#F5EFE0;font-family:'Inter',sans-serif;font-size:14px;outline:none;-webkit-appearance:none}
+    .sf input::placeholder{color:rgba(255,255,255,.25)}
+    .sf input:focus,.sf select:focus{border-color:rgba(201,169,110,.6);box-shadow:0 0 0 2px rgba(201,169,110,.1)}
+    .sf select{cursor:pointer}
+    .sf select option{background:#1a1a1a;color:#fff}
+    .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+    .submit-btn{width:100%;padding:16px;background:#8B3214;color:#F5EFE0;border:none;border-radius:4px;font-family:'Inter',sans-serif;font-size:14px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:opacity .2s;margin-top:4px}
+    .submit-btn:hover{opacity:.85}
+    .submit-btn:disabled{opacity:.5;cursor:not-allowed}
+
+    .form-error{background:rgba(220,38,38,.15);border:1px solid rgba(220,38,38,.3);color:#fca5a5;padding:10px 14px;border-radius:4px;font-size:13px;margin-bottom:14px;display:none}
+    .form-success{display:none;text-align:center;padding:32px 20px}
+    .form-success .check{width:56px;height:56px;background:rgba(90,122,74,.15);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 16px}
+    .form-success h2{font-family:'Libre Baskerville',serif;font-size:22px;font-weight:900;margin:0 0 10px;color:#F5EFE0}
+    .form-success p{font-size:14px;color:#8C7560;line-height:1.6;margin:0}
+
+    .privacy{font-size:11px;color:#8C7560;text-align:center;margin-top:14px;line-height:1.5}
+
+    .footer{margin-top:auto;padding:32px 24px;text-align:center;border-top:1px solid rgba(201,169,110,.1)}
+    .footer a{font-family:'Libre Baskerville',serif;font-size:14px;color:#C9A96E;text-decoration:none;font-weight:700}
+    .footer .sub{font-size:11px;color:#8C7560;margin-top:6px}
+
+    @media(max-width:480px){
+      .hero h1{font-size:24px}
+      .checks{flex-direction:column;align-items:center;gap:8px}
+      .row2{grid-template-columns:1fr}
+    }
   </style>
 </head>
 <body>
 
-<header>
-  <div>
-    <h1>Herd <span>Hub</span> Catalog Generator</h1>
-    <p>T-Bone &amp; Prime Advertiser Exclusive &mdash; Print or export to PDF</p>
+<div class="logo-bar">
+  <img src="/logo.png" alt="Herd Hub">
+  <div class="wordmark">Herd <span>Hub</span></div>
+</div>
+
+<div class="hero">
+  <div class="hero-eyebrow">Coming Soon</div>
+  <h1>Get the Herd Hub Print Catalog. <span>Free.</span></h1>
+  <p>Premium cattle listings, market reports, ranch tools, and the brands and operations that make American beef what it is. Mailed free to producers nationwide.</p>
+</div>
+
+<div class="checks">
+  <span>&#10003; Free &mdash; no cost to you</span>
+  <span>&#10003; Mailed to your door</span>
+  <span>&#10003; First come, first served</span>
+</div>
+
+<div class="form-card">
+  <div id="catalog-form-error" class="form-error"></div>
+  <div id="catalog-form-success" class="form-success">
+    <div class="check">&#10003;</div>
+    <h2>You're on the list!</h2>
+    <p>We'll mail your catalog when it's ready. Keep an eye on your mailbox.</p>
   </div>
-</header>
-
-<div class="container">
-
-  <!-- Step 1: Your Info -->
-  <div id="step-1" class="card">
-    <h2>Step 1 &mdash; Your Ranch Information</h2>
-    <div class="grid">
-      <div><label>Ranch / Business Name</label><input type="text" id="ranch-name" placeholder="Harrington Ranch"></div>
-      <div><label>Your Name</label><input type="text" id="ranch-contact" placeholder="Jake Harrington"></div>
-      <div><label>Phone Number</label><input type="text" id="ranch-phone" placeholder="(806) 555-1234"></div>
-      <div><label>Email Address</label><input type="text" id="ranch-email" placeholder="jake@harringtonranch.com"></div>
-      <div><label>Website (optional)</label><input type="text" id="ranch-website" placeholder="www.harringtonranch.com"></div>
-      <div><label>Location (City, State)</label><input type="text" id="ranch-location" placeholder="Amarillo, Texas"></div>
+  <div id="catalog-form-fields">
+    <div class="sf"><label>Full Name</label><input type="text" id="catalog-name" placeholder="Jake Harrington" required></div>
+    <div class="sf"><label>Email Address</label><input type="email" id="catalog-email" placeholder="you@email.com" required></div>
+    <div class="sf"><label>Street Address</label><input type="text" id="catalog-street" placeholder="123 Ranch Road" required></div>
+    <div class="row2">
+      <div class="sf"><label>City</label><input type="text" id="catalog-city" placeholder="Amarillo" required></div>
+      <div class="sf"><label>State</label><select id="catalog-state" required><option value="">Select</option><option>AL</option><option>AK</option><option>AZ</option><option>AR</option><option>CA</option><option>CO</option><option>CT</option><option>DE</option><option>FL</option><option>GA</option><option>HI</option><option>ID</option><option>IL</option><option>IN</option><option>IA</option><option>KS</option><option>KY</option><option>LA</option><option>ME</option><option>MD</option><option>MA</option><option>MI</option><option>MN</option><option>MS</option><option>MO</option><option>MT</option><option>NE</option><option>NV</option><option>NH</option><option>NJ</option><option>NM</option><option>NY</option><option>NC</option><option>ND</option><option>OH</option><option>OK</option><option>OR</option><option>PA</option><option>RI</option><option>SC</option><option>SD</option><option>TN</option><option>TX</option><option>UT</option><option>VT</option><option>VA</option><option>WA</option><option>WV</option><option>WI</option><option>WY</option></select></div>
     </div>
-    <div><label>Ranch Description / Tagline</label><textarea id="ranch-desc" rows="3" placeholder="Three generations of registered Black Angus cattle. Performance-tested bulls and replacement heifers available year-round."></textarea></div>
+    <div class="sf"><label>ZIP Code</label><input type="text" id="catalog-zip" placeholder="79101" maxlength="10" required></div>
+    <button class="submit-btn" id="catalog-submit-btn" onclick="submitCatalogSignup()">Put Me on the List &rarr;</button>
+    <div class="privacy">We respect your privacy. Your address is used only to mail your catalog. We never sell or share mailing lists.</div>
   </div>
+</div>
 
-  <!-- Step 2: Your Listings -->
-  <div id="step-2" class="card">
-    <h2>Step 2 &mdash; Select Listings to Feature</h2>
-    <p style="font-size:14px;color:#888;margin-bottom:16px">We'll pull your active Herd Hub listings. Enter your account email to load them.</p>
-    <div style="display:flex;gap:10px;margin-bottom:20px">
-      <input type="email" id="load-email" placeholder="Your Herd Hub email…" style="margin:0;flex:1">
-      <button class="btn btn-primary" onclick="loadUserListings()">Load My Listings</button>
-    </div>
-    <div id="listings-to-add" style="margin-bottom:16px"></div>
-    <div id="selected-listings" style="display:none">
-      <h3>Selected for Catalog (<span id="sel-count">0</span>)</h3>
-      <div id="sel-list"></div>
-    </div>
-  </div>
-
-  <!-- Controls -->
-  <div class="controls" style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:32px">
-    <button class="btn btn-gold" onclick="generateCatalog()">&#x2605; Generate Catalog Preview</button>
-    <button class="btn btn-primary" onclick="printCatalog()">&#x1F4C4; Export as PDF</button>
-    <button class="btn btn-ghost" onclick="resetForm()">Reset</button>
-  </div>
-
-  <!-- PDF Preview -->
-  <div id="preview"></div>
+<div class="footer">
+  <a href="/">theherdhub.com</a>
+  <div class="sub">American Cattle Marketplace</div>
 </div>
 
 <script>
-const API = '';
-let selectedListings = [];
-let allListings = [];
+async function submitCatalogSignup() {
+  var name = document.getElementById('catalog-name').value.trim();
+  var email = document.getElementById('catalog-email').value.trim();
+  var street = document.getElementById('catalog-street').value.trim();
+  var city = document.getElementById('catalog-city').value.trim();
+  var state = document.getElementById('catalog-state').value;
+  var zip = document.getElementById('catalog-zip').value.trim();
+  var errEl = document.getElementById('catalog-form-error');
+  errEl.style.display = 'none';
 
-async function loadUserListings() {
-  const email = document.getElementById('load-email').value.trim();
-  if (!email || !email.includes('@')) { alert('Please enter a valid email address'); return; }
+  if (!name || !email || !street || !city || !state || !zip) {
+    errEl.textContent = 'Please fill in all fields.'; errEl.style.display = 'block'; return;
+  }
+  if (!/^[\w.\-+]+@[\w.\-]+\.\w{2,}$/.test(email)) {
+    errEl.textContent = 'Please enter a valid email.'; errEl.style.display = 'block'; return;
+  }
+  if (!/^\d{5}(-\d{4})?$/.test(zip)) {
+    errEl.textContent = 'Please enter a valid ZIP code.'; errEl.style.display = 'block'; return;
+  }
 
-  const btn = document.querySelector('[onclick="loadUserListings()"]');
-  btn.textContent = 'Loading…'; btn.disabled = true;
-
+  var btn = document.getElementById('catalog-submit-btn');
+  btn.textContent = 'Sending...'; btn.disabled = true;
   try {
-    // Load all listings and filter by searching — since this is public-facing
-    const r = await fetch(`${API}/api/listings?limit=100&sort=newest`);
-    const d = await r.json();
-    allListings = (d.listings || []).filter(l => l.status === 'active');
-
-    if (!allListings.length) {
-      document.getElementById('listings-to-add').innerHTML = '<p style="color:#888;font-size:14px">No active listings found. Post some listings on Herd Hub first!</p>';
-      btn.textContent = 'Load My Listings'; btn.disabled = false;
-      return;
+    var r = await fetch('/api/catalog/signup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: name, email: email, street: street, city: city, state: state, zip: zip })
+    });
+    var d = await r.json();
+    if (d.success) {
+      document.getElementById('catalog-form-fields').style.display = 'none';
+      document.getElementById('catalog-form-success').style.display = 'block';
+    } else {
+      errEl.textContent = d.error || 'Something went wrong.'; errEl.style.display = 'block';
     }
-
-    renderListingPicker(allListings);
-    btn.textContent = 'Reload Listings'; btn.disabled = false;
   } catch(e) {
-    alert('Could not load listings. Please try again.');
-    btn.textContent = 'Load My Listings'; btn.disabled = false;
+    errEl.textContent = 'Network error — please try again.'; errEl.style.display = 'block';
+  } finally {
+    btn.textContent = 'Put Me on the List \u2192'; btn.disabled = false;
   }
-}
-
-function renderListingPicker(listings) {
-  const el = document.getElementById('listings-to-add');
-  el.innerHTML = '<h3 style="margin-bottom:12px">Click to add to catalog (max 8):</h3>' +
-    listings.map(l => {
-      const price = l.price ? '$' + Number(l.price).toLocaleString() : 'Call';
-      const thumb = l.thumb || '';
-      return `<div class="listing-row" onclick="toggleListingSelect(${l.id})" id="lr-${l.id}" style="cursor:pointer">
-        ${thumb ? `<img src="${thumb}" alt="">` : `<div style="width:72px;height:56px;background:var(--light-tan);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">🐄</div>`}
-        <div class="info">
-          <div class="title">${l.title}</div>
-          <div class="meta">${l.city || ''}, ${l.state} &middot; ${l.category?.replace(/_/g,' ')}</div>
-        </div>
-        <div class="price">${price}</div>
-        <div id="sel-${l.id}" style="width:22px;height:22px;border-radius:50%;border:2px solid var(--light-tan);display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;margin-left:8px"></div>
-      </div>`;
-    }).join('');
-}
-
-function toggleListingSelect(id) {
-  const listing = allListings.find(l => l.id === id);
-  if (!listing) return;
-
-  const idx = selectedListings.findIndex(l => l.id === id);
-  if (idx > -1) {
-    selectedListings.splice(idx, 1);
-    document.getElementById('sel-' + id).textContent = '';
-    document.getElementById('sel-' + id).style.background = '';
-    document.getElementById('sel-' + id).style.borderColor = 'var(--light-tan)';
-  } else {
-    if (selectedListings.length >= 8) { alert('Maximum 8 listings per catalog page. Export this one and start a new catalog for more.'); return; }
-    selectedListings.push(listing);
-    document.getElementById('sel-' + id).textContent = '✓';
-    document.getElementById('sel-' + id).style.background = 'var(--sage)';
-    document.getElementById('sel-' + id).style.borderColor = 'var(--sage)';
-    document.getElementById('sel-' + id).style.color = 'white';
-  }
-
-  document.getElementById('sel-count').textContent = selectedListings.length;
-  document.getElementById('selected-listings').style.display = selectedListings.length ? 'block' : 'none';
-}
-
-function generateCatalog() {
-  const ranchName    = document.getElementById('ranch-name').value || 'Your Ranch';
-  const ranchContact = document.getElementById('ranch-contact').value || '';
-  const ranchPhone   = document.getElementById('ranch-phone').value || '';
-  const ranchEmail   = document.getElementById('ranch-email').value || '';
-  const ranchWebsite = document.getElementById('ranch-website').value || '';
-  const ranchLoc     = document.getElementById('ranch-location').value || '';
-  const ranchDesc    = document.getElementById('ranch-desc').value || '';
-
-  if (!selectedListings.length) { alert('Please select at least one listing to feature.'); return; }
-
-  const catEmojis = {bulls:'🐂',bred_heifers:'🐄',cow_calf_pairs:'🐮',feeder_stocker:'🐄',showstock:'🏆',dairy:'🥛',equipment:'🚜',trailers:'🚛',working_dogs:'🐕',farm_to_table:'🌿',feed_hay:'🌾',bottle_calves:'🍼'};
-  const fmtCat = c => c?.replace(/_/g,' ').replace(/\b\w/g, x => x.toUpperCase()) || '';
-
-  const listingsHtml = selectedListings.map(l => {
-    const price = l.price ? '$' + Number(l.price).toLocaleString() + (l.price_type && l.price_type !== 'fixed' ? ' / ' + l.price_type.replace(/_/g,' ') : '') : 'Call for Price';
-    const emoji = catEmojis[l.category] || '🐄';
-    const imgTag = l.thumb
-      ? `<img class="pdf-listing-img" src="${l.thumb}" alt="${l.title}">`
-      : `<div class="pdf-listing-img">${emoji}</div>`;
-    const desc = (l.description || '').slice(0, 180) + ((l.description || '').length > 180 ? '…' : '');
-
-    return `<div class="pdf-listing-card">
-      ${imgTag}
-      <div class="pdf-listing-body">
-        <div class="pdf-listing-cat">${emoji} ${fmtCat(l.category)}</div>
-        <div class="pdf-listing-title">${l.title}</div>
-        <div class="pdf-listing-meta">📍 ${l.city || ''}, ${l.state}${l.quantity > 1 ? ' &middot; Qty: ' + l.quantity : ''}${l.weight_lbs ? ' &middot; ' + l.weight_lbs + ' lbs avg' : ''}</div>
-        <div class="pdf-listing-price">${price}</div>
-        ${desc ? `<div class="pdf-listing-desc">${desc}</div>` : ''}
-      </div>
-    </div>`;
-  }).join('');
-
-  const contactLines = [ranchPhone, ranchEmail, ranchWebsite, ranchLoc].filter(Boolean).map(c => `<div>${c}</div>`).join('');
-
-  document.getElementById('preview').style.display = 'block';
-  document.getElementById('preview').innerHTML = `
-    <div class="pdf-page">
-      <div class="pdf-header">
-        <div>
-          <div class="pdf-logo-text">Herd <span>Hub</span></div>
-          <div class="pdf-tagline">American Cattle Marketplace</div>
-        </div>
-        <div>
-          <div class="pdf-ranch-name">${ranchName}</div>
-          <div class="pdf-ranch-contact">${contactLines}</div>
-        </div>
-      </div>
-
-      ${ranchDesc ? `<div class="pdf-hero">
-        <div class="pdf-hero-text">
-          <div class="pdf-hero-eyebrow">About Our Operation</div>
-          <div class="pdf-hero-title">${ranchName}</div>
-          <div class="pdf-hero-desc">${ranchDesc}</div>
-        </div>
-      </div>` : ''}
-
-      <div style="font-family:'Inter',sans-serif;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--rust);margin-bottom:14px">Current Listings &mdash; ${new Date().toLocaleDateString('en-US',{month:'long',year:'numeric'})}</div>
-
-      <div class="pdf-listing-grid">${listingsHtml}</div>
-
-      <div class="pdf-footer">
-        <span>theherdhub.com &mdash; American Cattle Marketplace</span>
-        <span>Generated ${new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}</span>
-        <span>Contact: ${ranchPhone || ranchEmail || 'See listing details'}</span>
-      </div>
-    </div>`;
-
-  document.getElementById('preview').scrollIntoView({ behavior: 'smooth' });
-}
-
-function printCatalog() {
-  if (!document.getElementById('preview').innerHTML) {
-    generateCatalog();
-    setTimeout(() => window.print(), 500);
-  } else {
-    window.print();
-  }
-}
-
-function resetForm() {
-  selectedListings = [];
-  document.getElementById('preview').innerHTML = '';
-  document.getElementById('preview').style.display = 'none';
-  document.getElementById('listings-to-add').innerHTML = '';
-  document.getElementById('selected-listings').style.display = 'none';
 }
 </script>
 </body>
