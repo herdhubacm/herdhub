@@ -5,7 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Herd Hub | American Cattle Marketplace</title>
 <meta name="description" content="Herd Hub is America's cattle marketplace — buy, sell and trade cattle, livestock, ranch equipment, and farm-fresh beef products. Trusted by ranchers and farmers coast to coast.">
-<meta name="theme-color" content="#0A0A0A">
+<meta name="theme-color" content="#8B3214" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#8B3214">
+<meta name="mobile-web-app-capable" content="yes">
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-CK8GY5VK44"></script>
 <script>
@@ -25,7 +27,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preload" as="image" href="/hero_mark.png" fetchpriority="high">
 <link rel="icon" type="image/png" href="/logo.png">
-<link rel="apple-touch-icon" href="/logo.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png">
+<link rel="apple-touch-startup-image" href="/icons/icon-512.png">
 <link rel="manifest" href="/manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -7616,6 +7619,140 @@ async function submitBeefBoxClaim() {
     </div>
   </div>
 </div>
+
+<!-- PWA Install Banner -->
+<div id="pwa-install-banner" style="display:none;position:fixed;
+     bottom:0;left:0;right:0;z-index:9999;
+     background:#0A0A0A;border-top:1px solid rgba(201,169,110,.25);
+     padding:14px 20px;box-shadow:0 -4px 20px rgba(0,0,0,.4)">
+  <div style="display:flex;align-items:center;gap:14px;
+       max-width:560px;margin:0 auto">
+    <img src="/icons/icon-192.png"
+         style="width:44px;height:44px;border-radius:10px;flex-shrink:0"
+         alt="Herd Hub app icon">
+    <div style="flex:1;min-width:0">
+      <div style="font-family:'Inter',sans-serif;font-size:13px;
+           font-weight:600;color:#F5EFE0;margin-bottom:2px">
+        Add Herd Hub to your home screen
+      </div>
+      <div style="font-family:'Inter',sans-serif;font-size:11px;
+           color:#8C7560;white-space:nowrap;overflow:hidden;
+           text-overflow:ellipsis">
+        Free cattle marketplace &middot; Live prices &middot; Ranch tools
+      </div>
+    </div>
+    <button id="pwa-install-btn"
+      style="background:#8B3214;color:#F5EFE0;border:none;
+      padding:10px 18px;border-radius:4px;
+      font-family:'Inter',sans-serif;font-size:12px;
+      font-weight:700;letter-spacing:.04em;cursor:pointer;
+      flex-shrink:0;white-space:nowrap">
+      Install
+    </button>
+    <button onclick="dismissPWABanner()"
+      style="background:transparent;border:none;color:#8C7560;
+      cursor:pointer;font-size:20px;padding:4px;flex-shrink:0;
+      line-height:1">&times;</button>
+  </div>
+</div>
+
+<!-- iOS Install Instructions -->
+<div id="ios-install-hint" style="display:none;position:fixed;
+     bottom:0;left:0;right:0;z-index:9999;
+     background:#0A0A0A;border-top:1px solid rgba(201,169,110,.25);
+     padding:16px 20px;box-shadow:0 -4px 20px rgba(0,0,0,.4)">
+  <div style="max-width:400px;margin:0 auto;text-align:center">
+    <div style="font-family:'Inter',sans-serif;font-size:13px;
+         font-weight:600;color:#F5EFE0;margin-bottom:6px">
+      Add Herd Hub to your Home Screen
+    </div>
+    <div style="font-family:'Inter',sans-serif;font-size:12px;
+         color:#8C7560;line-height:1.6;margin-bottom:12px">
+      Tap <strong style="color:#C9A96E">Share</strong> then
+      <strong style="color:#C9A96E">Add to Home Screen</strong>
+      to install the Herd Hub app
+    </div>
+    <div style="font-size:24px;margin-bottom:10px">
+      &uarr; tap Share below
+    </div>
+    <button onclick="dismissPWABanner()"
+      style="background:transparent;border:1px solid rgba(201,169,110,.3);
+      color:#C9A96E;padding:8px 24px;border-radius:4px;
+      font-family:'Inter',sans-serif;font-size:12px;cursor:pointer">
+      Maybe Later
+    </button>
+  </div>
+</div>
+
+<script>
+// PWA Install Logic
+(function() {
+  var DISMISSED_UNTIL = 'pwa_banner_until';
+
+  // Don't show if already installed or recently dismissed
+  if (window.matchMedia('(display-mode: standalone)').matches) return;
+  if (window.navigator.standalone) return;
+  var dismissedUntil = localStorage.getItem(DISMISSED_UNTIL);
+  if (dismissedUntil && Date.now() < parseInt(dismissedUntil)) return;
+
+  var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  var deferredPrompt = null;
+
+  // Android / Chrome: capture install prompt
+  window.addEventListener('beforeinstallprompt', function(e) {
+    e.preventDefault();
+    deferredPrompt = e;
+    setTimeout(function() {
+      var banner = document.getElementById('pwa-install-banner');
+      if (banner) banner.style.display = 'block';
+    }, 8000);
+  });
+
+  // iOS: show instructions after 12 seconds
+  if (isIOS) {
+    setTimeout(function() {
+      var shown = localStorage.getItem('ios_hint_shown');
+      if (shown && Date.now() - parseInt(shown) < 7 * 24 * 60 * 60 * 1000) return;
+      var hint = document.getElementById('ios-install-hint');
+      if (hint) hint.style.display = 'block';
+      localStorage.setItem('ios_hint_shown', Date.now().toString());
+    }, 12000);
+  }
+
+  // Install button click
+  var installBtn = document.getElementById('pwa-install-btn');
+  if (installBtn) {
+    installBtn.addEventListener('click', function() {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then(function(result) {
+        if (result.outcome === 'accepted') {
+          document.getElementById('pwa-install-banner').style.display = 'none';
+        }
+        deferredPrompt = null;
+      });
+    });
+  }
+
+  // Track successful install
+  window.addEventListener('appinstalled', function() {
+    var banner = document.getElementById('pwa-install-banner');
+    var hint = document.getElementById('ios-install-hint');
+    if (banner) banner.style.display = 'none';
+    if (hint) hint.style.display = 'none';
+    localStorage.setItem('pwa_banner_dismissed', 'installed');
+  });
+})();
+
+function dismissPWABanner() {
+  var banner = document.getElementById('pwa-install-banner');
+  var hint = document.getElementById('ios-install-hint');
+  if (banner) banner.style.display = 'none';
+  if (hint) hint.style.display = 'none';
+  localStorage.setItem('pwa_banner_until',
+    (Date.now() + 3 * 24 * 60 * 60 * 1000).toString());
+}
+</script>
 
 </body>
 </html>

@@ -1,21 +1,80 @@
 {
   "name": "Herd Hub — American Cattle Marketplace",
   "short_name": "Herd Hub",
-  "description": "Buy, sell and manage cattle across America",
-  "start_url": "/",
+  "description": "Buy, sell and manage cattle. Free tools for American producers.",
+  "start_url": "/?source=pwa",
+  "scope": "/",
   "display": "standalone",
-  "background_color": "#2C1A0E",
+  "display_override": ["standalone", "minimal-ui"],
+  "background_color": "#0A0A0A",
   "theme_color": "#8B3214",
   "orientation": "portrait-primary",
+  "lang": "en-US",
+  "prefer_related_applications": false,
   "icons": [
-    {"src": "/logo.png", "sizes": "192x192", "type": "image/png"},
-    {"src": "/logo.png", "sizes": "512x512", "type": "image/png"}
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
   ],
-  "categories": ["shopping", "lifestyle", "business"],
+  "categories": ["shopping", "business", "agriculture"],
   "shortcuts": [
-    {"name": "Browse Cattle", "url": "/#listings", "description": "Browse cattle listings"},
-    {"name": "Post a Listing", "url": "/#post", "description": "Post a new listing"},
-    {"name": "Herd Manager", "url": "/herd-manager.html", "description": "Manage your herd"},
-    {"name": "Market Prices", "url": "/market-intelligence.html", "description": "Live cattle prices"}
+    {
+      "name": "Browse Cattle",
+      "short_name": "Browse",
+      "url": "/?source=pwa-shortcut#listings",
+      "description": "Browse cattle listings",
+      "icons": [{"src": "/icons/icon-192.png", "sizes": "192x192"}]
+    },
+    {
+      "name": "Post a Listing",
+      "short_name": "Post",
+      "url": "/?source=pwa-shortcut#post",
+      "description": "Post a new listing free",
+      "icons": [{"src": "/icons/icon-192.png", "sizes": "192x192"}]
+    },
+    {
+      "name": "Market Prices",
+      "short_name": "Prices",
+      "url": "/market-intelligence.html?source=pwa-shortcut",
+      "description": "Live USDA cattle prices",
+      "icons": [{"src": "/icons/icon-192.png", "sizes": "192x192"}]
+    },
+    {
+      "name": "Herd Manager",
+      "short_name": "Herd",
+      "url": "/herd-manager.html?source=pwa-shortcut",
+      "description": "Manage your cattle records",
+      "icons": [{"src": "/icons/icon-192.png", "sizes": "192x192"}]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/icons/screenshot-mobile.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Herd Hub cattle marketplace on mobile"
+    }
   ]
 }
