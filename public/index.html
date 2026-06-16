@@ -876,58 +876,80 @@ header.scrolled{background:rgba(10,10,10,.92)!important;backdrop-filter:blur(12p
   </div><!-- end home-3col -->
 
   <!-- ══ CATALOG CTA — Prominent section matching social media copy ══ -->
-  <section style="background:#0A0A0A;border-top:1px solid rgba(201,169,110,.15);
-    border-bottom:1px solid rgba(201,169,110,.15);padding:40px 24px">
-    <div style="max-width:860px;margin:0 auto">
-      <div style="display:grid;grid-template-columns:1fr auto;gap:32px;
-           align-items:center;flex-wrap:wrap">
-        <div>
-          <div style="font-family:'Inter',sans-serif;font-size:11px;
-               font-weight:600;letter-spacing:.15em;text-transform:uppercase;
-               color:#8B3214;margin-bottom:8px">
-            📖 Herd Hub Print Catalog
-          </div>
-          <div style="font-family:'Libre Baskerville',serif;font-size:24px;
-               font-weight:700;color:#F5EFE0;margin-bottom:8px;line-height:1.25">
-            Get on the Catalog List.
-          </div>
-          <div style="font-family:'Inter',sans-serif;font-size:14px;
-               color:#8C7560;line-height:1.6;max-width:520px">
-            The Herd Hub Print Catalog is coming — premium cattle listings,
-            market reports, ranch tools, and the brands and operations that
-            make American beef what it is. Mailed free to producers nationwide.
-            Sign up now and we'll ship your copy when it's ready.
-          </div>
-          <div style="display:flex;gap:16px;margin-top:8px;flex-wrap:wrap">
-            <span style="font-size:12px;color:#5a7a4a;font-family:'Inter',sans-serif">
-              ✓ Free — no cost to you
-            </span>
-            <span style="font-size:12px;color:#5a7a4a;font-family:'Inter',sans-serif">
-              ✓ Mailed to your door
-            </span>
-            <span style="font-size:12px;color:#5a7a4a;font-family:'Inter',sans-serif">
-              ✓ First come, first served
-            </span>
-          </div>
+  <section id="catalog-cta-section" style="background:#0A0A0A;
+    border-top:1px solid rgba(201,169,110,.15);
+    border-bottom:1px solid rgba(201,169,110,.15);
+    padding:48px 24px">
+    <div style="max-width:900px;margin:0 auto;
+      display:grid;grid-template-columns:1fr auto;
+      gap:40px;align-items:center">
+      <div>
+        <div style="font-family:'Inter',sans-serif;font-size:10px;
+             font-weight:700;letter-spacing:.2em;text-transform:uppercase;
+             color:#8B3214;margin-bottom:10px;display:flex;
+             align-items:center;gap:8px">
+          <span style="display:inline-block;width:20px;height:1px;
+                background:#8B3214"></span>
+          Herd Hub Print Catalog
         </div>
-        <div style="flex-shrink:0">
-          <button onclick="openModal('catalog-signup')"
-            style="background:#8B3214;color:#F5EFE0;border:none;
-            padding:16px 32px;border-radius:4px;font-family:'Inter',sans-serif;
-            font-size:14px;font-weight:700;letter-spacing:.06em;
-            text-transform:uppercase;cursor:pointer;white-space:nowrap;
-            transition:opacity .2s"
-            onmouseenter="this.style.opacity='.85'"
-            onmouseleave="this.style.opacity='1'">
-            Get on the Catalog List →
-          </button>
-          <div style="font-size:11px;color:#8C7560;text-align:center;
-               margin-top:8px;font-family:'Inter',sans-serif">
-            No credit card · No spam · Just the catalog
-          </div>
+        <div style="font-family:'Libre Baskerville',serif;font-size:28px;
+             font-weight:700;color:#F5EFE0;line-height:1.2;margin-bottom:12px">
+          Get on the Catalog List.
+        </div>
+        <div style="font-family:'Inter',sans-serif;font-size:14px;
+             color:#8C7560;line-height:1.7;max-width:540px;
+             margin-bottom:16px">
+          The Herd Hub Print Catalog is coming — premium cattle listings,
+          market intelligence, ranch tools explained, and the brands that
+          make American beef what it is. Mailed free to producers nationwide.
+          Sign up and we'll ship your copy when it's ready.
+        </div>
+        <div style="display:flex;gap:20px;flex-wrap:wrap">
+          <span style="font-family:'Inter',sans-serif;font-size:12px;
+                color:#5a7a4a;display:flex;align-items:center;gap:6px">
+            <span style="font-size:14px">✓</span> Free — no cost to you
+          </span>
+          <span style="font-family:'Inter',sans-serif;font-size:12px;
+                color:#5a7a4a;display:flex;align-items:center;gap:6px">
+            <span style="font-size:14px">✓</span> Mailed to your door
+          </span>
+          <span style="font-family:'Inter',sans-serif;font-size:12px;
+                color:#5a7a4a;display:flex;align-items:center;gap:6px">
+            <span style="font-size:14px">✓</span> First come, first served
+          </span>
+        </div>
+      </div>
+      <div style="flex-shrink:0;text-align:center;min-width:200px">
+        <button onclick="openModal('catalog-signup')"
+          id="catalog-cta-btn"
+          style="background:#8B3214;color:#F5EFE0;border:none;
+          padding:18px 36px;border-radius:4px;
+          font-family:'Inter',sans-serif;font-size:13px;
+          font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+          cursor:pointer;width:100%;transition:opacity .2s;
+          white-space:nowrap"
+          onmouseenter="this.style.opacity='.85'"
+          onmouseleave="this.style.opacity='1'">
+          Get on the Catalog List →
+        </button>
+        <div style="font-family:'Inter',sans-serif;font-size:11px;
+             color:#8C7560;margin-top:10px;line-height:1.5">
+          No credit card &nbsp;·&nbsp; No spam<br>Just the catalog, free.
         </div>
       </div>
     </div>
+    <!-- Mobile: stack vertically -->
+    <style>
+    @media(max-width:680px){
+      #catalog-cta-section > div {
+        grid-template-columns:1fr !important;
+        gap:24px !important;
+      }
+      #catalog-cta-section > div > div:last-child {
+        min-width:unset !important;
+      }
+    }
+    </style>
   </section>
 
   <!-- ══ BEEF BOXES — Full width, centered, above articles ══ -->
