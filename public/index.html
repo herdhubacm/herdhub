@@ -938,36 +938,68 @@ header.scrolled{background:rgba(10,10,10,.92)!important;backdrop-filter:blur(12p
         </div>
       </div>
     </div>
+    <!-- Subtle divider -->
+    <div style="max-width:900px;margin:32px auto 0">
+      <div style="height:1px;background:rgba(201,169,110,.12)"></div>
+    </div>
+
+    <!-- Beef Box row -->
+    <div id="beef-box-row" style="max-width:900px;margin:28px auto 0;
+      display:grid;grid-template-columns:1fr auto;gap:32px;align-items:center">
+      <div style="display:flex;align-items:flex-start;gap:16px">
+        <div style="font-size:32px;line-height:1;flex-shrink:0;margin-top:2px">📦</div>
+        <div>
+          <div style="display:inline-block;font-family:'Inter',sans-serif;font-size:9px;
+               font-weight:700;letter-spacing:.15em;text-transform:uppercase;
+               color:var(--gold);background:rgba(201,169,110,.1);
+               padding:3px 10px;border-radius:10px;margin-bottom:8px">
+            Launching Soon
+          </div>
+          <div style="font-family:'Libre Baskerville',serif;font-size:20px;
+               font-weight:700;color:#F5EFE0;line-height:1.25;margin-bottom:6px">
+            Beef <span style="color:var(--gold)">Boxes</span>
+          </div>
+          <div style="font-family:'Inter',sans-serif;font-size:13px;
+               color:#8C7560;line-height:1.6;max-width:440px">
+            A monthly box built for the American beef lover. Ranch gear,
+            premium beef products, and partner exclusives — delivered to your door.
+          </div>
+        </div>
+      </div>
+      <div style="flex-shrink:0;text-align:center">
+        <button data-action="page" data-page="beef-boxes"
+          style="background:#8B3214;color:#F5EFE0;border:none;
+          padding:14px 28px;border-radius:4px;
+          font-family:'Inter',sans-serif;font-size:13px;
+          font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+          cursor:pointer;white-space:nowrap;transition:opacity .2s"
+          onmouseenter="this.style.opacity='.85'"
+          onmouseleave="this.style.opacity='1'">
+          Get on the List →
+        </button>
+      </div>
+    </div>
+
     <!-- Mobile: stack vertically -->
     <style>
     @media(max-width:680px){
-      #catalog-cta-section > div {
+      #catalog-cta-section > div:first-child {
         grid-template-columns:1fr !important;
         gap:24px !important;
       }
-      #catalog-cta-section > div > div:last-child {
+      #catalog-cta-section > div:first-child > div:last-child {
         min-width:unset !important;
+      }
+      #beef-box-row {
+        grid-template-columns:1fr !important;
+        gap:20px !important;
+      }
+      #beef-box-row button {
+        width:100% !important;
       }
     }
     </style>
   </section>
-
-  <!-- ══ BEEF BOXES — Full width, centered, above articles ══ -->
-  <div class="nl-bb-banner">
-
-    <!-- Beef Boxes half -->
-    <div class="nl-bb-half nl-bb-beefbox">
-      <div style="position:absolute;top:-30px;right:-30px;width:160px;height:160px;background:var(--gold);opacity:.04;border-radius:50%"></div>
-      <div style="position:absolute;bottom:-40px;left:-20px;width:180px;height:180px;background:var(--rust);opacity:.05;border-radius:50%"></div>
-      <div style="position:relative">
-        <div class="nl-bb-eyebrow" style="color:var(--gold)">Launching Soon</div>
-        <h3 class="nl-bb-heading">📦 Beef <span style="color:var(--gold)">Boxes</span></h3>
-        <p class="nl-bb-body">A monthly box built for the American BEEF LOVER. Ranch gear, premium beef products, and partner exclusives — delivered to your door.</p>
-        <button class="btn-primary nl-bb-btn" style="background:var(--gold);color:var(--dark-brown);border-color:var(--gold);font-weight:700" data-action="page" data-page="beef-boxes">Get on the List →</button>
-      </div>
-    </div>
-
-  </div><!-- end nl-bb-banner -->
 
   <!-- ══ MOBILE AD STRIPS (visible below 900px only) ══ -->
   <div class="mobile-ad-strips">
