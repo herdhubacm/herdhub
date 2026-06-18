@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Herd Hub Merch — American Cattle Marketplace</title>
+<meta name="description" content="Herd Hub gear for the American producer. Hats, tees, stickers and more — built for the ranch.">
+<!-- Open Graph — Facebook, Instagram, LinkedIn -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://theherdhub.com/merch">
+<meta property="og:site_name" content="Herd Hub">
+<meta property="og:title" content="Herd Hub Merch — Ranch Gear Coming Soon">
+<meta property="og:description" content="Real gear for real producers. Hats, tees, stickers and more — built around the Herd Hub brand. Get notified for Drop 1.">
+<meta property="og:image" content="https://theherdhub.com/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Herd Hub Merch — Ranch Gear Coming Soon">
+<meta property="og:locale" content="en_US">
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@theherdhub">
+<meta name="twitter:title" content="Herd Hub Merch — Ranch Gear Coming Soon">
+<meta name="twitter:description" content="Real gear for real producers. Hats, tees, stickers and more — built around the Herd Hub brand. Get notified for Drop 1.">
+<meta name="twitter:image" content="https://theherdhub.com/og-image.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" href="/icons/icon-192.png">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:#0A0A0A;color:#F5EFE0;font-family:'Inter',sans-serif;min-height:100vh}
+.top-bar{height:4px;background:#8B3214}
+.nav{display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid rgba(201,169,110,.1)}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.nav-logo-text{font-family:'Libre Baskerville',serif;font-size:17px;font-weight:700;color:#F5EFE0}
+.nav-logo-sub{font-size:9px;color:#8C7560;letter-spacing:.1em;text-transform:uppercase}
+.nav-back{font-size:12px;color:#C9A96E;text-decoration:none;font-weight:600;letter-spacing:.04em}
+.hero{position:relative;overflow:hidden;padding:80px 24px 60px;text-align:center;border-bottom:1px solid rgba(201,169,110,.12)}
+.hero-eyebrow{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:#8B3214;margin-bottom:16px;display:flex;align-items:center;justify-content:center;gap:10px}
+.hero-eyebrow::before,.hero-eyebrow::after{content:'';width:24px;height:1px;background:#8B3214;display:block}
+.hero-headline{font-family:'Libre Baskerville',serif;font-size:42px;font-weight:700;line-height:1.1;margin-bottom:8px}
+.hero-headline span{color:#C9A96E}
+.hero-sub{font-size:15px;color:#8C7560;line-height:1.7;max-width:480px;margin:16px auto 0}
+.gold-rule{width:48px;height:2px;background:#8B3214;margin:28px auto}
+.coming-badge{display:inline-block;background:rgba(139,50,20,.15);color:#8B3214;border:1px solid rgba(139,50,20,.35);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:6px 16px;border-radius:20px;margin-bottom:24px}
+.main{max-width:580px;margin:0 auto;padding:48px 24px}
+.notify-card{background:rgba(255,255,255,.04);border:1px solid rgba(201,169,110,.2);border-radius:8px;padding:28px 24px;margin-bottom:32px}
+.notify-title{font-family:'Libre Baskerville',serif;font-size:20px;font-weight:700;margin-bottom:6px}
+.notify-sub{font-size:13px;color:#8C7560;margin-bottom:20px;line-height:1.6}
+.email-row{display:flex;gap:10px}
+.email-input{flex:1;padding:13px 14px;background:rgba(0,0,0,.5);border:1px solid rgba(201,169,110,.25);border-radius:4px;color:#fff;font-family:'Inter',sans-serif;font-size:14px;outline:none;-webkit-text-fill-color:#fff}
+.email-input::placeholder{color:rgba(255,255,255,.3)}
+.email-input:focus{border-color:rgba(201,169,110,.6)}
+.notify-btn{padding:13px 22px;background:#8B3214;color:#F5EFE0;border:none;border-radius:4px;font-family:'Inter',sans-serif;font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;white-space:nowrap;transition:opacity .2s}
+.notify-btn:hover{opacity:.85}
+.notify-btn:disabled{opacity:.5;cursor:not-allowed}
+.notify-note{font-size:11px;color:#8C7560;margin-top:10px}
+.success-msg{display:none;text-align:center;padding:16px}
+.success-icon{font-size:32px;margin-bottom:10px}
+.success-title{font-family:'Libre Baskerville',serif;font-size:18px;margin-bottom:8px}
+.success-sub{font-size:13px;color:#8C7560}
+.preview-section{margin-bottom:40px}
+.preview-label{font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:#8B3214;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.preview-label::after{content:'';flex:1;height:1px;background:rgba(201,169,110,.15)}
+.product-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.product-card{background:rgba(255,255,255,.04);border:1px solid rgba(201,169,110,.12);border-radius:6px;overflow:hidden}
+.product-img{aspect-ratio:1;background:#111;display:flex;align-items:center;justify-content:center;border-bottom:1px solid rgba(201,169,110,.1);position:relative}
+.product-img-placeholder{text-align:center}
+.product-img-icon{font-size:32px;margin-bottom:6px;display:block}
+.product-img-label{font-size:9px;color:#555;letter-spacing:.1em;text-transform:uppercase}
+.product-watermark{position:absolute;font-family:'Libre Baskerville',serif;font-size:28px;font-weight:700;color:#C9A96E;opacity:.08;letter-spacing:.05em}
+.product-info{padding:12px 14px}
+.product-name{font-size:13px;font-weight:600;color:#F5EFE0;margin-bottom:3px}
+.product-desc{font-size:11px;color:#8C7560;line-height:1.5;margin-bottom:8px}
+.product-badge{display:inline-block;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:3px 9px;border-radius:10px;background:rgba(139,50,20,.15);color:#8B3214;border:0.5px solid rgba(139,50,20,.3)}
+.tagline-section{text-align:center;padding:40px 0;border-top:1px solid rgba(201,169,110,.1)}
+.tagline-text{font-family:'Libre Baskerville',serif;font-size:20px;font-weight:700;color:#C9A96E;margin-bottom:8px}
+.tagline-sub{font-size:13px;color:#8C7560}
+.footer{padding:24px;text-align:center;border-top:1px solid rgba(201,169,110,.1)}
+.footer-text{font-size:11px;color:#8C7560}
+.footer-text a{color:#C9A96E;text-decoration:none}
+.bottom-bar{height:3px;background:linear-gradient(to right,#8B3214,#C9A96E)}
+@media(max-width:480px){
+  .hero-headline{font-size:30px}
+  .email-row{flex-direction:column}
+  .notify-btn{width:100%}
+  .product-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="top-bar"></div>
+<nav class="nav">
+  <a href="/" class="nav-logo">
+    <div>
+      <div class="nav-logo-text">Herd Hub</div>
+      <div class="nav-logo-sub">American Cattle Marketplace</div>
+    </div>
+  </a>
+  <a href="/" class="nav-back">&larr; Back to Marketplace</a>
+</nav>
+
+<div class="hero">
+  <div class="hero-eyebrow">Herd Hub Gear</div>
+  <div class="coming-badge">Coming Soon</div>
+  <h1 class="hero-headline">Gear Built for<br>the <span>Ranch.</span></h1>
+  <p class="hero-sub">
+    Real gear for real producers. Hats, tees, stickers,
+    and limited drops &mdash; all built around the brand that's
+    built for the producer.
+  </p>
+  <div class="gold-rule"></div>
+</div>
+
+<main class="main">
+
+  <div class="notify-card" id="notify-form-card">
+    <div class="notify-title">Be First to Know</div>
+    <div class="notify-sub">
+      Drop your email and we'll notify you the moment
+      the first drop goes live. Early access, no spam.
+    </div>
+    <div class="email-row">
+      <input class="email-input" type="email" id="merch-email"
+             placeholder="your@email.com">
+      <button class="notify-btn" id="merch-notify-btn"
+              onclick="submitMerchNotify()">
+        Notify Me
+      </button>
+    </div>
+    <div class="notify-note">
+      No spam. Just one email when the drop is live.
+    </div>
+  </div>
+
+  <div class="success-msg" id="merch-success">
+    <div class="success-icon">&#x1F920;</div>
+    <div class="success-title">You're on the list.</div>
+    <div class="success-sub">
+      We'll hit you up the moment the first drop goes live.
+    </div>
+  </div>
+
+  <div class="preview-section">
+    <div class="preview-label">What's Coming</div>
+    <div class="product-grid">
+      <div class="product-card">
+        <div class="product-img">
+          <div class="product-watermark">HH</div>
+          <div class="product-img-placeholder">
+            <span class="product-img-icon">&#x1F920;</span>
+            <div class="product-img-label">Preview coming</div>
+          </div>
+        </div>
+        <div class="product-info">
+          <div class="product-name">Ranch Hat</div>
+          <div class="product-desc">
+            Classic trucker or structured cap with the
+            gold HH mark. Built to wear on the ranch.
+          </div>
+          <span class="product-badge">Drop 1</span>
+        </div>
+      </div>
+      <div class="product-card">
+        <div class="product-img">
+          <div class="product-watermark">HH</div>
+          <div class="product-img-placeholder">
+            <span class="product-img-icon">&#x1F455;</span>
+            <div class="product-img-label">Preview coming</div>
+          </div>
+        </div>
+        <div class="product-info">
+          <div class="product-name">Heavyweight Tee</div>
+          <div class="product-desc">
+            Black heavyweight cotton, gold HH mark,
+            &ldquo;Built for the producer.&rdquo; on the back.
+          </div>
+          <span class="product-badge">Drop 1</span>
+        </div>
+      </div>
+      <div class="product-card">
+        <div class="product-img">
+          <div class="product-watermark">HH</div>
+          <div class="product-img-placeholder">
+            <span class="product-img-icon">&#x1F3F7;&#xFE0F;</span>
+            <div class="product-img-label">Preview coming</div>
+          </div>
+        </div>
+        <div class="product-info">
+          <div class="product-name">Vinyl Sticker Pack</div>
+          <div class="product-desc">
+            Weather-resistant die-cut stickers.
+            Cow head mark. Truck ready. Ranch ready.
+          </div>
+          <span class="product-badge">Drop 1</span>
+        </div>
+      </div>
+      <div class="product-card">
+        <div class="product-img">
+          <div class="product-watermark">HH</div>
+          <div class="product-img-placeholder">
+            <span class="product-img-icon">&#x1F9E5;</span>
+            <div class="product-img-label">Preview coming</div>
+          </div>
+        </div>
+        <div class="product-info">
+          <div class="product-name">Ranch Hoodie</div>
+          <div class="product-desc">
+            Black heavyweight pullover. Gold embroidery.
+            The kind you keep for 10 years.
+          </div>
+          <span class="product-badge">Drop 2</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tagline-section">
+    <div class="tagline-text">Built for the producer.<br>Not the packer.</div>
+    <div class="tagline-sub" style="margin-top:8px">theherdhub.com</div>
+  </div>
+
+</main>
+
+<footer class="footer">
+  <div class="footer-text">
+    <a href="/">theherdhub.com</a> &middot; American Cattle Marketplace &middot;
+    Built for the producer. Not the packer.
+  </div>
+</footer>
+<div class="bottom-bar"></div>
+
+<script>
+async function submitMerchNotify() {
+  var btn = document.getElementById('merch-notify-btn');
+  var email = document.getElementById('merch-email')?.value?.trim();
+  if (!email || !/^[\w.+-]+@[\w-]+\.\w{2,}$/.test(email)) {
+    alert('Please enter a valid email address.');
+    return;
+  }
+  if (btn) { btn.textContent = 'Adding you...'; btn.disabled = true; }
+  try {
+    var r = await fetch('/api/catalog/signup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: 'Merch Notify',
+        email: email,
+        street: 'Merch List',
+        city: 'N/A',
+        state: 'N/A',
+        zip: '00000'
+      })
+    });
+    document.getElementById('notify-form-card').style.display = 'none';
+    document.getElementById('merch-success').style.display = 'block';
+  } catch(e) {
+    if (btn) { btn.textContent = 'Notify Me'; btn.disabled = false; }
+    alert('Error. Please try again.');
+  }
+}
+</script>
+</body>
+</html>

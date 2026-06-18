@@ -417,6 +417,14 @@ app.get('/catalog', (_req, res) =>
 app.get('/catalog-generator', (_req, res) =>
   res.sendFile(require('path').join(__dirname, 'public', 'catalog-generator.html'))
 );
+// ── Merch landing page ───────────────────────────────
+app.get('/merch', (_req, res) =>
+  res.sendFile(require('path').join(__dirname, 'public', 'merch.html'))
+);
+// ── Link in bio page ─────────────────────────────────
+app.get('/links', (_req, res) =>
+  res.sendFile(require('path').join(__dirname, 'public', 'links.html'))
+);
 
 // ── SEO Landing Pages — real URLs Google can index ───
 const SEO_PAGES = [
