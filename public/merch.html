@@ -101,7 +101,6 @@ body{background:#0A0A0A;color:#F5EFE0;font-family:'Inter',sans-serif;min-height:
 
 <div class="hero">
   <div class="hero-eyebrow">Herd Hub Gear</div>
-  <div class="coming-badge">Coming Soon</div>
   <h1 class="hero-headline">Gear Built for<br>the <span>Ranch.</span></h1>
   <p class="hero-sub">
     Real gear for real producers. Hats, tees, stickers,
@@ -113,35 +112,24 @@ body{background:#0A0A0A;color:#F5EFE0;font-family:'Inter',sans-serif;min-height:
 
 <main class="main">
 
-  <div class="notify-card" id="notify-form-card">
-    <div class="notify-title">Be First to Know</div>
-    <div class="notify-sub">
-      Drop your email and we'll notify you the moment
-      the first drop goes live. Early access, no spam.
-    </div>
-    <div class="email-row">
-      <input class="email-input" type="email" id="merch-email"
-             placeholder="your@email.com">
-      <button class="notify-btn" id="merch-notify-btn"
-              onclick="submitMerchNotify()">
-        Notify Me
-      </button>
-    </div>
-    <div class="notify-note">
-      No spam. Just one email when the drop is live.
-    </div>
-  </div>
-
-  <div class="success-msg" id="merch-success">
-    <div class="success-icon">&#x1F920;</div>
-    <div class="success-title">You're on the list.</div>
-    <div class="success-sub">
-      We'll hit you up the moment the first drop goes live.
+  <div style="text-align:center;padding:8px 0">
+    <a href="https://shop.theherdhub.com"
+       style="display:inline-block;background:#8B3214;color:#F5EFE0;
+       text-decoration:none;padding:18px 48px;border-radius:4px;
+       font-family:'Inter',sans-serif;font-size:15px;font-weight:700;
+       letter-spacing:.08em;text-transform:uppercase;transition:opacity .2s"
+       onmouseenter="this.style.opacity='.85'"
+       onmouseleave="this.style.opacity='1'">
+      Shop Herd Hub Merch &rarr;
+    </a>
+    <div style="font-size:12px;color:#8C7560;margin-top:12px;
+         font-family:'Inter',sans-serif">
+      shop.theherdhub.com
     </div>
   </div>
 
   <div class="preview-section">
-    <div class="preview-label">What's Coming</div>
+    <div class="preview-label">Available Now</div>
     <div class="product-grid">
       <div class="product-card">
         <div class="product-img">
@@ -157,7 +145,7 @@ body{background:#0A0A0A;color:#F5EFE0;font-family:'Inter',sans-serif;min-height:
             Classic trucker or structured cap with the
             gold HH mark. Built to wear on the ranch.
           </div>
-          <span class="product-badge">Drop 1</span>
+          <span class="product-badge" style="background:rgba(90,122,74,.15);color:#5a7a4a;border-color:rgba(90,122,74,.3)">Available Now</span>
         </div>
       </div>
       <div class="product-card">
@@ -174,7 +162,7 @@ body{background:#0A0A0A;color:#F5EFE0;font-family:'Inter',sans-serif;min-height:
             Black heavyweight cotton, gold HH mark,
             &ldquo;Built for the producer.&rdquo; on the back.
           </div>
-          <span class="product-badge">Drop 1</span>
+          <span class="product-badge" style="background:rgba(90,122,74,.15);color:#5a7a4a;border-color:rgba(90,122,74,.3)">Available Now</span>
         </div>
       </div>
       <div class="product-card">
@@ -191,7 +179,7 @@ body{background:#0A0A0A;color:#F5EFE0;font-family:'Inter',sans-serif;min-height:
             Weather-resistant die-cut stickers.
             Cow head mark. Truck ready. Ranch ready.
           </div>
-          <span class="product-badge">Drop 1</span>
+          <span class="product-badge" style="background:rgba(90,122,74,.15);color:#5a7a4a;border-color:rgba(90,122,74,.3)">Available Now</span>
         </div>
       </div>
       <div class="product-card">
@@ -208,7 +196,7 @@ body{background:#0A0A0A;color:#F5EFE0;font-family:'Inter',sans-serif;min-height:
             Black heavyweight pullover. Gold embroidery.
             The kind you keep for 10 years.
           </div>
-          <span class="product-badge">Drop 2</span>
+          <span class="product-badge" style="background:rgba(90,122,74,.15);color:#5a7a4a;border-color:rgba(90,122,74,.3)">Available Now</span>
         </div>
       </div>
     </div>
@@ -229,35 +217,5 @@ body{background:#0A0A0A;color:#F5EFE0;font-family:'Inter',sans-serif;min-height:
 </footer>
 <div class="bottom-bar"></div>
 
-<script>
-async function submitMerchNotify() {
-  var btn = document.getElementById('merch-notify-btn');
-  var email = document.getElementById('merch-email')?.value?.trim();
-  if (!email || !/^[\w.+-]+@[\w-]+\.\w{2,}$/.test(email)) {
-    alert('Please enter a valid email address.');
-    return;
-  }
-  if (btn) { btn.textContent = 'Adding you...'; btn.disabled = true; }
-  try {
-    var r = await fetch('/api/catalog/signup', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        name: 'Merch Notify',
-        email: email,
-        street: 'Merch List',
-        city: 'N/A',
-        state: 'N/A',
-        zip: '00000'
-      })
-    });
-    document.getElementById('notify-form-card').style.display = 'none';
-    document.getElementById('merch-success').style.display = 'block';
-  } catch(e) {
-    if (btn) { btn.textContent = 'Notify Me'; btn.disabled = false; }
-    alert('Error. Please try again.');
-  }
-}
-</script>
 </body>
 </html>
