@@ -47,12 +47,14 @@ body{background:#0A0A0A;color:#F5EFE0;font-family:'Inter',sans-serif;min-height:
 .audience-item{padding:16px;background:rgba(255,255,255,.04);border-radius:6px;border-left:3px solid #8B3214}
 .audience-title{font-size:14px;font-weight:700;color:#F5EFE0;margin-bottom:4px}
 .audience-desc{font-size:12px;color:#8C7560;line-height:1.6}
-.placements{display:flex;flex-direction:column;gap:12px;margin-bottom:40px}
+.placements{display:flex;flex-direction:column;gap:12px;margin-bottom:24px}
 .placement-card{padding:18px;background:rgba(255,255,255,.04);border:1px solid rgba(201,169,110,.12);border-left:3px solid #8B3214;border-radius:6px}
+.placement-card.gold-border{border-left-color:#C9A96E}
 .placement-num{font-size:10px;font-weight:700;color:#8B3214;letter-spacing:.1em;margin-bottom:6px}
+.placement-card.gold-border .placement-num{color:#C9A96E}
 .placement-title{font-size:15px;font-weight:700;color:#F5EFE0;margin-bottom:6px;font-family:'Libre Baskerville',serif}
 .placement-desc{font-size:12px;color:#8C7560;line-height:1.6}
-.why-now{background:rgba(255,255,255,.04);border:1px solid rgba(201,169,110,.2);border-radius:8px;padding:24px;margin-bottom:40px}
+.why-now{background:rgba(255,255,255,.04);border:1px solid rgba(201,169,110,.2);border-radius:8px;padding:24px;margin:24px 0 40px}
 .why-now p{font-size:14px;color:#8C7560;line-height:1.7;font-style:italic}
 .form-card{background:rgba(255,255,255,.04);border:1px solid rgba(201,169,110,.2);border-radius:8px;padding:28px 24px;margin-bottom:32px}
 .form-title{font-family:'Libre Baskerville',serif;font-size:20px;font-weight:700;margin-bottom:4px}
@@ -64,8 +66,9 @@ body{background:#0A0A0A;color:#F5EFE0;font-family:'Inter',sans-serif;min-height:
 .fg input:focus,.fg textarea:focus{border-color:rgba(201,169,110,.6)}
 .fg textarea{resize:vertical;min-height:100px}
 .checkbox-group{display:flex;flex-direction:column;gap:10px;margin-top:4px}
-.checkbox-item{display:flex;align-items:center;gap:10px;cursor:pointer;font-size:13px;color:#F5EFE0}
-.checkbox-item input[type="checkbox"]{width:18px;height:18px;accent-color:#8B3214;cursor:pointer;flex-shrink:0}
+.checkbox-item{display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:13px;color:#F5EFE0}
+.checkbox-item input[type="checkbox"]{width:18px;height:18px;accent-color:#8B3214;cursor:pointer;flex-shrink:0;margin-top:1px}
+.checkbox-hint{font-size:10px;color:#8C7560;margin-left:28px;margin-top:-4px;font-style:italic}
 .submit-btn{width:100%;padding:16px;background:#8B3214;color:#F5EFE0;border:none;border-radius:4px;font-family:'Inter',sans-serif;font-size:14px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;margin-top:8px;transition:opacity .2s}
 .submit-btn:hover{opacity:.85}
 .submit-btn:disabled{opacity:.5;cursor:not-allowed}
@@ -120,33 +123,30 @@ body{background:#0A0A0A;color:#F5EFE0;font-family:'Inter',sans-serif;min-height:
     </div>
   </div>
 
-  <div class="section-label">Placement Options</div>
+  <div class="section-label">What's Available</div>
   <div class="placements">
     <div class="placement-card">
       <div class="placement-num">01</div>
-      <div class="placement-title">Website Placement</div>
-      <div class="placement-desc">Homepage, tool pages and listing pages. Your brand sits alongside the tools producers use weekly. Monthly or annual terms.</div>
+      <div class="placement-title">Homepage Placement</div>
+      <div class="placement-desc">Prime advertiser and featured ad slots on theherdhub.com &mdash; the page every producer lands on. Monthly or annual terms.</div>
     </div>
     <div class="placement-card">
       <div class="placement-num">02</div>
-      <div class="placement-title">Print Catalog</div>
-      <div class="placement-desc">Full, half and quarter page in Edition One of the Herd Hub Print Catalog, mailed free to producers nationwide.</div>
+      <div class="placement-title">Print Catalog &mdash; Edition One</div>
+      <div class="placement-desc">Full, half and quarter page placements in the first Herd Hub print catalog, mailed free to producers nationwide.</div>
     </div>
-    <div class="placement-card">
-      <div class="placement-num">03</div>
-      <div class="placement-title">The Range Report</div>
-      <div class="placement-desc">Sponsor slot in the weekly producer newsletter.</div>
-    </div>
-    <div class="placement-card">
-      <div class="placement-num">04</div>
-      <div class="placement-title">Services Directory</div>
-      <div class="placement-desc">Permanent listing for vets, haulers, AI techs, feed dealers, equipment and processors.</div>
+  </div>
+
+  <div class="placements">
+    <div class="placement-card gold-border">
+      <div class="placement-num">What Founding Means</div>
+      <div class="placement-desc">First choice of placement, your rate locked for the first full year, and a say in how advertising works on this platform as it grows.</div>
     </div>
   </div>
 
   <div class="why-now">
     <div class="section-label" style="margin-bottom:12px">Why Now</div>
-    <p>Herd Hub is early. That's the opportunity. Founding advertisers get first choice of placement, rates locked for the first year, and a say in how advertising works on this platform as it grows. We would rather build long relationships with a handful of brands who serve producers well than sell space to anyone with a budget.</p>
+    <p>Herd Hub is early. That's the opportunity. We would rather build long relationships with a handful of brands who serve producers well than sell space to anyone with a budget. Reach out and let's talk about what makes sense.</p>
   </div>
 
   <div class="form-card" id="adv-form-card">
@@ -176,10 +176,10 @@ body{background:#0A0A0A;color:#F5EFE0;font-family:'Inter',sans-serif;min-height:
     <div class="fg">
       <label>I'm Interested In</label>
       <div class="checkbox-group">
-        <label class="checkbox-item"><input type="checkbox" value="Website placement"> Website placement</label>
-        <label class="checkbox-item"><input type="checkbox" value="Print catalog"> Print catalog</label>
-        <label class="checkbox-item"><input type="checkbox" value="Newsletter sponsorship"> Newsletter sponsorship</label>
-        <label class="checkbox-item"><input type="checkbox" value="Services directory"> Services directory</label>
+        <label class="checkbox-item"><input type="checkbox" value="Homepage placement"> Homepage placement</label>
+        <label class="checkbox-item"><input type="checkbox" value="Print catalog — Edition One"> Print catalog &mdash; Edition One</label>
+        <label class="checkbox-item"><input type="checkbox" value="Services directory (gauging interest)"> A permanent listing in a cattle services directory (vets, haulers, AI techs, feed, equipment)</label>
+        <div class="checkbox-hint">Not built yet &mdash; tick this if you'd want it and we'll let you know.</div>
         <label class="checkbox-item"><input type="checkbox" value="Not sure yet — let's talk"> Not sure yet &mdash; let's talk</label>
       </div>
     </div>
