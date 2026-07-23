@@ -166,6 +166,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
       <button class="nav-item" onclick="switchPanel('payments')"><span class="icon">💳</span><span>Payments</span></button>
       <button class="nav-item" onclick="switchPanel('catalog')"><span class="icon">📬</span><span>Catalog List</span><span class="nav-badge" id="catalog-badge" style="display:none;background:var(--rust)">0</span></button>
       <button class="nav-item" onclick="switchPanel('beefbox')"><span class="icon">🥩</span><span>Beef Box Claims</span><span class="nav-badge" id="beefbox-badge" style="display:none;background:var(--gold)">0</span></button>
+      <button class="nav-item" onclick="switchPanel('advertisers')"><span class="icon">📢</span><span>Advertisers</span><span class="nav-badge" id="advertisers-badge" style="display:none;background:var(--rust)">0</span></button>
       <button class="nav-item" onclick="switchPanel('settings')"><span class="icon">⚙️</span><span>Settings</span></button>
     </nav>
     <div class="sidebar-footer">
@@ -637,6 +638,25 @@ tr:hover td{background:rgba(255,255,255,.02)}
         </table></div>
       </div>
 
+      <div class="panel" id="panel-advertisers">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+          <div style="font-size:13px;color:var(--muted)">Advertiser inquiry leads</div>
+          <div style="display:flex;gap:8px">
+            <button class="btn" onclick="downloadAdvertisersCSV()" style="background:var(--rust);color:white;font-size:11px;padding:7px 14px">&#x2B07; Download CSV</button>
+            <button class="btn" onclick="loadAdvertiserInquiries()" style="font-size:11px;padding:7px 14px">&#x21BB; Refresh</button>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px">
+          <div style="background:rgba(255,255,255,.04);border:1px solid rgba(201,169,110,.12);border-radius:6px;padding:14px;text-align:center"><div id="adv-stat-total" style="font-size:24px;font-weight:700;color:var(--gold)">-</div><div style="font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-top:4px">Total</div></div>
+          <div style="background:rgba(255,255,255,.04);border:1px solid rgba(201,169,110,.12);border-radius:6px;padding:14px;text-align:center"><div id="adv-stat-new" style="font-size:24px;font-weight:700;color:var(--rust)">-</div><div style="font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-top:4px">New</div></div>
+          <div style="background:rgba(255,255,255,.04);border:1px solid rgba(201,169,110,.12);border-radius:6px;padding:14px;text-align:center"><div id="adv-stat-contacted" style="font-size:24px;font-weight:700;color:#2e7d4f">-</div><div style="font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-top:4px">Contacted</div></div>
+        </div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>#</th><th>Date</th><th>Name</th><th>Business</th><th>Email</th><th>Phone</th><th>Interests</th><th>Status</th></tr></thead>
+          <tbody id="adv-tbody"><tr><td colspan="8" style="text-align:center;color:var(--muted);padding:24px">Click Refresh to load...</td></tr></tbody>
+        </table></div>
+      </div>
+
   </div><!-- /main -->
 </div><!-- /admin-app -->
 
@@ -801,6 +821,7 @@ const panelTitles = {
   settings:  ['Settings', 'Platform configuration and quick actions'],
   catalog:   ['Catalog Mailing List', 'Print catalog signup requests'],
   beefbox:   ['Beef Box Claims', 'First 1,000 listers promotion'],
+  advertisers: ['Advertiser Inquiries', 'Inquiry leads from /advertise page'],
 };
 
 function switchPanel(name) {
@@ -824,6 +845,7 @@ function switchPanel(name) {
   if (name === 'settings')  { loadSettings(); }
   if (name === 'catalog')   { loadCatalogSignups(); }
   if (name === 'beefbox')   { loadBeefBoxClaims(); }
+  if (name === 'advertisers') { loadAdvertiserInquiries(); }
 }
 
 // ── Dashboard ─────────────────────────────────────────
@@ -1913,6 +1935,54 @@ function downloadBeefBoxCSV(){
   const rows=bbClaims.map(c=>[c.lister_number||'',c.name||'',c.email||c.user_email||'',c.phone||'',c.street||'',c.city||'',c.state||'',c.zip||'',c.claimed_at?new Date(c.claimed_at).toLocaleDateString():'',c.fulfilled?'Yes':'No',c.tracking_number||'']);
   const csv=[heads,...rows].map(r=>r.map(v=>'"'+String(v||'').replace(/"/g,'""')+'"').join(',')).join('\n');
   const blob=new Blob([csv],{type:'text/csv'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='BeefBox_Claims_'+new Date().toISOString().split('T')[0]+'.csv';a.click();
+}
+
+// ── Advertiser Inquiries ──────────────────────────────
+let advInquiries = [];
+async function loadAdvertiserInquiries() {
+  try {
+    const r = await fetch(`${API}/api/admin/advertiser-inquiries`, {headers:{Authorization:`Bearer ${token}`}});
+    advInquiries = await r.json();
+    const newCount = advInquiries.filter(a=>a.status==='new').length;
+    const contacted = advInquiries.filter(a=>a.status==='contacted').length;
+    document.getElementById('adv-stat-total').textContent = advInquiries.length;
+    document.getElementById('adv-stat-new').textContent = newCount;
+    document.getElementById('adv-stat-contacted').textContent = contacted;
+    const badge = document.getElementById('advertisers-badge');
+    if (badge) { badge.textContent = newCount; badge.style.display = newCount?'':'none'; }
+    renderAdvTable();
+  } catch(e) { document.getElementById('adv-tbody').innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:24px">Failed: '+e.message+'</td></tr>'; }
+}
+function renderAdvTable() {
+  const tbody = document.getElementById('adv-tbody');
+  if (!advInquiries.length) { tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:24px">No inquiries yet</td></tr>'; return; }
+  tbody.innerHTML = advInquiries.map(function(a,i) {
+    const statusColors = {new:'var(--rust)',contacted:'#2e7d4f',closed:'var(--muted)'};
+    const date = a.created_at ? new Date(a.created_at).toLocaleDateString() : '—';
+    return '<tr style="'+(i%2?'':'background:rgba(255,255,255,.02)')+'">'+
+      '<td>'+(i+1)+'</td>'+
+      '<td style="font-size:11px;color:var(--muted)">'+date+'</td>'+
+      '<td style="font-weight:500">'+escHtml(a.name||'')+'</td>'+
+      '<td>'+escHtml(a.business||'')+'</td>'+
+      '<td style="font-size:12px">'+escHtml(a.email||'')+'</td>'+
+      '<td style="font-size:12px;color:var(--muted)">'+escHtml(a.phone||'—')+'</td>'+
+      '<td style="font-size:11px;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+escHtml(a.interests||'')+'">'+escHtml(a.interests||'—')+'</td>'+
+      '<td><select onchange="setAdvertiserStatus('+a.id+',this.value)" style="padding:3px 6px;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:3px;font-size:11px">'+
+        '<option value="new"'+(a.status==='new'?' selected':'')+'>New</option>'+
+        '<option value="contacted"'+(a.status==='contacted'?' selected':'')+'>Contacted</option>'+
+        '<option value="closed"'+(a.status==='closed'?' selected':'')+'>Closed</option>'+
+      '</select></td></tr>';
+  }).join('');
+}
+async function setAdvertiserStatus(id, status) {
+  await fetch(`${API}/api/admin/advertiser-inquiries/${id}/status`,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`},body:JSON.stringify({status:status})});
+  loadAdvertiserInquiries();
+}
+function downloadAdvertisersCSV(){
+  const heads=['Date','Name','Business','Email','Phone','Website','Interests','Message','Status'];
+  const rows=advInquiries.map(function(a){return[a.created_at?new Date(a.created_at).toLocaleDateString():'',a.name||'',a.business||'',a.email||'',a.phone||'',a.website||'',a.interests||'',a.message||'',a.status||'']});
+  const csv=[heads].concat(rows).map(function(r){return r.map(function(v){return '"'+String(v||'').replace(/"/g,'""')+'"'}).join(',')}).join('\n');
+  const blob=new Blob([csv],{type:'text/csv'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='Advertiser_Inquiries_'+new Date().toISOString().split('T')[0]+'.csv';a.click();
 }
 
 function downloadCatalogCSV(){

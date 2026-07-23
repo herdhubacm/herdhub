@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Welcome to Herd Hub</title>
+<meta name="description" content="Herd Hub is an American cattle marketplace built for producers. List your cattle free, no commission. Use every tool free, no subscription.">
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://theherdhub.com/welcome">
+<meta property="og:site_name" content="Herd Hub">
+<meta property="og:title" content="Welcome to Herd Hub">
+<meta property="og:description" content="Buy and sell cattle free. Six free ranch tools. Built for the producer, not the packer.">
+<meta property="og:image" content="https://theherdhub.com/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Welcome to Herd Hub">
+<meta property="og:locale" content="en_US">
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@theherdhub">
+<meta name="twitter:title" content="Welcome to Herd Hub">
+<meta name="twitter:description" content="Buy and sell cattle free. Six free ranch tools. Built for the producer, not the packer.">
+<meta name="twitter:image" content="https://theherdhub.com/og-image.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" href="/icons/icon-192.png">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:#0A0A0A;color:#F5EFE0;font-family:'Inter',sans-serif;min-height:100vh;display:flex;flex-direction:column}
+.top-bar{height:4px;background:#8B3214}
+.header{padding:24px;display:flex;align-items:center;gap:14px;border-bottom:1px solid rgba(201,169,110,.12)}
+.logo-text{font-family:'Libre Baskerville',serif;font-size:18px;font-weight:700;color:#F5EFE0}
+.logo-sub{font-size:10px;color:#8C7560;letter-spacing:.1em;text-transform:uppercase}
+.home-link{margin-left:auto;font-size:12px;color:#C9A96E;text-decoration:none;font-weight:600}
+.main{flex:1;max-width:600px;margin:0 auto;padding:0 24px 60px;width:100%}
+.hero{padding:48px 0 40px;text-align:center}
+.hero-eyebrow{font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#8B3214;margin-bottom:16px;display:flex;align-items:center;justify-content:center;gap:10px}
+.hero-eyebrow::before,.hero-eyebrow::after{content:'';width:24px;height:1px;background:#8B3214;display:block}
+.hero h1{font-family:'Libre Baskerville',serif;font-size:32px;font-weight:700;line-height:1.2;margin-bottom:8px}
+.hero .gold{color:#C9A96E}
+.hero p{font-size:15px;color:#8C7560;line-height:1.7;max-width:480px;margin:16px auto 0}
+.gold-rule{width:48px;height:2px;background:#8B3214;margin:32px auto}
+.tools-label{font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:#8B3214;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.tools-label::after{content:'';flex:1;height:1px;background:rgba(201,169,110,.15)}
+.tools-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:40px}
+.tool-card{background:rgba(255,255,255,.04);border:1px solid rgba(201,169,110,.12);border-radius:6px;padding:16px;text-decoration:none;transition:border-color .2s}
+.tool-card:hover{border-color:rgba(201,169,110,.35)}
+.tool-icon{font-size:22px;margin-bottom:8px;display:block}
+.tool-name{font-size:13px;font-weight:700;color:#F5EFE0;margin-bottom:4px;display:block}
+.tool-desc{font-size:11px;color:#8C7560;line-height:1.5;display:block}
+.cta-section{text-align:center;margin-bottom:32px}
+.cta-primary{display:inline-block;background:#8B3214;color:#F5EFE0;text-decoration:none;padding:18px 48px;border-radius:4px;font-size:15px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;transition:opacity .2s;margin-bottom:8px}
+.cta-primary:hover{opacity:.85}
+.cta-note{font-size:12px;color:#8C7560;margin-top:10px}
+.cta-secondary{display:inline-block;background:transparent;border:1px solid rgba(201,169,110,.3);color:#C9A96E;text-decoration:none;padding:14px 36px;border-radius:4px;font-size:13px;font-weight:600;transition:opacity .2s;margin-top:16px}
+.cta-secondary:hover{opacity:.75}
+.closing{text-align:center;padding:40px 0;border-top:1px solid rgba(201,169,110,.1)}
+.closing-tagline{font-family:'Libre Baskerville',serif;font-size:20px;font-weight:700;color:#C9A96E;margin-bottom:8px}
+.closing-url{font-size:13px;color:#8C7560}
+.footer{padding:24px;text-align:center;border-top:1px solid rgba(201,169,110,.1)}
+.footer-text{font-size:11px;color:#8C7560}
+.footer-text a{color:#C9A96E;text-decoration:none}
+.bottom-bar{height:3px;background:linear-gradient(to right,#8B3214,#C9A96E)}
+@media(max-width:480px){
+  .hero h1{font-size:26px}
+  .tools-grid{grid-template-columns:1fr}
+  .cta-primary{width:100%;text-align:center}
+  .cta-secondary{width:100%;text-align:center}
+}
+</style>
+</head>
+<body>
+
+<div class="top-bar"></div>
+<header class="header">
+  <div>
+    <div class="logo-text">Herd Hub</div>
+    <div class="logo-sub">American Cattle Marketplace</div>
+  </div>
+  <a href="/" class="home-link">Visit the Marketplace &rarr;</a>
+</header>
+
+<main class="main">
+  <div class="hero">
+    <div class="hero-eyebrow">You found us</div>
+    <h1>Glad the box made it.</h1>
+    <h1 class="gold">Now here's what we built.</h1>
+    <p>Herd Hub is an American cattle marketplace built for producers. List your cattle free, no commission. Use every tool free, no subscription. That's the whole deal.</p>
+  </div>
+
+  <div class="gold-rule"></div>
+
+  <div class="tools-label">Six Free Ranch Tools</div>
+  <div class="tools-grid">
+    <a href="/market-intelligence.html?source=pr" class="tool-card">
+      <span class="tool-icon">&#x1F4C8;</span>
+      <span class="tool-name">Market Prices</span>
+      <span class="tool-desc">Live USDA data, 90-day history, break-even calc</span>
+    </a>
+    <a href="/herd-manager.html?source=pr" class="tool-card">
+      <span class="tool-icon">&#x1F4CB;</span>
+      <span class="tool-name">Herd Manager</span>
+      <span class="tool-desc">Digital records for every animal in your operation</span>
+    </a>
+    <a href="/herd-vision.html?source=pr" class="tool-card">
+      <span class="tool-icon">&#x1F52C;</span>
+      <span class="tool-name">Herd Vision</span>
+      <span class="tool-desc">EPD analysis in plain English</span>
+    </a>
+    <a href="/gestation-calculator.html?source=pr" class="tool-card">
+      <span class="tool-icon">&#x1F4C5;</span>
+      <span class="tool-name">Calving Calculator</span>
+      <span class="tool-desc">Every due date on one screen</span>
+    </a>
+    <a href="/genetic-pairing.html?source=pr" class="tool-card">
+      <span class="tool-icon">&#x1F9EC;</span>
+      <span class="tool-name">Genetic Pairing</span>
+      <span class="tool-desc">Predict your calf crop before breeding</span>
+    </a>
+    <a href="/ranch-finance.html?source=pr" class="tool-card">
+      <span class="tool-icon">&#x1F4B0;</span>
+      <span class="tool-name">Ranch Financials</span>
+      <span class="tool-desc">Simple P&amp;L and cost of gain</span>
+    </a>
+  </div>
+
+  <div class="cta-section">
+    <a href="/?source=pr#signup" class="cta-primary">Create Your Free Account &rarr;</a>
+    <div class="cta-note">No credit card. No subscription. No catch.</div>
+    <br>
+    <a href="/catalog?source=pr" class="cta-secondary">Get the Free Print Catalog &rarr;</a>
+  </div>
+
+  <div class="closing">
+    <div class="closing-tagline">Built for the producer. Not the packer.</div>
+    <div class="closing-url">theherdhub.com</div>
+  </div>
+</main>
+
+<footer class="footer">
+  <div class="footer-text">
+    <a href="/">theherdhub.com</a> &middot; American Cattle Marketplace
+  </div>
+</footer>
+<div class="bottom-bar"></div>
+
+</body>
+</html>

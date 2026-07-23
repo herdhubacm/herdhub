@@ -286,6 +286,22 @@ app.get('/api/articles/:id', async (req, res) => {
   } catch (e) { res.status(500).json({ error: 'Failed to load article' }); }
 });
 
+// ── POST /api/advertise/inquiry (public) ──────────────
+app.post('/api/advertise/inquiry', async (req, res) => {
+  try {
+    const { name, business, email, phone, website, interests, message } = req.body;
+    if (!name || !business || !email)
+      return res.status(400).json({ error: 'Name, business and email are required' });
+    if (!/^[\w.+-]+@[\w.-]+\.\w{2,}$/.test(email))
+      return res.status(400).json({ error: 'Invalid email address' });
+    await query(
+      'INSERT INTO advertiser_inquiries (name,business,email,phone,website,interests,message) VALUES ($1,$2,$3,$4,$5,$6,$7)',
+      [name, business, email.toLowerCase(), phone || null, website || null, interests || null, message || null]
+    );
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: 'Inquiry failed' }); }
+});
+
 // ── POST /api/catalog/signup (public) ─────────────────
 app.post('/api/catalog/signup', async (req, res) => {
   try {
@@ -424,6 +440,14 @@ app.get('/merch', (_req, res) =>
 // ── Link in bio page ─────────────────────────────────
 app.get('/links', (_req, res) =>
   res.sendFile(require('path').join(__dirname, 'public', 'links.html'))
+);
+// ── Welcome PR landing page ──────────────────────────
+app.get('/welcome', (_req, res) =>
+  res.sendFile(require('path').join(__dirname, 'public', 'welcome.html'))
+);
+// ── Advertise inquiry page ───────────────────────────
+app.get('/advertise', (_req, res) =>
+  res.sendFile(require('path').join(__dirname, 'public', 'advertise.html'))
 );
 
 // ── SEO Landing Pages — real URLs Google can index ───
@@ -579,6 +603,20 @@ async function start() {
         tracking_number VARCHAR(100),
         notes TEXT
       )`);
+
+      await query(`CREATE TABLE IF NOT EXISTS advertiser_inquiries (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(120) NOT NULL,
+        business VARCHAR(160) NOT NULL,
+        email VARCHAR(160) NOT NULL,
+        phone VARCHAR(40),
+        website VARCHAR(200),
+        interests TEXT,
+        message TEXT,
+        status VARCHAR(20) DEFAULT 'new',
+        created_at TIMESTAMP DEFAULT NOW()
+      )`);
+      console.log('✅  Advertiser inquiries table ready');
 
       // Ensure updated_at column exists on listings
       await query(`ALTER TABLE listings ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW()`);

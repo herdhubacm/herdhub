@@ -540,4 +540,22 @@ router.post('/beef-box-claims/:id/fulfill', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+// ── Advertiser Inquiries ──────────────────────────────
+router.get('/advertiser-inquiries', async (req, res) => {
+  try {
+    const { rows } = await query('SELECT * FROM advertiser_inquiries ORDER BY created_at DESC');
+    res.json(rows);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+router.post('/advertiser-inquiries/:id/status', async (req, res) => {
+  try {
+    const { status } = req.body;
+    if (!['new', 'contacted', 'closed'].includes(status))
+      return res.status(400).json({ error: 'Invalid status' });
+    await query('UPDATE advertiser_inquiries SET status=$1 WHERE id=$2', [status, req.params.id]);
+    res.json({ ok: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 module.exports = router;
