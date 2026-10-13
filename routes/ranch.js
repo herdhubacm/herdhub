@@ -56,8 +56,9 @@ router.get('/:userId', async (req, res) => {
     // Increment views
     await query('UPDATE ranch_profiles SET views=views+1 WHERE user_id=$1', [uid]);
     const listings = await query(
-      `SELECT id, title, category, price, city, state, photo_urls, tier, created_at
-       FROM listings WHERE user_id=$1 AND status='active' ORDER BY created_at DESC LIMIT 20`, [uid]);
+      `SELECT l.id, l.title, l.category, l.price, l.city, l.state, l.tier, l.created_at,
+              (SELECT url FROM listing_photos WHERE listing_id = l.id ORDER BY sort_order LIMIT 1) AS photo_url
+       FROM listings l WHERE l.user_id=$1 AND l.status='active' ORDER BY l.created_at DESC LIMIT 20`, [uid]);
     res.json({ ...rows[0], listings: listings.rows });
   } catch (err) {
     res.status(500).json({ error: 'Failed to load ranch' });

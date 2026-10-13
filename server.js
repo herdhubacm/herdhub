@@ -34,6 +34,15 @@ function validateCsrfToken(token) {
 const { testConnection: testDb, query } = require('./db/database');
 const { testConnection: testStorage } = require('./services/storage');
 
+// ── Process error handlers ───────────────────────────
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+});
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err);
+  process.exit(1);
+});
+
 // ── Simple in-memory cache ────────────────────────────
 const apiCache = new Map();
 function getCached(key) {
@@ -361,12 +370,7 @@ app.post('/api/heartbeat', (req, res) => {
   res.json({ ok: true });
 });
 app.get('/api/online', (_req, res) => {
-  // Add social-proof base of 800 + real active sessions
-  const base = 800;
-  const count = base + visitorSessions.size;
-  // Round to nearest 10 for natural feel
-  const display = Math.round(count / 10) * 10;
-  res.json({ online: display });
+  res.json({ online: visitorSessions.size });
 });
 
 // ── Health check ──────────────────────────────────────
@@ -506,10 +510,8 @@ async function start() {
     try {
       const { query } = require('./db/database');
 
-      // Drop old tier and category CHECK constraints — validated in app routes
-      await query(`ALTER TABLE listings DROP CONSTRAINT IF EXISTS listings_tier_check`);
-      await query(`ALTER TABLE listings DROP CONSTRAINT IF EXISTS listings_category_check`);
-      console.log('✅  Tier + category constraints removed (validated in app layer)');
+      // Note: tier and category CHECK constraints are defined in schema.sql and
+      // validated in app routes. Do not drop them here.
 
       // Ensure articles table exists (added in v3.1)
       await query(`CREATE TABLE IF NOT EXISTS articles (
@@ -711,19 +713,14 @@ async function start() {
       )`);
       console.log('✅  Email drip log table ready');
 
-      // Login attempt tracking — migrate old table to new schema
-      try {
-        await query(`DROP TABLE IF EXISTS login_attempts`);
-        await query(`CREATE TABLE login_attempts (
-          id           BIGSERIAL    PRIMARY KEY,
-          identifier   TEXT         NOT NULL UNIQUE,
-          attempts     INTEGER      NOT NULL DEFAULT 0,
-          last_attempt TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
-          locked_until TIMESTAMPTZ
-        )`);
-      } catch (e) {
-        console.warn('login_attempts migration note:', e.message);
-      }
+      // Login attempt tracking
+      await query(`CREATE TABLE IF NOT EXISTS login_attempts (
+        id           BIGSERIAL    PRIMARY KEY,
+        identifier   TEXT         NOT NULL UNIQUE,
+        attempts     INTEGER      NOT NULL DEFAULT 0,
+        last_attempt TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+        locked_until TIMESTAMPTZ
+      )`);
       console.log('✅  Login attempts table ready');
 
       // Site settings table
@@ -1062,7 +1059,7 @@ async function start() {
     // ── Geocoding backfill — fill missing lat/lng on startup ──
     async function geocodeExistingListings() {
       try {
-        const { rows } = await pool.query(
+        const { rows } = await query(
           "SELECT id, city, state FROM listings WHERE lat IS NULL AND lng IS NULL AND status = 'active' LIMIT 50"
         );
         if (!rows.length) return;
@@ -1075,7 +1072,7 @@ async function start() {
             });
             const data = await resp.json();
             if (data && data[0]) {
-              await pool.query('UPDATE listings SET lat=$1, lng=$2 WHERE id=$3',
+              await query('UPDATE listings SET lat=$1, lng=$2 WHERE id=$3',
                 [parseFloat(data[0].lat), parseFloat(data[0].lon), listing.id]);
             }
             await new Promise(r => setTimeout(r, 1100)); // Nominatim rate limit: 1 req/sec
@@ -1089,7 +1086,7 @@ async function start() {
     // ── Category validation — check for unknown categories on startup ──
     async function validateCategories() {
       try {
-        const { rows } = await pool.query("SELECT DISTINCT category FROM listings WHERE status='active'");
+        const { rows } = await query("SELECT DISTINCT category FROM listings WHERE status='active'");
         const valid = new Set(['bulls','bucking_bulls','bred_heifers','bred_cows','open_heifers','open_cows',
           'feeder_stocker','fat_cattle','bottle_calves','cow_calf_pairs','embryos','semen','showstock','dairy',
           'equipment','trailers','chutes_pens','working_dogs','feed_hay','farm_to_table',

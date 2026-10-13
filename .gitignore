@@ -1,0 +1,17 @@
+# Environment
+.env
+.env.*
+
+# Dependencies
+node_modules/
+
+# OS
+.DS_Store
+
+# Stale artifacts
+home/
+*.zip
+
+# Data files — never commit PII
+*.csv
+*.numbers
