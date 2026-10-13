@@ -70,7 +70,7 @@ async function loadProfile(){
     if(ranch.listings&&ranch.listings.length){
       html+='<div class="card"><div class="card-title">Active Listings ('+ranch.listings.length+')</div><div class="listings-grid">';
       ranch.listings.forEach(l=>{
-        const img=l.photo_urls&&l.photo_urls.length?l.photo_urls[0]:'';
+        const img=l.photo_url||'';
         html+='<a href="/?listing='+l.id+'" class="listing-card" style="text-decoration:none">'+(img?'<img src="'+esc(img)+'" alt="">':'')+'<div class="info"><div class="title">'+esc(l.title)+'</div><div class="price">'+(l.price?'$'+parseFloat(l.price).toLocaleString():'Contact')+'</div></div></a>';
       });
       html+='</div></div>';
