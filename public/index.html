@@ -582,7 +582,7 @@ header.scrolled{background:rgba(10,10,10,.92)!important;backdrop-filter:blur(12p
     </nav>
     <button class="hamburger" id="hamburger-btn" aria-label="Open menu">&#9776;</button>
     <div class="header-actions">
-      <div id="online-counter" aria-label="Users currently online" style="font-family:'Inter',sans-serif;font-size:11px;letter-spacing:.08em;color:var(--tan);display:flex;align-items:center;gap:5px;margin-right:16px"><span style="display:inline-block;width:7px;height:7px;background:#4ade80;border-radius:50%;box-shadow:0 0 6px #4ade80"></span><span id="online-count">—</span> online</div>
+      <div id="online-counter" aria-label="Users currently online" style="font-family:'Inter',sans-serif;font-size:11px;letter-spacing:.08em;color:var(--tan);display:none;align-items:center;gap:5px;margin-right:16px"><span style="display:inline-block;width:7px;height:7px;background:#4ade80;border-radius:50%;box-shadow:0 0 6px #4ade80"></span><span id="online-count">—</span> online</div>
       <button class="btn-signin" id="auth-btn" data-action="modal" data-modal="auth" aria-label="Sign in or register to Herd Hub">Sign In / Register</button>
       <button class="btn-account" id="account-btn" data-action="page" data-page="account" style="display:none;background:var(--rust);color:white;border:none;font-family:'Inter',sans-serif;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:9px 18px;border-radius:3px;cursor:pointer">👤 <span id="account-name">My Account</span></button>
     </div>
@@ -4124,13 +4124,18 @@ function loadBreedGrid() {
 }
 
 // ── Online Counter ──────────────────────────────────────
+const ONLINE_MIN_SHOW = 25; // real sessions only, never padded; hidden until the number means something
 function startOnlineCounter() {
   async function fetchOnline() {
     try {
       const r = await fetch(`${API}/api/online`);
       const d = await r.json();
+      const n = Number(d.online);
+      const wrap = document.getElementById('online-counter');
       const el = document.getElementById('online-count');
-      if (el) el.textContent = Number(d.online).toLocaleString();
+      if (!wrap || !el) return;
+      if (n >= ONLINE_MIN_SHOW) { el.textContent = n.toLocaleString(); wrap.style.display = 'flex'; }
+      else { wrap.style.display = 'none'; }
     } catch(e) {}
   }
   fetchOnline();
