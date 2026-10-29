@@ -11,9 +11,9 @@ jobs:
     name: check
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 20
           cache: npm
@@ -31,7 +31,5 @@ jobs:
       - name: Audit, critical fails the build
         run: npm audit --audit-level=critical
 
-      # Advisory until the sharp bump ships (Batch 3). Flip to hard-fail after.
-      - name: Audit, high is advisory for now
+      - name: Audit, high fails the build
         run: npm audit --audit-level=high
-        continue-on-error: true
