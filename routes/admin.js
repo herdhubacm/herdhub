@@ -7,7 +7,7 @@
 const express = require('express');
 const bcrypt  = require('bcryptjs');
 const multer  = require('multer');
-const { query } = require('../db/database');
+const { query, pool } = require('../db/database');
 const storage = require('../services/storage');
 
 // multer — memory only, admin image uploads
@@ -218,6 +218,62 @@ router.put('/users/:id/ban', async (req, res) => {
     res.json({ banned: true, user: rows[0] });
   } catch (err) {
     res.status(500).json({ error: 'Could not ban user' });
+  }
+});
+
+// ── DELETE /api/admin/users/:id ───────────────────────
+// Permanently removes an account. Refuses the caller's own account and any
+// admin. Deletes the account's listing photos from storage, clears the
+// nullable pointers that have no ON DELETE (beef box claims, auction
+// bidder/winner, bids, verification reviewer, audit rows), drops the login
+// lockout row, then deletes the user; the cascades take everything else.
+// Records one audit_log row.
+router.delete('/users/:id', async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  if (!Number.isInteger(id)) return res.status(400).json({ error: 'Invalid user id' });
+  if (id === req.user.id) return res.status(400).json({ error: "You can't delete your own account from here." });
+  const client = await pool.connect();
+  let inTx = false;
+  try {
+    const { rows } = await client.query('SELECT id, email, name, role FROM users WHERE id=$1', [id]);
+    const user = rows[0];
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    if (user.role === 'admin') return res.status(400).json({ error: "Admin accounts can't be deleted here. Change the role to user first." });
+
+    // Listing photos out of storage first (best effort) so nothing orphans in S3
+    const { rows: photos } = await client.query(
+      `SELECT lp.storage_key, lp.thumb_key
+         FROM listing_photos lp JOIN listings l ON l.id = lp.listing_id
+        WHERE l.user_id = $1`, [id]);
+    await Promise.allSettled(
+      photos.flatMap(p => [p.storage_key, p.thumb_key].filter(Boolean).map(k => deleteFile(k)))
+    );
+
+    await client.query('BEGIN'); inTx = true;
+    const { rows: lc } = await client.query('SELECT COUNT(*)::int AS n FROM listings WHERE user_id=$1', [id]);
+    await client.query('DELETE FROM beef_box_claims WHERE user_id=$1', [id]);
+    await client.query('UPDATE sale_lots SET current_bidder_id=NULL WHERE current_bidder_id=$1', [id]);
+    await client.query('UPDATE sale_lots SET winner_user_id=NULL WHERE winner_user_id=$1', [id]);
+    await client.query('DELETE FROM sale_bids WHERE user_id=$1', [id]);
+    await client.query('UPDATE verification_requests SET reviewed_by=NULL WHERE reviewed_by=$1', [id]);
+    await client.query('UPDATE audit_log SET user_id=NULL WHERE user_id=$1', [id]);
+    await client.query('DELETE FROM login_attempts WHERE identifier=$1', [String(user.email).toLowerCase()]);
+    await client.query('DELETE FROM users WHERE id=$1', [id]);
+    await client.query(
+      `INSERT INTO audit_log (user_id, action, entity, entity_id, meta, ip)
+       VALUES ($1, 'user.delete', 'user', $2, $3, $4)`,
+      [req.user.id, id, JSON.stringify({ email: user.email, name: user.name, listings: lc[0].n, photos: photos.length }), req.ip || null]
+    );
+    await client.query('COMMIT'); inTx = false;
+
+    console.log(`🗑️  Admin ${req.user.email} deleted user ${id}: ${user.email} (${lc[0].n} listings, ${photos.length} photo files)`);
+    res.json({ deleted: true, id, email: user.email, listings: lc[0].n, photos: photos.length });
+  } catch (err) {
+    if (inTx) { try { await client.query('ROLLBACK'); } catch {} }
+    console.error('Admin delete user error:', err);
+    res.status(500).json({ error: 'Could not delete account' });
+  } finally {
+    client.release();
   }
 });
 
