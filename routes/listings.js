@@ -1,7 +1,7 @@
 const express = require('express');
 const multer  = require('multer');
 const { query, pool } = require('../db/database');
-const { authenticateToken, optionalAuth } = require('../middleware/auth');
+const { authenticateToken, optionalAuth, requireVerifiedEmail } = require('../middleware/auth');
 const storage = require('../services/storage');
 
 const router = express.Router();
@@ -410,7 +410,7 @@ router.get('/:id', optionalAuth, async (req, res) => {
 // ── POST /api/listings ────────────────────────────────
 // Accepts multipart/form-data with up to 20 photos.
 // Photos go: multer memoryStorage → storage service → S3/R2/local → DB.
-router.post('/', authenticateToken, upload.array('photos', 20), async (req, res) => {
+router.post('/', authenticateToken, requireVerifiedEmail, upload.array('photos', 20), async (req, res) => {
   const client = await pool.connect();
   const uploadedKeys = []; // track for rollback on failure
 

@@ -587,6 +587,20 @@ async function start() {
       await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS beef_box_claimed BOOLEAN DEFAULT FALSE`);
       await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS lister_number INTEGER`);
 
+      // Email confirmation (H4, shipped 2026-10-29). New signups get a token at
+      // register and must confirm before posting. Accounts that never received a
+      // token (everyone from before the feature) are grandfathered as confirmed.
+      // The date cap makes the backfill inert after rollout.
+      await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verified_at TIMESTAMPTZ`);
+      await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verify_token_hash TEXT`);
+      await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verify_sent_at TIMESTAMPTZ`);
+      await query(`CREATE INDEX IF NOT EXISTS idx_users_verify_token ON users(email_verify_token_hash) WHERE email_verify_token_hash IS NOT NULL`);
+      await query(`UPDATE users SET email_verified_at = created_at
+                    WHERE email_verified_at IS NULL
+                      AND email_verify_token_hash IS NULL
+                      AND created_at < '2026-11-01 00:00:00+00'`);
+      console.log('✅  Email confirmation columns ready');
+
       await query(`CREATE TABLE IF NOT EXISTS beef_box_claims (
         id SERIAL PRIMARY KEY,
         user_id INTEGER REFERENCES users(id),

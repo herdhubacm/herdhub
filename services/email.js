@@ -60,22 +60,41 @@ function emailBase(content) {
 </div></body></html>`;
 }
 
-// Welcome email after registration
-function welcomeEmail(name) {
+// Welcome email after registration. Carries the confirm-email link.
+function welcomeEmail(name, verifyUrl) {
+  const first = (name || '').trim().split(' ')[0] || 'there';
   return {
-    subject: `Welcome to Herd Hub, ${name}!`,
+    subject: `Welcome to Herd Hub, ${first}. One quick step.`,
     html: emailBase(`
-      <p>Hey ${name},</p>
-      <p>Welcome to <strong>Herd Hub</strong> — America's cattle marketplace. You're in good company.</p>
-      <p>Here's what you can do right now:</p>
-      <p>🐄 <strong>Post a free listing</strong> — sell cattle, equipment, or ranch goods to buyers across all 50 states.<br>
-         📈 <strong>Browse listings</strong> — find cattle, equipment, and farm-fresh products.<br>
-         💬 <strong>Join the forum</strong> — connect with ranchers, ask questions, share knowledge.</p>
-      <a href="https://theherdhub.com" class="btn">Go to Herd Hub →</a>
+      <p>Hey ${first},</p>
+      <p>Welcome to <strong>Herd Hub</strong>, the American cattle marketplace. Glad to have you.</p>
+      <p>One quick step before you post your first listing: confirm this is your email address.</p>
+      <a href="${verifyUrl}" class="btn">Confirm My Email</a>
+      <p style="font-size:13px;color:#666">The link is good for 24 hours. Until you confirm, you can still browse listings, save searches and message sellers.</p>
       <div class="divider"></div>
+      <p>Once you're in:</p>
+      <p><strong>Post a free listing.</strong> Cattle, equipment, hay, working dogs, farm-fresh beef. Buyers in all 50 states.<br>
+         <strong>Browse</strong> what's for sale near you.<br>
+         <strong>Use the free ranch tools.</strong> Market prices, gestation, genetics, finance.</p>
       <p style="font-size:13px;color:#666">Questions? Reply to this email or reach us at <a href="mailto:ad@theherdhub.com" style="color:#8b3214">ad@theherdhub.com</a></p>
     `),
-    text: `Welcome to Herd Hub, ${name}! Visit https://theherdhub.com to post your first listing.`,
+    text: `Welcome to Herd Hub, ${first}.\n\nOne quick step before you post your first listing: confirm your email address.\n${verifyUrl}\n\nThe link is good for 24 hours. Until you confirm, you can still browse, save searches and message sellers.\n\nQuestions? Reply to this email.`,
+  };
+}
+
+// Fresh confirm-email link, sent on request
+function verifyEmailReminder(name, verifyUrl) {
+  const first = (name || '').trim().split(' ')[0] || 'there';
+  return {
+    subject: 'Confirm your Herd Hub email',
+    html: emailBase(`
+      <p>Hey ${first},</p>
+      <p>Here's a fresh link to confirm your email address. Click it and you're clear to post.</p>
+      <a href="${verifyUrl}" class="btn">Confirm My Email</a>
+      <div class="divider"></div>
+      <p style="font-size:13px;color:#666">The link is good for 24 hours. If you didn't ask for this, you can ignore it.</p>
+    `),
+    text: `Confirm your Herd Hub email: ${verifyUrl}\n\nThe link is good for 24 hours. If you didn't ask for this, ignore it.`,
   };
 }
 
@@ -132,6 +151,7 @@ function listingExpiryEmail(name, listingTitle, expiresAt, listingId) {
 module.exports = {
   sendEmail,
   welcomeEmail,
+  verifyEmailReminder,
   passwordResetEmail,
   newMessageEmail,
   listingExpiryEmail,
