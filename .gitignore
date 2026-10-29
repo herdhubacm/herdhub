@@ -15,3 +15,6 @@ home/
 # Data files — never commit PII
 *.csv
 *.numbers
+
+# Local tooling config (Claude Code launch/settings)
+.claude/
