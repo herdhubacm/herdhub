@@ -6178,6 +6178,8 @@ async function loadAccountPage() {
 }
 
 function switchAcctTab(tab) {
+  // Account page's own post form: same confirm-email gate as the post buttons (H4)
+  if (tab === 'post' && needsEmailConfirm()) { showVerifyGateModal(); return; }
   document.querySelectorAll('.acct-tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.acct-panel').forEach(p => p.classList.remove('active'));
   document.querySelector(`.acct-tab[data-tab="${tab}"]`).classList.add('active');
@@ -6557,7 +6559,10 @@ async function acctPostListing() {
       body: formData
     });
     const d = await r.json();
-    if (!r.ok) { errEl.textContent = d.error || 'Failed to post listing'; errEl.style.display='block'; return; }
+    if (!r.ok) {
+      if (r.status === 403 && d.code === 'EMAIL_NOT_VERIFIED') { showVerifyGateModal(); return; }
+      errEl.textContent = d.error || 'Failed to post listing'; errEl.style.display='block'; return;
+    }
     sucEl.textContent = '✅ Listing posted successfully!'; sucEl.style.display='block';
     // Reset form
     ['acct-pl-title','acct-pl-breed','acct-pl-description','acct-pl-price','acct-pl-city'].forEach(id => {
