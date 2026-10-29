@@ -690,6 +690,22 @@ tr:hover td{background:rgba(255,255,255,.02)}
 </div>
 
 <!-- Ban User Modal -->
+<div class="modal-bg" id="modal-delete-user">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('delete-user')">✕</button>
+    <h2>🗑️ Delete Account</h2>
+    <div id="delete-user-info" style="font-weight:600;margin-bottom:10px;color:var(--text)"></div>
+    <p style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:14px">This permanently removes the account, its listings and photos, messages, saved searches, herd and finance records, forum posts and reviews. It can't be undone. The email address is free to register again right away.</p>
+    <div class="form-group"><label>Type the email address to confirm</label>
+      <input type="text" id="delete-user-confirm" placeholder="email@example.com" autocomplete="off" spellcheck="false" oninput="checkDeleteMatch()">
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">
+      <button class="btn btn-ghost" onclick="closeModal('delete-user')">Cancel</button>
+      <button class="btn btn-danger" id="delete-user-btn" onclick="confirmDeleteUser()" disabled style="opacity:.5">Delete Account</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-bg" id="modal-ban-user">
   <div class="modal">
     <button class="modal-close" onclick="closeModal('ban-user')">✕</button>
@@ -1010,6 +1026,7 @@ async function loadUsers() {
             }
             <button class="btn btn-warn" onclick="openResetPassword(${u.id},'${escHtml(u.name)}')">Reset PW</button>
             ${u.role === 'user' ? `<button class="btn btn-ghost" onclick="makeAdmin(${u.id})">→ Admin</button>` : ''}
+            ${u.role !== 'admin' && u.id !== (adminUser && adminUser.id) ? `<button class="btn btn-danger" onclick="openDeleteUser(${u.id},'${escHtml(u.email)}','${escHtml(u.name)}')">Delete</button>` : ''}
           </div>
         </td>
       </tr>`).join('') || '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:24px">No users found</td></tr>';
@@ -1083,6 +1100,41 @@ async function confirmDeleteListing() {
     showToast('Listing deleted');
   } catch { showToast('Error deleting listing'); }
   pendingDeleteId = null;
+}
+
+// ── Delete account (C2, admin half) ───────────────────
+let pendingDeleteUserId = null, pendingDeleteUserEmail = '';
+function openDeleteUser(id, email, name) {
+  pendingDeleteUserId = id;
+  pendingDeleteUserEmail = String(email || '').trim().toLowerCase();
+  document.getElementById('delete-user-info').textContent = `${name} (${email})`;
+  const inp = document.getElementById('delete-user-confirm');
+  inp.value = '';
+  checkDeleteMatch();
+  openModal('delete-user');
+  setTimeout(() => inp.focus(), 50);
+}
+function checkDeleteMatch() {
+  const v = String(document.getElementById('delete-user-confirm').value || '').trim().toLowerCase();
+  const btn = document.getElementById('delete-user-btn');
+  const ok = !!v && v === pendingDeleteUserEmail;
+  btn.disabled = !ok;
+  btn.style.opacity = ok ? '' : '.5';
+}
+async function confirmDeleteUser() {
+  if (!pendingDeleteUserId) return;
+  const btn = document.getElementById('delete-user-btn');
+  btn.disabled = true; btn.textContent = 'Deleting...';
+  try {
+    const r = await fetch(`${API}/api/admin/users/${pendingDeleteUserId}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
+    const d = await r.json();
+    if (!r.ok) { showToast(d.error || 'Could not delete account'); return; }
+    closeModal('delete-user');
+    showToast(`Deleted ${d.email} (${d.listings} listing${d.listings === 1 ? '' : 's'}, ${d.photos} photo${d.photos === 1 ? '' : 's'})`);
+    pendingDeleteUserId = null; pendingDeleteUserEmail = '';
+    loadUsers();
+  } catch { showToast('Error deleting account'); }
+  finally { btn.textContent = 'Delete Account'; checkDeleteMatch(); }
 }
 
 function openBanUser(id, info) {

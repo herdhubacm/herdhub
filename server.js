@@ -601,6 +601,23 @@ async function start() {
                       AND created_at < '2026-11-01 00:00:00+00'`);
       console.log('✅  Email confirmation columns ready');
 
+      // Audit log (defined in schema.sql; ensured here so admin actions can
+      // record to it on databases that never ran the schema file). First
+      // writer: admin account deletion (C2).
+      await query(`CREATE TABLE IF NOT EXISTS audit_log (
+        id          BIGSERIAL    PRIMARY KEY,
+        user_id     BIGINT       REFERENCES users(id),
+        action      TEXT         NOT NULL,
+        entity      TEXT,
+        entity_id   BIGINT,
+        meta        JSONB,
+        ip          TEXT,
+        created_at  TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+      )`);
+      await query(`CREATE INDEX IF NOT EXISTS idx_audit_user   ON audit_log(user_id)`);
+      await query(`CREATE INDEX IF NOT EXISTS idx_audit_entity ON audit_log(entity, entity_id)`);
+      console.log('✅  Audit log table ready');
+
       await query(`CREATE TABLE IF NOT EXISTS beef_box_claims (
         id SERIAL PRIMARY KEY,
         user_id INTEGER REFERENCES users(id),
