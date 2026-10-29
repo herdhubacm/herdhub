@@ -31,6 +31,7 @@ The vault is at `~/HerdHub-Brain`. It is the single source of truth for everythi
 
 - **Evidence only.** Verify from the file or the command before claiming anything is done or live. "Probably" is not a status.
 - **Confirm before anything that leaves the machine or touches data.** Routine edits in `public/`, `routes/` and `server.js` may proceed. State the change in one line and wait for a yes before: `git push`, any DB migration or direct DB write, any change to Railway variables or `.env`, deleting files, or anything that sends mail or money.
+- **Nothing goes straight to `main`.** The `main` ruleset requires the `check` CI job and has no bypass, so a direct push is rejected before CI even runs. Every change: branch off `main` (short kebab-case name, e.g. `batch3-h16-sharp`), commit, then `git push -u origin <branch>` and `gh pr create`, let CI run, `gh pr merge --squash --auto`. The confirm rule above still applies: state the change and wait for a yes before the branch push. One yes covers push, PR, and auto-merge. After it lands, verify live and report. PR bodies end with the Claude Code attribution line.
 - **Full reads, no skimming** when asked to review or audit.
 - **Checkpoint persistence.** Anything a future session needs gets written to its proper vault note in the same turn: Platform.md for code changes, Decisions.md for decisions, the Job note for a changed working method, today's daily note always. A daily-note line alone is never the documentation.
 - **No bloat.** Update the existing note before creating one; delete what you replace.
