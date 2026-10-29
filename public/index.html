@@ -38,7 +38,8 @@
   };
   // Event tracking
   window._trackEvent = function(category, action, label) {
-    gtag('event', action, { event_category: category, event_label: label });
+    // Analytics must never break the flow that calls it
+    try { gtag('event', action, { event_category: category, event_label: label }); } catch (e) {}
   };
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -253,6 +254,9 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
 .pw-toggle.on{color:var(--rust)}
 .auth-back{display:block;text-align:center;margin-top:14px;font-size:13px;color:var(--rust);text-decoration:none}
 .auth-back:hover{text-decoration:underline}
+/* Secondary button inside the cream auth modal: the hero's ghost style is unreadable here */
+#modal-auth .btn-secondary{background:transparent;color:var(--rust);border:1.5px solid var(--rust)}
+#modal-auth .btn-secondary:hover,#modal-auth .btn-secondary:focus-visible{background:rgba(139,50,20,.08);color:var(--rust)}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%}
 .form-row>*{min-width:0}
 .form-error{color:var(--rust);font-size:12px;margin-top:-8px;margin-bottom:8px}
@@ -2173,11 +2177,14 @@ header.scrolled{background:rgba(10,10,10,.92)!important;backdrop-filter:blur(12p
     </div>
 
     <!-- After registration: confirm-email notice (H4) -->
-    <div id="form-verify-sent" data-auth-view="verify-sent" style="display:none">
-      <h2>One more step</h2>
-      <p>We sent a confirmation link to <strong id="verify-sent-email">your email</strong>. Click it before you post your first listing. Until then you can browse, save searches and message sellers.</p>
-      <button class="btn-primary" style="width:100%;justify-content:center;margin-top:8px" onclick="finishVerifySent()">Got it</button>
-      <p style="text-align:center;margin-top:12px;font-size:13px;color:#666">Didn't get it? Check spam, or <a href="javascript:void(0)" onclick="resendVerification(this)" style="color:var(--rust)">send a new link</a>.</p>
+    <div id="form-verify-sent" data-auth-view="verify-sent" data-mode="register" style="display:none">
+      <h2 id="verify-sent-title">One more step</h2>
+      <p>We sent a confirmation link to <strong id="verify-sent-email">your email</strong>. <span id="verify-sent-tail">Click it before you post your first listing.</span> Until then you can browse, save searches and message sellers.</p>
+      <div id="verify-sent-actions">
+        <button id="verify-sent-gotit" type="button" class="btn-primary" style="width:100%;justify-content:center;margin-top:8px" onclick="finishVerifySent()">Got it</button>
+        <button id="verify-sent-resend" type="button" class="btn-secondary" style="width:100%;justify-content:center;margin-top:10px" onclick="resendVerification(this)">Send a new link</button>
+      </div>
+      <p style="text-align:center;margin-top:12px;font-size:13px;color:#666">Check your spam folder if it doesn't show up in a couple of minutes.</p>
     </div>
   </div>
 </div>
@@ -4581,17 +4588,22 @@ async function doRegister() {
     terms_accepted_at: new Date().toISOString(),
     website: honeypot ? honeypot.value : '',
   };
+  let r, d;
   try {
-    const r = await fetch(`${API}/api/auth/register`, { method:'POST', headers:{'Content-Type':'application/json','X-CSRF-Token': csrfToken||''}, body: JSON.stringify(body) });
-    const d = await r.json();
-    if (!r.ok) { errEl.textContent = d.error; errEl.style.display='block'; return; }
-    authToken = d.token; currentUser = d.user;
-    // token stored in httpOnly cookie set by server
+    r = await fetch(`${API}/api/auth/register`, { method:'POST', headers:{'Content-Type':'application/json','X-CSRF-Token': csrfToken||''}, body: JSON.stringify(body) });
+    d = await r.json();
+  } catch(e) { errEl.textContent = 'Connection error'; errEl.style.display='block'; return; }
+  if (!r.ok) { errEl.textContent = d.error || 'Registration failed'; errEl.style.display='block'; return; }
+  authToken = d.token; currentUser = d.user;
+  // The confirm-email panel comes first, so nothing below can hide it
+  showVerifySent(d.user.email, 'register');
+  try {
     document.getElementById('auth-btn').style.display = 'none';
     document.getElementById('account-btn').style.display = 'inline-block';
-    document.getElementById('account-name').textContent = d.user.name.split(' ')[0];
-    if(window._trackEvent) window._trackEvent('auth','register','new_user'); updateAuthUI(); showVerifySent(d.user.email);
-  } catch(e) { errEl.textContent = 'Connection error'; errEl.style.display='block'; }
+    document.getElementById('account-name').textContent = String(d.user.name || '').split(' ')[0];
+  } catch(e) { console.warn('Header update after register:', e); }
+  try { if (window._trackEvent) window._trackEvent('auth','register','new_user'); } catch(e) {}
+  updateAuthUI();
 }
 
 // ── Auth modal views (H17) ─────────────────────────────
@@ -4611,17 +4623,44 @@ function showAuthView(name) {
 }
 function switchTab(tab) { showAuthView(tab); }
 
-// After registration: show the confirm-email notice inside the auth modal
-function showVerifySent(email) {
+// Confirm-email panel inside the auth modal. Two moments share it:
+//   'register' right after signup ("One more step", Got it leads to onboarding)
+//   'gate'     when an unconfirmed account tries to post ("Confirm your email to post", resend first)
+function showVerifySent(email, mode) {
+  mode = mode === 'gate' ? 'gate' : 'register';
+  const view = document.getElementById('form-verify-sent');
+  if (view) view.dataset.mode = mode;
   const e = document.getElementById('verify-sent-email');
   if (e) e.textContent = email || 'your email';
+  const t = document.getElementById('verify-sent-title');
+  if (t) t.textContent = mode === 'gate' ? 'Confirm your email to post' : 'One more step';
+  const tail = document.getElementById('verify-sent-tail');
+  if (tail) tail.textContent = mode === 'gate' ? 'Click it, then come back and post.' : 'Click it before you post your first listing.';
+  const gotit = document.getElementById('verify-sent-gotit'), resend = document.getElementById('verify-sent-resend');
+  if (gotit && resend) {
+    gotit.className  = mode === 'gate' ? 'btn-secondary' : 'btn-primary';
+    resend.className = mode === 'gate' ? 'btn-primary'   : 'btn-secondary';
+    const box = gotit.parentNode;
+    if (mode === 'gate') box.insertBefore(resend, gotit); else box.insertBefore(gotit, resend);
+  }
   const authEl = document.getElementById('modal-auth');
   if (authEl && !authEl.classList.contains('open')) { authEl.classList.add('open'); authEl.removeAttribute('aria-hidden'); document.body.style.overflow = 'hidden'; }
   showAuthView('verify-sent');
 }
 function finishVerifySent() {
+  const view = document.getElementById('form-verify-sent');
+  const mode = view ? view.dataset.mode : 'register';
   closeModal('auth');
-  setTimeout(() => showOnboarding(currentUser && currentUser.name), 400);
+  if (mode === 'register') setTimeout(() => showOnboarding(currentUser && currentUser.name), 400);
+}
+// True only when the server has told us the account is unconfirmed (null).
+// Right after page load currentUser comes from the cookie token and has no
+// such field (undefined); the server-side gate covers that moment.
+function needsEmailConfirm() {
+  return !!authToken && !!currentUser && currentUser.email_verified_at === null && currentUser.role !== 'admin';
+}
+function showVerifyGateModal() {
+  showVerifySent((currentUser && currentUser.email) || '', 'gate');
 }
 
 // ── Email confirmation (H4) ────────────────────────────
@@ -4638,13 +4677,6 @@ async function resendVerification(btn) {
     if (d.already) { updateAuthUI(); restore(); return; }
     if (btn) { btn.textContent = 'Sent'; setTimeout(restore, 120000); }
   } catch (e) { showToast('Connection error', 'error'); restore(); }
-}
-// Shown in the post form when the server says EMAIL_NOT_VERIFIED
-function showVerifyGate(errEl) {
-  if (!errEl) return;
-  errEl.innerHTML = 'Confirm your email first. Check your inbox for the link, or send a new one. '
-    + '<button type="button" class="btn-secondary" style="margin-left:6px;padding:6px 12px;font-size:12px;vertical-align:middle" onclick="resendVerification(this)">Send a new link</button>';
-  errEl.style.display = 'block';
 }
 // Account page: confirmed / not confirmed line
 function renderEmailStatus() {
@@ -5582,7 +5614,7 @@ async function doPostListing() {
     });
     const d = await r.json();
     if (!r.ok) {
-      if (r.status === 403 && d.code === 'EMAIL_NOT_VERIFIED') { showVerifyGate(errEl); return; }
+      if (r.status === 403 && d.code === 'EMAIL_NOT_VERIFIED') { closeModal('post-listing'); showVerifyGateModal(); return; }
       errEl.textContent = d.error || 'Failed to post listing'; errEl.style.display='block'; return;
     }
     sucEl.textContent = '✅ Listing posted! Redirecting to your account…'; sucEl.style.display='block';
@@ -5704,7 +5736,10 @@ async function doPostFtfListing() {
       body: formData
     });
     const d = await r.json();
-    if (!r.ok) { errEl.textContent = d.error || 'Failed to post listing'; errEl.style.display='block'; return; }
+    if (!r.ok) {
+      if (r.status === 403 && d.code === 'EMAIL_NOT_VERIFIED') { closeModal('farm-to-table-listing'); showVerifyGateModal(); return; }
+      errEl.textContent = d.error || 'Failed to post listing'; errEl.style.display='block'; return;
+    }
     sucEl.textContent = '✅ Farm to Table listing posted! Redirecting…'; sucEl.style.display='block';
     setTimeout(() => { closeModal('farm-to-table-listing'); showPage('account'); loadHomepageSections(); }, 1500);
   } catch(e) { errEl.textContent = 'Connection error'; errEl.style.display='block'; }
@@ -6027,6 +6062,8 @@ function openModal(id) {
     }, 50);
     return;
   }
+  // Signed in but email not confirmed: the confirm pop-up instead of the post form (H4)
+  if ((id === 'post-listing' || id === 'farm-to-table-listing') && needsEmailConfirm()) { showVerifyGateModal(); return; }
   const el = document.getElementById('modal-' + id);
   if (!el) { console.warn('Modal not found: modal-' + id); return; }
   // Store trigger element to restore focus on close
