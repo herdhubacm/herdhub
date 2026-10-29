@@ -245,6 +245,14 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
 .form-group label:has(input[type=checkbox]),.form-group label:has(input[type=radio]){display:flex!important;text-transform:none!important;letter-spacing:normal!important;font-size:13px!important;margin-bottom:0!important}
 .form-group input,.form-group select,.form-group textarea{width:100%;padding:10px 12px;border:1.5px solid var(--light-tan);border-radius:4px;font-family:'Libre Baskerville',serif;font-size:14px;color:var(--text);outline:none;transition:border-color .2s;background:white;box-sizing:border-box}
 .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--rust)}
+/* Show/hide password toggle (M23) and auth view back link (H17) */
+.pw-wrap{position:relative;display:block}
+.pw-wrap input{padding-right:44px!important}
+.pw-toggle{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:32px;height:32px;display:flex;align-items:center;justify-content:center;background:none;border:0;border-radius:4px;cursor:pointer;color:var(--mid-brown);padding:0}
+.pw-toggle:hover,.pw-toggle:focus-visible{color:var(--rust);outline:none;background:rgba(139,50,20,.08)}
+.pw-toggle.on{color:var(--rust)}
+.auth-back{display:block;text-align:center;margin-top:14px;font-size:13px;color:var(--rust);text-decoration:none}
+.auth-back:hover{text-decoration:underline}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%}
 .form-row>*{min-width:0}
 .form-error{color:var(--rust);font-size:12px;margin-top:-8px;margin-bottom:8px}
@@ -1684,6 +1692,7 @@ header.scrolled{background:rgba(10,10,10,.92)!important;backdrop-filter:blur(12p
     <!-- Profile Panel -->
     <div class="acct-panel active" id="acct-panel-profile">
       <div style="max-width:560px;width:100%;box-sizing:border-box;overflow:hidden">
+        <div id="acct-email-status"></div>
         <!-- Profile Photo + Name Header -->
         <div style="display:flex;align-items:center;gap:18px;margin-bottom:24px;padding-bottom:18px;border-bottom:1px solid var(--light-tan)">
           <div style="position:relative">
@@ -2030,6 +2039,12 @@ header.scrolled{background:rgba(10,10,10,.92)!important;backdrop-filter:blur(12p
     <div style="padding:24px 28px;background:var(--warm-white)">
       <div id="onboard-checklist" style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px">
 
+        <div class="onboard-item" id="ob-email" onclick="obEmailClick(this)" style="display:flex;align-items:center;gap:12px;background:white;border:1.5px solid var(--light-tan);border-radius:6px;padding:12px 14px;cursor:pointer">
+          <div class="ob-check" style="width:24px;height:24px;border-radius:50%;border:2px solid var(--light-tan);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px;color:var(--light-tan)">✓</div>
+          <div style="flex:1"><div style="font-weight:700;font-size:13px;color:var(--dark-brown)">Confirm your email</div><div style="font-size:12px;color:#888">Click the link we sent you. Needed before you post.</div></div>
+          <span class="ob-cta" style="font-size:11px;color:var(--rust);font-family:'Inter',sans-serif;letter-spacing:.05em;white-space:nowrap">Resend →</span>
+        </div>
+
         <div class="onboard-item" id="ob-profile" style="display:flex;align-items:center;gap:12px;background:white;border:1.5px solid var(--light-tan);border-radius:6px;padding:12px 14px;cursor:pointer" onclick="completeOnboardStep('ob-profile','account','profile')">
           <div class="ob-check" style="width:24px;height:24px;border-radius:50%;border:2px solid var(--light-tan);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px;color:transparent">✓</div>
           <div style="flex:1"><div style="font-weight:700;font-size:13px;color:var(--dark-brown)">Complete your profile</div><div style="font-size:12px;color:#888">Add phone, state, and bio — buyers trust verified sellers</div></div>
@@ -2057,7 +2072,7 @@ header.scrolled{background:rgba(10,10,10,.92)!important;backdrop-filter:blur(12p
       </div>
       <div style="display:flex;justify-content:space-between;align-items:center">
         <button class="btn-secondary" style="font-size:12px;padding:8px 16px" data-action="close-modal" data-modal="onboarding">Skip for now</button>
-        <div style="font-size:12px;color:#aaa" id="ob-progress">0 of 4 complete</div>
+        <div style="font-size:12px;color:#aaa" id="ob-progress">0 of 5 complete</div>
       </div>
     </div>
   </div>
@@ -2091,7 +2106,7 @@ header.scrolled{background:rgba(10,10,10,.92)!important;backdrop-filter:blur(12p
   <div class="modal">
     <button class="modal-close" data-action="close-modal" data-modal="auth" aria-label="Close dialog">✕</button>
     <div class="tab-btns"><button class="tab-btn active" id="tab-login" data-action="tab" data-tab="login" aria-selected="true" role="tab">Sign In</button><button class="tab-btn" id="tab-register" data-action="tab" data-tab="register" aria-selected="false" role="tab">Register</button></div>
-    <div id="form-login">
+    <div id="form-login" data-auth-view="login">
       <h2>Welcome Back</h2><p>Sign in to your Herd <span style="color:var(--rust)">Hub</span> account.</p>
       <div id="login-error" class="form-error" style="display:none"></div>
       <div class="form-group"><label for="login-email">Email</label><input type="email" id="login-email" placeholder="you@example.com" autocomplete="email" aria-label="Email address"></div>
@@ -2099,8 +2114,8 @@ header.scrolled{background:rgba(10,10,10,.92)!important;backdrop-filter:blur(12p
       <button class="btn-primary" style="width:100%;justify-content:center;margin-top:8px" data-action="login">Sign In</button>
       <p style="text-align:center;margin-top:10px;font-size:13px"><a href="javascript:void(0)" onclick="showForgotPassword()" style="color:var(--rust);text-decoration:none">Forgot your password?</a></p>
     </div>
-    <div id="form-register" style="display:none">
-      <h2>Create Account</h2><p>Join 1,200+ ranchers on Herd <span style="color:var(--rust)">Hub</span>. It's free.</p>
+    <div id="form-register" data-auth-view="register" style="display:none">
+      <h2>Create Account</h2><p>Free. Takes about a minute.</p>
       <div id="register-error" class="form-error" style="display:none"></div>
       <div class="form-row"><div class="form-group"><label for="reg-name">Full Name</label><input type="text" id="reg-name" placeholder="Jake Harrington" autocomplete="name" aria-label="Full name"></div><div class="form-group"><label for="reg-phone">Phone</label><input type="tel" id="reg-phone" placeholder="(806) 555-1234" autocomplete="tel" aria-label="Phone number"></div></div>
       <div class="form-group"><label for="reg-email">Email</label><input type="email" id="reg-email" placeholder="you@example.com" autocomplete="email" aria-label="Email address"></div>
@@ -2131,6 +2146,38 @@ header.scrolled{background:rgba(10,10,10,.92)!important;backdrop-filter:blur(12p
 
       <button class="btn-primary" id="reg-submit-btn" style="width:100%;justify-content:center;margin-top:4px" data-action="register">Create Free Account</button>
       <p style="font-size:11px;color:#aaa;text-align:center;margin-top:10px;line-height:1.6">By creating an account you agree to the terms above. Your information is never sold to third parties.</p>
+    </div>
+
+    <!-- Forgot password: its own view, never overwrites Sign In (H17) -->
+    <div id="form-forgot" data-auth-view="forgot" style="display:none">
+      <h2>Reset your password</h2><p>Enter your email and we'll send you a link.</p>
+      <div id="forgot-msg" class="form-error" style="display:none"></div>
+      <div class="form-group"><label for="forgot-email">Email</label><input type="email" id="forgot-email" placeholder="you@example.com" autocomplete="email" aria-label="Email address"></div>
+      <button class="btn-primary" style="width:100%;justify-content:center;margin-top:8px" onclick="doForgotPassword()">Send Reset Link</button>
+      <a href="javascript:void(0)" class="auth-back" onclick="showAuthView('login')">Back to sign in</a>
+    </div>
+
+    <div id="form-forgot-sent" data-auth-view="forgot-sent" style="display:none">
+      <h2>Check your email</h2>
+      <p>If that address has an account, a reset link is on its way. It's good for one hour. Check your spam folder if it doesn't show up in a couple of minutes.</p>
+      <a href="javascript:void(0)" class="auth-back" onclick="showAuthView('login')">Back to sign in</a>
+    </div>
+
+    <div id="form-reset" data-auth-view="reset" style="display:none">
+      <h2>Set a new password</h2><p>Minimum 8 characters.</p>
+      <div id="reset-msg" class="form-error" style="display:none"></div>
+      <div class="form-group"><label for="reset-pw">New Password</label><input type="password" id="reset-pw" placeholder="Min 8 characters" autocomplete="new-password"></div>
+      <div class="form-group"><label for="reset-pw2">Confirm Password</label><input type="password" id="reset-pw2" placeholder="Match new password" autocomplete="new-password"></div>
+      <button class="btn-primary" style="width:100%;justify-content:center;margin-top:8px" onclick="doResetPassword()">Save New Password</button>
+      <a href="javascript:void(0)" class="auth-back" onclick="showAuthView('login')">Back to sign in</a>
+    </div>
+
+    <!-- After registration: confirm-email notice (H4) -->
+    <div id="form-verify-sent" data-auth-view="verify-sent" style="display:none">
+      <h2>One more step</h2>
+      <p>We sent a confirmation link to <strong id="verify-sent-email">your email</strong>. Click it before you post your first listing. Until then you can browse, save searches and message sellers.</p>
+      <button class="btn-primary" style="width:100%;justify-content:center;margin-top:8px" onclick="finishVerifySent()">Got it</button>
+      <p style="text-align:center;margin-top:12px;font-size:13px;color:#666">Didn't get it? Check spam, or <a href="javascript:void(0)" onclick="resendVerification(this)" style="color:var(--rust)">send a new link</a>.</p>
     </div>
   </div>
 </div>
@@ -4543,16 +4590,108 @@ async function doRegister() {
     document.getElementById('auth-btn').style.display = 'none';
     document.getElementById('account-btn').style.display = 'inline-block';
     document.getElementById('account-name').textContent = d.user.name.split(' ')[0];
-    if(window._trackEvent) window._trackEvent('auth','register','new_user'); closeModal('auth'); updateAuthUI(); setTimeout(() => showOnboarding(d.user.name), 600); showToast('Welcome to Herd Hub, ' + d.user.name.split(' ')[0] + '!');
+    if(window._trackEvent) window._trackEvent('auth','register','new_user'); updateAuthUI(); showVerifySent(d.user.email);
   } catch(e) { errEl.textContent = 'Connection error'; errEl.style.display='block'; }
 }
 
-function switchTab(tab) {
-  document.getElementById('form-login').style.display = tab === 'login' ? 'block' : 'none';
-  document.getElementById('form-register').style.display = tab === 'register' ? 'block' : 'none';
-  document.getElementById('tab-login').className = 'tab-btn' + (tab==='login'?' active':'');
-  document.getElementById('tab-register').className = 'tab-btn' + (tab==='register'?' active':'');
+// ── Auth modal views (H17) ─────────────────────────────
+// One switch for every view in #modal-auth: login, register, forgot,
+// forgot-sent, reset, verify-sent. Tabs show only on login/register.
+function showAuthView(name) {
+  const modal = document.getElementById('modal-auth');
+  if (!modal) return;
+  modal.querySelectorAll('[data-auth-view]').forEach(v => { v.style.display = v.dataset.authView === name ? 'block' : 'none'; });
+  const tabs = modal.querySelector('.tab-btns');
+  const isTab = name === 'login' || name === 'register';
+  if (tabs) tabs.style.display = isTab ? '' : 'none';
+  const tl = document.getElementById('tab-login'), tr = document.getElementById('tab-register');
+  if (tl) { tl.className = 'tab-btn' + (name === 'login' ? ' active' : ''); tl.setAttribute('aria-selected', String(name === 'login')); }
+  if (tr) { tr.className = 'tab-btn' + (name === 'register' ? ' active' : ''); tr.setAttribute('aria-selected', String(name === 'register')); }
+  ['login-error', 'register-error', 'forgot-msg', 'reset-msg'].forEach(id => { const e = document.getElementById(id); if (e) e.style.display = 'none'; });
 }
+function switchTab(tab) { showAuthView(tab); }
+
+// After registration: show the confirm-email notice inside the auth modal
+function showVerifySent(email) {
+  const e = document.getElementById('verify-sent-email');
+  if (e) e.textContent = email || 'your email';
+  const authEl = document.getElementById('modal-auth');
+  if (authEl && !authEl.classList.contains('open')) { authEl.classList.add('open'); authEl.removeAttribute('aria-hidden'); document.body.style.overflow = 'hidden'; }
+  showAuthView('verify-sent');
+}
+function finishVerifySent() {
+  closeModal('auth');
+  setTimeout(() => showOnboarding(currentUser && currentUser.name), 400);
+}
+
+// ── Email confirmation (H4) ────────────────────────────
+async function resendVerification(btn) {
+  if (!authToken) { openModal('auth'); return; }
+  const label = btn ? btn.textContent : '';
+  if (btn) { btn.disabled = true; btn.textContent = 'Sending...'; }
+  const restore = () => { if (btn) { btn.disabled = false; btn.textContent = label; } };
+  try {
+    const r = await fetch(`${API}/api/auth/resend-verification`, { method: 'POST', headers: { Authorization: `Bearer ${authToken}` } });
+    const d = await r.json();
+    if (!r.ok) { showToast(d.error || 'Could not send the link', 'error'); restore(); return; }
+    showToast(d.message || 'Sent. Check your email for the link.');
+    if (d.already) { updateAuthUI(); restore(); return; }
+    if (btn) { btn.textContent = 'Sent'; setTimeout(restore, 120000); }
+  } catch (e) { showToast('Connection error', 'error'); restore(); }
+}
+// Shown in the post form when the server says EMAIL_NOT_VERIFIED
+function showVerifyGate(errEl) {
+  if (!errEl) return;
+  errEl.innerHTML = 'Confirm your email first. Check your inbox for the link, or send a new one. '
+    + '<button type="button" class="btn-secondary" style="margin-left:6px;padding:6px 12px;font-size:12px;vertical-align:middle" onclick="resendVerification(this)">Send a new link</button>';
+  errEl.style.display = 'block';
+}
+// Account page: confirmed / not confirmed line
+function renderEmailStatus() {
+  const el = document.getElementById('acct-email-status');
+  if (!el || !currentUser) return;
+  if (currentUser.email_verified_at) {
+    el.innerHTML = '<div style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--sage);margin-bottom:16px"><span aria-hidden="true">✓</span> Email confirmed</div>';
+  } else {
+    el.innerHTML = '<div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;background:var(--cream);border:1.5px solid var(--light-tan);border-radius:6px;padding:12px 14px;margin-bottom:16px;font-size:13px;color:var(--dark-brown)">'
+      + '<span style="flex:1;min-width:200px">Your email isn\'t confirmed yet. Confirm it to post listings.</span>'
+      + '<button type="button" class="btn-primary" style="padding:6px 14px;font-size:12px" onclick="resendVerification(this)">Send a new link</button></div>';
+  }
+}
+function markObDone(id) {
+  _obCompleted.add(id);
+  localStorage.setItem('hh_ob', JSON.stringify([..._obCompleted]));
+  markObStep(id);
+  updateObProgress();
+}
+function obEmailClick(el) {
+  if (currentUser && currentUser.email_verified_at) { markObDone('ob-email'); showToast('Your email is already confirmed.'); return; }
+  resendVerification(el ? el.querySelector('.ob-cta') : null);
+}
+
+// ── Show/hide password toggles (M23) ──────────────────
+const EYE_SVG = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>';
+function wirePasswordToggles(root) {
+  (root || document).querySelectorAll('input[type="password"]:not([data-pw-wired])').forEach(inp => {
+    inp.dataset.pwWired = '1';
+    const wrap = document.createElement('span'); wrap.className = 'pw-wrap';
+    inp.parentNode.insertBefore(wrap, inp); wrap.appendChild(inp);
+    const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'pw-toggle';
+    btn.setAttribute('aria-label', 'Show password'); btn.setAttribute('aria-pressed', 'false'); btn.title = 'Show password';
+    btn.innerHTML = EYE_SVG;
+    btn.addEventListener('click', () => {
+      const show = inp.type === 'password';
+      inp.type = show ? 'text' : 'password';
+      btn.setAttribute('aria-pressed', String(show));
+      btn.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+      btn.title = btn.getAttribute('aria-label');
+      btn.classList.toggle('on', show);
+      inp.focus();
+    });
+    wrap.appendChild(btn);
+  });
+}
+wirePasswordToggles();
 
 // ── Market Data ────────────────────────────────────────
 async function loadMarketData() {
@@ -5442,7 +5581,10 @@ async function doPostListing() {
       body: formData
     });
     const d = await r.json();
-    if (!r.ok) { errEl.textContent = d.error || 'Failed to post listing'; errEl.style.display='block'; return; }
+    if (!r.ok) {
+      if (r.status === 403 && d.code === 'EMAIL_NOT_VERIFIED') { showVerifyGate(errEl); return; }
+      errEl.textContent = d.error || 'Failed to post listing'; errEl.style.display='block'; return;
+    }
     sucEl.textContent = '✅ Listing posted! Redirecting to your account…'; sucEl.style.display='block';
     console.log('Listing response:', JSON.stringify({id:d.id, show_beef_box_offer:d.show_beef_box_offer, lister_number:d.lister_number}));
     // Check for beef box offer
@@ -5892,6 +6034,7 @@ function openModal(id) {
   // Reset post modal to clean state every time it opens
   if (id === 'post-listing') resetPostModal();
   if (id === 'farm-to-table-listing') resetFtfModal();
+  if (id === 'auth') showAuthView('login'); // always open on Sign In (H17)
   el.classList.add('open');
   el.removeAttribute('aria-hidden');
   document.body.style.overflow = 'hidden';
@@ -5955,6 +6098,7 @@ async function loadAccountPage() {
     document.getElementById('acct-state').value = currentUser.state || '';
     document.getElementById('acct-city').value = currentUser.city || '';
     document.getElementById('acct-bio').value = currentUser.bio || '';
+    renderEmailStatus();
     // New fields
     var opEl = document.getElementById('acct-operation-type'); if (opEl) opEl.value = currentUser.operation_type || '';
     var hcEl = document.getElementById('acct-head-count'); if (hcEl) hcEl.value = currentUser.head_count_range || '';
@@ -7201,6 +7345,7 @@ function showOnboarding(name) {
   const el = document.getElementById('onboard-name');
   if (el) el.textContent = name?.split(' ')[0] || 'Rancher';
   // Restore previously completed steps
+  if (currentUser && currentUser.email_verified_at) _obCompleted.add('ob-email');
   _obCompleted.forEach(id => markObStep(id));
   updateObProgress();
   openModal('onboarding');
@@ -7221,8 +7366,8 @@ function markObStep(id) {
 
 function updateObProgress() {
   const el = document.getElementById('ob-progress');
-  if (el) el.textContent = _obCompleted.size + ' of 4 complete';
-  if (_obCompleted.size >= 4) {
+  if (el) el.textContent = _obCompleted.size + ' of 5 complete';
+  if (_obCompleted.size >= 5) {
     setTimeout(() => {
       closeModal('onboarding');
       showToast('All set! Happy ranching.');
@@ -7250,82 +7395,79 @@ function completeOnboardStep(id, page, tab, postListing, verify) {
   }
 }
 
-function showForgotPassword() {
-  const loginForm = document.getElementById('form-login');
-  loginForm.innerHTML = `
-    <h2>Reset Password</h2>
-    <p style="font-size:14px;color:#666;margin-bottom:16px">Enter your email address and we'll send you a reset link.</p>
-    <div id="forgot-msg" style="display:none;padding:10px;border-radius:4px;font-size:13px;margin-bottom:12px"></div>
-    <div class="form-group">
-      <label for="forgot-email">Email Address</label>
-      <input type="email" id="forgot-email" placeholder="you@example.com" autocomplete="email">
-    </div>
-    <button class="btn-primary" style="width:100%;justify-content:center;margin-top:8px" onclick="doForgotPassword()">Send Reset Link →</button>
-    <p style="text-align:center;margin-top:10px;font-size:13px"><a href="javascript:void(0)" onclick="switchTab('login')" style="color:var(--rust);text-decoration:none">← Back to Sign In</a></p>
-  `;
-}
+// Forgot / reset password live in their own auth views (H17). Nothing here
+// overwrites the Sign In form any more.
+function showForgotPassword() { showAuthView('forgot'); }
 
 async function doForgotPassword() {
-  const email  = document.getElementById('forgot-email')?.value?.trim();
-  const msgEl  = document.getElementById('forgot-msg');
-  if (!email) { msgEl.textContent='Please enter your email address'; msgEl.style.background='#fee2e2'; msgEl.style.color='#991b1b'; msgEl.style.display='block'; return; }
+  const email = document.getElementById('forgot-email')?.value?.trim();
+  const msgEl = document.getElementById('forgot-msg');
+  const fail  = (t) => { msgEl.textContent = t; msgEl.className = 'form-error'; msgEl.style.display = 'block'; };
+  if (!email) return fail('Enter your email address.');
   try {
     const r = await fetch(`${API}/api/auth/forgot-password`, {
       method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ email })
     });
-    const d = await r.json();
-    msgEl.textContent = d.message || 'Check your email for a reset link.';
-    msgEl.style.background = '#dcfce7'; msgEl.style.color = '#166534';
-    msgEl.style.display = 'block';
-  } catch(e) {
-    msgEl.textContent = 'Connection error. Please try again.';
-    msgEl.style.background = '#fee2e2'; msgEl.style.color = '#991b1b';
-    msgEl.style.display = 'block';
-  }
+    if (!r.ok) { const d = await r.json().catch(() => ({})); return fail(d.error || 'Could not send the link. Try again.'); }
+    showAuthView('forgot-sent');
+  } catch(e) { fail('Connection error. Please try again.'); }
 }
 
-// Check for password reset token in URL on load
+// Reset link in the URL (?reset=TOKEN): open the auth modal on the reset view
+let _resetToken = null;
 (function checkResetToken() {
   const params = new URLSearchParams(window.location.search);
   const token  = params.get('reset');
   if (!token) return;
-  // Show password reset form in auth modal
+  _resetToken = token;
   openModal('auth');
-  const loginForm = document.getElementById('form-login');
-  if (loginForm) {
-    loginForm.innerHTML = `
-      <h2>Set New Password</h2>
-      <p style="font-size:14px;color:#666;margin-bottom:16px">Enter your new password below.</p>
-      <div id="reset-msg" style="display:none;padding:10px;border-radius:4px;font-size:13px;margin-bottom:12px"></div>
-      <div class="form-group"><label for="reset-pw">New Password</label><input type="password" id="reset-pw" placeholder="Min 8 characters" autocomplete="new-password"></div>
-      <div class="form-group"><label for="reset-pw2">Confirm Password</label><input type="password" id="reset-pw2" placeholder="Match new password"></div>
-      <button class="btn-primary" style="width:100%;justify-content:center;margin-top:8px" onclick="doResetPassword('${token}')">Set New Password →</button>
-    `;
-  }
+  showAuthView('reset');
 })();
 
-async function doResetPassword(token) {
-  const pw   = document.getElementById('reset-pw')?.value;
-  const pw2  = document.getElementById('reset-pw2')?.value;
+async function doResetPassword() {
+  const pw    = document.getElementById('reset-pw')?.value;
+  const pw2   = document.getElementById('reset-pw2')?.value;
   const msgEl = document.getElementById('reset-msg');
-  if (!pw || pw.length < 8) { msgEl.textContent='Password must be at least 8 characters'; msgEl.style.background='#fee2e2'; msgEl.style.color='#991b1b'; msgEl.style.display='block'; return; }
-  if (pw !== pw2) { msgEl.textContent='Passwords do not match'; msgEl.style.background='#fee2e2'; msgEl.style.color='#991b1b'; msgEl.style.display='block'; return; }
+  const fail  = (t) => { msgEl.textContent = t; msgEl.className = 'form-error'; msgEl.style.display = 'block'; };
+  if (!_resetToken) return fail('This reset link is missing its code. Open the link from your email again.');
+  if (!pw || pw.length < 8) return fail('Password must be at least 8 characters.');
+  if (pw !== pw2) return fail('Passwords do not match.');
   try {
     const r = await fetch(`${API}/api/auth/reset-password`, {
-      method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ token, newPassword: pw })
+      method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ token: _resetToken, newPassword: pw })
     });
     const d = await r.json();
-    if (!r.ok) { msgEl.textContent=d.error; msgEl.style.background='#fee2e2'; msgEl.style.color='#991b1b'; msgEl.style.display='block'; return; }
-    msgEl.textContent = 'Password reset! You can now sign in.';
-    msgEl.style.background = '#dcfce7'; msgEl.style.color = '#166534';
-    msgEl.style.display = 'block';
+    if (!r.ok) return fail(d.error || 'Could not reset the password.');
+    msgEl.textContent = 'Password saved. You can sign in now.'; msgEl.className = 'form-success'; msgEl.style.display = 'block';
+    _resetToken = null;
     window.history.replaceState({}, '', '/');
-    setTimeout(() => switchTab('login'), 2000);
-  } catch(e) {
-    msgEl.textContent = 'Connection error. Please try again.';
-    msgEl.style.background='#fee2e2'; msgEl.style.color='#991b1b'; msgEl.style.display='block';
-  }
+    setTimeout(() => showAuthView('login'), 1800);
+  } catch(e) { fail('Connection error. Please try again.'); }
 }
+
+// Confirm-email link landed here (?verified=1 or 0). Waits a moment so the
+// cookie session restore has finished and we know who is signed in.
+(function checkVerifiedParam() {
+  const params = new URLSearchParams(window.location.search);
+  const v = params.get('verified');
+  if (v === null) return;
+  window.history.replaceState({}, '', window.location.pathname);
+  setTimeout(() => {
+    if (v === '1') {
+      showToast('Email confirmed. You can post now.');
+      if (currentUser) currentUser.email_verified_at = new Date().toISOString();
+      markObDone('ob-email');
+      updateAuthUI();
+      return;
+    }
+    const expired = (signedIn) => showToast('That link has expired or was already used. ' + (signedIn ? 'Send a new one from your account page.' : 'Sign in and send a new one from your account page.'), 'error');
+    if (!authToken) return expired(false);
+    fetch(`${API}/api/auth/me`, { headers: { Authorization: `Bearer ${authToken}` } }).then(r => r.json()).then(u => {
+      if (u && u.email_verified_at) { currentUser = u; markObDone('ob-email'); showToast('Your email is already confirmed.'); }
+      else expired(true);
+    }).catch(() => expired(true));
+  }, 1200);
+})();
 
 // ── Messages ────────────────────────────────────────────
 async function loadMyMessages() {

@@ -50,23 +50,28 @@ router.post('/register', async (req, res) => {
 
     const hash = await bcrypt.hash(password, 12);
     const acceptedAt = terms_accepted_at ? new Date(terms_accepted_at) : new Date();
+    // Email confirmation token: the raw token goes in the email, only its hash is stored
+    const crypto      = require('crypto');
+    const verifyToken = crypto.randomBytes(32).toString('hex');
+    const verifyHash  = crypto.createHash('sha256').update(verifyToken).digest('hex');
     const { rows } = await query(
       `INSERT INTO users (email, password_hash, name, phone, state, city,
-                          terms_accepted, terms_accepted_at, newsletter_opt_in)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-       RETURNING id, email, name, role`,
+                          terms_accepted, terms_accepted_at, newsletter_opt_in,
+                          email_verify_token_hash, email_verify_sent_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW())
+       RETURNING id, email, name, role, email_verified_at`,
       [email.toLowerCase(), hash, name, phone || null, state || null, city || null,
-       true, acceptedAt, newsletter_opt_in === true]
+       true, acceptedAt, newsletter_opt_in === true, verifyHash]
     );
 
     const user  = rows[0];
     const token = signToken({ id: user.id, email: user.email, name: user.name, role: user.role });
     setAuthCookie(res, token);
-    // Send welcome email (non-blocking)
+    // One welcome email, carrying the confirm link (non-blocking)
     try {
       const { sendEmail, welcomeEmail } = require('../services/email');
-      const tmpl = welcomeEmail(user.name);
-      sendEmail({ to: user.email, ...tmpl }).catch(() => {});
+      const verifyUrl = `https://theherdhub.com/api/auth/verify-email?token=${verifyToken}`;
+      sendEmail({ to: user.email, ...welcomeEmail(user.name, verifyUrl) }).catch(() => {});
     } catch(e) {}
     res.status(201).json({ token, user });
   } catch (err) {
@@ -86,7 +91,7 @@ router.post('/login', async (req, res) => {
 
     // Step 1 — Look up user
     const { rows } = await query(
-      'SELECT id, email, name, role, password_hash FROM users WHERE email = $1',
+      'SELECT id, email, name, role, password_hash, email_verified_at FROM users WHERE email = $1',
       [identifier]
     );
     const user = rows[0] || null;
@@ -136,7 +141,7 @@ router.post('/login', async (req, res) => {
     const payload = { id: user.id, email: user.email, name: user.name, role: user.role };
     const token   = signToken(payload);
     setAuthCookie(res, token);
-    res.json({ token, user: payload });
+    res.json({ token, user: { ...payload, email_verified_at: user.email_verified_at } });
   } catch (err) {
     console.error('Login error:', err);
     res.status(500).json({ error: 'Login failed' });
@@ -151,7 +156,8 @@ router.get('/me', authenticateToken, async (req, res) => {
               is_verified, created_at, operation_type, breeds, county,
               years_in_operation, head_count_range, preferred_contact,
               facebook_url, instagram_url, bqa_certified, website_url,
-              shipping_street, shipping_city, shipping_zip, beef_box_claimed, lister_number
+              shipping_street, shipping_city, shipping_zip, beef_box_claimed, lister_number,
+              email_verified_at
        FROM users WHERE id = $1`,
       [req.user.id]
     );
@@ -159,6 +165,61 @@ router.get('/me', authenticateToken, async (req, res) => {
     res.json(rows[0]);
   } catch (err) {
     res.status(500).json({ error: 'Could not fetch profile' });
+  }
+});
+
+// ── GET /api/auth/verify-email?token= ─────────────────
+// The link in the welcome / reminder email. Lands the user back on the site:
+// /?verified=1 on success, /?verified=0 if the link is bad, used or older than 24h.
+router.get('/verify-email', async (req, res) => {
+  const token = String(req.query.token || '');
+  const back  = (ok) => res.redirect(302, ok ? '/?verified=1' : '/?verified=0');
+  if (!/^[a-f0-9]{64}$/.test(token)) return back(false);
+  try {
+    const hash = require('crypto').createHash('sha256').update(token).digest('hex');
+    const { rows } = await query(
+      `UPDATE users
+          SET email_verified_at = NOW(), email_verify_token_hash = NULL
+        WHERE email_verify_token_hash = $1
+          AND email_verified_at IS NULL
+          AND email_verify_sent_at > NOW() - INTERVAL '24 hours'
+        RETURNING id`,
+      [hash]
+    );
+    return back(rows.length > 0);
+  } catch (err) {
+    console.error('verify-email error:', err);
+    return back(false);
+  }
+});
+
+// ── POST /api/auth/resend-verification ────────────────
+// Signed-in only. One link every two minutes. Unlike forgot-password, this
+// checks the mailer's answer and tells the user if the send failed.
+router.post('/resend-verification', authenticateToken, async (req, res) => {
+  try {
+    const { rows } = await query(
+      'SELECT id, email, name, email_verified_at, email_verify_sent_at FROM users WHERE id = $1',
+      [req.user.id]
+    );
+    const user = rows[0];
+    if (!user) return res.status(404).json({ error: 'Account not found' });
+    if (user.email_verified_at) return res.json({ ok: true, already: true, message: 'Your email is already confirmed.' });
+    if (user.email_verify_sent_at && (Date.now() - new Date(user.email_verify_sent_at).getTime()) < 2 * 60 * 1000) {
+      return res.status(429).json({ error: 'A link was just sent. Give it two minutes, then try again.' });
+    }
+    const crypto      = require('crypto');
+    const verifyToken = crypto.randomBytes(32).toString('hex');
+    const verifyHash  = crypto.createHash('sha256').update(verifyToken).digest('hex');
+    await query('UPDATE users SET email_verify_token_hash = $1, email_verify_sent_at = NOW() WHERE id = $2', [verifyHash, user.id]);
+    const { sendEmail, verifyEmailReminder } = require('../services/email');
+    const verifyUrl = `https://theherdhub.com/api/auth/verify-email?token=${verifyToken}`;
+    const sent = await sendEmail({ to: user.email, ...verifyEmailReminder(user.name, verifyUrl) });
+    if (!sent.ok) return res.status(502).json({ error: 'We could not send the email just now. Try again in a minute.' });
+    res.json({ ok: true, message: `Sent. Check ${user.email} for the link.` });
+  } catch (err) {
+    console.error('resend-verification error:', err);
+    res.status(500).json({ error: 'Could not send the link' });
   }
 });
 

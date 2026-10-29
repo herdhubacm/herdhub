@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const { getDb } = require('../db/database');
+const { query } = require('../db/database');
 
 function authenticateToken(req, res, next) {
   const authHeader = req.headers['authorization'];
@@ -30,4 +30,26 @@ function requireAdmin(req, res, next) {
   next();
 }
 
-module.exports = { authenticateToken, optionalAuth, requireAdmin };
+// Blocks actions that need a confirmed email address (posting a listing).
+// Reads the database each time, so a confirmation takes effect immediately
+// without waiting for a new login token. Admins pass.
+async function requireVerifiedEmail(req, res, next) {
+  try {
+    if (!req.user) return res.status(401).json({ error: 'No token provided' });
+    if (req.user.role === 'admin') return next();
+    const { rows } = await query('SELECT email_verified_at FROM users WHERE id = $1', [req.user.id]);
+    if (!rows.length) return res.status(401).json({ error: 'Account not found' });
+    if (!rows[0].email_verified_at) {
+      return res.status(403).json({
+        error: 'Confirm your email address before posting. Check your inbox for the link, or send a new one.',
+        code: 'EMAIL_NOT_VERIFIED',
+      });
+    }
+    next();
+  } catch (err) {
+    console.error('requireVerifiedEmail error:', err);
+    res.status(500).json({ error: 'Could not check account status' });
+  }
+}
+
+module.exports = { authenticateToken, optionalAuth, requireAdmin, requireVerifiedEmail };
