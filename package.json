@@ -28,7 +28,7 @@
     "stripe": "^14.14.0",
     "@aws-sdk/client-s3": "^3.540.0",
     "@aws-sdk/s3-request-presigner": "^3.540.0",
-    "sharp": "^0.33.2",
+    "sharp": "^0.35.5",
     "mime-types": "^2.1.35"
   },
   "devDependencies": {
