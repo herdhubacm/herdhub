@@ -186,8 +186,8 @@ router.get('/report/:id', async (req, res) => {
   } catch (err) {
     console.error('Report fetch error:', err.message);
     const stale = await getStaleCached(reportId);
-    if (stale) return res.json({ ...stale, stale: true, error: err.message });
-    res.status(502).json({ error: `USDA API error: ${err.message}` });
+    if (stale) return res.json({ ...stale, stale: true, error: 'Live market data is unavailable; showing the last good report.' });
+    res.status(502).json({ error: 'Live market data is unavailable right now. Please try again shortly.' });
   }
 });
 
@@ -208,7 +208,8 @@ router.get('/cache-status', async (_req, res) => {
     );
     res.json(rows);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('Market prices error:', err.message);
+    res.status(500).json({ error: 'Could not load market data right now.' });
   }
 });
 

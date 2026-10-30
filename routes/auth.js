@@ -95,42 +95,42 @@ router.post('/login', async (req, res) => {
       [identifier]
     );
     const user = rows[0] || null;
-    const isAdmin = user && user.role === 'admin';
-
-    // Step 2 — Rate limit check (admin bypass, non-fatal on error)
-    if (!isAdmin) {
-      try {
-        const { rows: lockRows } = await query(
-          'SELECT attempts, locked_until FROM login_attempts WHERE identifier=$1', [identifier]);
-        const rec = lockRows[0];
-        if (rec && rec.locked_until && new Date(rec.locked_until) > new Date()) {
-          const mins = Math.ceil((new Date(rec.locked_until) - new Date()) / 60000);
-          return res.status(429).json({ error: `Too many attempts. Try again in ${mins} minute${mins !== 1 ? 's' : ''}.` });
-        }
-      } catch (e) {
-        console.warn('Rate limit check skipped (non-fatal):', e.message);
+    // Step 2 — Lockout check (applies to every account, admins included; non-fatal on error)
+    try {
+      const { rows: lockRows } = await query(
+        'SELECT attempts, locked_until FROM login_attempts WHERE identifier=$1', [identifier]);
+      const rec = lockRows[0];
+      if (rec && rec.locked_until && new Date(rec.locked_until) > new Date()) {
+        const mins = Math.ceil((new Date(rec.locked_until) - new Date()) / 60000);
+        return res.status(429).json({ error: `Too many attempts. Try again in ${mins} minute${mins !== 1 ? 's' : ''}.` });
       }
+    } catch (e) {
+      console.warn('Rate limit check skipped (non-fatal):', e.message);
     }
 
     // Step 3 — Verify password
     const valid = user ? await bcrypt.compare(password, user.password_hash) : false;
 
     if (!user || !valid) {
-      // Step 4 — Record failed attempt (non-fatal)
-      if (!isAdmin) {
-        try {
-          await query(`
-            INSERT INTO login_attempts (identifier, attempts, last_attempt, locked_until)
-            VALUES ($1, 1, NOW(), NULL)
-            ON CONFLICT (identifier) DO UPDATE SET
-              attempts = login_attempts.attempts + 1,
-              last_attempt = NOW(),
-              locked_until = CASE
-                WHEN login_attempts.attempts + 1 >= 10
-                THEN NOW() + INTERVAL '3 minutes' ELSE NULL END
-          `, [identifier]);
-        } catch (e) { console.warn('Failed to record attempt (non-fatal):', e.message); }
-      }
+      // Step 4 — Record failed attempt (non-fatal). Escalating lockout:
+      // 10 failures in a row = 15 minutes, 20 = 60 minutes. The streak
+      // restarts after an hour of quiet so old typos don't count forever.
+      try {
+        await query(`
+          INSERT INTO login_attempts (identifier, attempts, last_attempt, locked_until)
+          VALUES ($1, 1, NOW(), NULL)
+          ON CONFLICT (identifier) DO UPDATE SET
+            attempts = CASE
+              WHEN login_attempts.last_attempt < NOW() - INTERVAL '1 hour' THEN 1
+              ELSE login_attempts.attempts + 1 END,
+            last_attempt = NOW(),
+            locked_until = CASE
+              WHEN login_attempts.last_attempt < NOW() - INTERVAL '1 hour' THEN NULL
+              WHEN login_attempts.attempts + 1 >= 20 THEN NOW() + INTERVAL '60 minutes'
+              WHEN login_attempts.attempts + 1 >= 10 THEN NOW() + INTERVAL '15 minutes'
+              ELSE NULL END
+        `, [identifier]);
+      } catch (e) { console.warn('Failed to record attempt (non-fatal):', e.message); }
       return res.status(401).json({ error: 'Invalid email or password' });
     }
 
@@ -243,7 +243,7 @@ router.put('/me', authenticateToken, async (req, res) => {
     res.json({ user, token });
   } catch (err) {
     console.error('PUT /api/auth/me error:', err.message);
-    res.status(500).json({ error: 'Update failed: ' + err.message });
+    res.status(500).json({ error: 'Could not save your changes. Please try again.' });
   }
 });
 
@@ -283,7 +283,7 @@ router.put('/profile', authenticateToken, async (req, res) => {
     res.json({ success: true, user, token });
   } catch (err) {
     console.error('PUT /api/auth/profile error:', err.message);
-    res.status(500).json({ error: 'Update failed: ' + err.message });
+    res.status(500).json({ error: 'Could not save your changes. Please try again.' });
   }
 });
 
@@ -302,7 +302,7 @@ router.post('/beef-box-claim', authenticateToken, async (req, res) => {
     await query('UPDATE users SET beef_box_claimed=true, shipping_street=$1, shipping_city=$2, shipping_zip=$3 WHERE id=$4',
       [street, city, zip, req.user.id]);
     res.json({ success: true });
-  } catch(e) { console.error('Beef box claim error:', e); res.status(500).json({ error: e.message }); }
+  } catch(e) { console.error('Beef box claim error:', e); res.status(500).json({ error: 'Could not submit the claim. Please try again.' }); }
 });
 
 router.post('/change-password', authenticateToken, async (req, res) => {
