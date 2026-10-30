@@ -7781,6 +7781,8 @@ function showBeefBoxOffer(listerNumber, listingId) {
   if (u.state) { var st=document.getElementById('bbclaim-state'); if(st) st.value=u.state; }
   if (u.shipping_zip) { var z=document.getElementById('bbclaim-zip'); if(z) z.value=u.shipping_zip; }
   modal.dataset.listingId = listingId || '';
+  var sb = document.getElementById('bbclaim-submit-btn');
+  if (sb) { sb.textContent = 'Claim My Free Beef Box'; sb.disabled = false; }
   modal.style.display = 'flex';
   document.body.style.overflow = 'hidden';
 }
@@ -7808,8 +7810,22 @@ async function submitBeefBoxClaim() {
     });
     var d = await r.json();
     if (!r.ok) throw new Error(d.error||'Failed');
+    // Optional catalog mailing list signup, same name and address; never blocks the claim
+    var catalogMsg = '';
+    var wantCatalog = !!(document.getElementById('bbclaim-catalog') && document.getElementById('bbclaim-catalog').checked);
+    var claimEmail = (window.currentUser && window.currentUser.email) || '';
+    if (wantCatalog && claimEmail) {
+      var catalogFail = ' (The catalog signup did not go through; use the Free Catalog form on the homepage.)';
+      try {
+        var cr = await fetch(API+'/api/catalog/signup', {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({ name:name, email:claimEmail, street:street, city:city, state:state, zip:zip })
+        });
+        catalogMsg = cr.ok ? " You're on the catalog list too." : catalogFail;
+      } catch(e) { catalogMsg = catalogFail; }
+    }
     closeBeefBoxOffer();
-    showToast('Your Beef Box is on its way!');
+    showToast('Your Beef Box is on its way!' + catalogMsg);
   } catch(e) {
     showToast(e.message||'Failed','error');
     if(btn){btn.textContent='Claim My Free Beef Box';btn.disabled=false;}
@@ -7820,15 +7836,16 @@ async function submitBeefBoxClaim() {
 <!-- Beef Box Offer Modal -->
 <div id="modal-beef-box-offer" style="display:none;position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.85);align-items:center;justify-content:center;padding:20px">
   <div style="background:#0A0A0A;border:1px solid rgba(201,169,110,.3);border-radius:12px;max-width:480px;width:100%;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.8)">
-    <div style="background:linear-gradient(135deg,#8B3214,#C9A96E);padding:24px;text-align:center">
-      <div style="font-size:32px;margin-bottom:8px">&#x1F389;</div>
-      <div style="font-family:'Libre Baskerville',serif;font-size:22px;font-weight:700;color:#fff;margin-bottom:4px">You Made The List.</div>
-      <div style="font-family:'Inter',sans-serif;font-size:13px;color:rgba(255,255,255,.85)">You're one of our first 1,000 producers on Herd Hub</div>
+    <div style="position:relative;overflow:hidden;background:linear-gradient(135deg,#8B3214,#C9A96E);padding:22px 24px 20px;text-align:center">
+      <img src="/hero_mark.png" alt="" aria-hidden="true" style="position:absolute;left:50%;top:50%;width:220px;height:220px;transform:translate(-50%,-50%);opacity:.08;pointer-events:none">
+      <img src="/logo.png" alt="Herd Hub" style="position:relative;height:44px;width:auto;display:block;margin:0 auto 10px;filter:drop-shadow(0 1px 2px rgba(0,0,0,.35))">
+      <div style="position:relative;font-family:'Libre Baskerville',serif;font-size:22px;font-weight:700;color:#fff;margin-bottom:4px">You Made The List.</div>
+      <div style="position:relative;font-family:'Inter',sans-serif;font-size:13px;color:rgba(255,255,255,.85)">You're one of our first 1,000 producers on Herd Hub</div>
     </div>
     <div style="padding:24px">
       <div id="beef-box-lister-number" style="font-family:'Libre Baskerville',serif;font-size:48px;font-weight:700;color:var(--gold);text-align:center;margin-bottom:4px">#1</div>
       <div style="font-family:'Inter',sans-serif;font-size:13px;color:var(--muted);text-align:center;margin-bottom:16px">Producer on Herd Hub</div>
-      <div style="font-size:14px;color:var(--cream);line-height:1.6;margin-bottom:20px;text-align:center">As a thank you, we want to send you a <strong>free Herd Hub Beef Box</strong> — shipped to your door on us.</div>
+      <div style="font-size:14px;color:var(--cream);line-height:1.6;margin-bottom:20px;text-align:center">As a thank you, we want to send you a <strong>free Herd Hub Beef Box</strong>, shipped to your door on us.</div>
       <div style="display:flex;flex-direction:column;gap:8px">
         <input id="bbclaim-name" type="text" placeholder="Full Name *" style="width:100%;padding:10px 12px;background:rgba(255,255,255,.06);border:1px solid rgba(201,169,110,.25);border-radius:4px;color:#fff;font-size:13px;outline:none;box-sizing:border-box;-webkit-text-fill-color:#fff">
         <input id="bbclaim-phone" type="tel" placeholder="Phone Number" style="width:100%;padding:10px 12px;background:rgba(255,255,255,.06);border:1px solid rgba(201,169,110,.25);border-radius:4px;color:#fff;font-size:13px;outline:none;box-sizing:border-box;-webkit-text-fill-color:#fff">
@@ -7838,10 +7855,14 @@ async function submitBeefBoxClaim() {
           <select id="bbclaim-state" style="width:100%;padding:10px 8px;background:rgba(255,255,255,.06);border:1px solid rgba(201,169,110,.25);border-radius:4px;color:#fff;font-size:12px;outline:none;box-sizing:border-box"><option value="">ST</option><option>AL</option><option>AK</option><option>AZ</option><option>AR</option><option>CA</option><option>CO</option><option>CT</option><option>DE</option><option>FL</option><option>GA</option><option>HI</option><option>ID</option><option>IL</option><option>IN</option><option>IA</option><option>KS</option><option>KY</option><option>LA</option><option>ME</option><option>MD</option><option>MA</option><option>MI</option><option>MN</option><option>MS</option><option>MO</option><option>MT</option><option>NE</option><option>NV</option><option>NH</option><option>NJ</option><option>NM</option><option>NY</option><option>NC</option><option>ND</option><option>OH</option><option>OK</option><option>OR</option><option>PA</option><option>RI</option><option>SC</option><option>SD</option><option>TN</option><option>TX</option><option>UT</option><option>VT</option><option>VA</option><option>WA</option><option>WV</option><option>WI</option><option>WY</option></select>
           <input id="bbclaim-zip" type="text" placeholder="ZIP *" maxlength="10" style="width:100%;padding:10px 8px;background:rgba(255,255,255,.06);border:1px solid rgba(201,169,110,.25);border-radius:4px;color:#fff;font-size:13px;outline:none;box-sizing:border-box;-webkit-text-fill-color:#fff">
         </div>
+        <label style="display:flex;align-items:flex-start;gap:10px;margin-top:4px;font-size:13px;color:var(--cream);line-height:1.5;cursor:pointer;text-align:left">
+          <input type="checkbox" id="bbclaim-catalog" checked style="margin-top:3px;flex-shrink:0;width:15px;height:15px;accent-color:var(--gold)">
+          <span>Also put me on the free print catalog mailing list.</span>
+        </label>
         <button id="bbclaim-submit-btn" onclick="submitBeefBoxClaim()" style="width:100%;padding:14px;background:var(--rust);color:var(--cream);border:none;border-radius:4px;font-family:'Inter',sans-serif;font-size:14px;font-weight:700;letter-spacing:.06em;cursor:pointer;margin-top:4px">Claim My Free Beef Box</button>
-        <button onclick="closeBeefBoxOffer()" style="width:100%;padding:10px;background:transparent;color:var(--muted);border:none;cursor:pointer;font-size:12px">No thanks, maybe later</button>
+        <button type="button" onclick="closeBeefBoxOffer()" style="width:100%;padding:12px;background:transparent;color:var(--cream);border:1.5px solid rgba(245,239,224,.45);border-radius:4px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;letter-spacing:.04em;cursor:pointer;margin-top:6px">No thanks, I don't want free beef merch</button>
       </div>
-      <div style="font-size:10px;color:var(--muted);text-align:center;margin-top:12px;line-height:1.5">One per producer. US addresses only. Allow 4-6 weeks for delivery.</div>
+      <div style="font-size:11px;color:var(--tan);text-align:center;margin-top:12px;line-height:1.5">One per producer. US addresses only. Allow 4-6 weeks for delivery.</div>
     </div>
   </div>
 </div>
