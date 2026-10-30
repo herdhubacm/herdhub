@@ -199,13 +199,22 @@ router.get('/storage-info', (_req, res) => res.json(storage.getStorageInfo()));
 // ── GET /api/listings/presign ─────────────────────────
 // Returns a presigned URL for direct browser → cloud uploads.
 // Usage: GET /api/listings/presign?type=image/jpeg&ext=.jpg&folder=listings
+// Direct-to-storage upload URL. Not used by the site today; kept for native
+// clients. Folder and extension are whitelisted so a token holder can't
+// write anywhere else in the bucket.
+const PRESIGN_FOLDERS = /^(listings|herd|ranch)(\/\d{1,10})?$/;
+const PRESIGN_EXTS    = new Set(['.jpg', '.jpeg', '.png', '.webp', '.gif']);
 router.get('/presign', authenticateToken, async (req, res) => {
   try {
     const { type = 'image/jpeg', ext = '.jpg', folder = 'listings' } = req.query;
-    const result = await storage.getPresignedUploadUrl(type, ext, folder);
+    const safeExt = String(ext).toLowerCase();
+    if (!PRESIGN_FOLDERS.test(String(folder))) return res.status(400).json({ error: 'Invalid upload folder' });
+    if (!PRESIGN_EXTS.has(safeExt))            return res.status(400).json({ error: 'Invalid file extension' });
+    const result = await storage.getPresignedUploadUrl(String(type), safeExt, String(folder));
     res.json(result);
   } catch (err) {
-    res.status(err.status || 500).json({ error: err.message });
+    console.error('Presign error:', err.message);
+    res.status(err.status || 500).json({ error: err.status ? err.message : 'Could not prepare the upload' });
   }
 });
 
@@ -327,7 +336,7 @@ router.get('/homepage', async (_req, res) => {
     res.json(result);
   } catch (e) {
     console.error('Homepage query error:', e.message);
-    res.status(500).json({ error: e.message });
+    res.status(500).json({ error: 'Could not load listings right now. Please try again.' });
   }
 });
 
@@ -654,6 +663,13 @@ router.post('/:id/photos', authenticateToken, upload.array('photos', 20), async 
 
     if (slots === 0)
       return res.status(400).json({ error: `Photo limit (${limit}) reached for ${rows[0].tier} tier` });
+
+    // Same real-image check as listing creation: the MIME type is client-supplied
+    for (const file of (req.files || [])) {
+      if (!validateImageBytes(file.buffer)) {
+        return res.status(415).json({ error: 'Invalid image file. Only real JPEG, PNG, WEBP, or GIF files are accepted.' });
+      }
+    }
 
     await client.query('BEGIN');
 
