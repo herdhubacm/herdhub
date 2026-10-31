@@ -612,7 +612,8 @@ router.get('/me/export', authenticateToken, async (req, res) => {
     const stamp = new Date().toISOString().slice(0, 10);
     res.setHeader('Content-Disposition', `attachment; filename="herdhub-data-${req.user.id}-${stamp}.json"`);
     res.setHeader('Cache-Control', 'no-store');
-    res.json(data);
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+    res.send(JSON.stringify(data, null, 2)); // readable in any text editor
   } catch (err) {
     console.error('Export error:', err);
     res.status(500).json({ error: 'Could not build your data file. Please try again.' });
