@@ -375,7 +375,7 @@ app.get('/api/online', (_req, res) => {
 
 // ── Health check ──────────────────────────────────────
 app.get('/api/health', async (_req, res) => {
-  let dbOk = false, poolStats = {};
+  let dbOk = false, poolStats = {}, migrations = null;
   try {
     const { pool } = require('./db/database');
     await pool.query('SELECT 1');
@@ -385,6 +385,13 @@ app.get('/api/health', async (_req, res) => {
       idle:    pool.idleCount,
       waiting: pool.waitingCount,
     };
+    // Which migrations have run (db/migrate.js). Proves a deploy's schema
+    // changes landed without reading the deploy log.
+    try {
+      const { rows } = await pool.query('SELECT name, applied_at FROM schema_migrations ORDER BY name');
+      const last = rows[rows.length - 1];
+      migrations = { applied: rows.length, latest: last ? last.name : null, latest_at: last ? last.applied_at : null };
+    } catch { migrations = { applied: 0, latest: null, latest_at: null }; }
   } catch {}
   const { getStorageInfo } = require('./services/storage');
   const storageInfo = getStorageInfo();
@@ -393,6 +400,7 @@ app.get('/api/health', async (_req, res) => {
     version: '2.3.0',
     db:      dbOk ? 'postgres connected' : 'postgres unreachable',
     pool:    poolStats,
+    migrations,
     storage: { provider: storageInfo.provider, configured: storageInfo.configured },
     uptime:  Math.floor(process.uptime()) + 's',
     memory:  Math.round(process.memoryUsage().heapUsed / 1024 / 1024) + 'MB used',
