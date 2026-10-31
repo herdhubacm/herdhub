@@ -475,8 +475,12 @@ header.scrolled{background:rgba(10,10,10,.92)!important;backdrop-filter:blur(12p
 @media(max-width:900px){
   .home-3col{grid-template-columns:1fr!important}
   .home-sidebar{display:none!important}
-  .hero-content{grid-template-columns:1fr!important}
-  .hero-search{display:none!important}
+  .hero-content{grid-template-columns:1fr!important;height:auto!important;padding:44px 20px 28px!important;gap:22px!important}
+  /* H12: the hero grows to fit and the same search box shows, compact, under the buttons */
+  .hero{height:auto!important;min-height:0!important}
+  .hero-search{display:block!important;padding:16px!important;box-shadow:none!important}
+  .hero-search h3{display:none}
+  .hero-search .sf{margin-bottom:8px}
   .two-col{grid-template-columns:1fr!important}
   .footer-grid{grid-template-columns:1fr 1fr!important}
   .compact-grid{grid-template-columns:repeat(3,1fr)!important}
