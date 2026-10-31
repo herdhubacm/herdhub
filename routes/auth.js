@@ -2,7 +2,7 @@ const express  = require('express');
 const bcrypt   = require('bcryptjs');
 const jwt      = require('jsonwebtoken');
 const { query } = require('../db/database');
-const { authenticateToken } = require('../middleware/auth');
+const { authenticateToken, invalidateSessionCache } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -65,7 +65,7 @@ router.post('/register', async (req, res) => {
     );
 
     const user  = rows[0];
-    const token = signToken({ id: user.id, email: user.email, name: user.name, role: user.role });
+    const token = signToken({ id: user.id, email: user.email, name: user.name, role: user.role, tv: (req.user && req.user.tv) || 0 });
     setAuthCookie(res, token);
     // One welcome email, carrying the confirm link (non-blocking)
     try {
@@ -91,7 +91,7 @@ router.post('/login', async (req, res) => {
 
     // Step 1 — Look up user
     const { rows } = await query(
-      'SELECT id, email, name, role, password_hash, email_verified_at FROM users WHERE email = $1',
+      'SELECT id, email, name, role, password_hash, email_verified_at, is_banned, token_version FROM users WHERE email = $1',
       [identifier]
     );
     const user = rows[0] || null;
@@ -138,10 +138,15 @@ router.post('/login', async (req, res) => {
     try { await query('DELETE FROM login_attempts WHERE identifier=$1', [identifier]); }
     catch (e) { /* non-fatal */ }
 
-    const payload = { id: user.id, email: user.email, name: user.name, role: user.role };
+    // Step 6 — Suspended accounts don't get a session, even with the right password
+    if (user.is_banned) {
+      return res.status(403).json({ error: 'This account has been suspended. Contact ad@theherdhub.com.' });
+    }
+
+    const payload = { id: user.id, email: user.email, name: user.name, role: user.role, tv: user.token_version || 0 };
     const token   = signToken(payload);
     setAuthCookie(res, token);
-    res.json({ token, user: { ...payload, email_verified_at: user.email_verified_at } });
+    res.json({ token, user: { id: user.id, email: user.email, name: user.name, role: user.role, email_verified_at: user.email_verified_at } });
   } catch (err) {
     console.error('Login error:', err);
     res.status(500).json({ error: 'Login failed' });
@@ -238,7 +243,7 @@ router.put('/me', authenticateToken, async (req, res) => {
     );
     if (!rows.length) return res.status(404).json({ error: 'User not found' });
     const user = rows[0];
-    const token = signToken({ id: user.id, email: user.email, name: user.name, role: user.role });
+    const token = signToken({ id: user.id, email: user.email, name: user.name, role: user.role, tv: (req.user && req.user.tv) || 0 });
     setAuthCookie(res, token);
     res.json({ user, token });
   } catch (err) {
@@ -278,7 +283,7 @@ router.put('/profile', authenticateToken, async (req, res) => {
     );
     if (!rows.length) return res.status(404).json({ error: 'User not found' });
     const user = rows[0];
-    const token = signToken({ id: user.id, email: user.email, name: user.name, role: user.role });
+    const token = signToken({ id: user.id, email: user.email, name: user.name, role: user.role, tv: (req.user && req.user.tv) || 0 });
     setAuthCookie(res, token);
     res.json({ success: true, user, token });
   } catch (err) {
@@ -322,8 +327,17 @@ router.post('/change-password', authenticateToken, async (req, res) => {
     if (!valid) return res.status(401).json({ error: 'Current password incorrect' });
 
     const hash = await bcrypt.hash(newPassword, 12);
-    await query('UPDATE users SET password_hash=$1 WHERE id=$2', [hash, req.user.id]);
-    res.json({ message: 'Password changed successfully' });
+    // New password ends every other session; this device gets a fresh token
+    const { rows: upd } = await query(
+      `UPDATE users SET password_hash=$1, token_version = token_version + 1
+        WHERE id=$2 RETURNING id, email, name, role, token_version`,
+      [hash, req.user.id]
+    );
+    invalidateSessionCache(req.user.id);
+    const u = upd[0];
+    const token = signToken({ id: u.id, email: u.email, name: u.name, role: u.role, tv: u.token_version });
+    setAuthCookie(res, token);
+    res.json({ message: 'Password changed successfully', token });
   } catch (err) {
     res.status(500).json({ error: 'Password change failed' });
   }
@@ -404,9 +418,10 @@ router.post('/reset-password', async (req, res) => {
     const hash = await require('bcryptjs').hash(newPassword, 12);
 
     await Promise.all([
-      query('UPDATE users SET password_hash=$1 WHERE id=$2', [hash, user_id]),
+      query('UPDATE users SET password_hash=$1, token_version = token_version + 1 WHERE id=$2', [hash, user_id]),
       query('UPDATE password_reset_tokens SET used=TRUE WHERE token=$1', [token]),
     ]);
+    invalidateSessionCache(user_id); // every existing session ends (H6)
 
     res.json({ message: 'Password reset successfully. You can now sign in.' });
   } catch (err) {
@@ -541,18 +556,26 @@ router.post('/contact', async (req, res) => {
 
 // ── GET /api/auth/refresh ──────────────────────────────
 // Called on page load — reads httpOnly cookie, returns token to memory
-router.get('/refresh', (req, res) => {
+// Re-reads the account from the database (H6): a banned account or a token
+// from before a password change is cleared instead of being renewed.
+router.get('/refresh', async (req, res) => {
   const token = req.cookies?.hh_auth;
   if (!token) return res.status(401).json({ error: 'No session' });
   try {
-    const payload = require('jsonwebtoken').verify(token, process.env.JWT_SECRET);
-    // Rotate cookie to extend session
-    setAuthCookie(res, require('jsonwebtoken').sign(
-      { id: payload.id, email: payload.email, name: payload.name, role: payload.role },
-      process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
-    ));
-    res.json({ token, user: { id: payload.id, email: payload.email, name: payload.name, role: payload.role } });
+    const payload = jwt.verify(token, process.env.JWT_SECRET);
+    const { rows } = await query(
+      'SELECT id, email, name, role, is_banned, token_version, email_verified_at FROM users WHERE id = $1',
+      [payload.id]
+    );
+    const u = rows[0];
+    if (!u || u.is_banned || (payload.tv || 0) !== (u.token_version || 0)) {
+      clearAuthCookie(res);
+      return res.status(401).json({ error: 'Session ended' });
+    }
+    const fresh = { id: u.id, email: u.email, name: u.name, role: u.role, tv: u.token_version || 0 };
+    const newToken = signToken(fresh);
+    setAuthCookie(res, newToken);
+    res.json({ token: newToken, user: { id: u.id, email: u.email, name: u.name, role: u.role, email_verified_at: u.email_verified_at } });
   } catch(e) {
     clearAuthCookie(res);
     res.status(401).json({ error: 'Session expired' });
@@ -563,6 +586,20 @@ router.get('/refresh', (req, res) => {
 router.post('/logout', (req, res) => {
   clearAuthCookie(res);
   res.json({ ok: true });
+});
+
+// ── POST /api/auth/logout-all ──────────────────────────
+// Ends this account's sessions on every device (H6).
+router.post('/logout-all', authenticateToken, async (req, res) => {
+  try {
+    await query('UPDATE users SET token_version = token_version + 1 WHERE id = $1', [req.user.id]);
+    invalidateSessionCache(req.user.id);
+    clearAuthCookie(res);
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('logout-all error:', err);
+    res.status(500).json({ error: 'Could not sign out everywhere' });
+  }
 });
 
 // ── POST /api/auth/verify-request ─────────────────────

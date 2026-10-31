@@ -618,6 +618,11 @@ async function start() {
       await query(`CREATE INDEX IF NOT EXISTS idx_audit_entity ON audit_log(entity, entity_id)`);
       console.log('✅  Audit log table ready');
 
+      // Session versioning (H6, 2026-10-30): tokens carry users.token_version;
+      // ban, password change, sign-out-everywhere and admin invalidate-all bump it.
+      await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS token_version INTEGER NOT NULL DEFAULT 0`);
+      console.log('✅  Session versioning column ready');
+
       await query(`CREATE TABLE IF NOT EXISTS beef_box_claims (
         id SERIAL PRIMARY KEY,
         user_id INTEGER REFERENCES users(id),

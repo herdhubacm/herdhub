@@ -1807,6 +1807,10 @@ header.scrolled{background:rgba(10,10,10,.92)!important;backdrop-filter:blur(12p
             <div class="form-group"><label for="pw-confirm">Confirm New</label><input type="password" id="pw-confirm" placeholder="Match new password"></div>
           </div>
           <button class="btn-primary" data-action="change-password" style="margin-top:4px">Update Password</button>
+          <div style="margin-top:22px;padding-top:16px;border-top:1px solid var(--light-tan)">
+            <div style="font-size:13px;color:#666;margin-bottom:8px">Signed in somewhere you don't recognize? This signs you out on every device, including this one.</div>
+            <button type="button" class="btn-secondary" data-action="logout-all" style="color:var(--rust);border:1.5px solid var(--rust)">Sign out everywhere</button>
+          </div>
         </div>
       </div>
     </div>
@@ -3862,6 +3866,42 @@ fetch('/api/csrf-token').then(r=>r.json()).then(d=>{ csrfToken=d.token; }).catch
 let authToken = null;
 let currentUser = null;
 
+// ── Session watch (H6) ─────────────────────────────────
+// When the server says this session was revoked (ban, password change,
+// sign-out-everywhere), this tab signs itself out and says so. Two triggers:
+// any API answer of 401 SESSION_REVOKED, and a once-a-minute check while
+// signed in so an idle tab notices within a minute too.
+function sessionEnded() {
+  if (!authToken) return;
+  authToken = null; currentUser = null;
+  fetch('/api/auth/logout', { method: 'POST', credentials: 'include' }).catch(() => {});
+  const b = document.getElementById('auth-btn'), a = document.getElementById('account-btn');
+  if (b) b.style.display = 'inline-block';
+  if (a) a.style.display = 'none';
+  try { showPage('home'); } catch (e) {}
+  showToast('Your session has ended. Please sign in again.', 6000);
+}
+(function watchSession() {
+  const origFetch = window.fetch.bind(window);
+  window.fetch = async function (input, init) {
+    const r = await origFetch(input, init);
+    try {
+      const url = typeof input === 'string' ? input : (input && input.url) || '';
+      if (r.status === 401 && authToken && url.indexOf('/api/') !== -1) {
+        const d = await r.clone().json().catch(() => null);
+        if (d && d.code === 'SESSION_REVOKED') sessionEnded();
+      }
+    } catch (e) {}
+    return r;
+  };
+  setInterval(() => {
+    if (!authToken) return;
+    origFetch('/api/auth/me', { headers: { Authorization: 'Bearer ' + authToken } })
+      .then(r => { if (r.status === 401) return r.json().then(d => { if (d && d.code === 'SESSION_REVOKED') sessionEnded(); }); })
+      .catch(() => {});
+  }, 60000);
+})();
+
 // On page load: ping /api/auth/refresh to restore session from httpOnly cookie
 (async function restoreSession() {
   try {
@@ -4336,6 +4376,7 @@ function initEventDelegation() {
       if (listingId) openReportModal(listingId);
     }
     else if (action === 'logout')      logout();
+    else if (action === 'logout-all')  logoutAll();
     else if (action === 'save-profile') saveProfile();
     else if (action === 'change-password') changePassword();
     else if (action === 'acct-tab')    switchAcctTab(el.dataset.tab);
@@ -6424,7 +6465,8 @@ async function changePassword() {
     });
     const d = await r.json();
     if (!r.ok) { errEl.textContent = d.error; errEl.style.display='block'; return; }
-    sucEl.textContent = '✅ Password updated!'; sucEl.style.display='block';
+    if (d.token) authToken = d.token; // other devices are signed out; this one continues
+    sucEl.textContent = '✅ Password updated! Other devices have been signed out.'; sucEl.style.display='block';
     document.getElementById('pw-current').value='';
     document.getElementById('pw-new').value='';
     document.getElementById('pw-confirm').value='';
@@ -6571,6 +6613,13 @@ async function acctPostListing() {
     document.getElementById('acct-photo-previews').innerHTML = '';
     setTimeout(() => { sucEl.style.display='none'; switchAcctTab('listings'); }, 2000);
   } catch(e) { errEl.textContent = 'Connection error'; errEl.style.display='block'; }
+}
+
+// Sign out on every device, this one included (H6)
+async function logoutAll() {
+  if (!confirm('Sign out of Herd Hub on every device, including this one?')) return;
+  try { await fetch(`${API}/api/auth/logout-all`, { method: 'POST', headers: { Authorization: `Bearer ${authToken}` } }); } catch (e) {}
+  logout();
 }
 
 function logout() {

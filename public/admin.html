@@ -581,7 +581,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
               <div style="display:flex;flex-direction:column;gap:10px">
                 <button class="btn btn-warn" onclick="if(confirm('Expire all listings older than 90 days?'))showToast('Run via Railway console: UPDATE listings SET status=\'expired\' WHERE expires_at < NOW()')">Expire Old Listings</button>
                 <button class="btn btn-warn" onclick="showToast('Cleanup: DELETE FROM beefbox_waitlist WHERE created_at < NOW() - INTERVAL \'1 year\'')">Purge Old Waitlist Data</button>
-                <button class="btn btn-danger" onclick="if(confirm('This will log out all users by invalidating tokens. Are you sure?'))showToast('To invalidate all tokens, rotate JWT_SECRET in Railway env vars')">Invalidate All Sessions</button>
+                <button class="btn btn-danger" onclick="invalidateAllSessions()">Invalidate All Sessions</button>
               </div>
             </div>
           </div>
@@ -842,6 +842,18 @@ function showApp() {
   document.getElementById('admin-name').textContent = adminUser.name;
   document.getElementById('admin-email').textContent = adminUser.email;
   loadDashboard();
+}
+
+// Ends every session on the site, this admin's included (H6)
+async function invalidateAllSessions() {
+  if (!confirm('This signs out every user on the site, including you. Continue?')) return;
+  try {
+    const r = await fetch(`${API}/api/admin/sessions/invalidate-all`, { method: 'POST', headers: { Authorization: `Bearer ${token}` } });
+    const d = await r.json();
+    if (!r.ok) { showToast(d.error || 'Could not invalidate sessions'); return; }
+    showToast(`All sessions ended (${d.users} accounts). Signing you out...`);
+    setTimeout(logout, 1200);
+  } catch { showToast('Error invalidating sessions'); }
 }
 
 function logout() {

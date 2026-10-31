@@ -19,7 +19,7 @@ const adminUpload = multer({
     cb(null, true);
   }
 });
-const { authenticateToken, requireAdmin } = require('../middleware/auth');
+const { authenticateToken, requireAdmin, invalidateSessionCache } = require('../middleware/auth');
 const { deleteFile } = require('../services/storage');
 
 const router = express.Router();
@@ -210,10 +210,12 @@ router.put('/users/:id/ban', async (req, res) => {
   try {
     const { reason = 'Banned by admin' } = req.body;
     const { rows } = await query(
-      `UPDATE users SET is_banned=TRUE, ban_reason=$1 WHERE id=$2 RETURNING id, email, name`,
+      `UPDATE users SET is_banned=TRUE, ban_reason=$1, token_version = token_version + 1
+        WHERE id=$2 RETURNING id, email, name`,
       [reason, req.params.id]
     );
     if (!rows.length) return res.status(404).json({ error: 'User not found' });
+    invalidateSessionCache(req.params.id); // existing sessions end now (H6)
     console.log(`🚫  Admin banned user ${req.params.id}: ${rows[0].email} — ${reason}`);
     res.json({ banned: true, user: rows[0] });
   } catch (err) {
@@ -277,6 +279,21 @@ router.delete('/users/:id', async (req, res) => {
   }
 });
 
+// ── POST /api/admin/sessions/invalidate-all ────────────
+// Ends every session on the site, the caller's included (H6). Replaces the
+// old "rotate JWT_SECRET" advice.
+router.post('/sessions/invalidate-all', async (req, res) => {
+  try {
+    const { rowCount } = await query('UPDATE users SET token_version = token_version + 1');
+    invalidateSessionCache();
+    console.log(`🔒  Admin ${req.user.email} invalidated all sessions (${rowCount} accounts)`);
+    res.json({ ok: true, users: rowCount });
+  } catch (err) {
+    console.error('invalidate-all error:', err);
+    res.status(500).json({ error: 'Could not invalidate sessions' });
+  }
+});
+
 // ── PUT /api/admin/users/:id/unban ────────────────────
 router.put('/users/:id/unban', async (req, res) => {
   try {
@@ -316,10 +333,12 @@ router.put('/users/:id/reset-password', async (req, res) => {
       return res.status(400).json({ error: 'Password must be at least 8 characters' });
     const hash = await bcrypt.hash(newPassword, 12);
     const { rows } = await query(
-      `UPDATE users SET password_hash=$1 WHERE id=$2 RETURNING id, email, name`,
+      `UPDATE users SET password_hash=$1, token_version = token_version + 1
+        WHERE id=$2 RETURNING id, email, name`,
       [hash, req.params.id]
     );
     if (!rows.length) return res.status(404).json({ error: 'User not found' });
+    invalidateSessionCache(req.params.id); // their sessions end now (H6)
     res.json({ reset: true, user: rows[0] });
   } catch (err) {
     res.status(500).json({ error: 'Could not reset password' });
