@@ -13,11 +13,21 @@ const { Pool } = require('pg');
 
 const isProduction = process.env.NODE_ENV === 'production';
 
+// TLS to the database (M20). With PG_CA_CERT set (the provider's CA, PEM,
+// newlines may be escaped as \n in a Railway variable) the certificate is
+// verified. Without it we connect encrypted but unverified, which is what
+// Railway's self-signed Postgres certificate allows today; testConnection()
+// logs that once at startup so it isn't forgotten.
+const CA_CERT = process.env.PG_CA_CERT ? process.env.PG_CA_CERT.replace(/\\n/g, '\n') : null;
+const sslConfig = !isProduction ? false
+  : CA_CERT ? { ca: CA_CERT, rejectUnauthorized: true }
+  : { rejectUnauthorized: false };
+
 // Build pool config — prefer DATABASE_URL if present
 const poolConfig = process.env.DATABASE_URL
   ? {
       connectionString: process.env.DATABASE_URL,
-      ssl: isProduction ? { rejectUnauthorized: false } : false,
+      ssl: sslConfig,
     }
   : {
       host:     process.env.PGHOST     || 'localhost',
@@ -31,6 +41,8 @@ const poolConfig = process.env.DATABASE_URL
 poolConfig.max             = parseInt(process.env.PG_POOL_MAX          || '10');
 poolConfig.idleTimeoutMillis    = parseInt(process.env.PG_IDLE_TIMEOUT_MS   || '30000');
 poolConfig.connectionTimeoutMillis = parseInt(process.env.PG_CONNECT_TIMEOUT_MS || '5000');
+// M12: a runaway query is cancelled instead of holding a pool slot forever
+poolConfig.statement_timeout = parseInt(process.env.PG_STATEMENT_TIMEOUT_MS || '30000');
 
 const pool = new Pool(poolConfig);
 
@@ -67,6 +79,9 @@ async function testConnection() {
   try {
     const { rows } = await client.query('SELECT version()');
     console.log('✅  PostgreSQL connected:', rows[0].version.split(' ').slice(0,2).join(' '));
+    if (isProduction && !CA_CERT) {
+      console.warn('⚠️  Database TLS is encrypted but the certificate is not verified. Set PG_CA_CERT to the provider CA to close this (M20).');
+    }
   } finally {
     client.release();
   }

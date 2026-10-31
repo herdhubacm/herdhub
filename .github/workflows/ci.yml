@@ -24,7 +24,7 @@ jobs:
       - name: Syntax check every server file
         run: |
           set -e
-          for f in server.js db/*.js middleware/*.js routes/*.js services/*.js; do
+          for f in server.js db/*.js db/migrations/*.js middleware/*.js routes/*.js services/*.js scripts/*.js; do
             node --check "$f"
           done
 

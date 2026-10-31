@@ -1,36 +1,24 @@
 /**
- * Herd Hub – Database Migration
- * Reads schema.sql and applies it to PostgreSQL.
- * Safe to run multiple times (all statements use IF NOT EXISTS / OR REPLACE).
+ * Herd Hub – run pending database migrations and exit.
+ * Same runner the server uses at startup (db/migrate.js).
  *
  * Usage: node scripts/migrate.js
  */
 require('dotenv').config();
-const fs   = require('fs');
-const path = require('path');
 const { pool, testConnection } = require('../db/database');
+const { runMigrations } = require('../db/migrate');
 
-async function migrate() {
-  console.log('\n🔧  Running Herd Hub database migration...\n');
-
-  await testConnection();
-
-  const sql = fs.readFileSync(path.join(__dirname, '../db/schema.sql'), 'utf-8');
-  const client = await pool.connect();
-
+(async () => {
+  console.log('\n🔧  Herd Hub migrations\n');
   try {
-    await client.query('BEGIN');
-    await client.query(sql);
-    await client.query('COMMIT');
-    console.log('✅  Schema applied successfully\n');
+    await testConnection();
+    const { applied, failed } = await runMigrations();
+    console.log(`\nApplied: ${applied.length ? applied.join(', ') : 'none'}`);
+    if (failed.length) { console.error(`Failed: ${failed.map(f => f.name).join(', ')}`); process.exitCode = 1; }
   } catch (err) {
-    await client.query('ROLLBACK');
-    console.error('❌  Migration failed:', err.message);
-    process.exit(1);
+    console.error('❌  Migration run failed:', err.message);
+    process.exitCode = 1;
   } finally {
-    client.release();
     await pool.end();
   }
-}
-
-migrate();
+})();
