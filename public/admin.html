@@ -171,6 +171,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
       <button class="nav-item" onclick="switchPanel('catalog')"><span class="icon">📬</span><span>Catalog List</span><span class="nav-badge" id="catalog-badge" style="display:none;background:var(--rust)">0</span></button>
       <button class="nav-item" onclick="switchPanel('beefbox')"><span class="icon">🥩</span><span>Beef Box Claims</span><span class="nav-badge" id="beefbox-badge" style="display:none;background:var(--gold)">0</span></button>
       <button class="nav-item" onclick="switchPanel('advertisers')"><span class="icon">📢</span><span>Advertisers</span><span class="nav-badge" id="advertisers-badge" style="display:none;background:var(--rust)">0</span></button>
+      <button class="nav-item" onclick="switchPanel('reports')"><span class="icon">🚩</span><span>Reports</span><span class="nav-badge" id="reports-badge" style="display:none;background:var(--rust)">0</span></button>
       <button class="nav-item" onclick="switchPanel('settings')"><span class="icon">⚙️</span><span>Settings</span></button>
     </nav>
     <div class="sidebar-footer">
@@ -661,6 +662,21 @@ tr:hover td{background:rgba(255,255,255,.02)}
         </table></div>
       </div>
 
+      <div class="panel" id="panel-reports">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+          <div style="font-size:13px;color:var(--muted)">Three open reports hide a listing automatically. Dismissing the last open report brings it back.</div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <select id="reports-filter" onchange="loadReports()" style="padding:6px 8px;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:3px;font-size:12px"><option value="open">Open only</option><option value="all">All reports</option></select>
+            <button class="btn" onclick="loadReports()" style="font-size:11px;padding:7px 14px">&#x21BB; Refresh</button>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px">
+          <div style="background:rgba(255,255,255,.04);border:1px solid rgba(201,169,110,.12);border-radius:6px;padding:14px;text-align:center"><div id="rep-stat-open" style="font-size:24px;font-weight:700;color:var(--rust)">0</div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em">Open reports</div></div>
+          <div style="background:rgba(255,255,255,.04);border:1px solid rgba(201,169,110,.12);border-radius:6px;padding:14px;text-align:center"><div id="rep-stat-hidden" style="font-size:24px;font-weight:700;color:var(--rust)">0</div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em">Listings hidden by reports</div></div>
+        </div>
+        <div id="reports-body"><div style="color:var(--muted);padding:24px;text-align:center">Loading...</div></div>
+      </div>
+
   </div><!-- /main -->
 </div><!-- /admin-app -->
 
@@ -842,6 +858,7 @@ function showApp() {
   document.getElementById('admin-name').textContent = adminUser.name;
   document.getElementById('admin-email').textContent = adminUser.email;
   loadDashboard();
+  loadReports(); // sets the Reports badge on start
 }
 
 // Ends every session on the site, this admin's included (H6)
@@ -878,6 +895,7 @@ const panelTitles = {
   catalog:   ['Catalog Mailing List', 'Print catalog signup requests'],
   beefbox:   ['Beef Box Claims', 'First 1,000 listers promotion'],
   advertisers: ['Advertiser Inquiries', 'Inquiry leads from /advertise page'],
+  reports:   ['Listing Reports', 'Reports from users. Review, dismiss, restore or remove.'],
 };
 
 function switchPanel(name) {
@@ -897,6 +915,7 @@ function switchPanel(name) {
   if (name === 'waitlists') { loadWaitlists(); }
   if (name === 'featured')  { loadFeaturedListings(); }
   if (name === 'payments')  { loadPayments(); }
+  if (name === 'reports')   { loadReports(); }
   if (name === 'verifications') { loadVerifications(); }
   if (name === 'settings')  { loadSettings(); }
   if (name === 'catalog')   { loadCatalogSignups(); }
@@ -1109,6 +1128,7 @@ async function confirmDeleteListing() {
     closeModal('delete-listing');
     loadListings();
     loadDashboard();
+    loadReports(); // a removed listing takes its reports with it
     showToast('Listing deleted');
   } catch { showToast('Error deleting listing'); }
   pendingDeleteId = null;
@@ -2031,6 +2051,84 @@ function downloadBeefBoxCSV(){
 
 // ── Advertiser Inquiries ──────────────────────────────
 let advInquiries = [];
+// ── Listing reports (H11) ─────────────────────────────
+let reportRows = [];
+async function loadReports() {
+  const box = document.getElementById('reports-body');
+  try {
+    const filter = (document.getElementById('reports-filter') || {}).value || 'open';
+    const r = await fetch(`${API}/api/admin/reports?status=${filter}`, { headers: { Authorization: `Bearer ${token}` } });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || 'Failed');
+    reportRows = d.reports || [];
+    const badge = document.getElementById('reports-badge');
+    if (badge) { badge.textContent = d.open; badge.style.display = d.open ? '' : 'none'; }
+    const so = document.getElementById('rep-stat-open'); if (so) so.textContent = d.open;
+    const hiddenCount = new Set(reportRows.filter(x => x.listing_status === 'pending').map(x => x.listing_id)).size;
+    const sh = document.getElementById('rep-stat-hidden'); if (sh) sh.textContent = hiddenCount;
+    renderReports();
+  } catch (e) {
+    if (box) box.innerHTML = '<div style="color:var(--muted);padding:24px;text-align:center">Failed: ' + escHtml(e.message) + '</div>';
+  }
+}
+function renderReports() {
+  const box = document.getElementById('reports-body');
+  if (!box) return;
+  if (!reportRows.length) { box.innerHTML = '<div style="color:var(--muted);padding:24px;text-align:center">No reports.</div>'; return; }
+  const groups = new Map();
+  for (const r of reportRows) {
+    if (!groups.has(r.listing_id)) groups.set(r.listing_id, { id: r.listing_id, title: r.listing_title, status: r.listing_status, seller_name: r.seller_name, seller_email: r.seller_email, items: [] });
+    groups.get(r.listing_id).items.push(r);
+  }
+  const statusBadge = s => s === 'open' ? '<span class="badge badge-red">Open</span>' : s === 'reviewed' ? '<span class="badge badge-green">Reviewed</span>' : '<span class="badge">Dismissed</span>';
+  box.innerHTML = [...groups.values()].map(g => {
+    const open = g.items.filter(i => i.status === 'open').length;
+    const hidden = g.status === 'pending';
+    const rows = g.items.map(i => `<tr>
+        <td style="font-size:11px;color:var(--muted);white-space:nowrap">${escHtml(new Date(i.created_at).toLocaleDateString())}</td>
+        <td style="font-size:12px">${escHtml(i.reporter_name || 'Anonymous')}${i.reporter_email ? '<br><span style="color:var(--muted)">' + escHtml(i.reporter_email) + '</span>' : ''}</td>
+        <td style="font-weight:500">${escHtml(i.reason)}</td>
+        <td style="font-size:12px;color:var(--muted);max-width:360px">${escHtml(i.details || '')}</td>
+        <td>${statusBadge(i.status)}</td>
+        <td><div style="display:flex;gap:6px">${i.status === 'open'
+          ? `<button class="btn btn-ghost" onclick="setReportStatus(${i.id},'dismissed')">Dismiss</button><button class="btn btn-success" onclick="setReportStatus(${i.id},'reviewed')">Reviewed</button>`
+          : `<button class="btn btn-ghost" onclick="setReportStatus(${i.id},'open')">Reopen</button>`}</div></td>
+      </tr>`).join('');
+    return `<div style="border:1px solid var(--border);border-radius:6px;margin-bottom:14px;overflow:hidden">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:12px 14px;background:rgba(255,255,255,.03)">
+        <div>
+          <a href="https://theherdhub.com/?listing=${g.id}" target="_blank" rel="noopener" style="color:var(--text);font-weight:600;text-decoration:none">#${g.id} ${escHtml(g.title || '(untitled)')}</a>
+          <div style="font-size:11px;color:var(--muted);margin-top:3px">${escHtml(g.seller_name || '')}${g.seller_email ? ' · ' + escHtml(g.seller_email) : ''} · ${hidden ? '<span class="badge badge-red">Hidden by reports</span>' : '<span class="badge badge-green">Live</span>'} · ${open} open of ${g.items.length}</div>
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          ${hidden ? `<button class="btn btn-success" onclick="restoreReportedListing(${g.id})">Restore listing</button>` : ''}
+          <button class="btn btn-danger" onclick="openDeleteListing(${g.id}, '${escHtml(g.title || '')}')">Remove listing</button>
+        </div>
+      </div>
+      <div class="table-wrap"><table><thead><tr><th>Date</th><th>Reporter</th><th>Reason</th><th>Details</th><th>Status</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>
+    </div>`;
+  }).join('');
+}
+async function setReportStatus(id, status) {
+  try {
+    const r = await fetch(`${API}/api/admin/reports/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify({ status }) });
+    const d = await r.json();
+    if (!r.ok) { showToast(d.error || 'Could not update report'); return; }
+    showToast(d.restored ? `Report ${status}. Listing is live again.` : `Report ${status}`);
+    loadReports();
+  } catch { showToast('Error updating report'); }
+}
+async function restoreReportedListing(id) {
+  if (!confirm('Put this listing back live?')) return;
+  try {
+    const r = await fetch(`${API}/api/admin/reports/listing/${id}/restore`, { method: 'POST', headers: { Authorization: `Bearer ${token}` } });
+    const d = await r.json();
+    if (!r.ok) { showToast(d.error || 'Could not restore listing'); return; }
+    showToast('Listing restored');
+    loadReports();
+  } catch { showToast('Error restoring listing'); }
+}
+
 async function loadAdvertiserInquiries() {
   try {
     const r = await fetch(`${API}/api/admin/advertiser-inquiries`, {headers:{Authorization:`Bearer ${token}`}});
