@@ -53,6 +53,8 @@ async function collectUserData(userId) {
   await grab('sale_registrations',   'SELECT * FROM sale_registrations WHERE user_id = $1');
   await grab('verification_requests','SELECT * FROM verification_requests WHERE user_id = $1');
   await grab('beef_box_claims',      'SELECT * FROM beef_box_claims WHERE user_id = $1');
+  // search_vector is an internal index blob, not the producer's data
+  for (const l of out.listings) delete l.search_vector;
   return out;
 }
 
@@ -91,10 +93,14 @@ async function deleteUserAccount(userId, { actorId = null, ip = null, reason = '
     await client.query('UPDATE audit_log SET user_id=NULL WHERE user_id=$1', [id]);
     await client.query('DELETE FROM login_attempts WHERE identifier=$1', [String(user.email).toLowerCase()]);
     await client.query('DELETE FROM users WHERE id=$1', [id]);
+    // audit_log.user_id references users(id). When the actor is the account
+    // being deleted (self-service), that row no longer exists, so the actor
+    // goes in meta instead of the foreign key.
+    const auditActor = actorId !== null && Number(actorId) !== id ? actorId : null;
     await client.query(
       `INSERT INTO audit_log (user_id, action, entity, entity_id, meta, ip)
        VALUES ($1, 'user.delete', 'user', $2, $3, $4)`,
-      [actorId, id, JSON.stringify({ email: user.email, name: user.name, listings: lc[0].n, photos: photos.length, reason }), ip]
+      [auditActor, id, JSON.stringify({ email: user.email, name: user.name, listings: lc[0].n, photos: photos.length, reason, actor: auditActor === null ? 'self' : actorId }), ip]
     );
     await client.query('COMMIT'); inTx = false;
     return { ok: true, id, email: user.email, name: user.name, listings: lc[0].n, photos: photos.length };
