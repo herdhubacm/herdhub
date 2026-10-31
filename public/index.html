@@ -4288,9 +4288,10 @@ document.addEventListener('DOMContentLoaded', () => {
   initPhotoUpload('acct-pl-photos', 'acct-photo-previews', 'acct-photo-drop-area');
   // Init post modal hint
   updatePlPhotoHint('burger');
-  // Handle shared listing links — ?listing=ID opens that listing directly
+  // Handle shared listing links: /listing/ID (current) and ?listing=ID (older links)
   const urlParams = new URLSearchParams(window.location.search);
-  const sharedListingId = urlParams.get('listing');
+  const pathMatch = window.location.pathname.match(/^\/listing\/(\d+)\/?$/);
+  const sharedListingId = (pathMatch && pathMatch[1]) || urlParams.get('listing');
   if (sharedListingId) {
     setTimeout(() => openListing(sharedListingId), 800);
   }
@@ -5467,7 +5468,8 @@ async function openListing(id) {
 
 // ── Listing Share Functions ────────────────────────────
 function getListingUrl(id) {
-  return `${window.location.origin}?listing=${id}`;
+  // Crawlable per-listing page with its own share preview (H1)
+  return `${window.location.origin}/listing/${id}`;
 }
 
 function shareListingFacebook(id, encodedTitle) {
@@ -5506,8 +5508,8 @@ function nativeShareListing(id, encodedTitle) {
   const title = decodeURIComponent(encodedTitle);
   if (navigator.share) {
     navigator.share({
-      title: `${title} — Herd Hub`,
-      text: `Check out this listing on Herd Hub: ${title}`,
+      title: `${title} | Herd Hub`,
+      text: `${title} on Herd Hub`,
       url
     }).catch(() => {});
   } else {

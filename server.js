@@ -494,6 +494,49 @@ SEO_PAGES.forEach(path => {
   );
 });
 
+// ── Per-listing share previews (H1) ──────────────────
+// /listing/:id serves the normal page with title, description and
+// Open Graph / Twitter tags for that listing, so a shared link shows the
+// animal. /listing/:id/og.jpg is a 1200x630 JPEG card from the first photo.
+async function loadListingForShare(id) {
+  const { rows } = await query(
+    `SELECT l.id, l.title, l.description, l.price, l.price_type, l.category, l.city, l.state, l.status,
+            (SELECT url FROM listing_photos WHERE listing_id = l.id ORDER BY sort_order LIMIT 1) AS photo_url
+       FROM listings l
+      WHERE l.id = $1 AND l.status IN ('active', 'sold', 'expired')`,
+    [id]
+  );
+  return rows[0] || null;
+}
+
+app.get('/listing/:id(\\d+)', async (req, res) => {
+  try {
+    const listing = await loadListingForShare(req.params.id);
+    if (!listing) return res.redirect(302, '/');
+    const { renderListingPage } = require('./services/og');
+    res.set('Cache-Control', 'public, max-age=300');
+    res.type('html').send(renderListingPage(listing));
+  } catch (err) {
+    console.error('Listing share page error:', err.message);
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  }
+});
+
+app.get('/listing/:id(\\d+)/og.jpg', async (req, res) => {
+  try {
+    const listing = await loadListingForShare(req.params.id);
+    if (!listing || !listing.photo_url) return res.redirect(302, '/og-image.jpg');
+    const { listingOgImage } = require('./services/og');
+    const buf = await listingOgImage(listing);
+    if (!buf) return res.redirect(302, '/og-image.jpg');
+    res.set('Cache-Control', 'public, max-age=86400');
+    res.type('jpeg').send(buf);
+  } catch (err) {
+    console.error('Listing og.jpg error:', err.message);
+    res.redirect(302, '/og-image.jpg');
+  }
+});
+
 app.get('*', (_req, res) =>
   res.sendFile(path.join(__dirname, 'public', 'index.html'))
 );
