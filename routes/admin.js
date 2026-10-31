@@ -160,6 +160,70 @@ router.delete('/listings/:id', async (req, res) => {
   }
 });
 
+// ── Listing reports (H11) ──────────────────────────────
+// GET /api/admin/reports?status=open|all  — reports with listing, seller and reporter
+router.get('/reports', async (req, res) => {
+  try {
+    const status = req.query.status === 'all' ? null : 'open';
+    const { rows } = await query(
+      `SELECT r.id, r.listing_id, r.reason, r.details, r.status, r.created_at,
+              l.title AS listing_title, l.status AS listing_status, l.category AS listing_category,
+              s.id AS seller_id, s.name AS seller_name, s.email AS seller_email,
+              u.name AS reporter_name, u.email AS reporter_email
+         FROM listing_reports r
+         JOIN listings l ON l.id = r.listing_id
+         LEFT JOIN users s ON s.id = l.user_id
+         LEFT JOIN users u ON u.id = r.reporter_id
+        WHERE ($1::text IS NULL OR r.status = $1)
+        ORDER BY (r.status = 'open') DESC, r.created_at DESC
+        LIMIT 500`,
+      [status]
+    );
+    const { rows: c } = await query(`SELECT COUNT(*)::int AS open FROM listing_reports WHERE status = 'open'`);
+    res.json({ reports: rows, open: c[0].open });
+  } catch (err) {
+    console.error('Admin reports error:', err);
+    res.status(500).json({ error: 'Could not load reports' });
+  }
+});
+
+// PUT /api/admin/reports/:id  { status: open | reviewed | dismissed }
+// When a listing hidden by reports has no open report left, it goes live again.
+router.put('/reports/:id', async (req, res) => {
+  const { status } = req.body || {};
+  if (!['open', 'reviewed', 'dismissed'].includes(status)) return res.status(400).json({ error: 'Invalid status' });
+  try {
+    const { rows } = await query('UPDATE listing_reports SET status=$1 WHERE id=$2 RETURNING id, listing_id', [status, req.params.id]);
+    if (!rows.length) return res.status(404).json({ error: 'Report not found' });
+    const listingId = rows[0].listing_id;
+    const { rows: left } = await query(`SELECT COUNT(*)::int AS n FROM listing_reports WHERE listing_id=$1 AND status='open'`, [listingId]);
+    let restored = false;
+    if (left[0].n === 0) {
+      const r2 = await query(`UPDATE listings SET status='active' WHERE id=$1 AND status='pending' RETURNING id`, [listingId]);
+      restored = r2.rows.length > 0;
+      if (restored && global.apiCache) global.apiCache.clearListingCache();
+    }
+    res.json({ ok: true, listing_id: listingId, open_left: left[0].n, restored });
+  } catch (err) {
+    console.error('Admin report update error:', err);
+    res.status(500).json({ error: 'Could not update report' });
+  }
+});
+
+// POST /api/admin/reports/listing/:id/restore  — put a report-hidden listing back live
+router.post('/reports/listing/:id/restore', async (req, res) => {
+  try {
+    const { rows } = await query(`UPDATE listings SET status='active' WHERE id=$1 AND status='pending' RETURNING id, title`, [req.params.id]);
+    if (!rows.length) return res.status(404).json({ error: 'Listing not found, or not hidden' });
+    if (global.apiCache) global.apiCache.clearListingCache();
+    console.log(`♻️  Admin ${req.user.email} restored listing ${rows[0].id}: ${rows[0].title}`);
+    res.json({ restored: true, id: rows[0].id, title: rows[0].title });
+  } catch (err) {
+    console.error('Admin restore listing error:', err);
+    res.status(500).json({ error: 'Could not restore listing' });
+  }
+});
+
 // ── GET /api/admin/users ───────────────────────────────
 router.get('/users', async (req, res) => {
   try {
