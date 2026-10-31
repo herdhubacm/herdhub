@@ -3,6 +3,7 @@ const bcrypt   = require('bcryptjs');
 const jwt      = require('jsonwebtoken');
 const { query } = require('../db/database');
 const { authenticateToken, invalidateSessionCache } = require('../middleware/auth');
+const { collectUserData, deleteUserAccount } = require('../services/accounts');
 
 const router = express.Router();
 
@@ -599,6 +600,47 @@ router.post('/logout-all', authenticateToken, async (req, res) => {
   } catch (err) {
     console.error('logout-all error:', err);
     res.status(500).json({ error: 'Could not sign out everywhere' });
+  }
+});
+
+// ── GET /api/auth/me/export ────────────────────────────
+// Everything we hold on the signed-in account, as a JSON download (C2).
+router.get('/me/export', authenticateToken, async (req, res) => {
+  try {
+    const data = await collectUserData(req.user.id);
+    if (!data) return res.status(404).json({ error: 'Account not found' });
+    const stamp = new Date().toISOString().slice(0, 10);
+    res.setHeader('Content-Disposition', `attachment; filename="herdhub-data-${req.user.id}-${stamp}.json"`);
+    res.setHeader('Cache-Control', 'no-store');
+    res.json(data);
+  } catch (err) {
+    console.error('Export error:', err);
+    res.status(500).json({ error: 'Could not build your data file. Please try again.' });
+  }
+});
+
+// ── DELETE /api/auth/me ────────────────────────────────
+// A producer deletes their own account. Needs the current password. Admins
+// use the admin panel (after changing the role) so nobody deletes the only
+// admin by accident.
+router.delete('/me', authenticateToken, async (req, res) => {
+  try {
+    const { password } = req.body || {};
+    if (!password) return res.status(400).json({ error: 'Enter your password to confirm.' });
+    const { rows } = await query('SELECT password_hash, role FROM users WHERE id=$1', [req.user.id]);
+    if (!rows.length) return res.status(404).json({ error: 'Account not found' });
+    if (rows[0].role === 'admin') return res.status(403).json({ error: "Admin accounts can't be deleted from the account page." });
+    const ok = await bcrypt.compare(password, rows[0].password_hash);
+    if (!ok) return res.status(401).json({ error: 'That password is not correct.' });
+    const result = await deleteUserAccount(req.user.id, { actorId: req.user.id, ip: req.ip || null, reason: 'self' });
+    if (!result.ok) return res.status(result.status || 500).json({ error: result.error });
+    invalidateSessionCache(req.user.id);
+    clearAuthCookie(res);
+    console.log(`🗑️  User ${req.user.id} deleted their own account (${result.listings} listings, ${result.photos} photo files)`);
+    res.json({ deleted: true });
+  } catch (err) {
+    console.error('Self delete error:', err);
+    res.status(500).json({ error: 'Could not delete your account. Please try again.' });
   }
 });
 

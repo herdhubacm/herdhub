@@ -1815,6 +1815,13 @@ header.scrolled{background:rgba(10,10,10,.92)!important;backdrop-filter:blur(12p
             <div style="font-size:13px;color:#666;margin-bottom:8px">Signed in somewhere you don't recognize? This signs you out on every device, including this one.</div>
             <button type="button" class="btn-secondary" data-action="logout-all" style="color:var(--rust);border:1.5px solid var(--rust)">Sign out everywhere</button>
           </div>
+          <div style="margin-top:22px;padding-top:16px;border-top:1px solid var(--light-tan)">
+            <h4 style="font-family:'Inter',sans-serif;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--mid-brown);margin-bottom:10px">Your Data</h4>
+            <div style="font-size:13px;color:#666;margin-bottom:8px">Everything Herd Hub holds on your account, as one file you keep.</div>
+            <button type="button" class="btn-secondary" data-action="export-data" style="color:var(--rust);border:1.5px solid var(--rust)">Download my data</button>
+            <div style="font-size:13px;color:#666;margin:18px 0 8px">Deleting your account removes your listings, photos, messages, saved searches and records. It can't be undone.</div>
+            <button type="button" class="btn-secondary" data-action="delete-account" style="color:#991b1b;border:1.5px solid #991b1b">Delete my account</button>
+          </div>
         </div>
       </div>
     </div>
@@ -2040,6 +2047,18 @@ header.scrolled{background:rgba(10,10,10,.92)!important;backdrop-filter:blur(12p
 
 <!-- ── MODALS ── -->
 <!-- AUTH -->
+<div class="modal-overlay" id="modal-delete-account" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Delete my account">
+  <div class="modal">
+    <button class="modal-close" data-action="close-modal" data-modal="delete-account" aria-label="Close dialog">✕</button>
+    <h2>Delete my account</h2>
+    <p>This removes your account, your listings and photos, messages, saved searches, herd and finance records, forum posts and reviews. It can't be undone. If you want a copy first, download your data before you do this.</p>
+    <div id="delete-account-error" class="form-error" style="display:none"></div>
+    <div class="form-group"><label for="delete-account-pw">Your password</label><input type="password" id="delete-account-pw" placeholder="••••••••" autocomplete="current-password"></div>
+    <button type="button" class="btn-primary" style="width:100%;justify-content:center;margin-top:8px;background:#991b1b;border-color:#991b1b" onclick="confirmDeleteAccount()">Delete my account for good</button>
+    <a href="javascript:void(0)" class="auth-back" onclick="closeModal('delete-account')">Keep my account</a>
+  </div>
+</div>
+
 <div class="modal-overlay" id="modal-onboarding" role="dialog" aria-modal="true" aria-label="Get started on Herd Hub" style="align-items:center">
   <div class="modal" style="max-width:520px;padding:0;overflow:hidden">
     <div style="background:var(--dark-brown);padding:24px 28px;position:relative">
@@ -4381,6 +4400,8 @@ function initEventDelegation() {
     }
     else if (action === 'logout')      logout();
     else if (action === 'logout-all')  logoutAll();
+    else if (action === 'export-data') exportMyData(el);
+    else if (action === 'delete-account') openDeleteAccount();
     else if (action === 'save-profile') saveProfile();
     else if (action === 'change-password') changePassword();
     else if (action === 'acct-tab')    switchAcctTab(el.dataset.tab);
@@ -6617,6 +6638,50 @@ async function acctPostListing() {
     document.getElementById('acct-photo-previews').innerHTML = '';
     setTimeout(() => { sucEl.style.display='none'; switchAcctTab('listings'); }, 2000);
   } catch(e) { errEl.textContent = 'Connection error'; errEl.style.display='block'; }
+}
+
+// ── Your data: export and self-delete (C2) ─────────────
+async function exportMyData(btn) {
+  if (!authToken) { openModal('auth'); return; }
+  const label = btn ? btn.textContent : '';
+  if (btn) { btn.disabled = true; btn.textContent = 'Preparing your file...'; }
+  try {
+    const r = await fetch(`${API}/api/auth/me/export`, { headers: { Authorization: `Bearer ${authToken}` } });
+    if (!r.ok) { const d = await r.json().catch(() => ({})); showToast(d.error || 'Could not build your data file', 'error'); return; }
+    const blob = await r.blob();
+    const m = (r.headers.get('Content-Disposition') || '').match(/filename="?([^"]+)"?/);
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = m ? m[1] : 'herdhub-data.json';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 3000);
+    showToast('Your data file is downloading.');
+  } catch (e) { showToast('Connection error', 'error'); }
+  finally { if (btn) { btn.disabled = false; btn.textContent = label; } }
+}
+function openDeleteAccount() {
+  if (!authToken) { openModal('auth'); return; }
+  const e = document.getElementById('delete-account-error'); if (e) e.style.display = 'none';
+  const p = document.getElementById('delete-account-pw'); if (p) p.value = '';
+  openModal('delete-account');
+}
+async function confirmDeleteAccount() {
+  const errEl = document.getElementById('delete-account-error');
+  const pw = (document.getElementById('delete-account-pw') || {}).value || '';
+  const fail = t => { errEl.textContent = t; errEl.style.display = 'block'; };
+  if (!pw) return fail('Enter your password to confirm.');
+  try {
+    const r = await fetch(`${API}/api/auth/me`, { method: 'DELETE', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` }, body: JSON.stringify({ password: pw }) });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) return fail(d.error || 'Could not delete your account.');
+    closeModal('delete-account');
+    authToken = null; currentUser = null;
+    const b = document.getElementById('auth-btn'), a = document.getElementById('account-btn');
+    if (b) b.style.display = 'inline-block';
+    if (a) a.style.display = 'none';
+    showPage('home');
+    showToast('Your account has been deleted. Thanks for being part of Herd Hub.', 6000);
+  } catch (e) { fail('Connection error. Please try again.'); }
 }
 
 // Sign out on every device, this one included (H6)
