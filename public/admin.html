@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Herd Hub Admin</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Libre+Baskerville:wght@700&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{--bg:#0f1117;--surface:#1a1d27;--border:#2a2d3e;--text:#e2e8f0;--muted:#8892a4;--rust:#c0522a;--rust-light:#e06030;--gold:#d4a92a;--green:#22c55e;--red:#ef4444;--blue:#3b82f6;--purple:#a855f7}
@@ -706,6 +706,36 @@ tr:hover td{background:rgba(255,255,255,.02)}
 </div>
 
 <!-- Ban User Modal -->
+<div class="modal-bg" id="modal-post-listing">
+  <div class="modal" style="width:980px;max-width:95vw">
+    <button class="modal-close" onclick="closeModal('post-listing')">✕</button>
+    <h2>📣 Post this listing</h2>
+    <div id="post-kit-sub" style="font-size:12px;color:var(--muted);margin-bottom:14px"></div>
+    <div style="display:grid;grid-template-columns:minmax(260px,420px) 1fr;gap:20px;align-items:start">
+      <div>
+        <canvas id="post-card" width="1080" height="1080" style="width:100%;height:auto;border:1px solid var(--border);border-radius:6px;background:#0A0A0A;display:block"></canvas>
+        <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+          <button class="btn btn-primary" onclick="downloadPostCard()">&#x2B07; Download card (JPG)</button>
+          <a class="btn btn-ghost" id="post-open-link" href="#" target="_blank" rel="noopener">Open listing</a>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-top:8px">1080x1080. The listing photo, headline = category and location, price in gold, the link.</div>
+      </div>
+      <div>
+        <div class="form-group"><label>Seller tag (a handle, or blank to name the operation)</label><input type="text" id="post-handle" placeholder="@handle" oninput="refreshPostCaptions()"></div>
+        <div class="form-group"><label>Facebook caption (with the link)</label><textarea id="post-caption-fb" rows="9" style="width:100%;font-family:inherit;font-size:13px;line-height:1.5"></textarea>
+          <button class="btn btn-ghost" style="margin-top:6px" onclick="copyText('post-caption-fb', this)">Copy Facebook caption</button></div>
+        <div class="form-group"><label>Instagram / TikTok caption (link in bio)</label><textarea id="post-caption-ig" rows="9" style="width:100%;font-family:inherit;font-size:13px;line-height:1.5"></textarea>
+          <button class="btn btn-ghost" style="margin-top:6px" onclick="copyText('post-caption-ig', this)">Copy Instagram caption</button></div>
+        <div style="display:flex;gap:10px;justify-content:flex-end;align-items:center;margin-top:8px">
+          <span id="post-posted-note" style="font-size:12px;color:var(--muted)"></span>
+          <button class="btn btn-success" onclick="markListingPosted()">Mark as posted</button>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-top:10px">Nothing posts from here. Download the card, copy the caption, post it yourself. Two or three listing posts a week keeps the feed a community, not a classified.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="modal-bg" id="modal-delete-user">
   <div class="modal">
     <button class="modal-close" onclick="closeModal('delete-user')">✕</button>
@@ -1022,7 +1052,11 @@ async function loadListings() {
         <td>${statusBadge(l.status)}</td>
         <td style="text-align:center">${l.photo_count}</td>
         <td style="font-size:12px;color:var(--muted)">${timeAgo(l.created_at)}</td>
-        <td><button class="btn btn-danger" onclick="openDeleteListing(${l.id},'${escHtml(l.title)}')">Delete</button></td>
+        <td><div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+          <button class="btn btn-ghost" onclick="openPostListing(${l.id})">Post</button>
+          ${l.social_posted_at ? `<span class="badge badge-green" title="Posted ${escHtml(fmtDate(l.social_posted_at))}">Posted</span>` : ''}
+          <button class="btn btn-danger" onclick="openDeleteListing(${l.id},'${escHtml(l.title)}')">Delete</button>
+        </div></td>
       </tr>`).join('') || '<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:24px">No listings found</td></tr>';
     document.getElementById('listings-count').textContent = `${d.total} listings · page ${d.page} of ${d.pages}`;
     document.getElementById('listings-prev').disabled = d.page <= 1;
@@ -2051,6 +2085,102 @@ function downloadBeefBoxCSV(){
 
 // ── Advertiser Inquiries ──────────────────────────────
 let advInquiries = [];
+// ── Post this listing (share to social) ───────────────
+let postKit = null;
+async function openPostListing(id) {
+  try {
+    const r = await fetch(`${API}/api/admin/listings/${id}/post-kit`, { headers: { Authorization: `Bearer ${token}` } });
+    const d = await r.json();
+    if (!r.ok) { showToast(d.error || 'Could not load the listing'); return; }
+    postKit = d;
+    document.getElementById('post-kit-sub').textContent = `#${d.id} ${d.title} · ${d.seller_name || ''}` + (d.social_posted_at ? ` · last posted ${fmtDate(d.social_posted_at)}` : '');
+    document.getElementById('post-open-link').href = `https://theherdhub.com/listing/${d.id}`;
+    document.getElementById('post-handle').value = PostKit.handleFrom(d.seller_instagram || d.ranch_instagram) || PostKit.handleFrom(d.seller_facebook || d.ranch_facebook) || '';
+    document.getElementById('post-posted-note').textContent = d.social_posted_at ? `Posted ${fmtDate(d.social_posted_at)}` : '';
+    refreshPostCaptions();
+    openModal('post-listing');
+    await drawPostCard(d);
+  } catch (e) { showToast('Could not open the post kit'); }
+}
+function refreshPostCaptions() {
+  if (!postKit) return;
+  const c = PostKit.buildCaptions(postKit, { handle: document.getElementById('post-handle').value });
+  document.getElementById('post-caption-fb').value = c.facebook;
+  document.getElementById('post-caption-ig').value = c.instagram;
+}
+async function copyText(id, btn) {
+  try {
+    await navigator.clipboard.writeText(document.getElementById(id).value);
+    const o = btn.textContent; btn.textContent = '✅ Copied'; setTimeout(() => { btn.textContent = o; }, 1500);
+  } catch { showToast('Copy failed. Select the text and copy it.'); }
+}
+function loadImg(src) {
+  return new Promise((resolve, reject) => { const i = new Image(); i.onload = () => resolve(i); i.onerror = reject; i.src = src; });
+}
+function wrapLines(ctx, text, maxWidth, maxLines) {
+  const words = String(text).split(' '); const lines = []; let line = '';
+  for (const w of words) {
+    const t = line ? line + ' ' + w : w;
+    if (ctx.measureText(t).width > maxWidth && line) { lines.push(line); line = w; } else line = t;
+  }
+  if (line) lines.push(line);
+  if (lines.length > maxLines) { lines.length = maxLines; lines[maxLines - 1] = lines[maxLines - 1].replace(/\s+\S*$/, '') + '…'; }
+  return lines;
+}
+// Brand card: photo base, dark gradient on the lower third, rust top bar and
+// HH monogram, headline = category · location, price in gold, the link.
+async function drawPostCard(kit) {
+  const cv = document.getElementById('post-card'); const ctx = cv.getContext('2d'); const W = 1080, H = 1080;
+  try { await document.fonts.load('700 56px "Libre Baskerville"'); await document.fonts.load('600 24px Inter'); } catch {}
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = '#0A0A0A'; ctx.fillRect(0, 0, W, H);
+  try {
+    if (kit.photo_url) {
+      const img = await loadImg(`${API}/api/admin/listings/${kit.id}/photo`);
+      const s = Math.max(W / img.width, H / img.height); const dw = img.width * s, dh = img.height * s;
+      ctx.drawImage(img, (W - dw) / 2, (H - dh) / 2, dw, dh);
+    } else {
+      const mark = await loadImg('/hero_mark.png');
+      ctx.globalAlpha = 0.08; ctx.drawImage(mark, 90, 90, 900, 900); ctx.globalAlpha = 1;
+    }
+  } catch (e) { /* keep the black base */ }
+  const g = ctx.createLinearGradient(0, H * 0.45, 0, H);
+  g.addColorStop(0, 'rgba(10,10,10,0)'); g.addColorStop(0.55, 'rgba(10,10,10,.86)'); g.addColorStop(1, 'rgba(10,10,10,.97)');
+  ctx.fillStyle = g; ctx.fillRect(0, H * 0.45, W, H * 0.55);
+  ctx.fillStyle = '#8B3214'; ctx.fillRect(0, 0, W, 14);
+  try { const logo = await loadImg('/logo.png'); const lh = 96, lw = lh * (logo.width / logo.height); ctx.drawImage(logo, 48, 44, lw, lh); } catch {}
+  const t = PostKit.cardText(kit);
+  const left = 64; let y = 760;
+  ctx.textBaseline = 'alphabetic';
+  ctx.fillStyle = '#C4A882'; ctx.font = '600 24px Inter, Arial, sans-serif';
+  ctx.fillText(t.kicker.split('').join(' '), left, y); y += 50;
+  ctx.fillStyle = '#F5EFE0'; ctx.font = '700 56px "Libre Baskerville", Georgia, serif';
+  for (const line of wrapLines(ctx, t.headline, W - left * 2, 2)) { ctx.fillText(line, left, y); y += 66; }
+  ctx.fillStyle = '#8B3214'; ctx.fillRect(left, y - 26, 40, 4); y += 16;
+  ctx.fillStyle = '#C9A96E'; ctx.font = '700 68px "Libre Baskerville", Georgia, serif'; ctx.fillText(t.price, left, y + 40); y += 92;
+  ctx.fillStyle = '#C9A96E'; ctx.font = '500 28px Inter, Arial, sans-serif'; ctx.fillText(t.url, left, y + 14);
+}
+function downloadPostCard() {
+  const cv = document.getElementById('post-card');
+  cv.toBlob(b => {
+    if (!b) { showToast('Could not build the image'); return; }
+    const a = document.createElement('a'); a.href = URL.createObjectURL(b);
+    a.download = `herdhub-post-${postKit ? postKit.id : 'card'}.jpg`;
+    document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 3000);
+  }, 'image/jpeg', 0.92);
+}
+async function markListingPosted() {
+  if (!postKit) return;
+  try {
+    const r = await fetch(`${API}/api/admin/listings/${postKit.id}/posted`, { method: 'POST', headers: { Authorization: `Bearer ${token}` } });
+    const d = await r.json();
+    if (!r.ok) { showToast(d.error || 'Could not record the post'); return; }
+    postKit.social_posted_at = d.social_posted_at;
+    document.getElementById('post-posted-note').textContent = `Posted ${fmtDate(d.social_posted_at)}`;
+    showToast('Marked as posted'); loadListings();
+  } catch { showToast('Error recording the post'); }
+}
+
 // ── Listing reports (H11) ─────────────────────────────
 let reportRows = [];
 async function loadReports() {
@@ -2186,5 +2316,6 @@ function downloadCatalogCSV(){
 }
 
 </script>
+<script src="/post-kit.js"></script>
 </body>
 </html>

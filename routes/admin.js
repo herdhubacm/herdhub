@@ -113,7 +113,7 @@ router.get('/listings', async (req, res) => {
     const [rows, countRow] = await Promise.all([
       query(`SELECT l.id, l.title, l.category, l.breed, l.price, l.price_type,
               l.state, l.city, l.tier, l.status, l.is_featured,
-              l.payment_status, l.created_at, l.expires_at,
+              l.payment_status, l.created_at, l.expires_at, l.social_posted_at,
               u.id AS user_id, u.name AS seller_name, u.email AS seller_email,
               (SELECT COUNT(*) FROM listing_photos WHERE listing_id=l.id) AS photo_count,
               (SELECT url FROM listing_photos WHERE listing_id=l.id ORDER BY sort_order LIMIT 1) AS thumb
@@ -158,6 +158,59 @@ router.delete('/listings/:id', async (req, res) => {
   } catch (err) {
     console.error('Admin delete listing error:', err);
     res.status(500).json({ error: 'Could not delete listing' });
+  }
+});
+
+// ── Post this listing (share to social) ────────────────
+// Everything the admin Post action needs for one listing, in one call.
+router.get('/listings/:id(\\d+)/post-kit', async (req, res) => {
+  try {
+    const { rows } = await query(
+      `SELECT l.id, l.title, l.description, l.category, l.breed, l.quantity, l.price, l.price_type,
+              l.city, l.state, l.status, l.social_posted_at,
+              (SELECT url FROM listing_photos WHERE listing_id = l.id ORDER BY sort_order LIMIT 1) AS photo_url,
+              u.name AS seller_name, u.facebook_url AS seller_facebook, u.instagram_url AS seller_instagram,
+              r.ranch_name, r.facebook AS ranch_facebook, r.instagram AS ranch_instagram
+         FROM listings l
+         JOIN users u ON u.id = l.user_id
+         LEFT JOIN ranch_profiles r ON r.user_id = l.user_id
+        WHERE l.id = $1`,
+      [req.params.id]
+    );
+    if (!rows.length) return res.status(404).json({ error: 'Listing not found' });
+    res.json(rows[0]);
+  } catch (err) {
+    console.error('post-kit error:', err);
+    res.status(500).json({ error: 'Could not load the listing' });
+  }
+});
+
+// Same-origin copy of the first photo so the admin page can draw it on a canvas
+// (the photo bucket sends no CORS headers, which would taint the canvas).
+router.get('/listings/:id(\\d+)/photo', async (req, res) => {
+  try {
+    const { rows } = await query('SELECT url FROM listing_photos WHERE listing_id = $1 ORDER BY sort_order LIMIT 1', [req.params.id]);
+    if (!rows.length) return res.status(404).json({ error: 'No photo' });
+    const r = await fetch(rows[0].url);
+    if (!r.ok) return res.status(502).json({ error: 'Photo fetch failed' });
+    res.set('Content-Type', r.headers.get('content-type') || 'image/webp');
+    res.set('Cache-Control', 'private, max-age=3600');
+    res.send(Buffer.from(await r.arrayBuffer()));
+  } catch (err) {
+    console.error('photo proxy error:', err);
+    res.status(500).json({ error: 'Could not fetch the photo' });
+  }
+});
+
+// Rotation log: when the brand last posted this listing
+router.post('/listings/:id(\\d+)/posted', async (req, res) => {
+  try {
+    const { rows } = await query('UPDATE listings SET social_posted_at = NOW() WHERE id = $1 RETURNING id, social_posted_at', [req.params.id]);
+    if (!rows.length) return res.status(404).json({ error: 'Listing not found' });
+    res.json({ ok: true, social_posted_at: rows[0].social_posted_at });
+  } catch (err) {
+    console.error('posted error:', err);
+    res.status(500).json({ error: 'Could not record the post' });
   }
 });
 
