@@ -214,6 +214,67 @@ router.post('/listings/:id(\\d+)/posted', async (req, res) => {
   }
 });
 
+// ── Steakholder spotlight (share to social) ────────────
+// Our Steakholders on the homepage are the Prime (filet) placements. This is
+// the roster for the Advertisers panel: who is live, when it ends, last spotlight.
+router.get('/steakholders', async (_req, res) => {
+  try {
+    const { rows } = await query(
+      `SELECT l.id, l.title, l.farm_name, l.city, l.state, l.status, l.payment_status,
+              l.created_at, l.expires_at, l.steakholder_posted_at,
+              (SELECT COALESCE(thumb_url, url) FROM listing_photos WHERE listing_id = l.id ORDER BY sort_order LIMIT 1) AS thumb,
+              u.name AS seller_name, u.email AS seller_email, r.ranch_name
+         FROM listings l
+         JOIN users u ON u.id = l.user_id
+         LEFT JOIN ranch_profiles r ON r.user_id = l.user_id
+        WHERE l.tier = 'filet'
+        ORDER BY (l.status = 'active') DESC, l.created_at DESC
+        LIMIT 100`
+    );
+    res.json(rows);
+  } catch (err) {
+    console.error('steakholders error:', err);
+    res.status(500).json({ error: 'Could not load the Steakholders' });
+  }
+});
+
+// Everything the spotlight needs for one Steakholder, in one call.
+router.get('/listings/:id(\\d+)/steakholder-kit', async (req, res) => {
+  try {
+    const { rows } = await query(
+      `SELECT l.id, l.title, l.description, l.category, l.city, l.state, l.status, l.tier,
+              l.farm_name, l.website_url, l.expires_at, l.steakholder_posted_at,
+              (SELECT url FROM listing_photos WHERE listing_id = l.id ORDER BY sort_order LIMIT 1) AS photo_url,
+              u.name AS seller_name, u.website_url AS seller_website,
+              u.facebook_url AS seller_facebook, u.instagram_url AS seller_instagram,
+              r.ranch_name, r.tagline AS ranch_tagline, r.website AS ranch_website,
+              r.facebook AS ranch_facebook, r.instagram AS ranch_instagram
+         FROM listings l
+         JOIN users u ON u.id = l.user_id
+         LEFT JOIN ranch_profiles r ON r.user_id = l.user_id
+        WHERE l.id = $1`,
+      [req.params.id]
+    );
+    if (!rows.length) return res.status(404).json({ error: 'Listing not found' });
+    res.json(rows[0]);
+  } catch (err) {
+    console.error('steakholder-kit error:', err);
+    res.status(500).json({ error: 'Could not load the Steakholder' });
+  }
+});
+
+// Rotation log: when the brand last ran this Steakholder's spotlight
+router.post('/listings/:id(\\d+)/steakholder-posted', async (req, res) => {
+  try {
+    const { rows } = await query('UPDATE listings SET steakholder_posted_at = NOW() WHERE id = $1 RETURNING id, steakholder_posted_at', [req.params.id]);
+    if (!rows.length) return res.status(404).json({ error: 'Listing not found' });
+    res.json({ ok: true, steakholder_posted_at: rows[0].steakholder_posted_at });
+  } catch (err) {
+    console.error('steakholder-posted error:', err);
+    res.status(500).json({ error: 'Could not record the post' });
+  }
+});
+
 // ── Listing reports (H11) ──────────────────────────────
 // GET /api/admin/reports?status=open|all  — reports with listing, seller and reporter
 router.get('/reports', async (req, res) => {
