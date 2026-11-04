@@ -111,5 +111,90 @@
     };
   }
 
-  return { STATE_NAMES, fmtCat, fmtPrice, firstSentence, handleFrom, sellerLine, hashtagsFor, factsLine, buildCaptions, cardText };
+  // ── Steakholder spotlight ──────────────────────────────────────────────
+  // Input: a Prime (filet) placement listing plus the owner's profile. Output: a
+  // thank-you-and-spotlight caption (who they are, what they do for producers,
+  // where to find them) and the text for a logo-on-black brand card.
+
+  // "example.com/shop" from any URL shape; '' when there isn't one.
+  function domainOf(url) {
+    const t = String(url || '').trim();
+    if (!t) return '';
+    const m = t.match(/^(?:https?:\/\/)?(?:www\.)?([^\s/?#]+)([^\s?#]*)/i);
+    if (!m || !/\./.test(m[1])) return '';
+    return (m[1] + m[2].replace(/\/+$/, '')).toLowerCase();
+  }
+
+  // The partner's own first one or two sentences. Their claim, not ours.
+  function leadSentences(text, max) {
+    max = max || 240;
+    const t = String(text || '').replace(/\s+/g, ' ').trim();
+    if (!t) return '';
+    const parts = t.match(/[^.!?]+[.!?]+(?=\s|$)/g) || [t];
+    let out = parts[0].trim();
+    if (parts[1] && (out + ' ' + parts[1].trim()).length <= max) out += ' ' + parts[1].trim();
+    if (out.length > max) out = out.slice(0, max - 1).replace(/\s+\S*$/, '') + '…';
+    return out;
+  }
+
+  function partnerName(kit, nameOverride) {
+    const typed = String(nameOverride || '').trim();
+    return typed || String(kit.farm_name || kit.ranch_name || kit.title || '').trim();
+  }
+
+  function partnerSite(kit) {
+    return domainOf(kit.website_url) || domainOf(kit.ranch_website) || domainOf(kit.seller_website);
+  }
+
+  function partnerHandle(kit, handleOverride) {
+    const typed = String(handleOverride || '').trim();
+    const h = typed || handleFrom(kit.ranch_instagram || kit.seller_instagram) || handleFrom(kit.ranch_facebook || kit.seller_facebook);
+    if (!h) return '';
+    return h.startsWith('@') ? h : '@' + h;
+  }
+
+  function steakholderHashtags(kit) {
+    const out = ['#HerdHub', '#Steakholders', '#BuiltForTheProducer'];
+    const cat = fmtCat(kit.category);
+    if (cat && kit.category !== 'farm_to_table') out.push(tag(cat));
+    const st = STATE_NAMES[kit.state];
+    if (st) out.push(tag(st + ' Cattle'), tag(st + ' Ranch'));
+    out.push('#Ranching', '#Cattlemen', '#AmericanRancher', '#RanchLife', '#SupportLocal');
+    return Array.from(new Set(out.filter(t => t.length > 1))).slice(0, 12);
+  }
+
+  function buildSteakholderCaptions(kit, opts) {
+    opts = opts || {};
+    const name = partnerName(kit, opts.name);
+    const where = [kit.city, kit.state].filter(Boolean).join(', ');
+    const site = partnerSite(kit);
+    const handle = partnerHandle(kit, opts.handle);
+    const base = [
+      `Thank you to ${name}, one of our Steakholders.`,
+      leadSentences(kit.ranch_tagline || kit.description),
+      [where, site].filter(Boolean).join(' · '),
+      'Steakholders are the partners that keep Herd Hub free for the producer. Give them a look.',
+      handle ? `Find them: ${handle}` : '',
+    ].filter(Boolean);
+    const tags = steakholderHashtags(kit).join(' ');
+    const facebook  = base.concat([`https://theherdhub.com/listing/${kit.id}`]).join('\n') + '\n\n' + tags;
+    const instagram = base.concat(['Link in bio.']).join('\n') + '\n\n' + tags;
+    return { facebook, instagram, hashtags: tags, name, handle };
+  }
+
+  function steakholderCardText(kit, opts) {
+    opts = opts || {};
+    const where = [kit.city, kit.state].filter(Boolean).join(', ');
+    const site = partnerSite(kit);
+    return {
+      kicker: 'THANK YOU TO OUR STEAKHOLDER',
+      headline: partnerName(kit, opts.name),
+      body: [where, leadSentences(kit.ranch_tagline || kit.description, 110)].filter(Boolean).join(' · '),
+      url: site || `theherdhub.com/listing/${kit.id}`,
+      footer: site ? 'A Herd Hub Steakholder · theherdhub.com' : '',
+    };
+  }
+
+  return { STATE_NAMES, fmtCat, fmtPrice, firstSentence, handleFrom, sellerLine, hashtagsFor, factsLine, buildCaptions, cardText,
+           domainOf, leadSentences, partnerName, partnerSite, partnerHandle, steakholderHashtags, buildSteakholderCaptions, steakholderCardText };
 });

@@ -644,6 +644,15 @@ tr:hover td{background:rgba(255,255,255,.02)}
       </div>
 
       <div class="panel" id="panel-advertisers">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:10px">
+          <div style="font-size:13px;color:var(--muted)">Our Steakholders: the Prime placements live on the homepage. Post runs the thank-you spotlight.</div>
+          <button class="btn" onclick="loadSteakholders()" style="font-size:11px;padding:7px 14px">&#x21BB; Refresh</button>
+        </div>
+        <div class="table-wrap" style="margin-bottom:28px"><table>
+          <thead><tr><th>Steakholder</th><th>Owner</th><th>Location</th><th>Status</th><th>Placement ends</th><th>Last spotlight</th><th>Action</th></tr></thead>
+          <tbody id="stk-tbody"><tr><td colspan="7" style="text-align:center;color:var(--muted);padding:24px">Loading...</td></tr></tbody>
+        </table></div>
+
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
           <div style="font-size:13px;color:var(--muted)">Advertiser inquiry leads</div>
           <div style="display:flex;gap:8px">
@@ -731,6 +740,37 @@ tr:hover td{background:rgba(255,255,255,.02)}
           <button class="btn btn-success" onclick="markListingPosted()">Mark as posted</button>
         </div>
         <div style="font-size:11px;color:var(--muted);margin-top:10px">Nothing posts from here. Download the card, copy the caption, post it yourself. Two or three listing posts a week keeps the feed a community, not a classified.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="modal-post-steakholder">
+  <div class="modal" style="width:980px;max-width:95vw">
+    <button class="modal-close" onclick="closeModal('post-steakholder')">✕</button>
+    <h2>🥩 Steakholder spotlight</h2>
+    <div id="stk-sub" style="font-size:12px;color:var(--muted);margin-bottom:14px"></div>
+    <div style="display:grid;grid-template-columns:minmax(260px,420px) 1fr;gap:20px;align-items:start">
+      <div>
+        <canvas id="stk-card" width="1080" height="1080" style="width:100%;height:auto;border:1px solid var(--border);border-radius:6px;background:#0A0A0A;display:block"></canvas>
+        <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+          <button class="btn btn-primary" onclick="downloadSteakholderCard()">&#x2B07; Download card (JPG)</button>
+          <a class="btn btn-ghost" id="stk-open-link" href="#" target="_blank" rel="noopener">Open listing</a>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-top:8px">1080x1080. Their logo (the listing's first photo) on brand black, their name, where to find them.</div>
+      </div>
+      <div>
+        <div class="form-group"><label>Name as it should read (from the listing; edit if the title is a headline)</label><input type="text" id="stk-name" oninput="refreshSteakholderPost()"></div>
+        <div class="form-group"><label>Their handle (blank if they haven't shared one)</label><input type="text" id="stk-handle" placeholder="@handle" oninput="refreshSteakholderPost()"></div>
+        <div class="form-group"><label>Facebook caption (with the link)</label><textarea id="stk-caption-fb" rows="9" style="width:100%;font-family:inherit;font-size:13px;line-height:1.5"></textarea>
+          <button class="btn btn-ghost" style="margin-top:6px" onclick="copyText('stk-caption-fb', this)">Copy Facebook caption</button></div>
+        <div class="form-group"><label>Instagram / TikTok caption (link in bio)</label><textarea id="stk-caption-ig" rows="9" style="width:100%;font-family:inherit;font-size:13px;line-height:1.5"></textarea>
+          <button class="btn btn-ghost" style="margin-top:6px" onclick="copyText('stk-caption-ig', this)">Copy Instagram caption</button></div>
+        <div style="display:flex;gap:10px;justify-content:flex-end;align-items:center;margin-top:8px">
+          <span id="stk-posted-note" style="font-size:12px;color:var(--muted)"></span>
+          <button class="btn btn-success" onclick="markSteakholderPosted()">Mark as posted</button>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-top:10px">Nothing posts from here. If they're paying, clear the copy with them before it goes out. Mark as posted writes the date on this row.</div>
       </div>
     </div>
   </div>
@@ -924,7 +964,7 @@ const panelTitles = {
   settings:  ['Settings', 'Platform configuration and quick actions'],
   catalog:   ['Catalog Mailing List', 'Print catalog signup requests'],
   beefbox:   ['Beef Box Claims', 'First 1,000 listers promotion'],
-  advertisers: ['Advertiser Inquiries', 'Inquiry leads from /advertise page'],
+  advertisers: ['Advertisers', 'Steakholder spotlights and inquiry leads from /advertise'],
   reports:   ['Listing Reports', 'Reports from users. Review, dismiss, restore or remove.'],
 };
 
@@ -950,7 +990,7 @@ function switchPanel(name) {
   if (name === 'settings')  { loadSettings(); }
   if (name === 'catalog')   { loadCatalogSignups(); }
   if (name === 'beefbox')   { loadBeefBoxClaims(); }
-  if (name === 'advertisers') { loadAdvertiserInquiries(); }
+  if (name === 'advertisers') { loadSteakholders(); loadAdvertiserInquiries(); }
 }
 
 // ── Dashboard ─────────────────────────────────────────
@@ -1291,7 +1331,7 @@ function fmtDate(iso) {
 
 function tierBadge(tier) {
   const map = { basic:'badge-gray', burger:'badge-gray', sirloin:'badge-rust', ribeye:'badge-rust', filet:'badge-gold', t_bone:'badge-purple' };
-  const names = { burger:'Burger', sirloin:'Sirloin', ribeye:'Ribeye', filet:'Choice', t_bone:'Prime' };
+  const names = { burger:'Burger', sirloin:'Sirloin', ribeye:'Ribeye', filet:'Prime', t_bone:'Choice' };
   return `<span class="badge ${map[tier]||'badge-gray'}">${names[tier]||tier||'basic'}</span>`;
 }
 function statusBadge(s) {
@@ -2160,15 +2200,16 @@ async function drawPostCard(kit) {
   ctx.fillStyle = '#C9A96E'; ctx.font = '700 68px "Libre Baskerville", Georgia, serif'; ctx.fillText(t.price, left, y + 40); y += 92;
   ctx.fillStyle = '#C9A96E'; ctx.font = '500 28px Inter, Arial, sans-serif'; ctx.fillText(t.url, left, y + 14);
 }
-function downloadPostCard() {
-  const cv = document.getElementById('post-card');
+function downloadCanvas(canvasId, filename) {
+  const cv = document.getElementById(canvasId);
   cv.toBlob(b => {
     if (!b) { showToast('Could not build the image'); return; }
     const a = document.createElement('a'); a.href = URL.createObjectURL(b);
-    a.download = `herdhub-post-${postKit ? postKit.id : 'card'}.jpg`;
+    a.download = filename;
     document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 3000);
   }, 'image/jpeg', 0.92);
 }
+function downloadPostCard() { downloadCanvas('post-card', `herdhub-post-${postKit ? postKit.id : 'card'}.jpg`); }
 async function markListingPosted() {
   if (!postKit) return;
   try {
@@ -2178,6 +2219,113 @@ async function markListingPosted() {
     postKit.social_posted_at = d.social_posted_at;
     document.getElementById('post-posted-note').textContent = `Posted ${fmtDate(d.social_posted_at)}`;
     showToast('Marked as posted'); loadListings();
+  } catch { showToast('Error recording the post'); }
+}
+
+// ── Steakholder spotlight (share to social) ───────────
+let steakholders = [];
+let stkKit = null;
+let stkDrawTimer = null;
+async function loadSteakholders() {
+  const tbody = document.getElementById('stk-tbody');
+  try {
+    const r = await fetch(`${API}/api/admin/steakholders`, { headers: { Authorization: `Bearer ${token}` } });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || 'Could not load');
+    steakholders = d;
+    renderSteakholders();
+  } catch (e) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:24px">Failed: ' + escHtml(e.message) + '</td></tr>'; }
+}
+function renderSteakholders() {
+  const tbody = document.getElementById('stk-tbody');
+  if (!steakholders.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:24px">No Prime placements yet. Promote one from Featured Listings (👑) or sell a slot.</td></tr>'; return; }
+  tbody.innerHTML = steakholders.map(s => {
+    const name = s.farm_name || s.ranch_name || s.title;
+    const live = s.status === 'active';
+    return `<tr>
+      <td style="font-weight:500">${s.thumb ? `<img src="${escHtml(s.thumb)}" alt="" style="width:28px;height:28px;object-fit:cover;border-radius:4px;vertical-align:middle;margin-right:8px;background:#0A0A0A">` : ''}${escHtml(name)}</td>
+      <td style="font-size:12px">${escHtml(s.seller_name || '')}<br><span style="color:var(--muted)">${escHtml(s.seller_email || '')}</span></td>
+      <td style="font-size:12px">${escHtml([s.city, s.state].filter(Boolean).join(', ') || '—')}</td>
+      <td>${statusBadge(s.status)}</td>
+      <td style="font-size:12px;color:var(--muted)">${fmtDate(s.expires_at)}</td>
+      <td style="font-size:12px">${s.steakholder_posted_at ? `<span class="badge badge-green" title="${escHtml(fmtDate(s.steakholder_posted_at))}">Posted ${escHtml(fmtDate(s.steakholder_posted_at))}</span>` : '<span style="color:var(--muted)">Not yet</span>'}</td>
+      <td><button class="btn btn-ghost" onclick="openPostSteakholder(${s.id})"${live ? '' : ' title="Placement is not live"'}>Post</button></td>
+    </tr>`;
+  }).join('');
+}
+async function openPostSteakholder(id) {
+  try {
+    const r = await fetch(`${API}/api/admin/listings/${id}/steakholder-kit`, { headers: { Authorization: `Bearer ${token}` } });
+    const d = await r.json();
+    if (!r.ok) { showToast(d.error || 'Could not load the Steakholder'); return; }
+    stkKit = d;
+    document.getElementById('stk-sub').textContent = `#${d.id} ${d.title} · ${d.seller_name || ''}` + (d.steakholder_posted_at ? ` · last spotlight ${fmtDate(d.steakholder_posted_at)}` : '');
+    document.getElementById('stk-open-link').href = `https://theherdhub.com/listing/${d.id}`;
+    document.getElementById('stk-name').value = PostKit.partnerName(d);
+    document.getElementById('stk-handle').value = PostKit.partnerHandle(d);
+    document.getElementById('stk-posted-note').textContent = d.steakholder_posted_at ? `Posted ${fmtDate(d.steakholder_posted_at)}` : '';
+    refreshSteakholderCaptions();
+    openModal('post-steakholder');
+    await drawSteakholderCard(d, document.getElementById('stk-name').value);
+  } catch (e) { showToast('Could not open the spotlight'); }
+}
+function refreshSteakholderCaptions() {
+  if (!stkKit) return;
+  const c = PostKit.buildSteakholderCaptions(stkKit, { name: document.getElementById('stk-name').value, handle: document.getElementById('stk-handle').value });
+  document.getElementById('stk-caption-fb').value = c.facebook;
+  document.getElementById('stk-caption-ig').value = c.instagram;
+}
+function refreshSteakholderPost() {
+  refreshSteakholderCaptions();
+  clearTimeout(stkDrawTimer);
+  stkDrawTimer = setTimeout(() => { if (stkKit) drawSteakholderCard(stkKit, document.getElementById('stk-name').value); }, 250);
+}
+// Brand card: black, rust top bar, HH monogram, cow-mark watermark, their logo
+// (first photo, fit inside a box, never cropped), name in cream, rust rule,
+// where and what in muted, their site in gold.
+async function drawSteakholderCard(kit, name) {
+  const cv = document.getElementById('stk-card'); const ctx = cv.getContext('2d'); const W = 1080, H = 1080;
+  try { await document.fonts.load('700 60px "Libre Baskerville"'); await document.fonts.load('600 24px Inter'); } catch {}
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = '#0A0A0A'; ctx.fillRect(0, 0, W, H);
+  try { const mark = await loadImg('/hero_mark.png'); ctx.globalAlpha = 0.06; ctx.drawImage(mark, 90, 90, 900, 900); ctx.globalAlpha = 1; } catch {}
+  ctx.fillStyle = '#8B3214'; ctx.fillRect(0, 0, W, 14);
+  try { const logo = await loadImg('/logo.png'); const lh = 96, lw = lh * (logo.width / logo.height); ctx.drawImage(logo, 48, 44, lw, lh); } catch {}
+  // Logo box: 760 wide, 420 tall, centered, contain-fit
+  const bx = 160, by = 190, bw = 760, bh = 420;
+  try {
+    if (kit.photo_url) {
+      const img = await loadImg(`${API}/api/admin/listings/${kit.id}/photo`);
+      const s = Math.min(bw / img.width, bh / img.height, 1.6); const dw = img.width * s, dh = img.height * s;
+      ctx.drawImage(img, bx + (bw - dw) / 2, by + (bh - dh) / 2, dw, dh);
+    }
+  } catch (e) { /* keep the black base */ }
+  const t = PostKit.steakholderCardText(kit, { name });
+  const left = 64; let y = 700;
+  ctx.textBaseline = 'alphabetic';
+  ctx.fillStyle = '#C4A882'; ctx.font = '600 24px Inter, Arial, sans-serif';
+  ctx.fillText(t.kicker.split('').join(' '), left, y); y += 56;
+  ctx.fillStyle = '#F5EFE0'; ctx.font = '700 60px "Libre Baskerville", Georgia, serif';
+  const head = wrapLines(ctx, t.headline, W - left * 2, 2);
+  for (const line of head) { ctx.fillText(line, left, y); y += 70; }
+  ctx.fillStyle = '#8B3214'; ctx.fillRect(left, y - 30, 40, 4); y += 18;
+  ctx.fillStyle = '#8C7560'; ctx.font = '400 28px Inter, Arial, sans-serif';
+  const body = t.body ? wrapLines(ctx, t.body, W - left * 2, head.length > 1 ? 1 : 2) : [];
+  for (const line of body) { ctx.fillText(line, left, y); y += 38; }
+  y += 14;
+  ctx.fillStyle = '#C9A96E'; ctx.font = '500 32px Inter, Arial, sans-serif'; ctx.fillText(t.url, left, y + 16);
+  if (t.footer) { ctx.fillStyle = '#8C7560'; ctx.font = '500 20px Inter, Arial, sans-serif'; ctx.textAlign = 'right'; ctx.fillText(t.footer, W - left, H - 44); ctx.textAlign = 'left'; }
+}
+function downloadSteakholderCard() { downloadCanvas('stk-card', `herdhub-steakholder-${stkKit ? stkKit.id : 'card'}.jpg`); }
+async function markSteakholderPosted() {
+  if (!stkKit) return;
+  try {
+    const r = await fetch(`${API}/api/admin/listings/${stkKit.id}/steakholder-posted`, { method: 'POST', headers: { Authorization: `Bearer ${token}` } });
+    const d = await r.json();
+    if (!r.ok) { showToast(d.error || 'Could not record the post'); return; }
+    stkKit.steakholder_posted_at = d.steakholder_posted_at;
+    document.getElementById('stk-posted-note').textContent = `Posted ${fmtDate(d.steakholder_posted_at)}`;
+    showToast('Marked as posted'); loadSteakholders();
   } catch { showToast('Error recording the post'); }
 }
 
