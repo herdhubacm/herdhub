@@ -315,8 +315,6 @@ tr:hover td{background:rgba(255,255,255,.02)}
         </div>
       </div>
 
-    </div><!-- /content -->
-
       <!-- ARTICLES PANEL -->
       <div class="panel" id="panel-articles">
         <div class="table-wrap">
@@ -685,6 +683,8 @@ tr:hover td{background:rgba(255,255,255,.02)}
         </div>
         <div id="reports-body"><div style="color:var(--muted);padding:24px;text-align:center">Loading...</div></div>
       </div>
+
+    </div><!-- /content: every panel lives inside it -->
 
   </div><!-- /main -->
 </div><!-- /admin-app -->
@@ -2157,6 +2157,14 @@ async function copyText(id, btn) {
 function loadImg(src) {
   return new Promise((resolve, reject) => { const i = new Image(); i.onload = () => resolve(i); i.onerror = reject; i.src = src; });
 }
+// Admin routes only accept the Bearer header, and a plain <img> request can't
+// send one. Fetch the bytes with the token, then hand the canvas a blob URL.
+async function loadAuthedImg(url) {
+  const r = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+  if (!r.ok) throw new Error('photo ' + r.status);
+  const obj = URL.createObjectURL(await r.blob());
+  try { return await loadImg(obj); } finally { setTimeout(() => URL.revokeObjectURL(obj), 5000); }
+}
 function wrapLines(ctx, text, maxWidth, maxLines) {
   const words = String(text).split(' '); const lines = []; let line = '';
   for (const w of words) {
@@ -2176,7 +2184,7 @@ async function drawPostCard(kit) {
   ctx.fillStyle = '#0A0A0A'; ctx.fillRect(0, 0, W, H);
   try {
     if (kit.photo_url) {
-      const img = await loadImg(`${API}/api/admin/listings/${kit.id}/photo`);
+      const img = await loadAuthedImg(`${API}/api/admin/listings/${kit.id}/photo`);
       const s = Math.max(W / img.width, H / img.height); const dw = img.width * s, dh = img.height * s;
       ctx.drawImage(img, (W - dw) / 2, (H - dh) / 2, dw, dh);
     } else {
@@ -2295,7 +2303,7 @@ async function drawSteakholderCard(kit, name) {
   const bx = 160, by = 190, bw = 760, bh = 420;
   try {
     if (kit.photo_url) {
-      const img = await loadImg(`${API}/api/admin/listings/${kit.id}/photo`);
+      const img = await loadAuthedImg(`${API}/api/admin/listings/${kit.id}/photo`);
       const s = Math.min(bw / img.width, bh / img.height, 1.6); const dw = img.width * s, dh = img.height * s;
       ctx.drawImage(img, bx + (bw - dw) / 2, by + (bh - dh) / 2, dw, dh);
     }
