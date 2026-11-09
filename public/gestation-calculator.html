@@ -379,6 +379,29 @@ body::before {
   margin-top: 4px;
 }
 
+/* ── Calving window ── */
+.window-note {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--tan);
+  padding: 12px 16px;
+  border-left: 3px solid var(--gold);
+  background: rgba(201,169,110,.06);
+  border-radius: 0 6px 6px 0;
+  margin: 0 0 8px;
+}
+.window-note strong { color: var(--gold); font-weight: 700; }
+.sources {
+  margin-top: 10px;
+  font-size: 12px;
+  line-height: 1.7;
+}
+.sources a { color: var(--tan); }
+.sources a:hover { color: var(--gold); }
+
+/* Two-up input rows stack on a phone */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
 /* ── Stage Info ── */
 .stage-card {
   background: rgba(10,10,10,.6);
@@ -588,6 +611,7 @@ body::before {
   .site-header { padding: 0 20px; }
   .result-grid { grid-template-columns: 1fr 1fr; }
   .add-row { grid-template-columns: 1fr; }
+  .two-col { grid-template-columns: 1fr; gap: 0; }
   .cal-cell { min-height: 60px; }
   .cal-entry { font-size: 9px; }
   .auth-banner { flex-direction: column; text-align: center; }
@@ -615,7 +639,7 @@ body::before {
   <div class="hero-eyebrow">Herd Hub Rancher Tools</div>
   <h1>Gestation <em>Calculator</em></h1>
   <div class="hero-sub">Track every pregnancy from pasture to calving pen</div>
-  <p class="hero-desc">Enter a breeding date and breed to see the expected calving date, days remaining, and fetal development stage. Save entries to your calving calendar — synced across all your devices when signed in.</p>
+  <p class="hero-desc">Enter a breeding date and breed to see the expected calving date, days remaining, and fetal development stage. Save entries to your calving calendar, synced across all your devices when signed in.</p>
   <div class="tool-tabs">
     <button class="tool-tab active" onclick="switchTool('calc')">&#x1f404; Gestation Calculator</button>
     <button class="tool-tab" onclick="switchTool('calendar')">&#x1f4c5; Calving Calendar</button>
@@ -635,7 +659,7 @@ body::before {
 
     <div class="card">
       <div class="card-title">&#x1f404; Breeding Details</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <div class="two-col">
         <div class="field">
           <label for="calc-name">Cow Name / ID (optional)</label>
           <input type="text" id="calc-name" placeholder="e.g. 442T or Daisy">
@@ -657,7 +681,7 @@ body::before {
           </select>
         </div>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <div class="two-col">
         <div class="field">
           <label for="breed-date">Breeding Date</label>
           <input type="date" id="breed-date">
@@ -702,6 +726,8 @@ body::before {
           <span class="progress-text" id="r-bar-text">0%</span>
         </div>
       </div>
+
+      <div class="window-note"><strong>Calving window:</strong> <span id="r-window"></span>. Most calves come within about a week of the date. Heifers and AI-sired calves often come a few days early.</div>
 
       <div class="stage-card" id="r-stage">
         <div class="stage-name" id="r-stage-name"></div>
@@ -825,10 +851,19 @@ body::before {
   </div>
 
   <div class="disclaimer">
-    <strong style="color:var(--tan)">About gestation estimates:</strong> Average gestation lengths vary by breed and individual animal.
-    The values used here are breed averages — actual calving can occur 5-10 days before or after the estimated date.
-    Heifers often calve a few days earlier than mature cows. Always watch for signs of labor and have your calving supplies ready
-    at least two weeks before the estimated due date. This tool is for planning purposes only.
+    <strong style="color:var(--tan)">About gestation estimates:</strong> The breed figures here are the commonly published breed averages
+    (Angus 283, Hereford 285, Simmental and Charolais 289, and so on). Every cow is different: actual calving commonly falls
+    5 to 10 days before or after the date shown. Heifers often calve a few days earlier than mature cows, and bull calves tend to be carried
+    about a day longer than heifer calves. Always watch for signs of labor and have your calving supplies ready at least two weeks before
+    the estimated date. This tool is for planning only.
+    <div class="sources">
+      <strong style="color:var(--tan)">What recent data says:</strong> two 2026 extension reports found modern beef cows calving ahead of the traditional 283 days.
+      Oklahoma State's Cow-Calf Corner (Feb 2026) reported an average of 280.2 days across 10,037 records from 14 Bos taurus herds, and
+      K-State Beef Tips (July 2026) reported 278.6 days across 101,787 Angus AI matings from 2000 to 2020. If you AI-breed Angus, plan on the early side of the window.
+      Sources: <a href="https://www.oklahomafarmreport.com/?p=160650" target="_blank" rel="noopener">OSU Cow-Calf Corner, Gestation Length in Beef Cattle</a> ·
+      <a href="https://www.k-state.edu/news/beef-tips/articles/2026/07/when-is-she-due-understanding-gestation-length-in-modern-beef-cattle.html" target="_blank" rel="noopener">K-State Beef Tips, When Is She Due?</a>.
+      Figures checked November 2026.
+    </div>
   </div>
 
 </div>
@@ -850,27 +885,29 @@ const BREEDS = {
 };
 
 // ── Pregnancy stages ─────────────────────────────────────────────────────────
+// Plain ASCII on purpose: the PDF export drops any non-ASCII character, so an
+// en-dash in "Week 1-2" used to print as "Week 12".
 const STAGES = [
-  { maxDay: 14,  name: 'Embryonic Stage — Week 1\u20132',
+  { maxDay: 14,  name: 'Embryonic Stage: Weeks 1 to 2',
     desc: 'The fertilized egg is traveling down the oviduct and into the uterus. Cell division is underway but the embryo has not yet attached to the uterine wall. The embryo is microscopic at this point.' },
-  { maxDay: 28,  name: 'Embryonic Attachment — Week 2\u20134',
-    desc: 'The embryo attaches to the uterine wall and the placenta begins forming. This is a critical period \u2014 stress, poor nutrition, or heat can cause early embryonic loss. The embryo is about the size of a grain of rice.' },
-  { maxDay: 45,  name: 'Early Organogenesis — Week 4\u20136',
-    desc: 'Major organs are beginning to form: heart, brain, spinal cord, and limb buds appear. The embryo is about 1 inch long. A veterinarian can confirm pregnancy via rectal palpation or ultrasound around day 30\u201335.' },
-  { maxDay: 60,  name: 'Organ Development — Week 6\u20139',
-    desc: 'The fetus now has recognizable features \u2014 eyes, ears, and hooves are forming. The heart is beating. Fetal sex can be determined by ultrasound around day 55\u201360. The fetus is about 2\u20133 inches long.' },
-  { maxDay: 90,  name: 'First Trimester Complete — Month 2\u20133',
+  { maxDay: 28,  name: 'Embryonic Attachment: Weeks 2 to 4',
+    desc: 'The embryo attaches to the uterine wall and the placenta begins forming. This is a critical period: stress, poor nutrition or heat can cause early embryonic loss. The embryo is about the size of a grain of rice.' },
+  { maxDay: 45,  name: 'Early Organogenesis: Weeks 4 to 6',
+    desc: 'Major organs are beginning to form: heart, brain, spinal cord and limb buds appear. The embryo is about 1 inch long. Ultrasound can confirm pregnancy from about day 28 to 30; rectal palpation from about day 35 to 45.' },
+  { maxDay: 60,  name: 'Organ Development: Weeks 6 to 9',
+    desc: 'The fetus now has recognizable features: eyes, ears and hooves are forming. The heart is beating. Fetal sex can be determined by ultrasound around day 55 to 60. The fetus is about 2 to 3 inches long.' },
+  { maxDay: 90,  name: 'First Trimester Complete: Months 2 to 3',
     desc: 'All major organ systems are in place. The fetus is about 6 inches long and weighs a few ounces. Hair follicles and teeth buds are developing. The cow may begin to show subtle body condition changes.' },
-  { maxDay: 150, name: 'Second Trimester — Month 3\u20135',
-    desc: 'Rapid growth phase. The fetus is developing muscle, bone density increases, and the coat begins to form. By day 150 the calf weighs about 5\u20138 lbs and is roughly 12\u201315 inches long. The cow\'s nutritional needs are increasing.' },
-  { maxDay: 210, name: 'Late Second Trimester — Month 5\u20137',
-    desc: 'The calf is growing rapidly \u2014 gaining about half a pound per day. Organs are maturing and the calf is becoming more active (you may see the cow\'s flank move). The cow needs increased protein and energy in her diet.' },
-  { maxDay: 250, name: 'Third Trimester — Month 7\u20138',
-    desc: 'The calf is gaining 1\u20131.5 lbs per day now. Lungs are maturing in preparation for breathing. The cow should be on an increasing plane of nutrition. Body condition score should be 5\u20136 heading into the final stretch.' },
-  { maxDay: 270, name: 'Pre-Calving — Month 8\u20139',
-    desc: 'The calf weighs 50\u201370 lbs and is nearly fully developed. The cow\'s udder is beginning to bag up (develop). Move her to the calving pasture. Have calving supplies ready. Watch for relaxation of the pelvic ligaments and vulva.' },
-  { maxDay: 999, name: 'Due Any Time — Final Days',
-    desc: 'The cow is at or near her due date. Watch closely for signs of labor: restlessness, tail raising, mucus discharge, and separation from the herd. The water bag should appear first, followed by the calf\'s front feet and nose. Have your vet\'s number handy.' }
+  { maxDay: 150, name: 'Second Trimester: Months 3 to 5',
+    desc: 'Rapid growth phase. The fetus is developing muscle, bone density increases, and the coat begins to form. By day 150 the calf weighs about 5 to 8 lbs and is roughly 12 to 15 inches long. The cow\'s nutritional needs are increasing.' },
+  { maxDay: 210, name: 'Late Second Trimester: Months 5 to 7',
+    desc: 'The calf is growing rapidly, gaining about half a pound per day. Organs are maturing and the calf is becoming more active (you may see the cow\'s flank move). The cow needs more protein and energy in her diet.' },
+  { maxDay: 250, name: 'Third Trimester: Months 7 to 8',
+    desc: 'The calf is gaining 1 to 1.5 lbs per day now. Lungs are maturing in preparation for breathing. The cow should be on an increasing plane of nutrition. Body condition score should be 5 to 6 heading into the final stretch.' },
+  { maxDay: 270, name: 'Pre-Calving: Months 8 to 9',
+    desc: 'The calf weighs 50 to 70 lbs and is nearly fully developed. The cow\'s udder is beginning to bag up. Move her to the calving pasture. Have calving supplies ready. Watch for relaxation of the pelvic ligaments and vulva.' },
+  { maxDay: 999, name: 'Due Any Time: Final Days',
+    desc: 'The cow is at or near her due date. Watch closely for signs of labor: restlessness, tail raising, mucus discharge and separation from the herd. The water bag should appear first, followed by the calf\'s front feet and nose. Have your vet\'s number handy.' }
 ];
 
 function getStage(day) {
@@ -943,6 +980,14 @@ function fmtDay(d) {
 }
 function daysBetween(a, b) { return Math.round((b - a) / 86400000); }
 function toDateStr(d) { return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); }
+// Add calendar days, not milliseconds. Adding days * 86400000 to a local
+// midnight lands at 11 PM the day before whenever the span crosses the fall
+// clock change, so every spring breeding showed a due date one day early.
+function addDays(d, days) { const x = new Date(d); x.setDate(x.getDate() + days); return x; }
+// Most calves come within about a week of the date (one standard deviation is
+// about 5 days in current data), so show the window, not just the day.
+const WINDOW_DAYS = 7;
+function windowText(due) { return fmt(addDays(due, -WINDOW_DAYS)) + ' to ' + fmt(addDays(due, WINDOW_DAYS)); }
 
 // ── Calculator ───────────────────────────────────────────────────────────────
 function calculate() {
@@ -952,7 +997,7 @@ function calculate() {
 
   const breed = BREEDS[breedKey];
   const breedDate = new Date(dateStr + 'T00:00:00');
-  const dueDate = new Date(breedDate.getTime() + breed.days * 86400000);
+  const dueDate = addDays(breedDate, breed.days);
   const today = new Date(); today.setHours(0,0,0,0);
 
   const elapsed = daysBetween(breedDate, today);
@@ -980,6 +1025,7 @@ function calculate() {
 
   document.getElementById('r-bar').style.width = pct.toFixed(1) + '%';
   document.getElementById('r-bar-text').textContent = pct.toFixed(0) + '%';
+  document.getElementById('r-window').textContent = windowText(dueDate);
 
   const stage = getStage(Math.max(0, elapsed));
   document.getElementById('r-stage-name').textContent = stage.name;
@@ -1035,7 +1081,7 @@ async function addCow() {
 
   const breed = BREEDS[breedKey];
   const breedDate = new Date(dateStr + 'T00:00:00');
-  const dueDate = new Date(breedDate.getTime() + breed.days * 86400000);
+  const dueDate = addDays(breedDate, breed.days);
 
   if (authToken) {
     try {
@@ -1341,21 +1387,26 @@ function exportGestationPDF() {
   let y = y0;
   const cowName = document.getElementById('calc-name')?.value || '';
   const breed = BREEDS[lc.breed];
+  const m = 18, cW = doc.internal.pageSize.getWidth() - m * 2;
   doc.setFontSize(11); doc.setTextColor(10, 10, 10);
-  if (cowName) { doc.text('Animal: ' + cowName, 14, y); y += 6; }
+  if (cowName) { doc.text('Animal: ' + stripEmoji(cowName), m, y); y += 6; }
   doc.setFontSize(9); doc.setTextColor(60, 60, 60);
-  doc.text('Breed: ' + (breed?.name || lc.breed), 14, y); y += 5;
-  doc.text('Breeding Date: ' + lc.date, 14, y); y += 5;
-  doc.text('Gestation Length: ' + lc.days + ' days', 14, y); y += 5;
-  doc.text('Expected Calving Date: ' + document.getElementById('r-due').textContent, 14, y); y += 5;
+  doc.text('Breed: ' + (breed?.name || lc.breed), m, y); y += 5;
+  doc.text('Breeding Date: ' + lc.date, m, y); y += 5;
+  doc.text('Gestation Length: ' + lc.days + ' days (published breed average)', m, y); y += 5;
+  doc.text('Expected Calving Date: ' + document.getElementById('r-due').textContent, m, y); y += 5;
+  doc.text('Calving Window: ' + document.getElementById('r-window').textContent, m, y); y += 5;
   const remaining = document.getElementById('r-remaining').textContent;
   const elapsed = document.getElementById('r-elapsed').textContent;
-  doc.text('Days Remaining: ' + remaining, 14, y); y += 5;
-  doc.text('Days Pregnant: ' + elapsed, 14, y); y += 5;
+  doc.text('Days Remaining: ' + remaining, m, y); y += 5;
+  doc.text('Days Pregnant: ' + elapsed, m, y); y += 5;
   const stage = document.getElementById('r-stage-name').textContent;
   const stageDesc = document.getElementById('r-stage-desc').textContent;
-  if (stage) { y += 5; doc.setFontSize(10); doc.setTextColor(10, 10, 10); doc.text('Current Stage: ' + stage, 14, y); y += 5; }
-  if (stageDesc) { doc.setFontSize(8); doc.setTextColor(80, 80, 80); const ls = doc.splitTextToSize(stageDesc, 180); doc.text(ls, 14, y); y += ls.length * 4 + 3; }
+  if (stage) { y += 5; doc.setFontSize(10); doc.setTextColor(10, 10, 10); doc.text('Current Stage: ' + stripEmoji(stage), m, y); y += 5; }
+  if (stageDesc) { doc.setFontSize(8); doc.setTextColor(80, 80, 80); const ls = doc.splitTextToSize(stripEmoji(stageDesc), cW); doc.text(ls, m, y); y += ls.length * 4 + 3; }
+  y += 4; doc.setFontSize(7.5); doc.setTextColor(110, 110, 110);
+  const note = doc.splitTextToSize('Planning estimate only. The gestation length is the commonly published breed average; actual calving commonly falls 5 to 10 days either side of the date, and heifers and AI-sired calves often come early. Recent extension data (Oklahoma State, Feb 2026; K-State, July 2026) found modern beef cows averaging 278 to 280 days. Watch the cow, not the calendar.', cW);
+  doc.text(note, m, y);
   pdfFooter(doc,'Herd Hub');
   doc.save('GestationCalc_' + new Date().toISOString().slice(0,10) + '.pdf');
 }
@@ -1370,7 +1421,7 @@ function exportCalendarPDF() {
     const due = new Date(r.due_date + 'T00:00:00');
     const today = new Date(); today.setHours(0,0,0,0);
     const rem = Math.round((due - today) / 86400000);
-    rows.push([r.cow_name || '—', r.breedName || r.breed || '—', r.breeding_date || '—', r.due_date || '—', rem > 0 ? rem + 'd' : rem === 0 ? 'Today' : Math.abs(rem) + 'd over']);
+    rows.push([r.cow_name || '--', r.breedName || r.breed || '--', r.breeding_date || '--', r.due_date || '--', rem > 0 ? rem + 'd' : rem === 0 ? 'Today' : Math.abs(rem) + 'd over']);
   });
   if (rows.length) {
     y = pdfTable(doc, headers, rows, y, "Herd Hub");
