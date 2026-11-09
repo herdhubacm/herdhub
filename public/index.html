@@ -299,6 +299,9 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
 .photo-upload-area{border:2px dashed var(--tan);border-radius:6px;padding:24px;text-align:center;cursor:pointer;transition:all .2s;background:rgba(201,169,110,.05);margin-bottom:12px}
 .photo-upload-area:hover{border-color:var(--rust);background:rgba(181,69,27,.05)}
 .photo-upload-area input[type=file]{display:none}
+/* Search boxes are type=search so a password manager never treats them as a username field; keep the text-input look */
+input[type=search]{-webkit-appearance:none;appearance:none}
+input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-search-decoration{-webkit-appearance:none;display:none}
 .photo-previews{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
 .photo-preview{position:relative;width:80px;height:64px}
 .photo-preview img{width:100%;height:100%;object-fit:cover;border-radius:4px;border:1px solid var(--light-tan)}
@@ -690,7 +693,7 @@ header.scrolled{background:rgba(10,10,10,.92)!important;backdrop-filter:blur(12p
         </div>
       </div>
       <div class="sf"><label>Keywords</label>
-        <input type="text" id="hs-q" placeholder="e.g. 'registered Angus bulls'" aria-label="Search listings by keyword">
+        <input type="search" name="q" autocomplete="off" id="hs-q" placeholder="e.g. 'registered Angus bulls'" aria-label="Search listings by keyword">
       </div>
       <button class="btn-primary" style="width:100%;justify-content:center;margin-top:6px" data-action="hero-search">Search Listings</button>
     </div>
@@ -1599,7 +1602,7 @@ header.scrolled{background:rgba(10,10,10,.92)!important;backdrop-filter:blur(12p
         <option value="WI">WI</option>
         <option value="WY">WY</option>
       </select>
-      <input type="text" id="f-q" placeholder="Search keywords…" aria-label="Search listings by keyword" style="padding:8px 12px;border:1.5px solid var(--light-tan);border-radius:4px;font-family:'Libre Baskerville',serif;font-size:14px;outline:none;width:180px" onkeydown="if(event.key==='Enter')loadListings()">
+      <input type="search" name="q" autocomplete="off" id="f-q" placeholder="Search keywords…" aria-label="Search listings by keyword" style="padding:8px 12px;border:1.5px solid var(--light-tan);border-radius:4px;font-family:'Libre Baskerville',serif;font-size:14px;outline:none;width:180px" onkeydown="if(event.key==='Enter')loadListings()">
       <div style="display:flex;align-items:center;gap:4px">
         <span style="font-size:12px;color:#888;white-space:nowrap;font-family:'Inter',sans-serif;letter-spacing:.05em">$ MIN</span>
         <input type="number" id="f-price-min" placeholder="0" aria-label="Min price" min="0" style="padding:8px 10px;border:1.5px solid var(--light-tan);border-radius:4px;font-size:13px;outline:none;width:80px" onkeydown="if(event.key==='Enter')loadListings()">
@@ -1805,10 +1808,10 @@ header.scrolled{background:rgba(10,10,10,.92)!important;backdrop-filter:blur(12p
           <h4 style="font-family:'Inter',sans-serif;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--mid-brown);margin-bottom:14px">Change Password</h4>
           <div id="pw-error" class="form-error" style="display:none"></div>
           <div id="pw-success" class="form-success" style="display:none"></div>
-          <div class="form-group"><label for="pw-current">Current Password</label><input type="password" id="pw-current" placeholder="••••••••"></div>
+          <div class="form-group"><label for="pw-current">Current Password</label><input type="password" id="pw-current" placeholder="••••••••" autocomplete="current-password"></div>
           <div class="form-row">
-            <div class="form-group"><label for="pw-new">New Password</label><input type="password" id="pw-new" placeholder="Min 8 characters"></div>
-            <div class="form-group"><label for="pw-confirm">Confirm New</label><input type="password" id="pw-confirm" placeholder="Match new password"></div>
+            <div class="form-group"><label for="pw-new">New Password</label><input type="password" id="pw-new" placeholder="Min 8 characters" autocomplete="new-password"></div>
+            <div class="form-group"><label for="pw-confirm">Confirm New</label><input type="password" id="pw-confirm" placeholder="Match new password" autocomplete="new-password"></div>
           </div>
           <button class="btn-primary" data-action="change-password" style="margin-top:4px">Update Password</button>
           <div style="margin-top:22px;padding-top:16px;border-top:1px solid var(--light-tan)">
@@ -1880,7 +1883,7 @@ header.scrolled{background:rgba(10,10,10,.92)!important;backdrop-filter:blur(12p
           </div>
           <div>
             <label style="font-size:11px;color:#888;display:block;margin-bottom:4px">Keywords</label>
-            <input type="text" id="ss-keywords" placeholder="e.g. registered, angus, bred" style="width:100%;padding:8px;border:1px solid var(--light-tan);border-radius:4px;font-size:13px;box-sizing:border-box">
+            <input type="text" name="keywords" autocomplete="off" id="ss-keywords" placeholder="e.g. registered, angus, bred" style="width:100%;padding:8px;border:1px solid var(--light-tan);border-radius:4px;font-size:13px;box-sizing:border-box">
           </div>
           <div>
             <label style="font-size:11px;color:#888;display:block;margin-bottom:4px">Min Price ($)</label>
@@ -2140,7 +2143,7 @@ header.scrolled{background:rgba(10,10,10,.92)!important;backdrop-filter:blur(12p
     <div id="form-login" data-auth-view="login">
       <h2>Welcome Back</h2><p>Sign in to your Herd <span style="color:var(--rust)">Hub</span> account.</p>
       <div id="login-error" class="form-error" style="display:none"></div>
-      <div class="form-group"><label for="login-email">Email</label><input type="email" id="login-email" placeholder="you@example.com" autocomplete="email" aria-label="Email address"></div>
+      <div class="form-group"><label for="login-email">Email</label><input type="email" id="login-email" placeholder="you@example.com" autocomplete="username" aria-label="Email address"></div>
       <div class="form-group"><label for="login-password">Password</label><input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password" aria-label="Password"></div>
       <button class="btn-primary" style="width:100%;justify-content:center;margin-top:8px" data-action="login">Sign In</button>
       <p style="text-align:center;margin-top:10px;font-size:13px"><a href="javascript:void(0)" onclick="showForgotPassword()" style="color:var(--rust);text-decoration:none">Forgot your password?</a></p>
