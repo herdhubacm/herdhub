@@ -4802,8 +4802,8 @@ async function loadMarketData() {
     const d = await r.json();
     renderTicker(d.ticker || []);
     const badge = document.getElementById('market-badge');
-    badge.textContent = d.stale ? 'CACHED' : (d.reference_only ? 'REFERENCE' : 'LIVE');
-    badge.style.background = d.reference_only ? '#888' : (d.stale ? '#C9A96E' : '#2d7a2d');
+    badge.textContent = d.unavailable ? 'OFFLINE' : (d.stale ? 'LAST REPORT' : 'USDA');
+    badge.style.background = d.unavailable ? '#888' : (d.stale ? '#C9A96E' : '#2d7a2d');
 
     // Full market prices
     const mr = await fetch(`${API}/api/market/prices`);
