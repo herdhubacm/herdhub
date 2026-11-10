@@ -4,12 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Market Price Intelligence | Herd Hub</title>
-<meta name="description" content="Live cattle market prices, break-even calculator, seasonal trends, and price alerts. Free USDA market data for ranchers on Herd Hub.">
+<meta name="description" content="USDA weekly cattle prices, break-even and cost-of-gain math, seasonal price patterns, and price alerts. Free market data for ranchers on Herd Hub.">
 <meta name="theme-color" content="#0A0A0A">
 <link rel="icon" type="image/png" href="/logo.png">
 <link rel="apple-touch-icon" href="/logo.png">
 <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<!-- cdnjs is on the site's script allow-list; jsdelivr is not -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.3.2/chart.umd.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{--dark:#000000;--brown:#0A0A0A;--rust:#8B3214;--rust2:#A63D1A;--gold:#C9A96E;--gold2:#E8C87A;--cream:#F5EFE0;--tan:#C4A882;--muted:#8C7560;--light:#E8DCC8;--danger:#C0392B;--warn:#D4820A;--good:#2E7D4F;--sage:#6B7C5E}
@@ -28,30 +29,38 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .hero h1{font-family:'Libre Baskerville',serif;font-size:clamp(40px,6vw,68px);font-weight:900;line-height:1;color:var(--cream);margin-bottom:8px}
 .hero h1 em{font-style:italic;color:var(--gold)}
 .hero-sub{font-family:'Inter',sans-serif;font-size:14px;letter-spacing:.15em;text-transform:uppercase;color:var(--tan);margin-bottom:12px}
-.hero-desc{font-size:15px;color:var(--muted);max-width:600px;margin:0 auto;line-height:1.7}
+.hero-desc{font-size:15px;color:var(--muted);max-width:620px;margin:0 auto;line-height:1.7}
 
 .container{max-width:1100px;margin:0 auto;padding:0 40px 80px;position:relative;z-index:1}
 
-/* Section */
 .section{margin-bottom:48px}
 .section-eyebrow{font-family:'Inter',sans-serif;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--rust2);margin-bottom:6px}
 .section-title{font-family:'Libre Baskerville',serif;font-size:28px;font-weight:900;color:var(--cream);margin-bottom:6px}
-.section-desc{font-size:14px;color:var(--muted);line-height:1.7;max-width:600px;margin-bottom:24px}
+.section-desc{font-size:14px;color:var(--muted);line-height:1.7;max-width:640px;margin-bottom:24px}
+.group-title{font-family:'Inter',sans-serif;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--tan);margin:18px 0 10px}
 
 .card{background:rgba(10,10,10,.6);border:1px solid rgba(201,169,110,.12);border-radius:8px;padding:24px;margin-bottom:16px}
 .card-title{font-family:'Inter',sans-serif;font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:16px}
 
+/* Status pill */
+.status{display:inline-flex;align-items:center;gap:8px;font-family:'Inter',sans-serif;font-size:11px;letter-spacing:.06em;color:var(--tan);margin-bottom:14px}
+.status .dot{width:8px;height:8px;border-radius:50%;background:var(--muted)}
+.status.live .dot{background:#4ade80}.status.stale .dot{background:var(--warn)}.status.off .dot{background:var(--danger)}
+
 /* Price cards */
-.price-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-bottom:24px}
-.price-card{background:rgba(10,10,10,.6);border:1px solid rgba(201,169,110,.12);border-radius:8px;padding:20px;text-align:center;transition:border-color .2s}
+.price-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.price-card{background:rgba(10,10,10,.6);border:1px solid rgba(201,169,110,.12);border-radius:8px;padding:18px;transition:border-color .2s}
 .price-card:hover{border-color:var(--gold)}
-.price-card .category{font-family:'Inter',sans-serif;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--tan);margin-bottom:8px}
-.price-card .price{font-family:'Libre Baskerville',serif;font-size:32px;font-weight:700;color:var(--gold);margin-bottom:4px}
-.price-card .range{font-size:12px;color:var(--muted)}
+.price-card .category{font-family:'Inter',sans-serif;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--tan);margin-bottom:6px}
+.price-card .price{font-family:'Libre Baskerville',serif;font-size:30px;font-weight:700;color:var(--gold);line-height:1.1}
+.price-card .price small{font-size:13px;color:var(--muted);font-family:'Inter',sans-serif;font-weight:400;margin-left:2px}
+.price-card .range{font-size:12px;color:var(--muted);margin-top:4px}
 .price-card .change{font-family:'Inter',sans-serif;font-size:12px;font-weight:600;margin-top:8px}
-.price-card .change.up{color:var(--good)}.price-card .change.down{color:var(--danger)}
-.price-card .updated{font-size:10px;color:var(--muted);margin-top:6px}
-.delayed-badge{display:inline-block;font-family:'Inter',sans-serif;font-size:9px;letter-spacing:.06em;text-transform:uppercase;padding:2px 6px;border-radius:3px;background:rgba(212,130,10,.2);color:var(--warn);margin-left:4px}
+.price-card .change.up{color:var(--good)}.price-card .change.down{color:var(--danger)}.price-card .change.flat{color:var(--muted)}
+.price-card .meta{font-family:'Inter',sans-serif;font-size:10.5px;color:var(--muted);margin-top:8px;line-height:1.55}
+.note-card{border-left:3px solid var(--gold);background:rgba(201,169,110,.06);border-radius:0 6px 6px 0;padding:14px 16px;font-size:13.5px;color:var(--tan);line-height:1.65;margin-top:14px}
+.note-card strong{color:var(--cream)}
+.note-card a{color:var(--gold)}
 
 /* Form fields */
 .field{margin-bottom:14px}
@@ -59,6 +68,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .field input,.field select{width:100%;padding:10px 12px;background:rgba(28,15,6,.6);border:1px solid rgba(201,169,110,.2);border-radius:4px;color:var(--cream);font-family:'Libre Baskerville',serif;font-size:14px;transition:border-color .2s}
 .field input:focus,.field select:focus{outline:none;border-color:var(--gold)}
 .field select option{background:var(--brown);color:var(--cream)}
+.field .hint{font-family:'Inter',sans-serif;font-size:10.5px;color:var(--muted);margin-top:4px;line-height:1.5}
 .field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .field-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
 .field-row-4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px}
@@ -70,19 +80,23 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .btn-danger{background:var(--danger);color:white}
 
 /* Result display */
-.result-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin:20px 0}
+.result-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin:20px 0 8px}
 .result-stat{background:rgba(28,15,6,.5);border:1px solid rgba(201,169,110,.12);border-radius:6px;padding:18px;text-align:center}
 .result-stat .lbl{font-family:'Inter',sans-serif;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
 .result-stat .val{font-family:'Libre Baskerville',serif;font-size:26px;font-weight:700;color:var(--gold)}
 .result-stat .sub{font-size:12px;color:var(--tan);margin-top:2px}
 .result-stat.profit .val{color:var(--good)}.result-stat.loss .val{color:var(--danger)}
+.formula{font-family:'Inter',sans-serif;font-size:11.5px;color:var(--muted);line-height:1.6;margin-top:6px}
 
 /* Chart wrapper */
-.chart-wrap{background:rgba(28,15,6,.4);border:1px solid rgba(201,169,110,.1);border-radius:8px;padding:20px;margin-bottom:16px;position:relative}
+.chart-wrap{background:rgba(28,15,6,.4);border:1px solid rgba(201,169,110,.1);border-radius:8px;padding:20px;margin-bottom:12px;position:relative;min-height:120px}
 .chart-wrap canvas{max-height:300px}
+.chart-empty{font-family:'Inter',sans-serif;font-size:13px;color:var(--muted);text-align:center;padding:30px 10px;line-height:1.6}
+.chart-source{font-family:'Inter',sans-serif;font-size:11px;color:var(--muted);line-height:1.6}
+.chart-source a{color:var(--tan)}
 
 /* Alert list */
-.alert-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid rgba(201,169,110,.06)}
+.alert-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid rgba(201,169,110,.06);gap:12px}
 .alert-row:last-child{border:none}
 .alert-info{font-size:14px;color:var(--light)}
 .alert-info strong{color:var(--cream)}
@@ -92,23 +106,25 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .auth-banner p{font-family:'Inter',sans-serif;font-size:13px;color:var(--cream)}
 .auth-banner a{font-family:'Inter',sans-serif;font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;background:var(--rust);color:white;padding:10px 20px;border-radius:4px;text-decoration:none}
 
-/* Seasonal annotation */
+/* Seasonal notes */
 .season-note{background:rgba(201,169,110,.08);border-left:3px solid var(--gold);padding:12px 16px;border-radius:0 4px 4px 0;font-size:13px;color:var(--tan);margin-bottom:12px;line-height:1.6}
 .season-note strong{color:var(--cream)}
 
-/* Responsive */
+.disclaimer{margin-top:40px;padding:20px 24px;background:rgba(10,10,10,.4);border:1px solid rgba(201,169,110,.08);border-radius:6px;font-size:13px;line-height:1.7;color:var(--muted)}
+.disclaimer a{color:var(--tan)}
+
 @media(max-width:768px){
   .hero{padding:40px 20px 30px}.container{padding:0 16px 60px}.site-header{padding:0 16px}
   .price-grid{grid-template-columns:1fr 1fr}.field-row,.field-row-3,.field-row-4{grid-template-columns:1fr}
   .auth-banner{flex-direction:column;text-align:center}
+  .alert-row{flex-direction:column;align-items:flex-start}
 }
+@media(max-width:420px){ .price-grid{grid-template-columns:1fr} }
 @media print {
-  .site-header, .hero, .btn, button, .tool-tabs, .tab-bar, .filter-tabs,
-  .auth-banner, .disclaimer, [onclick], input, select, textarea { display:none!important }
+  .site-header, .hero, .btn, button, .auth-banner, input, select, textarea { display:none!important }
   body, body::before { background:white!important; color:black!important }
   body::before { display:none!important }
-  .card, .result-stat, .stage-card { border-color:#ddd!important; background:white!important }
-  .result-stat .val, .stage-card .stage-name { color:#0A0A0A!important }
+  .card, .result-stat, .price-card { border-color:#ddd!important; background:white!important }
   * { color:black!important }
 }
 </style>
@@ -124,21 +140,24 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 <section class="hero">
   <div class="hero-eyebrow">Herd Hub Market Data</div>
   <h1>Market <em>Intelligence</em></h1>
-  <div class="hero-sub">Know what your cattle are worth — every day</div>
-  <p class="hero-desc">Live USDA market prices, break-even analysis, seasonal trends, and price alerts. Make smarter selling decisions backed by real market data.</p>
+  <div class="hero-sub">Know what the market is paying</div>
+  <p class="hero-desc">USDA weekly packer prices for fed cattle, cull cows, bulls and boxed beef. Break-even and cost-of-gain math with your own numbers. Seasonal patterns from university data, with the source on every chart.</p>
 </section>
 
 <div class="container">
 
-<!-- ═══ 1. LIVE PRICE BOARD ═══ -->
+<!-- ═══ 1. PRICE BOARD ═══ -->
 <div class="section">
-  <div class="section-eyebrow">Live Data</div>
-  <div class="section-title">Current Market Prices</div>
-  <div class="section-desc">Latest cattle prices from USDA Agricultural Marketing Service. Updated automatically.</div>
-  <div class="price-grid" id="price-board">
-    <div class="price-card"><div class="category">Loading...</div><div class="price">—</div></div>
+  <div class="section-eyebrow">USDA Data</div>
+  <div class="section-title">This Week's Prices</div>
+  <div class="section-desc">Weekly weighted averages from USDA Livestock Mandatory Reporting: what packers paid, nationally, for the week shown on each card. Every card names its report and week.</div>
+  <div class="status" id="price-status"><span class="dot"></span><span>Loading USDA reports...</span></div>
+  <div id="price-board"></div>
+  <div class="note-card" id="feeder-note">
+    <strong>Feeder and stocker calves are not on this board yet.</strong> Sale barn prices by weight come from USDA Market News, a separate feed that needs a free key. Until it is connected, use your local barn's report or the
+    <a href="https://mymarketnews.ams.usda.gov/" target="_blank" rel="noopener">USDA Market News reports</a>. Nothing on this page is a guess: if a number isn't in a USDA report, it isn't shown.
   </div>
-  <div style="margin-top:12px;display:flex;gap:8px">
+  <div style="margin-top:14px;display:flex;gap:8px">
     <button class="btn btn-primary btn-sm" onclick="exportMarketPDF()">&#x1F4C4; Download PDF / Print</button>
   </div>
 </div>
@@ -147,47 +166,37 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 <div class="section">
   <div class="section-eyebrow">Trends</div>
   <div class="section-title">Price History</div>
-  <div class="section-desc">90-day price trends from USDA market reports.</div>
+  <div class="section-desc">Weekly USDA reports for the last 90 days, straight from the same source as the board.</div>
   <div class="field-row" style="margin-bottom:16px">
-    <div class="field"><label>Category</label>
-      <select id="hist-cat" onchange="loadHistory()">
-        <option value="feeder_steers_500">Feeder Steers 500-600 lb</option>
-        <option value="feeder_steers_600">Feeder Steers 600-700 lb</option>
-        <option value="feeder_steers_700">Feeder Steers 700-800 lb</option>
-        <option value="feeder_calves_300">Feeder Calves 300-400 lb</option>
-        <option value="feeder_calves_400">Feeder Calves 400-500 lb</option>
-        <option value="fed_cattle">Fed Cattle</option>
-        <option value="cull_cows">Cull Cows</option>
-        <option value="bulls">Bulls</option>
-      </select>
+    <div class="field"><label for="hist-series">Series</label>
+      <select id="hist-series" onchange="loadHistory()"></select>
     </div>
   </div>
-  <div class="chart-wrap"><canvas id="history-chart"></canvas></div>
+  <div class="chart-wrap"><canvas id="history-chart"></canvas><div class="chart-empty" id="history-empty" style="display:none"></div></div>
+  <div class="chart-source" id="history-source"></div>
 </div>
 
 <!-- ═══ 3. WHAT ARE MY CATTLE WORTH ═══ -->
 <div class="section">
   <div class="section-eyebrow">Valuation</div>
-  <div class="section-title">What Are My Cattle Worth Today?</div>
-  <div class="section-desc">Enter your cattle details and see their estimated value at current market prices.</div>
+  <div class="section-title">What Are My Cattle Worth?</div>
+  <div class="section-desc">Head count times weight times price. The price box fills from this week's USDA report when there is one for your class; change it to your barn's quote any time.</div>
   <div class="card">
     <div class="field-row-4">
-      <div class="field"><label>Head Count</label><input type="number" id="val-head" value="10" min="1"></div>
-      <div class="field"><label>Avg Weight (lbs)</label><input type="number" id="val-weight" value="650"></div>
-      <div class="field"><label>Category</label>
-        <select id="val-cat">
-          <option value="feeder_steers">Feeder Steers</option>
-          <option value="feeder_heifers">Feeder Heifers</option>
-          <option value="fed_cattle">Fed Cattle</option>
-          <option value="cull_cows">Cull Cows</option>
-          <option value="bulls">Bulls</option>
+      <div class="field"><label for="val-head">Head Count</label><input type="number" id="val-head" value="10" min="1"></div>
+      <div class="field"><label for="val-weight">Avg Weight (lbs)</label><input type="number" id="val-weight" value="1400" min="1"></div>
+      <div class="field"><label for="val-cat">Class</label>
+        <select id="val-cat" onchange="fillValuationPrice()">
+          <option value="fed_steers_live">Fed Steers (live)</option>
+          <option value="fed_heifers_live">Fed Heifers (live)</option>
+          <option value="cull_cows_boner">Cull Cows, Boner 85%</option>
+          <option value="cull_cows_cutter">Cull Cows, Cutter 90%</option>
+          <option value="cull_cows_breaker">Cull Cows, Breaker 75%</option>
+          <option value="bulls_live">Slaughter Bulls (live)</option>
+          <option value="custom">Feeders / other: I'll enter the price</option>
         </select>
       </div>
-      <div class="field"><label>State</label>
-        <select id="val-state">
-          <option value="TX">Texas</option><option value="KS">Kansas</option><option value="NE">Nebraska</option><option value="OK">Oklahoma</option><option value="SD">South Dakota</option><option value="MT">Montana</option><option value="CO">Colorado</option><option value="IA">Iowa</option><option value="MO">Missouri</option><option value="WY">Wyoming</option><option value="ND">North Dakota</option><option value="CA">California</option><option value="FL">Florida</option><option value="GA">Georgia</option><option value="TN">Tennessee</option><option value="KY">Kentucky</option><option value="VA">Virginia</option><option value="PA">Pennsylvania</option><option value="NY">New York</option><option value="OH">Ohio</option><option value="MN">Minnesota</option><option value="WI">Wisconsin</option><option value="IL">Illinois</option><option value="IN">Indiana</option><option value="AL">Alabama</option><option value="MS">Mississippi</option><option value="AR">Arkansas</option><option value="LA">Louisiana</option><option value="NM">New Mexico</option><option value="AZ">Arizona</option><option value="OR">Oregon</option><option value="WA">Washington</option><option value="ID">Idaho</option><option value="UT">Utah</option><option value="NV">Nevada</option>
-        </select>
-      </div>
+      <div class="field"><label for="val-price">Price ($/cwt, live)</label><input type="number" id="val-price" step="0.01" min="0" placeholder="e.g. 215.00"><div class="hint" id="val-price-hint"></div></div>
     </div>
     <button class="btn btn-primary" onclick="calcValue()">Calculate Value</button>
   </div>
@@ -197,20 +206,21 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 <!-- ═══ 4. BREAK-EVEN CALCULATOR ═══ -->
 <div class="section">
   <div class="section-eyebrow">Analysis</div>
-  <div class="section-title">Break-Even Calculator</div>
-  <div class="section-desc">Know your break-even sell price before you buy. Factor in purchase cost, feed, and days on feed.</div>
+  <div class="section-title">Break-Even and Cost of Gain</div>
+  <div class="section-desc">What you have to sell for to get your money back, and what each pound of gain costs you. Put interest, death loss, trucking and commission into the daily cost if you want them counted.</div>
   <div class="card">
     <div class="field-row-4">
-      <div class="field"><label>Purchase Price ($)</label><input type="number" id="be-purchase" value="1800" step="0.01"></div>
-      <div class="field"><label>Purchase Weight (lbs)</label><input type="number" id="be-pweight" value="550"></div>
-      <div class="field"><label>Daily Cost ($/day)</label><input type="number" id="be-daily" value="3.50" step="0.01"></div>
-      <div class="field"><label>Days on Feed</label><input type="number" id="be-days" value="120"></div>
+      <div class="field"><label for="be-purchase">Purchase cost per head ($)</label><input type="number" id="be-purchase" value="1800" step="0.01" min="0"></div>
+      <div class="field"><label for="be-pweight">Purchase weight (lbs)</label><input type="number" id="be-pweight" value="550" min="1"></div>
+      <div class="field"><label for="be-daily">Daily cost ($/head/day)</label><input type="number" id="be-daily" value="3.50" step="0.01" min="0"><div class="hint">Feed, yardage, health, and anything else you want in</div></div>
+      <div class="field"><label for="be-days">Days on feed</label><input type="number" id="be-days" value="120" min="1"></div>
     </div>
-    <div class="field-row" style="margin-bottom:16px">
-      <div class="field"><label>Avg Daily Gain (lbs/day)</label><input type="number" id="be-adg" value="2.8" step="0.1"></div>
-      <div class="field"><label>Target Sell Weight (lbs)</label><input type="number" id="be-target" value="0" placeholder="Auto from ADG if 0"></div>
+    <div class="field-row-3" style="margin-bottom:16px">
+      <div class="field"><label for="be-adg">Avg daily gain (lbs/day)</label><input type="number" id="be-adg" value="2.8" step="0.1" min="0"></div>
+      <div class="field"><label for="be-target">Sell weight (lbs)</label><input type="number" id="be-target" value="0" placeholder="0 = purchase weight + gain"><div class="hint">Leave 0 to use purchase weight plus ADG times days</div></div>
+      <div class="field"><label for="be-sale">Expected sale price ($/cwt)</label><input type="number" id="be-sale" step="0.01" min="0" placeholder="optional"><div class="hint" id="be-sale-hint">Optional. Fills from USDA fed steers when the sell weight is 1,100 lb or more.</div></div>
     </div>
-    <button class="btn btn-primary" onclick="calcBreakEven()">Calculate Break-Even</button>
+    <button class="btn btn-primary" onclick="calcBreakEven()">Calculate</button>
   </div>
   <div id="be-result" style="display:none"></div>
 </div>
@@ -219,23 +229,25 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 <div class="section">
   <div class="section-eyebrow">Seasonality</div>
   <div class="section-title">Seasonal Price Patterns</div>
-  <div class="section-desc">Average historical price patterns help you time your buying and selling decisions.</div>
+  <div class="section-desc">Average month-by-month price relative to the year's average (100 = the annual average). Built from 15 years of Nebraska cash prices. Patterns move with the cattle cycle and your region, so treat them as a guide, not a forecast.</div>
 
-  <div class="season-note"><strong>Feeder Cattle:</strong> Typically peak in March-April (spring demand) and September-October (fall weaning runs). Prices usually bottom in January-February (winter feeding costs) and November-December (heavy fall run supply).</div>
-  <div class="season-note"><strong>Fed Cattle:</strong> Strongest in April-May (grilling season ramp-up) and weakest in November-January. Holiday retail demand for beef cuts peaks in May-July.</div>
-  <div class="season-note"><strong>Cull Cows:</strong> Highest prices in March-April (tight supply after winter) and lowest in October-November (fall liquidation). Lean beef demand for hamburger supports spring prices.</div>
+  <div class="season-note"><strong>Calves, 500-600 lb steers:</strong> Nebraska 2001-2015 ran about 3% above the year's average in June through August and about 2.5% below in October and November, when the fall calf run hits. Arkansas 2011-2020 found the high in March and prices below average through the fall. Both agree on the fall: that is the low for calves.</div>
+  <div class="season-note"><strong>Yearling feeders, 700-800 lb steers:</strong> about 5% above average July through September and about 6% below in January and February (Nebraska 2001-2015). Heavier feeders follow the annual average more closely than calves (Arkansas).</div>
+  <div class="season-note"><strong>Fed steers, live:</strong> strongest in March and April, about 2 to 3% above average, and weakest in June and July, about 3% below (Nebraska 2001-2015).</div>
+  <div class="season-note"><strong>Cull cows:</strong> we have not sourced a cull cow index yet, so there is no cull cow curve on this chart.</div>
 
   <div class="chart-wrap"><canvas id="seasonal-chart"></canvas></div>
+  <div class="chart-source">Source: Birch and Brooks, <a href="https://extensionpubs.unl.edu/publication/ec291/na/pdf/view" target="_blank" rel="noopener">Nebraska Historical Prices, Seasonal Price Patterns, and Futures Basis, Beef Cattle 2001-2015</a> (University of Nebraska-Lincoln Extension EC291), 15-year monthly indexes, Tables 2, 4 and 19. Arkansas statements from Mitchell, <a href="https://www.uaex.uada.edu/publications/PDF/FSA3159.pdf" target="_blank" rel="noopener">Feeder Cattle Price Seasonality 2011-2020</a> (University of Arkansas FSA3159).</div>
 </div>
 
 <!-- ═══ 6. PRICE ALERTS ═══ -->
 <div class="section">
-  <div class="section-eyebrow">Notifications</div>
+  <div class="section-eyebrow">Watch List</div>
   <div class="section-title">Price Alerts</div>
-  <div class="section-desc">Get notified when cattle prices hit your target. Set alerts for any category and weight class.</div>
+  <div class="section-desc">Save the price you are waiting for. <strong style="color:var(--tan)">Email notifications are not switched on yet.</strong> Your alerts are kept on your account so they are ready the day they are.</div>
 
   <div id="alerts-auth-banner" class="auth-banner" style="display:none">
-    <p>&#x1f512; Sign in to set price alerts and get notified when the market moves.</p>
+    <p>&#x1f512; Sign in to save price alerts to your account.</p>
     <a href="/">Sign In on Herd Hub</a>
   </div>
 
@@ -243,7 +255,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
     <div class="card">
       <div class="card-title">&#x2795; New Alert</div>
       <div class="field-row-4">
-        <div class="field"><label>Category</label>
+        <div class="field"><label for="al-cat">Category</label>
           <select id="al-cat">
             <option value="feeder_steers">Feeder Steers</option>
             <option value="feeder_heifers">Feeder Heifers</option>
@@ -253,27 +265,34 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
             <option value="bulls">Bulls</option>
           </select>
         </div>
-        <div class="field"><label>Min Weight</label><input type="number" id="al-wl" placeholder="e.g. 500"></div>
-        <div class="field"><label>Max Weight</label><input type="number" id="al-wh" placeholder="e.g. 700"></div>
-        <div class="field"><label>Target ($/cwt)</label><input type="number" id="al-price" step="0.01" placeholder="e.g. 280"></div>
+        <div class="field"><label for="al-wl">Min Weight</label><input type="number" id="al-wl" placeholder="e.g. 500"></div>
+        <div class="field"><label for="al-wh">Max Weight</label><input type="number" id="al-wh" placeholder="e.g. 700"></div>
+        <div class="field"><label for="al-price">Target ($/cwt)</label><input type="number" id="al-price" step="0.01" placeholder="e.g. 280"></div>
       </div>
-      <div style="display:flex;gap:10px;align-items:end">
-        <div class="field" style="margin:0"><label>Alert When</label>
+      <div style="display:flex;gap:10px;align-items:end;flex-wrap:wrap">
+        <div class="field" style="margin:0"><label for="al-type">Alert When</label>
           <select id="al-type"><option value="above">Price goes above target</option><option value="below">Price drops below target</option></select>
         </div>
-        <button class="btn btn-primary" onclick="saveAlert()">Set Alert</button>
+        <button class="btn btn-primary" onclick="saveAlert()">Save Alert</button>
       </div>
     </div>
-
     <div id="alerts-list"></div>
   </div>
+</div>
+
+<div class="disclaimer">
+  <strong style="color:var(--tan)">About these numbers:</strong> Board and history prices are USDA Agricultural Marketing Service Livestock Mandatory Reporting weekly weighted averages for packer-direct trade
+  (reports LM_CT150, LM_CT168 and LM_XB459). They are national, they are what packers paid, and they lag the week. Your local sale barn will differ.
+  The calculators use only the numbers you enter plus the USDA price shown. This page is for planning; it is not a bid.
+  Data: <a href="https://mpr.datamart.ams.usda.gov/" target="_blank" rel="noopener">USDA AMS LMR Datamart</a>. Figures checked November 2026.
 </div>
 
 </div><!-- /container -->
 
 <script>
 let authToken = null;
-let priceData = null;
+let priceData = null;      // last /api/market/prices answer
+let bySeries = {};         // key -> series object
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
 async function initAuth() {
@@ -299,144 +318,128 @@ async function api(method, url, body) {
   return r.json();
 }
 
+// ── Helpers ──────────────────────────────────────────────────────────────────
+function esc(s) { if (s === null || s === undefined) return ''; const d = document.createElement('div'); d.textContent = String(s); return d.innerHTML; }
+function commas(n) { return Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
+function money(n, d) { return '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: d === undefined ? 2 : d, maximumFractionDigits: d === undefined ? 2 : d }); }
+function fmtDate(iso) { if (!iso) return ''; const [y, m, d] = iso.split('-'); return ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][+m - 1] + ' ' + (+d) + ', ' + y; }
+function fmtWhen(iso) { try { return new Date(iso).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }); } catch { return ''; } }
+
 // ── Price Board ──────────────────────────────────────────────────────────────
-const CATEGORIES = [
-  { key: 'feeder_calves_300', label: 'Feeder Calves 300-400', wl: 300, wh: 400, ref: 285 },
-  { key: 'feeder_calves_400', label: 'Feeder Calves 400-500', wl: 400, wh: 500, ref: 272 },
-  { key: 'feeder_steers_500', label: 'Feeder Steers 500-600', wl: 500, wh: 600, ref: 268 },
-  { key: 'feeder_steers_600', label: 'Feeder Steers 600-700', wl: 600, wh: 700, ref: 258 },
-  { key: 'feeder_steers_700', label: 'Feeder Steers 700-800', wl: 700, wh: 800, ref: 245 },
-  { key: 'fed_cattle',        label: 'Fed Cattle (Live)',      wl: 1100, wh: 1400, ref: 198 },
-  { key: 'bred_cows',         label: 'Bred Cows',             wl: 0, wh: 0, ref: 2200, perHead: true },
-  { key: 'cull_cows',         label: 'Cull Cows',             wl: 1000, wh: 1300, ref: 118 },
-  { key: 'bulls',             label: 'Bulls (Slaughter)',      wl: 1500, wh: 2200, ref: 132 },
+const GROUPS = [
+  { key: 'fed',  title: 'Fed cattle, 5-area weekly weighted average' },
+  { key: 'cows', title: 'Cull cows and bulls, national packer-direct' },
+  { key: 'beef', title: 'Boxed beef cutout, 600-900 lb carcasses' },
 ];
 
 async function loadPrices() {
   const board = document.getElementById('price-board');
+  const status = document.getElementById('price-status');
   try {
-    const data = await fetch('/api/market/prices').then(r => r.json());
-    priceData = data;
+    const d = await fetch('/api/market/prices').then(r => r.json());
+    priceData = d; bySeries = {};
+    (d.series || []).forEach(s => { bySeries[s.key] = s; });
 
-    // Extract real prices from USDA data if available
-    const livePrices = extractPrices(data);
+    if (!d.series || !d.series.length) {
+      status.className = 'status off';
+      status.innerHTML = '<span class="dot"></span><span>USDA reports are unavailable right now. No prices are shown rather than stale or made-up ones. Check back shortly.</span>';
+      board.innerHTML = '';
+      populateHistorySelect(); fillValuationPrice(); fillSaleHint();
+      return;
+    }
+    if (d.stale) {
+      status.className = 'status stale';
+      status.innerHTML = '<span class="dot"></span><span>USDA feed is not answering. Showing the last good reports, fetched ' + esc(fmtWhen(d.stale_since || d.fetched_at)) + '.</span>';
+    } else {
+      status.className = 'status live';
+      status.innerHTML = '<span class="dot"></span><span>USDA AMS Livestock Mandatory Reporting. Checked ' + esc(fmtWhen(d.fetched_at)) + '. Reports are weekly.</span>';
+    }
 
-    board.innerHTML = CATEGORIES.map(cat => {
-      const live = livePrices[cat.key];
-      const price = live ? live.avg : cat.ref;
-      const low = live ? live.low : (price * 0.96);
-      const high = live ? live.high : (price * 1.04);
-      const prevPrice = live ? (live.prev || price) : cat.ref;
-      const change = price - prevPrice;
-      const changeStr = change >= 0 ? '+' + change.toFixed(2) : change.toFixed(2);
-      const changeClass = change >= 0 ? 'up' : 'down';
-      const arrow = change >= 0 ? '&#x25B2;' : '&#x25BC;';
-      const unit = cat.perHead ? '/hd' : '/cwt';
-      const isCached = data.cached === true;
-      const isRef = !live;
-      let statusHtml;
-      if (isRef && isCached) statusHtml = '<div class="updated">Cached data <span class="delayed-badge">data delayed</span></div>';
-      else if (isRef) statusHtml = '<div class="updated">Reference price</div>';
-      else if (isCached) statusHtml = '<div class="updated">USDA AMS <span class="delayed-badge">cached</span></div>';
-      else statusHtml = '<div class="updated" style="color:#4ade80">USDA AMS &middot; <span style="color:#4ade80;font-weight:600">Live</span></div>';
-
-      return '<div class="price-card">' +
-        '<div class="category">' + cat.label + '</div>' +
-        '<div class="price">$' + price.toFixed(2) + '<span style="font-size:14px;color:var(--muted)">' + unit + '</span></div>' +
-        '<div class="range">$' + low.toFixed(2) + ' \u2013 $' + high.toFixed(2) + '</div>' +
-        '<div class="change ' + changeClass + '">' + arrow + ' ' + changeStr + '</div>' +
-        statusHtml +
-        '</div>';
+    board.innerHTML = GROUPS.map(g => {
+      const items = d.series.filter(s => s.group === g.key);
+      if (!items.length) return '';
+      return '<div class="group-title">' + esc(g.title) + '</div><div class="price-grid">' + items.map(renderCard).join('') + '</div>';
     }).join('');
-  } catch {
-    board.innerHTML = CATEGORIES.map(cat => {
-      const unit = cat.perHead ? '/hd' : '/cwt';
-      return '<div class="price-card"><div class="category">' + cat.label + '</div><div class="price">$' + cat.ref.toFixed(2) + '<span style="font-size:14px;color:var(--muted)">' + unit + '</span></div><div class="range">Reference price</div><div class="updated">USDA unavailable <span class="delayed-badge">offline</span></div></div>';
-    }).join('');
+    populateHistorySelect(); fillValuationPrice(); fillSaleHint();
+  } catch (e) {
+    status.className = 'status off';
+    status.innerHTML = '<span class="dot"></span><span>Could not reach the market service. No prices are shown.</span>';
+    board.innerHTML = '';
   }
 }
 
-function extractPrices(data) {
-  const prices = {};
-  if (!data?.reports) return prices;
-
-  // Try to extract from feeder_stocker report
-  const feeder = data.reports?.feeder_stocker?.prices || [];
-  feeder.forEach(p => {
-    const wr = p.weight_range || '';
-    const c = p.commodity?.toLowerCase() || '';
-    if (c.includes('steer') && wr.includes('500')) prices.feeder_steers_500 = { avg: p.avg_price, low: p.avg_price * 0.97, high: p.avg_price * 1.03 };
-    if (c.includes('steer') && wr.includes('600')) prices.feeder_steers_600 = { avg: p.avg_price, low: p.avg_price * 0.97, high: p.avg_price * 1.03 };
-    if (c.includes('steer') && wr.includes('700')) prices.feeder_steers_700 = { avg: p.avg_price, low: p.avg_price * 0.97, high: p.avg_price * 1.03 };
-    if ((c.includes('calf') || c.includes('steer')) && wr.includes('300')) prices.feeder_calves_300 = { avg: p.avg_price, low: p.avg_price * 0.97, high: p.avg_price * 1.03 };
-    if ((c.includes('calf') || c.includes('steer')) && wr.includes('400')) prices.feeder_calves_400 = { avg: p.avg_price, low: p.avg_price * 0.97, high: p.avg_price * 1.03 };
-  });
-
-  const fed = data.reports?.fed_cattle?.prices || [];
-  const fedSteer = fed.find(p => p.avg_price > 100);
-  if (fedSteer) prices.fed_cattle = { avg: fedSteer.avg_price, low: fedSteer.avg_price * 0.98, high: fedSteer.avg_price * 1.02 };
-
-  return prices;
+function renderCard(s) {
+  const src = priceData && priceData.sources ? priceData.sources[s.source] : null;
+  const change = (s.prev_avg !== null && s.prev_avg !== undefined) ? s.avg - s.prev_avg : null;
+  let changeHtml = '<div class="change flat">First report in range</div>';
+  if (change !== null) {
+    const cls = change > 0.004 ? 'up' : change < -0.004 ? 'down' : 'flat';
+    const arrow = cls === 'up' ? '&#x25B2;' : cls === 'down' ? '&#x25BC;' : '&#x25CF;';
+    changeHtml = '<div class="change ' + cls + '">' + arrow + ' ' + (change >= 0 ? '+' : '') + change.toFixed(2) + ' vs week of ' + esc(fmtDate(s.prev_date)) + '</div>';
+  }
+  const range = (s.low !== null && s.high !== null && s.low !== undefined) ? '<div class="range">Range ' + money(s.low) + ' to ' + money(s.high) + '</div>' : '';
+  const meta = [
+    s.head ? commas(s.head) + ' head' : null,
+    s.weight ? 'avg ' + commas(s.weight) + ' lb' : null,
+    s.basis,
+  ].filter(Boolean).join(' · ');
+  return '<div class="price-card" data-key="' + esc(s.key) + '">' +
+    '<div class="category">' + esc(s.label) + '</div>' +
+    '<div class="price">' + money(s.avg) + '<small>/cwt</small></div>' +
+    range + changeHtml +
+    '<div class="meta">' + esc(meta) + '<br>USDA ' + esc(src ? src.report : '') + ' · week ending ' + esc(fmtDate(s.date)) + '</div>' +
+    '</div>';
 }
 
 // ── Price History Chart ──────────────────────────────────────────────────────
 let historyChart = null;
 
+function populateHistorySelect() {
+  const sel = document.getElementById('hist-series');
+  const keys = Object.keys(bySeries);
+  const current = sel.value;
+  sel.innerHTML = keys.length
+    ? keys.map(k => '<option value="' + esc(k) + '">' + esc(bySeries[k].label) + '</option>').join('')
+    : '<option value="">No USDA series available</option>';
+  if (current && bySeries[current]) sel.value = current;
+  loadHistory();
+}
+
 async function loadHistory() {
-  const cat = document.getElementById('hist-cat').value;
-  // Use reference data for chart since DB may be empty
-  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  const now = new Date();
-  const labels = [];
-  const highs = [], lows = [], avgs = [];
-  const catRef = CATEGORIES.find(c => c.key === cat);
-  const base = catRef ? catRef.ref : 250;
-
-  // Generate realistic 90-day pattern
-  for (let i = 89; i >= 0; i--) {
-    const d = new Date(now.getTime() - i * 86400000);
-    if (i % 7 === 0 || i === 0) {
-      labels.push(months[d.getMonth()] + ' ' + d.getDate());
-      const seasonal = Math.sin((d.getMonth() + 3) / 12 * Math.PI * 2) * (base * 0.04);
-      const noise = (Math.random() - 0.5) * (base * 0.03);
-      const avg = base + seasonal + noise;
-      avgs.push(Math.round(avg * 100) / 100);
-      highs.push(Math.round((avg * 1.03) * 100) / 100);
-      lows.push(Math.round((avg * 0.97) * 100) / 100);
-    }
+  const key = document.getElementById('hist-series').value;
+  const empty = document.getElementById('history-empty');
+  const canvas = document.getElementById('history-chart');
+  const sourceEl = document.getElementById('history-source');
+  if (historyChart) { historyChart.destroy(); historyChart = null; }
+  if (!key) { canvas.style.display = 'none'; empty.style.display = ''; empty.textContent = 'History needs the USDA feed. Nothing to chart right now.'; sourceEl.textContent = ''; return; }
+  empty.style.display = ''; empty.textContent = 'Loading USDA history...'; canvas.style.display = 'none';
+  let d;
+  try { d = await fetch('/api/market/prices/history?series=' + encodeURIComponent(key) + '&days=90').then(r => r.json()); }
+  catch { d = null; }
+  if (!d || !d.points || d.points.length < 2) {
+    empty.textContent = 'USDA has fewer than two weekly reports for this series in the last 90 days. Nothing to chart yet.';
+    sourceEl.textContent = '';
+    return;
   }
-
-  // Try to load from API
-  try {
-    const rows = await fetch('/api/market/prices/history?category=' + cat + '&days=90').then(r => r.json());
-    if (rows.length > 5) {
-      labels.length = 0; highs.length = 0; lows.length = 0; avgs.length = 0;
-      rows.forEach(r => {
-        labels.push(r.report_date.slice(5));
-        highs.push(parseFloat(r.price_high));
-        lows.push(parseFloat(r.price_low));
-        avgs.push(parseFloat(r.price_avg));
-      });
-    }
-  } catch {}
-
-  if (historyChart) historyChart.destroy();
-  historyChart = new Chart(document.getElementById('history-chart'), {
+  empty.style.display = 'none'; canvas.style.display = '';
+  const labels = d.points.map(p => fmtDate(p.date).replace(/, \d{4}$/, ''));
+  const avgs = d.points.map(p => p.avg);
+  const hasRange = d.points.every(p => p.low !== null && p.high !== null && p.low !== undefined);
+  const datasets = [{ label: 'Weighted average', data: avgs, borderColor: '#E8C87A', borderWidth: 2, tension: 0.25, pointRadius: 3 }];
+  if (hasRange) {
+    datasets.unshift({ label: 'High', data: d.points.map(p => p.high), borderColor: '#C9A96E', backgroundColor: 'rgba(201,169,110,.1)', fill: '+1', tension: 0.25, pointRadius: 2 });
+    datasets.push({ label: 'Low', data: d.points.map(p => p.low), borderColor: '#8B3214', backgroundColor: 'rgba(139,50,20,.1)', fill: '-1', tension: 0.25, pointRadius: 2 });
+  }
+  if (typeof Chart === 'undefined') { empty.style.display = ''; empty.textContent = 'The chart library did not load. The numbers are still in the PDF.'; canvas.style.display = 'none'; return; }
+  historyChart = new Chart(canvas, {
     type: 'line',
-    data: {
-      labels,
-      datasets: [
-        { label: 'High', data: highs, borderColor: '#C9A96E', backgroundColor: 'rgba(201,169,110,.1)', fill: '+1', tension: 0.3, pointRadius: 2 },
-        { label: 'Average', data: avgs, borderColor: '#E8C87A', borderWidth: 2, tension: 0.3, pointRadius: 2 },
-        { label: 'Low', data: lows, borderColor: '#8B3214', backgroundColor: 'rgba(139,50,20,.1)', fill: '-1', tension: 0.3, pointRadius: 2 },
-      ]
-    },
+    data: { labels, datasets },
     options: {
-      responsive: true,
-      maintainAspectRatio: false,
+      responsive: true, maintainAspectRatio: false,
       plugins: {
         legend: { labels: { color: '#C4A882', font: { family: 'Inter', size: 11 } } },
-        tooltip: { backgroundColor: '#0A0A0A', titleColor: '#F5EFE0', bodyColor: '#C9A96E', borderColor: 'rgba(201,169,110,.3)', borderWidth: 1 }
+        tooltip: { backgroundColor: '#0A0A0A', titleColor: '#F5EFE0', bodyColor: '#C9A96E', borderColor: 'rgba(201,169,110,.3)', borderWidth: 1,
+          callbacks: { label: ctx => ctx.dataset.label + ': $' + Number(ctx.parsed.y).toFixed(2) + '/cwt' } }
       },
       scales: {
         x: { ticks: { color: '#8C7560', font: { family: 'Inter', size: 10 } }, grid: { color: 'rgba(201,169,110,.06)' } },
@@ -444,116 +447,121 @@ async function loadHistory() {
       }
     }
   });
+  const src = d.source || {};
+  sourceEl.innerHTML = esc(d.label) + ' (' + esc(d.basis) + '). ' + d.points.length + ' weekly reports, ' + esc(fmtDate(d.points[0].date)) + ' to ' + esc(fmtDate(d.points[d.points.length - 1].date)) + '. Source: USDA AMS ' + esc(src.report || '') + ', ' + esc(src.name || '') + '.' + (d.stale ? ' Showing the last good fetch; USDA is not answering right now.' : '');
 }
 
 // ── Cattle Valuation ─────────────────────────────────────────────────────────
+function fillValuationPrice() {
+  const key = document.getElementById('val-cat').value;
+  const input = document.getElementById('val-price');
+  const hint = document.getElementById('val-price-hint');
+  const s = bySeries[key];
+  // Only overwrite a value this function put there, never one the producer typed.
+  const autoFilled = input.dataset.auto === input.value;
+  if (key === 'custom') {
+    if (autoFilled) { input.value = ''; delete input.dataset.auto; }
+    hint.textContent = 'Enter the live price from your barn or the USDA Market News report for your weight and class.';
+    return;
+  }
+  if (s) {
+    if (!input.value || autoFilled) { input.value = s.avg.toFixed(2); input.dataset.auto = input.value; }
+    hint.textContent = 'USDA ' + ((priceData && priceData.sources && priceData.sources[s.source]) || {}).report + ', week ending ' + fmtDate(s.date) + ', ' + s.basis + '. Change it if your market differs.';
+  } else {
+    if (autoFilled) { input.value = ''; delete input.dataset.auto; }
+    hint.textContent = 'No USDA price for this class right now. Enter your own.';
+  }
+}
+
 function calcValue() {
-  const head = parseInt(document.getElementById('val-head').value) || 1;
-  const weight = parseInt(document.getElementById('val-weight').value) || 600;
-  const cat = document.getElementById('val-cat').value;
-
-  // Find matching price
-  let priceCwt = 250;
-  const catMap = { feeder_steers: 'feeder_steers_600', feeder_heifers: 'feeder_steers_500', fed_cattle: 'fed_cattle', cull_cows: 'cull_cows', bulls: 'bulls' };
-  const ref = CATEGORIES.find(c => c.key === (catMap[cat] || cat));
-  if (ref) priceCwt = ref.ref;
-
-  // Adjust price for weight (lighter cattle = higher $/cwt)
-  const weightAdj = ref ? 1 + ((ref.wl + ref.wh) / 2 - weight) * 0.001 : 1;
-  const adjPrice = priceCwt * Math.max(0.85, Math.min(1.15, weightAdj));
-  const perHead = (adjPrice / 100) * weight;
-  const totalLow = head * perHead * 0.95;
-  const totalHigh = head * perHead * 1.05;
-  const totalAvg = head * perHead;
-
-  // 30-day projection
-  const futureWeight = weight + 30 * 2.5;
-  const futureAdj = ref ? 1 + ((ref.wl + ref.wh) / 2 - futureWeight) * 0.001 : 1;
-  const futurePrice = priceCwt * Math.max(0.85, Math.min(1.15, futureAdj));
-  const futurePerHead = (futurePrice / 100) * futureWeight;
-  const futureTotal = head * futurePerHead;
-
-  document.getElementById('val-result').style.display = '';
-  document.getElementById('val-result').innerHTML =
+  const head = parseInt(document.getElementById('val-head').value) || 0;
+  const weight = parseFloat(document.getElementById('val-weight').value) || 0;
+  const price = parseFloat(document.getElementById('val-price').value) || 0;
+  const out = document.getElementById('val-result');
+  if (head <= 0 || weight <= 0 || price <= 0) { out.style.display = ''; out.innerHTML = '<div class="formula">Enter head count, weight and a price per cwt.</div>'; return; }
+  const perHead = weight / 100 * price;
+  const total = head * perHead;
+  out.style.display = '';
+  out.innerHTML =
     '<div class="result-grid">' +
-    '<div class="result-stat"><div class="lbl">Estimated Value</div><div class="val">$' + commas(Math.round(totalAvg)) + '</div><div class="sub">' + head + ' head &times; $' + Math.round(perHead) + '/hd</div></div>' +
-    '<div class="result-stat"><div class="lbl">Value Range</div><div class="val">$' + commas(Math.round(totalLow)) + ' \u2013 $' + commas(Math.round(totalHigh)) + '</div><div class="sub">Based on market spread</div></div>' +
-    '<div class="result-stat"><div class="lbl">Price Per CWT</div><div class="val">$' + adjPrice.toFixed(2) + '</div><div class="sub">Adj. for ' + weight + ' lbs</div></div>' +
-    '<div class="result-stat"><div class="lbl">In 30 Days (+75 lbs)</div><div class="val">$' + commas(Math.round(futureTotal)) + '</div><div class="sub">' + futureWeight + ' lbs @ $' + futurePrice.toFixed(2) + '/cwt</div></div>' +
-    '</div>';
+    '<div class="result-stat"><div class="lbl">Estimated value</div><div class="val">$' + commas(total) + '</div><div class="sub">' + head + ' head</div></div>' +
+    '<div class="result-stat"><div class="lbl">Per head</div><div class="val">$' + commas(perHead) + '</div><div class="sub">' + commas(weight) + ' lb at ' + money(price) + '/cwt</div></div>' +
+    '</div>' +
+    '<div class="formula">Per head = weight &divide; 100 &times; price per cwt. Total = per head &times; head count. Before shrink, commission and trucking.</div>';
 }
 
 // ── Break-Even Calculator ────────────────────────────────────────────────────
+function fillSaleHint() {
+  const s = bySeries.fed_steers_live;
+  const hint = document.getElementById('be-sale-hint');
+  if (s) hint.textContent = 'Optional. USDA fed steers, week ending ' + fmtDate(s.date) + ': ' + money(s.avg) + '/cwt. Fills in when the sell weight is 1,100 lb or more and the box is empty.';
+}
+
 function calcBreakEven() {
   const purchase = parseFloat(document.getElementById('be-purchase').value) || 0;
   const pWeight = parseFloat(document.getElementById('be-pweight').value) || 0;
   const daily = parseFloat(document.getElementById('be-daily').value) || 0;
   const days = parseInt(document.getElementById('be-days').value) || 0;
-  const adg = parseFloat(document.getElementById('be-adg').value) || 2.5;
+  const adg = parseFloat(document.getElementById('be-adg').value) || 0;
   let target = parseFloat(document.getElementById('be-target').value) || 0;
+  const saleInput = document.getElementById('be-sale');
+  const out = document.getElementById('be-result');
 
-  if (target <= 0) target = pWeight + (adg * days);
+  if (target <= 0) target = pWeight + adg * days;
+  if (target <= 0) { out.style.display = ''; out.innerHTML = '<div class="formula">Enter a purchase weight, or a sell weight.</div>'; return; }
   const feedCost = daily * days;
   const totalCost = purchase + feedCost;
-  const breakEvenCwt = target > 0 ? (totalCost / target) * 100 : 0;
+  const gain = Math.max(0, target - pWeight);
+  const breakEvenCwt = totalCost / target * 100;
+  const cog = gain > 0 ? feedCost / gain : null;
 
-  // Compare to current market
-  let marketCwt = 245; // default reference for 700-800 steers
-  if (target < 600) marketCwt = 268;
-  else if (target < 700) marketCwt = 258;
-  else if (target < 800) marketCwt = 245;
-  else if (target < 1000) marketCwt = 220;
-  else marketCwt = 198;
+  if (!parseFloat(saleInput.value) && target >= 1100 && bySeries.fed_steers_live) saleInput.value = bySeries.fed_steers_live.avg.toFixed(2);
+  const sale = parseFloat(saleInput.value) || 0;
 
-  const marketValue = (marketCwt / 100) * target;
-  const projProfit = marketValue - totalCost;
-  const profitClass = projProfit >= 0 ? 'profit' : 'loss';
-
-  document.getElementById('be-result').style.display = '';
-  document.getElementById('be-result').innerHTML =
-    '<div class="result-grid">' +
-    '<div class="result-stat"><div class="lbl">Break-Even Price</div><div class="val">$' + breakEvenCwt.toFixed(2) + '/cwt</div><div class="sub">Must sell above this</div></div>' +
-    '<div class="result-stat"><div class="lbl">Total Cost</div><div class="val">$' + commas(Math.round(totalCost)) + '</div><div class="sub">$' + purchase.toFixed(0) + ' purchase + $' + feedCost.toFixed(0) + ' feed</div></div>' +
-    '<div class="result-stat"><div class="lbl">Sell Weight</div><div class="val">' + Math.round(target) + ' lbs</div><div class="sub">' + pWeight + ' + ' + Math.round(adg * days) + ' lbs gain</div></div>' +
-    '<div class="result-stat ' + profitClass + '"><div class="lbl">Projected at Market</div><div class="val">' + (projProfit >= 0 ? '+' : '') + '$' + commas(Math.round(Math.abs(projProfit))) + '</div><div class="sub">@ $' + marketCwt + '/cwt market</div></div>' +
-    '</div>';
+  let html = '<div class="result-grid">' +
+    '<div class="result-stat"><div class="lbl">Break-even price</div><div class="val">' + money(breakEvenCwt) + '</div><div class="sub">per cwt, to get your money back</div></div>' +
+    '<div class="result-stat"><div class="lbl">Cost of gain</div><div class="val">' + (cog === null ? 'n/a' : money(cog)) + '</div><div class="sub">' + (cog === null ? 'no gain entered' : 'per lb gained') + '</div></div>' +
+    '<div class="result-stat"><div class="lbl">Total cost</div><div class="val">$' + commas(totalCost) + '</div><div class="sub">$' + commas(purchase) + ' purchase + $' + commas(feedCost) + ' daily costs</div></div>' +
+    '<div class="result-stat"><div class="lbl">Sell weight</div><div class="val">' + commas(target) + ' lb</div><div class="sub">' + commas(pWeight) + ' + ' + commas(gain) + ' lb gain</div></div>';
+  if (sale > 0) {
+    const marketValue = sale / 100 * target;
+    const profit = marketValue - totalCost;
+    html += '<div class="result-stat ' + (profit >= 0 ? 'profit' : 'loss') + '"><div class="lbl">At ' + money(sale) + '/cwt</div><div class="val">' + (profit >= 0 ? '+' : '-') + '$' + commas(Math.abs(profit)) + '</div><div class="sub">per head, ' + (profit >= 0 ? 'above' : 'below') + ' break-even</div></div>';
+  }
+  html += '</div><div class="formula">Break-even $/cwt = (purchase cost + daily cost &times; days) &divide; sell weight &times; 100. Cost of gain = daily cost &times; days &divide; pounds gained. Add interest, death loss, trucking and commission to the daily cost if you want them in.</div>';
+  out.style.display = ''; out.innerHTML = html;
 }
 
 // ── Seasonal Chart ───────────────────────────────────────────────────────────
+// University of Nebraska-Lincoln EC291, 15-year monthly seasonal indexes, 2001-2015 (index x 100).
+const SEASONAL = {
+  calves_500_600: [98.6, 98.8, 100.1, 100.7, 101.1, 102.8, 102.7, 102.2, 99.5, 97.5, 97.5, 98.5],   // Table 2, 500-600 lb steers
+  feeders_700_800: [94.0, 93.5, 95.1, 97.6, 99.6, 102.5, 104.7, 105.0, 104.3, 103.3, 101.0, 99.3],  // Table 4, 700-800 lb steers
+  fed_steers: [99.5, 100.2, 103.1, 101.5, 99.9, 97.2, 97.2, 98.8, 99.7, 100.9, 101.9, 100.1],        // Table 19, fed steers live
+};
 function renderSeasonalChart() {
+  if (typeof Chart === 'undefined') return;
   const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  // Historical seasonal index (100 = annual average)
-  const feeder  = [94,95,98,102,103,101,99,100,104,105,100,96];
-  const fed     = [97,98,101,104,105,103,101,100,99,98,96,95];
-  const cull    = [95,97,103,106,104,101,100,99,98,94,93,95];
-
   new Chart(document.getElementById('seasonal-chart'), {
     type: 'line',
     data: {
       labels: months,
       datasets: [
-        { label: 'Feeder Cattle', data: feeder, borderColor: '#C9A96E', backgroundColor: 'rgba(201,169,110,.1)', fill: true, tension: 0.4, pointRadius: 4 },
-        { label: 'Fed Cattle', data: fed, borderColor: '#E8C87A', tension: 0.4, pointRadius: 4 },
-        { label: 'Cull Cows', data: cull, borderColor: '#8B3214', tension: 0.4, pointRadius: 4 },
+        { label: 'Calves, 500-600 lb steers', data: SEASONAL.calves_500_600, borderColor: '#C9A96E', backgroundColor: 'rgba(201,169,110,.08)', fill: true, tension: 0.35, pointRadius: 3 },
+        { label: 'Feeders, 700-800 lb steers', data: SEASONAL.feeders_700_800, borderColor: '#E8C87A', tension: 0.35, pointRadius: 3 },
+        { label: 'Fed steers, live', data: SEASONAL.fed_steers, borderColor: '#8B3214', tension: 0.35, pointRadius: 3 },
       ]
     },
     options: {
-      responsive: true,
-      maintainAspectRatio: false,
+      responsive: true, maintainAspectRatio: false,
       plugins: {
         legend: { labels: { color: '#C4A882', font: { family: 'Inter', size: 11 } } },
-        tooltip: {
-          backgroundColor: '#0A0A0A', titleColor: '#F5EFE0', bodyColor: '#C9A96E',
-          callbacks: { label: ctx => ctx.dataset.label + ': ' + ctx.parsed.y + '% of annual avg' }
-        }
+        tooltip: { backgroundColor: '#0A0A0A', titleColor: '#F5EFE0', bodyColor: '#C9A96E',
+          callbacks: { label: ctx => ctx.dataset.label + ': ' + ctx.parsed.y.toFixed(1) + '% of the annual average' } }
       },
       scales: {
         x: { ticks: { color: '#8C7560', font: { family: 'Inter', size: 10 } }, grid: { color: 'rgba(201,169,110,.06)' } },
-        y: {
-          min: 90, max: 110,
-          ticks: { color: '#8C7560', font: { family: 'Inter', size: 10 }, callback: v => v + '%' },
-          grid: { color: 'rgba(201,169,110,.06)' }
-        }
+        y: { min: 90, max: 110, ticks: { color: '#8C7560', font: { family: 'Inter', size: 10 }, callback: v => v + '%' }, grid: { color: 'rgba(201,169,110,.06)' } }
       }
     }
   });
@@ -564,48 +572,45 @@ async function loadAlerts() {
   try {
     const alerts = await api('GET', '/api/market/alerts');
     const el = document.getElementById('alerts-list');
-    if (!alerts.length) { el.innerHTML = '<div class="card" style="text-align:center;color:var(--muted);padding:20px">No active alerts. Set one above.</div>'; return; }
+    if (!alerts.length) { el.innerHTML = '<div class="card" style="text-align:center;color:var(--muted);padding:20px">No alerts saved. Add one above.</div>'; return; }
     el.innerHTML = '<div class="card"><div class="card-title">Your Alerts</div>' +
       alerts.map(a => {
         const wRange = a.weight_low && a.weight_high ? a.weight_low + '-' + a.weight_high + ' lbs' : 'Any weight';
         const dir = a.alert_type === 'above' ? 'goes above' : 'drops below';
-        return '<div class="alert-row"><div class="alert-info"><strong>' + esc(a.category||'Any') + '</strong> ' + wRange + ' &mdash; alert when price ' + dir + ' <strong>$' + parseFloat(a.target_price).toFixed(2) + '/cwt</strong></div><button class="btn btn-sm btn-danger" onclick="deleteAlert(' + a.id + ')">Remove</button></div>';
+        return '<div class="alert-row"><div class="alert-info"><strong>' + esc((a.category || 'Any').replace(/_/g, ' ')) + '</strong> ' + esc(wRange) + ', when the price ' + dir + ' <strong>$' + parseFloat(a.target_price).toFixed(2) + '/cwt</strong></div><button class="btn btn-sm btn-danger" onclick="deleteAlert(' + parseInt(a.id) + ')">Remove</button></div>';
       }).join('') + '</div>';
   } catch {}
 }
 
 async function saveAlert() {
+  const price = parseFloat(document.getElementById('al-price').value);
+  if (!price || price <= 0) { alert('Enter a target price per cwt.'); return; }
   try {
     await api('POST', '/api/market/alerts', {
       category: document.getElementById('al-cat').value,
       weight_low: document.getElementById('al-wl').value,
       weight_high: document.getElementById('al-wh').value,
-      target_price: document.getElementById('al-price').value,
+      target_price: price,
       alert_type: document.getElementById('al-type').value
     });
+    document.getElementById('al-price').value = '';
     loadAlerts();
-  } catch (err) { alert('Failed to save alert'); }
+  } catch (err) { alert('Could not save the alert. Try again.'); }
 }
 
 async function deleteAlert(id) {
   try { await api('DELETE', '/api/market/alerts/' + id); loadAlerts(); }
-  catch { alert('Failed to delete'); }
+  catch { alert('Could not remove the alert.'); }
 }
-
-// ── Helpers ──────────────────────────────────────────────────────────────────
-function esc(s) { if (!s) return ''; const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
-function commas(n) { return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
 
 // ── Init ─────────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
+  renderSeasonalChart();
   await initAuth();
   loadPrices();
-  loadHistory();
-  renderSeasonalChart();
 });
 
-// ── PDF Helpers ───────────────────────────────────────────────────────────────
-// ── PDF Helpers (branded layout) ──────────────────────────────────────────────
+// ── PDF (branded layout) ──────────────────────────────────────────────────────
 function getJsPDF() {
   if (typeof window.jspdf !== 'undefined' && window.jspdf.jsPDF) return window.jspdf.jsPDF;
   if (typeof window.jsPDF !== 'undefined') return window.jsPDF;
@@ -620,10 +625,6 @@ function stripEmoji(str) {
   s = s.replace(/[^\x20-\x7E]/g,'');
   s = s.replace(/\s{2,}/g,' ').trim();
   return s;
-}
-function safeText(el) {
-  if (!el) return '';
-  return stripEmoji(el.textContent || '');
 }
 function pdfHeader(doc, title, subtitle) {
   var W = doc.internal.pageSize.getWidth(), m = 18, cW = W-m*2;
@@ -645,14 +646,6 @@ function pdfHeader(doc, title, subtitle) {
   }
   return y;
 }
-function pdfSection(doc, title, y) {
-  var W = doc.internal.pageSize.getWidth(), m = 18, cW = W-m*2;
-  doc.setFillColor(245,239,224); doc.rect(m,y,cW,7.5,'F');
-  doc.setFillColor(139,50,20); doc.rect(m,y,3,7.5,'F');
-  doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(10,10,10);
-  doc.text(stripEmoji(title).toUpperCase().slice(0,60), m+7, y+5.2);
-  return y + 11;
-}
 function pdfFooter(doc, toolName) {
   var W = doc.internal.pageSize.getWidth(), H = doc.internal.pageSize.getHeight(), m = 18;
   var pg = doc.internal.getCurrentPageInfo().pageNumber;
@@ -662,69 +655,56 @@ function pdfFooter(doc, toolName) {
   doc.text('Page '+pg, W-m, H-8, {align:'right'});
   doc.setTextColor(180,160,130); doc.text(stripEmoji(toolName||'').slice(0,50), W/2, H-8, {align:'center'});
 }
-function pdfTable(doc, headers, rows, y, toolName) {
-  var W = doc.internal.pageSize.getWidth(), m = 18, cW = W-m*2, colW = cW/headers.length;
+function pdfTable(doc, headers, rows, y, toolName, widths) {
+  var W = doc.internal.pageSize.getWidth(), m = 18, cW = W-m*2;
+  var colW = widths || headers.map(function(){ return cW/headers.length; });
+  var xs = []; var acc = m; colW.forEach(function(w){ xs.push(acc); acc += w; });
   doc.setFillColor(10,10,10); doc.rect(m,y,cW,7.5,'F');
   doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(201,169,110);
-  headers.forEach(function(h,i){doc.text(stripEmoji(h).toUpperCase().slice(0,Math.floor(colW/2)),m+4+i*colW,y+5.2);});
+  headers.forEach(function(h,i){ doc.text(stripEmoji(h).toUpperCase(), xs[i]+3, y+5.2); });
   y+=9; var alt=false;
   rows.forEach(function(r){
     if(y>265){pdfFooter(doc,toolName);doc.addPage();y=20;}
     if(alt){doc.setFillColor(250,248,245);doc.rect(m,y,cW,7,'F');}
-    doc.setFont('helvetica','normal');doc.setFontSize(8.5);doc.setTextColor(50,50,50);
-    r.forEach(function(c,i){var cv=stripEmoji(String(c||'--')).slice(0,Math.floor(colW/2));doc.text(cv,m+4+i*colW,y+5);});
+    doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(50,50,50);
+    r.forEach(function(c,i){ var cv = doc.splitTextToSize(stripEmoji(String(c === null || c === undefined || c === '' ? '--' : c)), colW[i]-5)[0] || ''; doc.text(cv, xs[i]+3, y+5); });
     y+=7;alt=!alt;
   });
   return y+4;
 }
 
 function exportMarketPDF() {
-  var JsPDF=getJsPDF();if(!JsPDF){alert('PDF loading.');return;}var doc=new JsPDF();var y0=pdfHeader(doc,'Market Price Intelligence Report');
-  let y = y0;
-  // Price board
-  const headers = ['Category', 'Price', 'Range', 'Change'];
-  const rows = [];
-  document.querySelectorAll('#price-board .price-card').forEach(card => {
-    const cat = card.querySelector('.category')?.textContent || '';
-    const price = card.querySelector('.price')?.textContent?.replace(/\s+/g, ' ').trim() || '';
-    const range = card.querySelector('.range')?.textContent || '';
-    const change = card.querySelector('.change')?.textContent || '';
-    if (cat && cat !== 'Loading...') rows.push([cat, price, range, change]);
+  var JsPDF = getJsPDF(); if (!JsPDF) { alert('PDF loading.'); return; }
+  var doc = new JsPDF(); var m = 18, cW = doc.internal.pageSize.getWidth() - m * 2;
+  var sub = priceData && priceData.series && priceData.series.length
+    ? 'USDA AMS Livestock Mandatory Reporting, weekly weighted averages, packer-direct trade. Checked ' + fmtWhen(priceData.fetched_at) + (priceData.stale ? ' (last good fetch; USDA was not answering).' : '.')
+    : 'USDA reports were unavailable when this was made. No prices are shown.';
+  var y = pdfHeader(doc, 'Market Price Report', sub);
+  var rows = (priceData && priceData.series ? priceData.series : []).map(function(s){
+    var src = priceData.sources ? priceData.sources[s.source] : null;
+    var change = (s.prev_avg !== null && s.prev_avg !== undefined) ? ((s.avg - s.prev_avg) >= 0 ? '+' : '') + (s.avg - s.prev_avg).toFixed(2) : '--';
+    return [s.label, '$' + s.avg.toFixed(2), (s.low !== null && s.low !== undefined) ? '$' + s.low.toFixed(2) + ' to $' + s.high.toFixed(2) : '--', change, s.head ? commas(s.head) : '--', (src ? src.report : '') + ' ' + s.date];
   });
-  if (rows.length) y = pdfTable(doc, headers, rows, y, "Herd Hub");
-  // Break-even result if visible
-  const beResult = document.getElementById('be-result');
-  if (beResult && beResult.style.display !== 'none' && beResult.textContent.trim()) {
-    y += 4; doc.setFontSize(10); doc.setTextColor(10, 10, 10); doc.text('Break-Even Analysis', 14, y); y += 6;
-    const stats = [];
-    beResult.querySelectorAll('.result-stat').forEach(s => {
-      const lbl = s.querySelector('.lbl')?.textContent || '';
-      const val = s.querySelector('.val')?.textContent || '';
-      if (lbl) stats.push([lbl, val]);
-    });
-    if (stats.length) y = pdfTable(doc, ['Metric', 'Value'], stats, y, "Herd Hub");
+  if (rows.length) y = pdfTable(doc, ['Series', '$/cwt', 'Range', 'Chg', 'Head', 'Report / week'], rows, y, 'Herd Hub', [50, 18, 36, 16, 18, cW - 138]);
+  var beResult = document.getElementById('be-result');
+  if (beResult && beResult.style.display !== 'none' && beResult.querySelector('.result-stat')) {
+    y += 4; doc.setFontSize(10); doc.setTextColor(10, 10, 10); doc.text('Break-even and cost of gain', m, y); y += 6;
+    var stats = [];
+    beResult.querySelectorAll('.result-stat').forEach(function(s){ stats.push([s.querySelector('.lbl').textContent, s.querySelector('.val').textContent + '  ' + s.querySelector('.sub').textContent]); });
+    y = pdfTable(doc, ['Metric', 'Value'], stats, y, 'Herd Hub', [55, cW - 55]);
   }
-  pdfFooter(doc,'Herd Hub');
-  doc.save('MarketIntelligence_' + new Date().toISOString().slice(0,10) + '.pdf');
+  var valResult = document.getElementById('val-result');
+  if (valResult && valResult.style.display !== 'none' && valResult.querySelector('.result-stat')) {
+    y += 4; doc.setFontSize(10); doc.setTextColor(10, 10, 10); doc.text('Cattle valuation', m, y); y += 6;
+    var vstats = [];
+    valResult.querySelectorAll('.result-stat').forEach(function(s){ vstats.push([s.querySelector('.lbl').textContent, s.querySelector('.val').textContent + '  ' + s.querySelector('.sub').textContent]); });
+    y = pdfTable(doc, ['Metric', 'Value'], vstats, y, 'Herd Hub', [55, cW - 55]);
+  }
+  y += 4; doc.setFontSize(7.5); doc.setTextColor(110, 110, 110);
+  doc.text(doc.splitTextToSize('Prices are national packer-direct weekly weighted averages (USDA LM_CT150 fed cattle, LM_CT168 cows and bulls, LM_XB459 boxed beef). Your local sale barn will differ. Feeder and stocker calf prices are not included. Planning only, not a bid.', cW), m, y);
+  pdfFooter(doc, 'Herd Hub');
+  doc.save('MarketPrices_' + new Date().toISOString().slice(0,10) + '.pdf');
 }
-
-function printAsPDF(exportFn) {
-  try {
-    var JsPDF = getJsPDF();
-    if (!JsPDF) { alert('PDF library loading - please try again.'); return; }
-    var origSave = JsPDF.prototype.save;
-    JsPDF.prototype.save = function(filename) {
-      JsPDF.prototype.save = origSave;
-      var blob = this.output('blob');
-      var url = URL.createObjectURL(blob);
-      var win = window.open(url, '_blank');
-      if (win) { setTimeout(function(){ try{win.print();}catch(e){} }, 1500); }
-      else { var a=document.createElement('a'); a.href=url; a.download=filename||'HerdHub_Report.pdf'; a.click(); }
-    };
-    exportFn();
-  } catch(e) { console.error('Print error:', e); alert('Print failed: '+e.message); }
-}
-
 </script>
 </body>
 </html>

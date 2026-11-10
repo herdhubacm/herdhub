@@ -592,7 +592,7 @@ async function start() {
     app.listen(PORT, () => {
       console.log(`\n🐄  Herd Hub running → http://localhost:${PORT}`);
       console.log(`☁️   Storage: ${(process.env.STORAGE_PROVIDER || 'local').toUpperCase()}`);
-      console.log(`📊  USDA feed: ${process.env.USDA_AMS_BASE_URL || 'https://marsapi.ams.usda.gov/services/v1.2'}`);
+      console.log(`📊  USDA feed: ${process.env.USDA_AMS_BASE_URL || 'https://mpr.datamart.ams.usda.gov/services/v1.1'}`);
       console.log(`🌍  Environment: ${process.env.NODE_ENV || 'development'}\n`);
     });
 
