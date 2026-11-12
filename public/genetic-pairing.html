@@ -55,7 +55,8 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .tab-btn.active{background:var(--rust);border-color:var(--rust);color:white}
 .saved-list .saved-item{display:flex;justify-content:space-between;align-items:center;padding:12px;border-bottom:1px solid rgba(201,169,110,.06)}
 .disclaimer{margin-top:40px;padding:16px;background:rgba(10,10,10,.4);border:1px solid rgba(201,169,110,.08);border-radius:6px;font-size:12px;color:var(--muted);line-height:1.6}
-@media(max-width:768px){.container{padding:0 16px 60px}.site-header{padding:0 16px}.epd-grid{grid-template-columns:repeat(3,1fr)}}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}.three{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px}.hint{font-family:'Inter',sans-serif;font-size:10.5px;color:var(--muted);margin-top:4px;line-height:1.5}.note{border-left:3px solid var(--gold);background:rgba(201,169,110,.06);border-radius:0 6px 6px 0;padding:12px 16px;font-size:13.5px;color:var(--tan);line-height:1.65;margin:10px 0}.note.warn{border-left-color:var(--warn)}.note strong{color:var(--cream)}.check{display:flex;align-items:center;gap:10px;font-family:'Inter',sans-serif;font-size:13px;color:var(--tan)}.check input{width:18px;height:18px}.disclaimer a{color:var(--tan)}
+@media(max-width:768px){.container{padding:0 16px 60px}.site-header{padding:0 16px}.hero{padding:40px 16px 30px}.epd-grid{grid-template-columns:repeat(3,1fr)}.two,.three{grid-template-columns:1fr}.cow-rank{flex-direction:column;align-items:flex-start;gap:4px}}
 @media print {
   .site-header, .hero, .btn, button, .tool-tabs, .tab-bar, .filter-tabs,
   .auth-banner, .disclaimer, [onclick], input, select, textarea { display:none!important }
@@ -72,63 +73,71 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 <header class="site-header"><a href="/" class="logo">Herd <span>Hub</span></a><a href="/" class="back-link">&larr; Back to Marketplace</a></header>
 <section class="hero">
 <h1>Genetic <em>Pairing</em></h1>
-<div class="hero-sub">Predict your calf crop before breeding season</div>
-<p class="hero-desc">Enter a bull's EPDs and your cowherd averages to see predicted calf performance, calving ease risk, and carcass quality estimates.</p>
+<div class="hero-sub">See what a bull does to your next calf crop</div>
+<p class="hero-desc">Enter a bull's EPDs and your cow herd's. See the expected EPDs of the calves, how many pounds he should add or take off against the bull you use now, and whether he fits heifers.</p>
 </section>
 <div class="container">
 
-<!-- BULL EPDs -->
 <div class="section">
-<div class="section-title">Bull EPD Input</div>
+<div class="section-title">The Bull</div>
 <div class="card">
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
-<div class="field"><label>Bull Name</label><input type="text" id="bull-name" placeholder="e.g. SAV Resource 1441"></div>
-<div class="field"><label>Breed</label><select id="bull-breed"><option value="angus">Angus</option><option value="hereford">Hereford</option><option value="simmental">Simmental</option><option value="charolais">Charolais</option><option value="red_angus">Red Angus</option><option value="limousin">Limousin</option><option value="gelbvieh">Gelbvieh</option><option value="other">Other</option></select></div>
+<div class="two">
+<div class="field"><label for="bull-name">Bull Name</label><input type="text" id="bull-name" placeholder="e.g. SAV Resource 1441"></div>
+<div class="field"><label for="bull-breed">Breed</label><select id="bull-breed"><option value="angus">Angus</option><option value="hereford">Hereford</option><option value="simmental">Simmental</option><option value="charolais">Charolais</option><option value="red_angus">Red Angus</option><option value="limousin">Limousin</option><option value="gelbvieh">Gelbvieh</option><option value="other">Other</option></select></div>
 </div>
-<div class="card-title">EPD Values</div>
+<div class="card-title">EPDs (leave a box blank if you don't have the number)</div>
 <div class="epd-grid" id="bull-epds"></div>
-<div class="card-title" style="margin-top:12px">Accuracy Values (optional)</div>
+<div class="card-title" style="margin-top:12px">Accuracy for CE, BW and WW (optional)</div>
 <div class="epd-grid" id="bull-acc"></div>
+<label class="check" style="margin-top:14px"><input type="checkbox" id="heifer-toggle"> First-calf heifers will be in his breeding group</label>
 </div>
 </div>
 
-<!-- COW HERD -->
 <div class="section">
-<div class="section-title">Cow Herd Input</div>
+<div class="section-title">Your Cows</div>
+<div class="card">
+<div class="two">
+<div class="field"><label for="cow-breed">Cow Herd Breed</label><select id="cow-breed"><option value="angus">Angus</option><option value="hereford">Hereford</option><option value="simmental">Simmental</option><option value="charolais">Charolais</option><option value="red_angus">Red Angus</option><option value="limousin">Limousin</option><option value="gelbvieh">Gelbvieh</option><option value="crossbred">Crossbred / commercial</option></select></div>
+<div class="field"><label for="cow-count">Cows he will breed</label><input type="number" id="cow-count" value="30" min="1"></div>
+</div>
+</div>
 <div class="tab-bar">
 <button class="tab-btn active" onclick="setCowMode('avg',this)">Herd Average</button>
 <button class="tab-btn" onclick="setCowMode('individual',this)">Individual Cows</button>
 </div>
-<div id="cow-avg-panel">
-<div class="card">
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
-<div class="field"><label>Cow Herd Breed</label><select id="cow-breed"><option value="angus">Angus</option><option value="hereford">Hereford</option><option value="simmental">Simmental</option><option value="charolais">Charolais</option><option value="red_angus">Red Angus</option><option value="limousin">Limousin</option><option value="gelbvieh">Gelbvieh</option><option value="crossbred">Crossbred</option></select></div>
-<div class="field"><label>Herd Size</label><input type="number" id="cow-count" value="30"></div>
-</div>
+<div id="cow-avg-panel"><div class="card">
 <div class="card-title">Cow Herd Average EPDs</div>
 <div class="epd-grid" id="cow-epds"></div>
-</div>
-</div>
-<div id="cow-ind-panel" style="display:none">
-<div class="card">
+<div class="hint">No EPDs on your cows? Leave these blank. The pounds comparison below still works from the two bulls.</div>
+</div></div>
+<div id="cow-ind-panel" style="display:none"><div class="card">
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
 <div class="card-title" style="margin:0">Individual Cows</div>
 <button class="btn btn-sm btn-ghost" onclick="addCowRow()">+ Add Cow</button>
 </div>
 <div id="cow-rows"></div>
+</div></div>
+</div>
+
+<div class="section">
+<div class="section-title">Your Herd Today</div>
+<div class="section-desc">An EPD can't tell you what a calf will weigh. It tells you the difference between bulls. Give us the bull you use now and your current weaning weight, and we can turn that difference into pounds.</div>
+<div class="card">
+<div class="three">
+<div class="field"><label for="cur-ww">Current avg weaning weight (lbs)</label><input type="number" id="cur-ww" placeholder="e.g. 540" min="0"></div>
+<div class="field"><label for="old-ww">Current bull's WW EPD</label><input type="number" id="old-ww" step="0.1" placeholder="e.g. 62"><div class="hint">Same breed as the new bull, or leave blank</div></div>
+<div class="field"><label for="old-bw">Current bull's BW EPD</label><input type="number" id="old-bw" step="0.1" placeholder="e.g. 1.8"></div>
 </div>
 </div>
 </div>
 
-<!-- RUN -->
 <div style="text-align:center;margin:24px 0">
-<button class="btn btn-primary" style="padding:16px 48px;font-size:14px" onclick="runPairing()">Predict Calf Crop Performance</button>
+<button class="btn btn-primary" style="padding:16px 48px;font-size:14px" onclick="runPairing()">Run the Pairing</button>
 </div>
 
-<!-- RESULTS -->
 <div id="results" style="display:none">
 <div class="section">
-<div class="section-title">Predicted Results</div>
+<div class="section-title">What to Expect</div>
 <div id="pairing-export" style="display:none;margin-bottom:12px;gap:8px">
   <button class="btn btn-primary btn-sm" onclick="exportPairingPDF()">&#x1F4C4; Download PDF / Print</button>
 </div>
@@ -139,38 +148,50 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 </div>
 <div style="text-align:center;margin:16px 0">
 <button class="btn btn-ghost" onclick="savePairing()">Save This Pairing</button>
+<div class="hint" id="save-msg"></div>
 </div>
 </div>
 
-<!-- SAVED -->
 <div class="section" id="saved-section" style="display:none">
 <div class="section-title">Saved Pairings</div>
 <div class="card saved-list" id="saved-list"></div>
 </div>
 
-<div class="disclaimer"><strong style="color:var(--tan)">About these predictions:</strong> Predicted calf EPDs are calculated as the midpoint of sire and dam EPDs. Actual progeny performance will vary due to Mendelian sampling. Heterosis estimates are approximate. EPDs are breed-specific — cross-breed comparisons are directional only. Always consult breed association data and your breeding advisor.</div>
+<div class="disclaimer"><strong style="color:var(--tan)">About these numbers:</strong> A calf's expected EPD is the average of its sire's and dam's EPDs. Any one calf can land above or below that. EPDs are only on one scale within a breed, so calf EPDs are shown only when the bull and the cows are the same breed.
+The pounds comparison uses the full difference between two sires' EPDs (<a href="https://extension.oregonstate.edu/catalog/how-interpret-sire-summaries" target="_blank" rel="noopener">Oregon State Extension, How to interpret sire summaries</a>).
+The hybrid vigor figure, about 3.9% on weaning weight for a first cross between British or Continental breeds, is from Cundiff and Gregory (1999) as published in <a href="https://beef-cattle.extension.org/considering-crossbreeding" target="_blank" rel="noopener">Heterosis: The Only Free Lunch</a>. Angus heifer-bull lines are from the American Angus Association percentile breakdown, current sires, Fall 2026. Checked November 2026. Planning aid only.</div>
 </div>
 
 <script>
 const EPD_TRAITS = [
-  {key:'CE',label:'CE',desc:'Calving Ease'},
-  {key:'BW',label:'BW',desc:'Birth Weight'},
-  {key:'WW',label:'WW',desc:'Weaning Weight'},
-  {key:'YW',label:'YW',desc:'Yearling Weight'},
-  {key:'MCE',label:'MCE',desc:'Maternal CE'},
-  {key:'MM',label:'MM',desc:'Milk'},
-  {key:'MWW',label:'MWW',desc:'Maternal WW'},
-  {key:'CW',label:'CW',desc:'Carcass Weight'},
-  {key:'REA',label:'REA',desc:'Rib Eye Area'},
-  {key:'MARB',label:'MARB',desc:'Marbling'},
-  {key:'FAT',label:'FAT',desc:'Fat'},
-  {key:'$B',label:'$B',desc:'Beef Value'},
-  {key:'$M',label:'$M',desc:'Maternal Value'},
-  {key:'$W',label:'$W',desc:'Weaning Value'},
-  {key:'$F',label:'$F',desc:'Feedlot Value'}
+  {key:'CE',label:'CE',desc:'Calving Ease Direct',dp:1},
+  {key:'BW',label:'BW',desc:'Birth Weight',dp:1},
+  {key:'WW',label:'WW',desc:'Weaning Weight',dp:0},
+  {key:'YW',label:'YW',desc:'Yearling Weight',dp:0},
+  {key:'MCE',label:'MCE',desc:'Maternal Calving Ease',dp:1},
+  {key:'MM',label:'Milk',desc:'Maternal Milk',dp:0},
+  {key:'MWW',label:'MWW',desc:'Maternal Weaning Weight',dp:0},
+  {key:'CW',label:'CW',desc:'Carcass Weight',dp:0},
+  {key:'REA',label:'REA',desc:'Ribeye Area',dp:2},
+  {key:'MARB',label:'MARB',desc:'Marbling',dp:2},
+  {key:'FAT',label:'FAT',desc:'Fat Thickness',dp:3},
+  {key:'$B',label:'$B',desc:'Beef Value',dp:0},
+  {key:'$M',label:'$M',desc:'Maternal Weaned Calf Value',dp:0},
+  {key:'$W',label:'$W',desc:'Weaned Calf Value',dp:0},
+  {key:'$F',label:'$F',desc:'Feedlot Value',dp:0}
 ];
+const ACC_TRAITS = ['CE','BW','WW'];
+const BREEDS = {angus:'Angus',hereford:'Hereford',simmental:'Simmental',charolais:'Charolais',red_angus:'Red Angus',limousin:'Limousin',gelbvieh:'Gelbvieh',crossbred:'crossbred',other:'Other'};
+// American Angus Association percentile breakdown, current sires, Fall 2026. Update each evaluation.
+const ANGUS = { ceTop25: 10, ceAvg: 6, ce75: 3, bwIdeal: 1.5, bwMax: 2.5, acc: 0.55, label: 'Angus current sires, Fall 2026' };
+// Individual heterosis on weaning weight, Bos taurus x Bos taurus first cross (Cundiff and Gregory 1999).
+const HET_WW = 0.039;
 
 let authToken=null, cowMode='avg', cowCount=0;
+
+function esc(s){ if(s===null||s===undefined) return ''; const d=document.createElement('div'); d.textContent=String(s); return d.innerHTML; }
+function num(id){ const el=document.getElementById(id); if(!el||el.value==='') return null; const v=parseFloat(el.value); return isNaN(v)?null:v; }
+function fmt(v,dp){ if(v===null||v===undefined) return '--'; let t=Number(v).toFixed(dp); if(t.indexOf('.')>=0) t=t.replace(/0+$/,'').replace(/\.$/,''); if(t==='-0') t='0'; return (v>0?'+':'')+t; }
 
 async function initAuth(){
   try{const r=await fetch('/api/auth/refresh',{credentials:'include'});if(r.ok){const d=await r.json();if(d.token)authToken=d.token;}}catch{}
@@ -179,19 +200,11 @@ async function initAuth(){
 
 function buildEpdInputs(containerId,prefix){
   document.getElementById(containerId).innerHTML=EPD_TRAITS.map(t=>
-    '<div class="field"><label>'+t.label+'</label><input type="number" step="0.01" id="'+prefix+'-'+t.key+'" placeholder="0"></div>'
-  ).join('');
+    '<div class="field"><label title="'+t.desc+'">'+t.label+'</label><input type="number" step="0.01" id="'+prefix+'-'+t.key+'" aria-label="'+t.desc+'"></div>').join('');
 }
-
-function buildAccInputs(containerId,prefix){
-  document.getElementById(containerId).innerHTML=EPD_TRAITS.map(t=>
-    '<div class="field"><label>'+t.label+' Acc</label><input type="number" step="0.01" id="'+prefix+'-acc-'+t.key+'" placeholder="0.00" min="0" max="1"></div>'
-  ).join('');
-}
-
 buildEpdInputs('bull-epds','b');
-buildAccInputs('bull-acc','b');
 buildEpdInputs('cow-epds','c');
+document.getElementById('bull-acc').innerHTML=ACC_TRAITS.map(k=>'<div class="field"><label>'+k+' Acc</label><input type="number" step="0.01" min="0" max="1" id="b-acc-'+k+'" placeholder="0.00"></div>').join('');
 
 function setCowMode(mode,btn){
   cowMode=mode;
@@ -203,138 +216,156 @@ function setCowMode(mode,btn){
 }
 
 function addCowRow(){
-  cowCount++;
-  const n=cowCount;
-  const html='<div class="card" style="padding:12px;margin-bottom:8px" id="cow-row-'+n+'"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><strong style="color:var(--gold);font-family:Inter,sans-serif;font-size:12px;letter-spacing:.08em">COW '+n+'</strong><button class="btn btn-sm" style="color:var(--danger);border:none;background:none;font-size:14px" onclick="document.getElementById(\'cow-row-'+n+'\').remove()">&times;</button></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px"><div class="field" style="margin:0"><label>Name/Tag</label><input type="text" id="ic-name-'+n+'"></div><div class="field" style="margin:0"><label>Breed</label><input type="text" id="ic-breed-'+n+'" value="Angus"></div></div><div class="epd-grid">'+EPD_TRAITS.map(t=>'<div class="field" style="margin:0"><label>'+t.label+'</label><input type="number" step="0.01" id="ic-'+n+'-'+t.key+'" placeholder="0"></div>').join('')+'</div></div>';
+  cowCount++; const n=cowCount;
+  const html='<div class="card" style="padding:12px;margin-bottom:8px" id="cow-row-'+n+'"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><strong style="color:var(--gold);font-family:Inter,sans-serif;font-size:12px;letter-spacing:.08em">COW '+n+'</strong><button class="btn btn-sm" style="color:var(--danger);border:none;background:none;font-size:14px" aria-label="Remove cow" onclick="document.getElementById(\'cow-row-'+n+'\').remove()">&times;</button></div><div class="field"><label>Name / Tag</label><input type="text" id="ic-name-'+n+'"></div><div class="epd-grid">'+EPD_TRAITS.map(t=>'<div class="field" style="margin:0"><label>'+t.label+'</label><input type="number" step="0.01" id="ic-'+n+'-'+t.key+'"></div>').join('')+'</div></div>';
   document.getElementById('cow-rows').insertAdjacentHTML('beforeend',html);
 }
 
-function getEpds(prefix){
-  const e={};
-  EPD_TRAITS.forEach(t=>{e[t.key]=parseFloat(document.getElementById(prefix+'-'+t.key)?.value)||0;});
-  return e;
-}
-
+// Blank stays blank (null). A real 0 is a value.
+function getEpds(prefix){ const e={}; EPD_TRAITS.forEach(t=>{e[t.key]=num(prefix+'-'+t.key);}); return e; }
 function getIndCows(){
   const cows=[];
   for(let i=1;i<=cowCount;i++){
-    const el=document.getElementById('cow-row-'+i);
-    if(!el)continue;
-    const epds={};
-    EPD_TRAITS.forEach(t=>{epds[t.key]=parseFloat(document.getElementById('ic-'+i+'-'+t.key)?.value)||0;});
-    cows.push({name:document.getElementById('ic-name-'+i)?.value||'Cow '+i,breed:document.getElementById('ic-breed-'+i)?.value||'',epds});
+    if(!document.getElementById('cow-row-'+i)) continue;
+    const epds={}; EPD_TRAITS.forEach(t=>{epds[t.key]=num('ic-'+i+'-'+t.key);});
+    if(Object.values(epds).every(v=>v===null)) continue;
+    cows.push({name:(document.getElementById('ic-name-'+i).value||'').trim()||'Cow '+i,epds});
   }
   return cows;
 }
+function avgOf(vals){ const v=vals.filter(x=>x!==null); return v.length? v.reduce((a,b)=>a+b,0)/v.length : null; }
+function mid(a,b){ return (a===null||b===null)? null : (a+b)/2; }
 
 function runPairing(){
-  const bullName=document.getElementById('bull-name').value||'Bull';
+  const bullName=(document.getElementById('bull-name').value||'').trim()||'This bull';
   const bullBreed=document.getElementById('bull-breed').value;
-  const bullEpds=getEpds('b');
   const cowBreed=document.getElementById('cow-breed').value;
-  const diffBreed=bullBreed!==cowBreed;
+  const heifers=document.getElementById('heifer-toggle').checked;
+  const bull=getEpds('b');
+  const sameBreed=bullBreed===cowBreed && bullBreed!=='other';
+  const herd=Math.max(1,parseInt(document.getElementById('cow-count').value)||1);
 
-  let cowEpds,cows=null;
-  if(cowMode==='avg'){
-    cowEpds=getEpds('c');
-  } else {
+  let cow, cows=null;
+  if(cowMode==='avg'){ cow=getEpds('c'); }
+  else {
     cows=getIndCows();
-    if(!cows.length){alert('Add at least one cow');return;}
-    cowEpds={};
-    EPD_TRAITS.forEach(t=>{cowEpds[t.key]=cows.reduce((s,c)=>s+c.epds[t.key],0)/cows.length;});
+    if(!cows.length){alert('Enter EPDs for at least one cow, or switch to Herd Average.');return;}
+    cow={}; EPD_TRAITS.forEach(t=>{cow[t.key]=avgOf(cows.map(c=>c.epds[t.key]));});
+  }
+  if(Object.values(bull).every(v=>v===null)){alert('Enter at least one EPD for the bull.');return;}
+
+  // Expected calf EPD = parent average, only on one breed scale
+  const calf={}; EPD_TRAITS.forEach(t=>{calf[t.key]=sameBreed? mid(bull[t.key],cow[t.key]) : null;});
+
+  const stats=[], notes=[];
+
+  // 1. Pounds against the current bull (full EPD difference, same cows)
+  const curWW=num('cur-ww'), oldWW=num('old-ww'), oldBW=num('old-bw');
+  let wwChange=null, predWW=null;
+  if(bull.WW!==null && oldWW!==null){
+    wwChange=bull.WW-oldWW;
+    stats.push('<div class="result-stat"><div class="lbl">Weaning weight vs your current bull</div><div class="val">'+fmt(wwChange,0)+' lbs</div><div class="sub">per calf, same cows and feed</div></div>');
+    if(curWW!==null && curWW>0){ predWW=Math.round(curWW+wwChange);
+      stats.push('<div class="result-stat"><div class="lbl">Expected avg weaning weight</div><div class="val">'+predWW.toLocaleString()+' lbs</div><div class="sub">'+Math.round(curWW).toLocaleString()+' now '+(wwChange>=0?'+ ':'- ')+Math.abs(Math.round(wwChange))+'</div></div>');
+      stats.push('<div class="result-stat"><div class="lbl">Across '+herd+' cows</div><div class="val">'+fmt(wwChange*herd,0)+' lbs</div><div class="sub">if every cow weans a calf</div></div>'); }
+  } else {
+    notes.push('<div class="note"><strong>No pounds estimate yet.</strong> To see what '+esc(bullName)+' adds or takes off at weaning, enter his WW EPD and the WW EPD of the bull you use now.</div>');
+  }
+  if(bull.BW!==null && oldBW!==null){
+    stats.push('<div class="result-stat"><div class="lbl">Birth weight vs your current bull</div><div class="val">'+fmt(bull.BW-oldBW,1)+' lbs</div><div class="sub">per calf on average</div></div>');
   }
 
-  // Predicted calf EPDs = (bull + cow) / 2
-  const calfEpds={};
-  EPD_TRAITS.forEach(t=>{calfEpds[t.key]=(bullEpds[t.key]+cowEpds[t.key])/2;});
+  // 2. Heifer fit, from the bull's own CE and BW
+  let fit=null, fitClass='';
+  if(heifers){
+    if(bullBreed==='angus' && (bull.CE!==null || bull.BW!==null)){
+      if((bull.CE!==null && bull.CE<ANGUS.ceAvg) || (bull.BW!==null && bull.BW>ANGUS.bwMax)){ fit='Mature cows only'; fitClass='risk-very-high'; }
+      else if((bull.CE!==null && bull.CE<ANGUS.ceTop25) || (bull.BW!==null && bull.BW>ANGUS.bwIdeal)){ fit='Borderline'; fitClass='risk-high'; }
+      else { fit='Fits heifers'; fitClass='risk-low'; }
+      stats.push('<div class="result-stat"><div class="lbl">On first-calf heifers</div><div class="val '+fitClass+'" style="font-size:19px">'+fit+'</div><div class="sub">CE '+fmt(bull.CE,1)+' / BW '+fmt(bull.BW,1)+'</div></div>');
+      notes.push('<div class="note'+(fit==='Fits heifers'?'':' warn')+'"><strong>Heifer check ('+ANGUS.label+'):</strong> a heifer bull should be in the top 25% for CE (+'+ANGUS.ceTop25+' or higher) with BW at +'+ANGUS.bwIdeal+' or lower, +'+ANGUS.bwMax+' at the outside. Below the breed average CE of +'+ANGUS.ceAvg+', keep him on mature cows.</div>');
+    } else if(bullBreed!=='angus'){
+      notes.push('<div class="note"><strong>Heifer check:</strong> '+BREEDS[bullBreed]+' EPDs are on their own scale, so we can\'t grade him here. Look his CE up in the '+(bullBreed==='other'?'breed':BREEDS[bullBreed])+' association\'s percentile table and want the top 25% or better.</div>');
+    } else {
+      notes.push('<div class="note"><strong>Heifer check:</strong> enter his CE and BW EPDs to check him for heifers.</div>');
+    }
+    ACC_TRAITS.slice(0,2).forEach(k=>{ const a=num('b-acc-'+k); if(a!==null && a<ANGUS.acc) notes.push('<div class="note warn"><strong>Unproven on '+k+':</strong> accuracy of '+a+' is under '+ANGUS.acc+'. His '+k+' number can still move as calves are recorded. A proven bull is the safer heifer bull.</div>'); });
+  }
+  const wwAcc=num('b-acc-WW');
+  if(wwAcc!==null && wwAcc<0.45 && wwChange!==null) notes.push('<div class="note"><strong>Low accuracy on WW ('+wwAcc+'):</strong> treat the pounds figure as a rough guide.</div>');
 
-  // Heterosis
-  const hetGrowth=diffBreed?1.08:1.0;
-  const hetMaternal=diffBreed?1.04:1.0;
+  // 3. Hybrid vigor, stated separately and only where it applies
+  if(!sameBreed && bullBreed!=='other' && cowBreed!=='crossbred'){
+    const lbs=(curWW!==null&&curWW>0)? ' On '+Math.round(curWW)+' lb calves that is about '+Math.round(curWW*HET_WW)+' lbs.' : '';
+    notes.push('<div class="note"><strong>Hybrid vigor:</strong> '+(bullBreed==='angus'?'an ':'a ')+BREEDS[bullBreed]+' bull on straightbred '+BREEDS[cowBreed]+' cows makes first-cross calves. Research puts the weaning weight lift at about 3.9% over the average of the two breeds.'+lbs+' It applies if your calves are straightbred today, and it is separate from the EPD comparison above.</div>');
+  } else if(!sameBreed && cowBreed==='crossbred'){
+    notes.push('<div class="note"><strong>Hybrid vigor:</strong> your cows are already crossbred, so you are already getting some of it. How much more this bull adds depends on which breeds are in the cows.</div>');
+  }
+  if(!sameBreed){
+    notes.push('<div class="note warn"><strong>No calf EPDs for this pairing.</strong> The bull and the cows are measured on different breed scales, so averaging their EPDs would not mean anything. The table below shows each side as entered.</div>');
+  }
 
-  // Predicted weaning weight: base 450 + WW EPD + dam MM contribution
-  const predWW=Math.round((450+calfEpds.WW+(cowEpds.MM||0)*0.5)*hetGrowth);
-  // Predicted % Choice
-  const predChoice=Math.min(99,Math.max(5,Math.round(45+calfEpds.MARB*40)));
-  // Calving ease risk
-  const ceScore=calfEpds.CE;
-  const bwScore=calfEpds.BW;
-  let ceRisk='LOW',ceClass='risk-low';
-  if(ceScore<5||bwScore>3){ceRisk='VERY HIGH';ceClass='risk-very-high';}
-  else if(ceScore<8||bwScore>1.5){ceRisk='HIGH';ceClass='risk-high';}
-  else if(ceScore<12||bwScore>0.5){ceRisk='MODERATE';ceClass='risk-moderate';}
+  document.getElementById('result-stats').innerHTML = stats.length? '<div class="result-grid">'+stats.join('')+'</div>' : '';
+  document.getElementById('result-summary').innerHTML = notes.join('');
 
-  // $B and $M predictions
-  const predB=Math.round(calfEpds['$B']);
-  const predM=Math.round(calfEpds['$M']);
-
-  // Render stats
-  document.getElementById('result-stats').innerHTML=
-    '<div class="result-grid">'+
-    '<div class="result-stat"><div class="lbl">Pred. Weaning Wt</div><div class="val">'+predWW+' lbs</div>'+(diffBreed?'<div class="sub">Incl. 8% heterosis</div>':'')+'</div>'+
-    '<div class="result-stat"><div class="lbl">% Choice or Better</div><div class="val">'+predChoice+'%</div></div>'+
-    '<div class="result-stat"><div class="lbl">Calving Ease Risk</div><div class="val '+ceClass+'">'+ceRisk+'</div><div class="sub">CE: '+calfEpds.CE.toFixed(1)+' / BW: '+calfEpds.BW.toFixed(1)+'</div></div>'+
-    '<div class="result-stat"><div class="lbl">$B (Beef Value)</div><div class="val">$'+predB+'</div></div>'+
-    '<div class="result-stat"><div class="lbl">$M (Maternal Value)</div><div class="val">$'+predM+'</div></div>'+
-    '</div>';
-
-  // Summary
-  const breedLabel={angus:'Angus',hereford:'Hereford',simmental:'Simmental',charolais:'Charolais',red_angus:'Red Angus',limousin:'Limousin',gelbvieh:'Gelbvieh',crossbred:'crossbred',other:''}[cowBreed]||cowBreed;
-  document.getElementById('result-summary').innerHTML=
-    '<div class="summary-box">Breeding <strong>'+esc(bullName)+'</strong> to your <strong>'+breedLabel+'</strong> cowherd is expected to produce calves weaning at approximately <strong>'+predWW+' lbs</strong> with a <strong>'+predChoice+'%</strong> probability of grading Choice or better. Calving ease risk is <strong class="'+ceClass+'">'+ceRisk+'</strong>.'+(diffBreed?' <strong>Heterosis bonus applied</strong> — crossbreeding adds approximately 8% to growth traits and 4% to maternal traits.':'')+'</div>';
-
-  // EPD prediction table
-  let epdHtml='<div class="card"><div class="card-title">Predicted Calf EPDs</div><table style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr><th style="text-align:left;padding:6px;border-bottom:1px solid rgba(201,169,110,.15);font-family:Inter,sans-serif;font-size:10px;letter-spacing:.1em;color:var(--muted)">Trait</th><th style="text-align:center;padding:6px;border-bottom:1px solid rgba(201,169,110,.15);font-family:Inter,sans-serif;font-size:10px;letter-spacing:.1em;color:var(--muted)">Bull</th><th style="text-align:center;padding:6px;border-bottom:1px solid rgba(201,169,110,.15);font-family:Inter,sans-serif;font-size:10px;letter-spacing:.1em;color:var(--muted)">Cow Avg</th><th style="text-align:center;padding:6px;border-bottom:1px solid rgba(201,169,110,.15);font-family:Inter,sans-serif;font-size:10px;letter-spacing:.1em;color:var(--gold)">Calf Pred</th></tr></thead><tbody>';
+  // EPD table
+  const th='text-align:center;padding:6px;border-bottom:1px solid rgba(201,169,110,.15);font-family:Inter,sans-serif;font-size:10px;letter-spacing:.1em;color:var(--muted)';
+  const td='text-align:center;padding:6px;border-bottom:1px solid rgba(201,169,110,.06)';
+  let h='<div class="card"><div class="card-title">'+(sameBreed?'Expected calf EPDs (average of sire and dam)':'EPDs as entered')+'</div><div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr><th style="'+th+';text-align:left">Trait</th><th style="'+th+'">Bull</th><th style="'+th+'">Cows</th>'+(sameBreed?'<th style="'+th+';color:var(--gold)">Calves</th>':'')+'</tr></thead><tbody>';
+  let any=false;
   EPD_TRAITS.forEach(t=>{
-    epdHtml+='<tr><td style="padding:6px;border-bottom:1px solid rgba(201,169,110,.06)">'+t.desc+' ('+t.label+')</td><td style="text-align:center;padding:6px;border-bottom:1px solid rgba(201,169,110,.06)">'+bullEpds[t.key].toFixed(1)+'</td><td style="text-align:center;padding:6px;border-bottom:1px solid rgba(201,169,110,.06)">'+cowEpds[t.key].toFixed(1)+'</td><td style="text-align:center;padding:6px;border-bottom:1px solid rgba(201,169,110,.06);color:var(--gold);font-weight:600">'+calfEpds[t.key].toFixed(1)+'</td></tr>';
+    if(bull[t.key]===null && cow[t.key]===null) return; any=true;
+    h+='<tr><td style="padding:6px;border-bottom:1px solid rgba(201,169,110,.06)">'+t.desc+' ('+t.label+')</td><td style="'+td+'">'+fmt(bull[t.key],t.dp)+'</td><td style="'+td+'">'+fmt(cow[t.key],t.dp)+'</td>'+(sameBreed?'<td style="'+td+';color:var(--gold);font-weight:600">'+fmt(calf[t.key],t.dp)+'</td>':'')+'</tr>';
   });
-  epdHtml+='</tbody></table></div>';
-  document.getElementById('result-epd-table').innerHTML=epdHtml;
+  h+='</tbody></table></div><div class="hint" style="margin-top:8px">'+(sameBreed?'A dash means one side was left blank. The calf figure is an EPD, not a weight: it says how the calves should compare as parents or as feeders against the rest of the breed.':'Not on a common scale. Do not compare the two columns.')+'</div></div>';
+  document.getElementById('result-epd-table').innerHTML = any? h : '';
 
-  // Individual cow rankings
+  // Individual cows: rank on one trait the producer picks
   const cowPanel=document.getElementById('result-cows');
-  if(cows&&cows.length>1){
+  if(sameBreed && cows && cows.length>1){
+    const prev=(document.getElementById('rank-by')||{}).value || 'WW';
     cowPanel.style.display='';
-    const ranked=cows.map(cow=>{
-      const ce=(bullEpds.CE+cow.epds.CE)/2;
-      const bw=(bullEpds.BW+cow.epds.BW)/2;
-      const ww=(bullEpds.WW+cow.epds.WW)/2;
-      const marb=(bullEpds.MARB+cow.epds.MARB)/2;
-      const b_val=(bullEpds['$B']+cow.epds['$B'])/2;
-      // Score: higher is better. Reward CE, WW, MARB, $B. Penalize BW.
-      const score=ce*2+ww*1.5+marb*20+b_val*0.5-bw*3;
-      return{...cow,score,ce,bw,ww,marb};
-    }).sort((a,b)=>b.score-a.score);
-
-    let html='<div class="card"><div class="card-title">Cow Rankings — Best to Worst Match</div>';
-    ranked.forEach((c,i)=>{
-      const cls=i<3?'color:var(--good)':i>=ranked.length-2?'color:var(--danger)':'color:var(--tan)';
-      html+='<div class="cow-rank"><span class="name">#'+(i+1)+' '+esc(c.name)+'</span><span><span style="color:var(--muted);font-size:11px">CE:'+c.ce.toFixed(0)+' WW:'+c.ww.toFixed(0)+' MARB:'+c.marb.toFixed(2)+'</span> <span class="score" style="'+cls+';margin-left:8px">Score: '+c.score.toFixed(0)+'</span></span></div>';
-    });
-    html+='<div style="margin-top:12px;font-size:12px;color:var(--muted)">Top 5 cows are the best genetic match for this bull. Bottom cows may have calving ease or growth concerns.</div></div>';
-    cowPanel.innerHTML=html;
-  } else { cowPanel.style.display='none'; }
+    cowPanel.innerHTML='<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px"><div class="card-title" style="margin:0">Your cows with this bull</div><div class="field" style="margin:0;min-width:200px"><label for="rank-by">Rank calves by</label><select id="rank-by" onchange="renderCowRank()">'+EPD_TRAITS.map(t=>'<option value="'+t.key+'"'+(t.key===prev?' selected':'')+'>'+t.desc+'</option>').join('')+'</select></div></div><div id="rank-list"></div><div class="hint" style="margin-top:10px">Each line is that cow\'s expected calf EPD with this bull. Pick the trait that pays you. There is no single score that fits every outfit.</div></div>';
+    window._rank={cows,bull};
+    renderCowRank();
+  } else { cowPanel.style.display='none'; cowPanel.innerHTML=''; window._rank=null; }
 
   document.getElementById('results').style.display='';
   document.getElementById('results').scrollIntoView({behavior:'smooth'});
   document.getElementById('pairing-export').style.display='flex';
+  document.getElementById('save-msg').textContent='';
 
-  // Store for saving
-  window._lastPairing={bullName,bullBreed,bullEpds,cowEpds,cowBreed,calfEpds,predWW,predChoice,ceRisk,predB,predM};
-  console.log('_lastPairing captured:', window._lastPairing);
+  const summary=[ wwChange!==null? 'WW '+fmt(wwChange,0)+' lbs vs current bull':null, predWW!==null? 'expected '+predWW+' lbs':null, fit? 'heifers: '+fit:null ].filter(Boolean).join(' | ') || 'EPD table only';
+  window._lastPairing={bullName,bullBreed,cowBreed,sameBreed,heifers,herd,bull,cow,calf,wwChange,predWW,curWW,oldWW,fit,summary,
+    notes:Array.from(document.querySelectorAll('#result-summary .note')).map(n=>n.innerText.trim())};
+}
+
+function renderCowRank(){
+  const r=window._rank; if(!r) return;
+  const key=document.getElementById('rank-by').value;
+  const t=EPD_TRAITS.find(x=>x.key===key);
+  const lower=(key==='BW'||key==='FAT');
+  const rows=r.cows.map(c=>({name:c.name,v:mid(r.bull[key],c.epds[key])}));
+  const have=rows.filter(x=>x.v!==null).sort((a,b)=>lower? a.v-b.v : b.v-a.v);
+  const missing=rows.filter(x=>x.v===null);
+  let html=have.map((c,i)=>'<div class="cow-rank"><span class="name">#'+(i+1)+' '+esc(c.name)+'</span><span class="score" style="color:var(--gold)">'+t.label+' '+fmt(c.v,t.dp)+'</span></div>').join('');
+  if(!have.length) html='<div class="hint">Enter '+t.label+' for the bull and at least one cow to rank on it.</div>';
+  if(missing.length && have.length) html+='<div class="hint" style="margin-top:8px">Not ranked (no '+t.label+' entered): '+missing.map(m=>esc(m.name)).join(', ')+'</div>';
+  if(have.length) html='<div class="hint" style="margin-bottom:6px">'+(lower?'Lowest first':'Highest first')+'</div>'+html;
+  document.getElementById('rank-list').innerHTML=html;
 }
 
 async function savePairing(){
-  if(!authToken){alert('Sign in to save pairings');return;}
-  if(!window._lastPairing)return;
-  const p=window._lastPairing;
+  const msg=document.getElementById('save-msg');
+  if(!authToken){msg.textContent='Sign in on Herd Hub to save pairings.';return;}
+  const p=window._lastPairing; if(!p) return;
   try{
-    await fetch('/api/genetics/pairings',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+authToken},body:JSON.stringify({
-      bull_name:p.bullName,bull_breed:p.bullBreed,bull_epds:p.bullEpds,cow_herd_epds:p.cowEpds,cow_herd_breed:p.cowBreed,
-      predicted_results:{calfEpds:p.calfEpds,predWW:p.predWW,predChoice:p.predChoice,ceRisk:p.ceRisk,predB:p.predB,predM:p.predM}
-    })});
-    loadSaved();
-  }catch{alert('Failed to save');}
+    const r=await fetch('/api/genetics/pairings',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+authToken},body:JSON.stringify({
+      bull_name:p.bullName,bull_breed:p.bullBreed,bull_epds:p.bull,cow_herd_epds:p.cow,cow_herd_breed:p.cowBreed,
+      predicted_results:{calfEpds:p.calf,wwChange:p.wwChange,predWW:p.predWW,fit:p.fit,summary:p.summary}})});
+    if(!r.ok) throw new Error('save failed');
+    msg.textContent='Saved.'; loadSaved();
+  }catch{msg.textContent='Could not save. Try again.';}
 }
 
 async function loadSaved(){
@@ -342,11 +373,12 @@ async function loadSaved(){
   try{
     const r=await fetch('/api/genetics/pairings',{headers:{Authorization:'Bearer '+authToken}});
     const data=await r.json();
-    if(!data.length){document.getElementById('saved-section').style.display='none';return;}
+    if(!Array.isArray(data)||!data.length){document.getElementById('saved-section').style.display='none';return;}
     document.getElementById('saved-section').style.display='';
     document.getElementById('saved-list').innerHTML=data.map(p=>{
       const res=p.predicted_results||{};
-      return'<div class="saved-item"><div><strong style="color:var(--cream)">'+esc(p.bull_name)+'</strong> <span style="color:var(--muted)">('+esc(p.bull_breed)+') &times; '+esc(p.cow_herd_breed)+'</span><div style="font-size:12px;color:var(--tan)">WW: '+(res.predWW||'?')+' lbs | Choice: '+(res.predChoice||'?')+'% | CE Risk: '+(res.ceRisk||'?')+'</div></div><button class="btn btn-sm" style="color:var(--danger);border:none;background:none" onclick="deletePairing('+p.id+')">&times;</button></div>';
+      const line=res.summary || 'Saved before November 2026. Run it again for current figures.';
+      return'<div class="saved-item"><div><strong style="color:var(--cream)">'+esc(p.bull_name)+'</strong> <span style="color:var(--muted)">('+esc(BREEDS[p.bull_breed]||p.bull_breed)+') on '+esc(BREEDS[p.cow_herd_breed]||p.cow_herd_breed)+' cows</span><div style="font-size:12px;color:var(--tan)">'+esc(line)+'</div></div><button class="btn btn-sm" style="color:var(--danger);border:none;background:none" aria-label="Delete saved pairing" onclick="deletePairing('+parseInt(p.id)+')">&times;</button></div>';
     }).join('');
   }catch{}
 }
@@ -355,10 +387,8 @@ async function deletePairing(id){
   try{await fetch('/api/genetics/pairings/'+id,{method:'DELETE',headers:{Authorization:'Bearer '+authToken}});loadSaved();}catch{}
 }
 
-function esc(s){if(!s)return'';const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
 document.addEventListener('DOMContentLoaded',initAuth);
 
-// ── PDF Helpers ───────────────────────────────────────────────────────────────
 // ── PDF Helpers (branded layout) ──────────────────────────────────────────────
 function getJsPDF() {
   if (typeof window.jspdf !== 'undefined' && window.jspdf.jsPDF) return window.jspdf.jsPDF;
@@ -433,44 +463,24 @@ function pdfTable(doc, headers, rows, y, toolName) {
 }
 
 function exportPairingPDF() {
-  const p = window._lastPairing;
-  if (!p) return;
-  var JsPDF=getJsPDF();if(!JsPDF){alert('PDF loading.');return;}var doc=new JsPDF();var y0=pdfHeader(doc,'Genetic Pairing Report');
-  let y = y0;
-  doc.setFontSize(11); doc.setTextColor(10, 10, 10);
-  doc.text('Bull: ' + p.bullName + ' (' + p.bullBreed + ')', 14, y); y += 6;
-  doc.text('Cow Herd Breed: ' + p.cowBreed, 14, y); y += 10;
-  doc.setFontSize(10); doc.text('Summary', 14, y); y += 6;
-  doc.setFontSize(9); doc.setTextColor(60, 60, 60);
-  doc.text('Predicted Weaning Weight: ' + p.predWW + ' lbs', 14, y); y += 5;
-  doc.text('% Choice or Better: ' + p.predChoice + '%', 14, y); y += 5;
-  doc.text('Calving Ease Risk: ' + p.ceRisk, 14, y); y += 5;
-  doc.text('$B Beef Value: $' + p.predB, 14, y); y += 5;
-  doc.text('$M Maternal Value: $' + p.predM, 14, y); y += 10;
-  const headers = ['Trait', 'Bull', 'Cow Avg', 'Calf Pred'];
-  const rows = EPD_TRAITS.map(t => [t.desc + ' (' + t.label + ')', p.bullEpds[t.key].toFixed(1), p.cowEpds[t.key].toFixed(1), p.calfEpds[t.key].toFixed(1)]);
-  y = pdfTable(doc, headers, rows, y, "Herd Hub");
+  const p = window._lastPairing; if (!p) return;
+  var JsPDF=getJsPDF(); if(!JsPDF){alert('PDF loading.');return;}
+  var doc=new JsPDF(); var m=18, cW=doc.internal.pageSize.getWidth()-m*2;
+  var y=pdfHeader(doc,'Genetic Pairing Report', p.bullName+' ('+BREEDS[p.bullBreed]+') on '+BREEDS[p.cowBreed]+' cows, '+p.herd+' head'+(p.heifers?' | heifers in the group':''));
+  doc.setFontSize(9); doc.setTextColor(60,60,60);
+  [ p.wwChange!==null ? 'Weaning weight vs current bull: '+fmt(p.wwChange,0)+' lbs per calf (current bull WW EPD '+fmt(p.oldWW,0)+')' : null,
+    p.predWW!==null ? 'Expected average weaning weight: '+p.predWW+' lbs (now '+Math.round(p.curWW)+')' : null,
+    p.fit ? 'On first-calf heifers: '+p.fit : null ].filter(Boolean).forEach(function(l){ doc.text(stripEmoji(l), m, y); y+=5; });
+  y+=3;
+  p.notes.forEach(function(n){ if(y>250){pdfFooter(doc,'Herd Hub');doc.addPage();y=20;} doc.setFontSize(8); doc.setTextColor(80,80,80); var ls=doc.splitTextToSize(stripEmoji(n), cW); doc.text(ls, m, y); y+=ls.length*4+3; });
+  y+=3;
+  var rows=EPD_TRAITS.filter(function(t){return p.bull[t.key]!==null||p.cow[t.key]!==null;}).map(function(t){ var r=[t.desc+' ('+t.label+')', fmt(p.bull[t.key],t.dp), fmt(p.cow[t.key],t.dp)]; if(p.sameBreed) r.push(fmt(p.calf[t.key],t.dp)); return r; });
+  if(rows.length){ if(y>220){pdfFooter(doc,'Herd Hub');doc.addPage();y=20;} y=pdfTable(doc, p.sameBreed?['Trait','Bull','Cows','Calves (avg of sire and dam)']:['Trait','Bull','Cows'], rows, y, 'Herd Hub'); }
+  doc.setFontSize(7.5); doc.setTextColor(110,110,110);
+  doc.text(doc.splitTextToSize('EPDs entered by the user. A calf EPD is the average of sire and dam and is only shown within one breed. Pounds use the full difference between two sires of the same breed. Planning aid only.', cW), m, Math.min(y+2, 268));
   pdfFooter(doc,'Herd Hub');
   doc.save('GeneticPairing_' + new Date().toISOString().slice(0,10) + '.pdf');
 }
-
-function printAsPDF(exportFn) {
-  try {
-    var JsPDF = getJsPDF();
-    if (!JsPDF) { alert('PDF library loading - please try again.'); return; }
-    var origSave = JsPDF.prototype.save;
-    JsPDF.prototype.save = function(filename) {
-      JsPDF.prototype.save = origSave;
-      var blob = this.output('blob');
-      var url = URL.createObjectURL(blob);
-      var win = window.open(url, '_blank');
-      if (win) { setTimeout(function(){ try{win.print();}catch(e){} }, 1500); }
-      else { var a=document.createElement('a'); a.href=url; a.download=filename||'HerdHub_Report.pdf'; a.click(); }
-    };
-    exportFn();
-  } catch(e) { console.error('Print error:', e); alert('Print failed: '+e.message); }
-}
-
 </script>
 </body>
 </html>
