@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Herd Vision — Genetic Tools | Herd Hub</title>
+<title>Herd Vision: EPD Comparison and Bull Selection | Herd Hub</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -795,10 +795,10 @@ select option { background: var(--brown); color: var(--cream); }
   <div class="hero-eyebrow">Herd Hub Genetic Tools</div>
   <h1>Herd <em>Vision</em></h1>
   <div class="hero-sub">See further into your herd's future</div>
-  <p class="hero-desc">Professional EPD analysis and bull selection guidance — free for every rancher on Herd Hub. Make smarter breeding decisions backed by data.</p>
+  <p class="hero-desc">Compare two bulls on paper and see what the numbers mean in calves. Build a list of what to look for before the sale. Free for every rancher on Herd Hub.</p>
   <div class="tool-tabs">
-    <button class="tool-tab active" onclick="switchTool('compare')">⚖ EPD Comparison</button>
-    <button class="tool-tab" onclick="switchTool('wizard')">🧭 Bull Selection Wizard</button>
+    <button class="tool-tab active" onclick="switchTool('compare', this)">⚖ EPD Comparison</button>
+    <button class="tool-tab" onclick="switchTool('wizard', this)">🧭 Bull Selection Wizard</button>
   </div>
 </section>
 
@@ -811,7 +811,7 @@ select option { background: var(--brown); color: var(--cream); }
 
     <div class="section-label">Tool 1 of 2</div>
     <div class="section-title">EPD Head-to-Head Comparison</div>
-    <div class="section-desc">Enter the EPD values for two bulls. Herd Vision will compare them trait by trait, explain what the differences mean in real terms, and flag any concerns — like a risky birth weight for heifer breeding.</div>
+    <div class="section-desc">Enter the EPDs for two bulls from the sale catalog or the breed association's site. Herd Vision compares them trait by trait, puts the difference in pounds and percentage points, and flags heifer concerns. Compare bulls of the same breed: each breed has its own scale.</div>
 
     <div class="bulls-grid">
       <!-- Bull 1 -->
@@ -838,12 +838,12 @@ select option { background: var(--brown); color: var(--cream); }
         <div class="epd-group-title">Calving Traits</div>
         <div class="grid-2">
           <div class="field">
-            <label>CE — Calving Ease</label>
+            <label>CE: Calving Ease</label>
             <input type="number" id="b1-ce" placeholder="+12" step="0.1">
             <div class="field-hint">Higher = easier births</div>
           </div>
           <div class="field">
-            <label>BW — Birth Weight</label>
+            <label>BW: Birth Weight</label>
             <input type="number" id="b1-bw" placeholder="+1.8" step="0.1">
             <div class="field-hint">Lower = lighter calves</div>
           </div>
@@ -862,11 +862,11 @@ select option { background: var(--brown); color: var(--cream); }
         <div class="epd-group-title">Growth Traits</div>
         <div class="grid-2">
           <div class="field">
-            <label>WW — Weaning Wt.</label>
+            <label>WW: Weaning Wt.</label>
             <input type="number" id="b1-ww" placeholder="+68" step="0.1">
           </div>
           <div class="field">
-            <label>YW — Yearling Wt.</label>
+            <label>YW: Yearling Wt.</label>
             <input type="number" id="b1-yw" placeholder="+110" step="0.1">
           </div>
         </div>
@@ -884,11 +884,11 @@ select option { background: var(--brown); color: var(--cream); }
         <div class="epd-group-title">Maternal Traits</div>
         <div class="grid-2">
           <div class="field">
-            <label>MM — Milk</label>
+            <label>MM: Milk</label>
             <input type="number" id="b1-mm" placeholder="+28" step="0.1">
           </div>
           <div class="field">
-            <label>MWW — Mat. Wean Wt.</label>
+            <label>MWW: Mat. Wean Wt.</label>
             <input type="number" id="b1-mww" placeholder="+62" step="0.1">
           </div>
         </div>
@@ -896,15 +896,15 @@ select option { background: var(--brown); color: var(--cream); }
         <div class="epd-group-title">Carcass Traits</div>
         <div class="grid-3">
           <div class="field">
-            <label>CW — Carcass Wt.</label>
+            <label>CW: Carcass Wt.</label>
             <input type="number" id="b1-cw" placeholder="+58" step="0.1">
           </div>
           <div class="field">
-            <label>REA — Ribeye</label>
+            <label>REA: Ribeye</label>
             <input type="number" id="b1-rea" placeholder="+0.42" step="0.01">
           </div>
           <div class="field">
-            <label>MARB — Marbling</label>
+            <label>MARB: Marbling</label>
             <input type="number" id="b1-marb" placeholder="+0.55" step="0.01">
           </div>
         </div>
@@ -912,21 +912,21 @@ select option { background: var(--brown); color: var(--cream); }
         <div class="epd-group-title">Selection Indexes</div>
         <div class="grid-2">
           <div class="field">
-            <label>$B — Beef Value</label>
+            <label>$B: Beef Value</label>
             <input type="number" id="b1-sb" placeholder="+142" step="0.1">
           </div>
           <div class="field">
-            <label>$M — Maternal Value</label>
+            <label>$M: Maternal Value</label>
             <input type="number" id="b1-sm" placeholder="+58" step="0.1">
           </div>
         </div>
         <div class="grid-2">
           <div class="field">
-            <label>$W — Weaning Value</label>
+            <label>$W: Weaning Value</label>
             <input type="number" id="b1-sw" placeholder="+44" step="0.1">
           </div>
           <div class="field">
-            <label>$F — Feedlot Value</label>
+            <label>$F: Feedlot Value</label>
             <input type="number" id="b1-sf" placeholder="+88" step="0.1">
           </div>
         </div>
@@ -956,11 +956,11 @@ select option { background: var(--brown); color: var(--cream); }
         <div class="epd-group-title">Calving Traits</div>
         <div class="grid-2">
           <div class="field">
-            <label>CE — Calving Ease</label>
+            <label>CE: Calving Ease</label>
             <input type="number" id="b2-ce" placeholder="+8" step="0.1">
           </div>
           <div class="field">
-            <label>BW — Birth Weight</label>
+            <label>BW: Birth Weight</label>
             <input type="number" id="b2-bw" placeholder="+3.2" step="0.1">
           </div>
         </div>
@@ -978,11 +978,11 @@ select option { background: var(--brown); color: var(--cream); }
         <div class="epd-group-title">Growth Traits</div>
         <div class="grid-2">
           <div class="field">
-            <label>WW — Weaning Wt.</label>
+            <label>WW: Weaning Wt.</label>
             <input type="number" id="b2-ww" placeholder="+78" step="0.1">
           </div>
           <div class="field">
-            <label>YW — Yearling Wt.</label>
+            <label>YW: Yearling Wt.</label>
             <input type="number" id="b2-yw" placeholder="+128" step="0.1">
           </div>
         </div>
@@ -1000,11 +1000,11 @@ select option { background: var(--brown); color: var(--cream); }
         <div class="epd-group-title">Maternal Traits</div>
         <div class="grid-2">
           <div class="field">
-            <label>MM — Milk</label>
+            <label>MM: Milk</label>
             <input type="number" id="b2-mm" placeholder="+22" step="0.1">
           </div>
           <div class="field">
-            <label>MWW — Mat. Wean Wt.</label>
+            <label>MWW: Mat. Wean Wt.</label>
             <input type="number" id="b2-mww" placeholder="+61" step="0.1">
           </div>
         </div>
@@ -1012,15 +1012,15 @@ select option { background: var(--brown); color: var(--cream); }
         <div class="epd-group-title">Carcass Traits</div>
         <div class="grid-3">
           <div class="field">
-            <label>CW — Carcass Wt.</label>
+            <label>CW: Carcass Wt.</label>
             <input type="number" id="b2-cw" placeholder="+72" step="0.1">
           </div>
           <div class="field">
-            <label>REA — Ribeye</label>
+            <label>REA: Ribeye</label>
             <input type="number" id="b2-rea" placeholder="+0.38" step="0.01">
           </div>
           <div class="field">
-            <label>MARB — Marbling</label>
+            <label>MARB: Marbling</label>
             <input type="number" id="b2-marb" placeholder="+0.42" step="0.01">
           </div>
         </div>
@@ -1028,21 +1028,21 @@ select option { background: var(--brown); color: var(--cream); }
         <div class="epd-group-title">Selection Indexes</div>
         <div class="grid-2">
           <div class="field">
-            <label>$B — Beef Value</label>
+            <label>$B: Beef Value</label>
             <input type="number" id="b2-sb" placeholder="+158" step="0.1">
           </div>
           <div class="field">
-            <label>$M — Maternal Value</label>
+            <label>$M: Maternal Value</label>
             <input type="number" id="b2-sm" placeholder="+48" step="0.1">
           </div>
         </div>
         <div class="grid-2">
           <div class="field">
-            <label>$W — Weaning Value</label>
+            <label>$W: Weaning Value</label>
             <input type="number" id="b2-sw" placeholder="+52" step="0.1">
           </div>
           <div class="field">
-            <label>$F — Feedlot Value</label>
+            <label>$F: Feedlot Value</label>
             <input type="number" id="b2-sf" placeholder="+104" step="0.1">
           </div>
         </div>
@@ -1054,7 +1054,7 @@ select option { background: var(--brown); color: var(--cream); }
       <div class="toggle-row">
         <div>
           <div class="toggle-label">Breeding first-calf heifers?</div>
-          <div class="toggle-desc">Enables stricter calving ease thresholds and birth weight warnings</div>
+          <div class="toggle-desc">Checks calving ease, birth weight and accuracy against heifer-bull rules of thumb</div>
         </div>
         <label class="toggle">
           <input type="checkbox" id="heifer-toggle">
@@ -1092,7 +1092,7 @@ select option { background: var(--brown); color: var(--cream); }
 
     <div class="section-label">Tool 2 of 2</div>
     <div class="section-title">Bull Selection Wizard</div>
-    <div class="section-desc">Answer three questions about your operation and goals. Herd Vision will tell you exactly which EPDs to prioritize, what target ranges to look for, and what to avoid — then help you find matching bulls on Herd Hub.</div>
+    <div class="section-desc">Tell us your goal and a little about your outfit. Herd Vision lists which EPDs to put first, where a bull should rank in his breed on each, and what to watch for.</div>
 
     <div class="wizard-steps">
       <div class="wizard-step active" onclick="goWizardStep(1)">
@@ -1133,12 +1133,12 @@ select option { background: var(--brown); color: var(--cream); }
         <div class="goal-card" onclick="selectGoal(this,'balanced')" data-goal="balanced">
           <div class="goal-icon">⚡</div>
           <div class="goal-name">Balanced Performance</div>
-          <div class="goal-desc">Strong across all traits — growth, maternal, and carcass without extreme tradeoffs</div>
+          <div class="goal-desc">Solid across calving, growth, maternal and carcass, with no extremes</div>
         </div>
         <div class="goal-card" onclick="selectGoal(this,'direct_market')" data-goal="direct_market">
           <div class="goal-icon">🌿</div>
           <div class="goal-name">Direct-to-Consumer</div>
-          <div class="goal-desc">Grass-fed, farm-to-table, or natural beef — focus on efficiency and eating quality</div>
+          <div class="goal-desc">Grass-fed, farm-to-table or natural beef: cattle that finish and eat well</div>
         </div>
       </div>
       <div style="text-align:right">
@@ -1167,14 +1167,6 @@ select option { background: var(--brown); color: var(--cream); }
         </div>
 
         <div class="grid-2">
-          <div class="field">
-            <label>Calving season</label>
-            <select id="calving-season">
-              <option value="spring">Spring (Jan–April)</option>
-              <option value="fall">Fall (Sept–Nov)</option>
-              <option value="yearround">Year-round</option>
-            </select>
-          </div>
           <div class="field">
             <label>Where do calves go?</label>
             <select id="calf-destination">
@@ -1225,18 +1217,14 @@ select option { background: var(--brown); color: var(--cream); }
           <div class="field">
             <label>Typical cow mature weight (lbs)</label>
             <input type="number" id="cow-weight" placeholder="1,150">
-            <div class="field-hint">Helps calibrate milk and mature size targets</div>
-          </div>
-          <div class="field">
-            <label>Average weaning weight of current calves (lbs)</label>
-            <input type="number" id="current-ww" placeholder="520">
+            <div class="field-hint">Used for the mature size check if you keep heifers</div>
           </div>
         </div>
 
         <div class="field">
           <label>Main challenge you face right now</label>
           <select id="main-challenge">
-            <option value="none">No major challenge — I just want to improve</option>
+            <option value="none">No major challenge, I just want to improve</option>
             <option value="light_calves">Calves too light at weaning</option>
             <option value="hard_calving">Too many calving difficulties</option>
             <option value="poor_carcass">Poor carcass quality / low grid premiums</option>
@@ -1249,7 +1237,7 @@ select option { background: var(--brown); color: var(--cream); }
         <div class="field">
           <label>Bull breed preference</label>
           <select id="bull-breed-pref">
-            <option value="any">No preference — show me the best match</option>
+            <option value="any">No preference</option>
             <option value="angus">Angus</option>
             <option value="hereford">Hereford</option>
             <option value="simmental">Simmental</option>
@@ -1279,7 +1267,7 @@ select option { background: var(--brown); color: var(--cream); }
         <div id="wizard-insights"></div>
         <div class="search-cta">
           <h3>Find matching bulls on Herd Hub</h3>
-          <p>Browse bulls listed by verified ranchers that fit your profile — with prices, photos, and contact info.</p>
+          <p>Browse bulls listed by producers on Herd Hub, with photos and contact info. Ask the seller for the bull's EPDs and check them against this list.</p>
           <button class="btn btn-primary" onclick="searchBulls()" style="background:var(--cream);color:var(--rust)">
             🔍 Search Bulls on Herd Hub
           </button>
@@ -1290,22 +1278,57 @@ select option { background: var(--brown); color: var(--cream); }
   </div><!-- end wizard -->
 
   <div class="disclaimer">
-    <strong style="color:var(--tan)">About EPD accuracy:</strong> EPDs are breed-specific estimates of genetic potential, not guarantees. 
-    Accuracy values below 0.50 mean the EPD could shift significantly as more progeny data becomes available. 
-    Always consider EPDs alongside visual appraisal, structural soundness, and semen quality. 
-    Data sourced from published breed association genetic evaluations. 
-    Herd Vision is provided as an educational tool — consult your veterinarian or extension specialist for herd-specific recommendations.
+    <strong style="color:var(--tan)">About these numbers:</strong> You enter the EPDs; Herd Vision does not look bulls up. An EPD predicts the average of a sire's calves, not any single calf, and it is only comparable within one breed.
+    The gap between two sires' EPDs is the expected average gap between their calves (<a href="https://extension.oregonstate.edu/catalog/how-interpret-sire-summaries" target="_blank" rel="noopener" style="color:var(--tan)">Oregon State Extension, How to interpret sire summaries</a>).
+    Low accuracy means the number can still move as calves are recorded. Angus ranks and averages are from the <a href="https://www.angus.org/tools-resources/national-cattle-evaluation/percentile-breakdowns" target="_blank" rel="noopener" style="color:var(--tan)">American Angus Association percentile breakdown</a>, current sires, Fall 2026; checked November 2026.
+    Look at the bull too: feet, legs, disposition and a breeding soundness exam count as much as the paper. This is a planning aid, not advice for your herd.
   </div>
 
 </div><!-- end container -->
 
 <script>
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function esc(s) { const d = document.createElement('div'); d.textContent = s === null || s === undefined ? '' : String(s); return d.innerHTML; }
+function gv(id) {
+  const el = document.getElementById(id);
+  if (!el || el.value === '') return null;
+  const v = parseFloat(el.value);
+  return isNaN(v) ? null : v;      // a real 0 stays 0
+}
+function gs(id) { const el = document.getElementById(id); return el ? el.value : ''; }
+function sign(v, dp) { let t = Number(v).toFixed(dp === undefined ? 2 : dp); if (t.indexOf('.') >= 0) t = t.replace(/0+$/, '').replace(/\.$/, ''); return (v > 0 ? '+' : '') + t; }
+const BREED_NAMES = { angus:'Angus', hereford:'Hereford', simmental:'Simmental', charolais:'Charolais', red_angus:'Red Angus', limousin:'Limousin', gelbvieh:'Gelbvieh', shorthorn:'Shorthorn' };
+
+// American Angus Association, Percentile Breakdown, Current Sires, Fall 2026.
+// https://www.angus.org/tools-resources/national-cattle-evaluation/percentile-breakdowns
+// Update these each evaluation; every other breed has its own table and scale.
+const ANGUS = {
+  label: 'Angus current sires, Fall 2026',
+  CED:{avg:6,   p10:13,   p25:10,   p75:3},
+  BW: {avg:1.2, p10:-1.1, p25:0,    p75:2.3},
+  WW: {avg:67,  p10:86,   p25:78,   p75:58},
+  YW: {avg:118, p10:151,  p25:137,  p75:102},
+  MILK:{avg:26, p10:34,   p25:30,   p75:22},
+  CW: {avg:52,  p10:75,   p25:64,   p75:40},
+  MARB:{avg:0.69,p10:1.26,p25:0.95, p75:0.39},
+  RE: {avg:0.66,p10:1.08, p25:0.88, p75:0.45},
+  FAT:{avg:0.020,p10:-0.024,p25:-0.003,p75:0.043},
+  M:  {avg:63,  p10:92,   p25:78,   p75:49},
+  W:  {avg:63,  p10:96,   p25:82,   p75:48},
+  F:  {avg:95,  p10:129,  p25:113,  p75:79},
+  B:  {avg:151, p10:207,  p25:179,  p75:123},
+  MW: {avg:64,  p10:107,  p25:88,   p75:43},
+};
+// Heifer-bull rules of thumb on the Angus scale: CED +10 is the top 25% line;
+// BW +1.5 ideal, +2.5 ceiling; accuracy 0.55 or better.
+const HEIFER = { ceGood: ANGUS.CED.p25, ceMin: ANGUS.CED.avg, bwIdeal: 1.5, bwMax: 2.5, acc: 0.55 };
+
 // ── Tool switcher ─────────────────────────────────────────────────────────────
-function switchTool(tool) {
+function switchTool(tool, btn) {
   document.querySelectorAll('.tool-panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.tool-tab').forEach(t => t.classList.remove('active'));
   document.getElementById('panel-' + tool).classList.add('active');
-  event.target.classList.add('active');
+  if (btn) btn.classList.add('active');
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -1316,387 +1339,270 @@ function goWizardStep(n) {
   document.getElementById('wizard-step-' + n).classList.add('active');
   document.querySelectorAll('.wizard-step')[n-1].classList.add('active');
 }
-
 function selectGoal(el, goal) {
   document.querySelectorAll('.goal-card').forEach(c => c.classList.remove('selected'));
   el.classList.add('selected');
   window._selectedGoal = goal;
 }
-
-function toggleBreed(el, breed) {
-  el.classList.toggle('selected');
-}
-
-// ── Accuracy badge ─────────────────────────────────────────────────────────────
-function accBadge(val) {
-  if (!val) return '';
-  const v = parseFloat(val);
-  if (v >= 0.70) return `<span class="accuracy-badge acc-high">${v} acc</span>`;
-  if (v >= 0.45) return `<span class="accuracy-badge acc-med">${v} acc</span>`;
-  return `<span class="accuracy-badge acc-low">${v} acc ⚠</span>`;
-}
-
-function accLabel(val) {
-  if (!val) return '';
-  const v = parseFloat(val);
-  if (v >= 0.70) return 'High confidence';
-  if (v >= 0.45) return 'Moderate confidence';
-  return 'Low — EPD may shift';
-}
-
-// ── Get value helper ──────────────────────────────────────────────────────────
-function gv(id) {
-  const el = document.getElementById(id);
-  if (!el) return null;
-  const v = parseFloat(el.value);
-  return isNaN(v) ? null : v;
-}
-function gs(id) {
-  const el = document.getElementById(id);
-  return el ? el.value : '';
-}
+function toggleBreed(el, breed) { el.classList.toggle('selected'); el.dataset.breed = breed; }
 
 // ── EPD Comparison ────────────────────────────────────────────────────────────
+// The difference between two sires' EPDs IS the expected average difference in
+// their calves (Oregon State, "How to interpret sire summaries"; Univ. of
+// Kentucky ASC-153). It is not halved again: the EPD already is half the
+// breeding value.
 function runComparison() {
-  const b1n = document.getElementById('b1-name').value || 'Bull A';
-  const b2n = document.getElementById('b2-name').value || 'Bull B';
+  const b1raw = document.getElementById('b1-name').value.trim() || 'Bull A';
+  const b2raw = document.getElementById('b2-name').value.trim() || 'Bull B';
+  const b1n = esc(b1raw), b2n = esc(b2raw);
   const isHeifer = document.getElementById('heifer-toggle').checked;
+  const b1breed = gs('b1-breed'), b2breed = gs('b2-breed');
+  const sameBreed = b1breed === b2breed;
+  const angusScale = sameBreed && b1breed === 'angus';
 
-  document.getElementById('res-b1-name').textContent = b1n;
-  document.getElementById('res-b2-name').textContent = b2n;
+  document.getElementById('res-b1-name').textContent = b1raw;
+  document.getElementById('res-b2-name').textContent = b2raw;
 
+  const who = (d, hb) => (hb ? d > 0 : d < 0) ? b1n : b2n;
   const traits = [
     { group:'Calving Traits', items:[
-      { key:'ce',  name:'Calving Ease',        abbr:'CE Direct',   higherBetter:true,  scale:20,  unit:'pts',
-        explain: (d,n1,n2) => d===0 ? null : `${d>0?n1:n2} has a <strong>${Math.abs(d).toFixed(1)}-point CE advantage</strong>. In practice that means fewer difficult births.` },
-      { key:'bw',  name:'Birth Weight',         abbr:'BW',          higherBetter:false, scale:5,   unit:'lbs',
-        explain: (d,n1,n2) => d===0 ? null : `${d<0?n1:n2}'s calves will be roughly <strong>${(Math.abs(d)/2).toFixed(1)} lbs lighter at birth</strong> on average (half EPD difference).` },
+      { key:'ce',  name:'Calving Ease', abbr:'CE Direct', higherBetter:true,  scale:20,
+        explain: d => `${who(d,true)} is expected to sire about <strong>${Math.abs(d).toFixed(1)} percentage points more unassisted births</strong> when bred to first-calf heifers.` },
+      { key:'bw',  name:'Birth Weight', abbr:'BW', higherBetter:false, scale:5,
+        explain: d => `${who(d,false)}'s calves are expected to average about <strong>${Math.abs(d).toFixed(1)} lbs lighter at birth</strong>.` },
     ]},
     { group:'Growth Traits', items:[
-      { key:'ww',  name:'Weaning Weight',       abbr:'WW',          higherBetter:true,  scale:50,  unit:'lbs',
-        explain: (d,n1,n2) => d===0 ? null : `${d>0?n1:n2}'s calves will wean approximately <strong>${(Math.abs(d)/2).toFixed(0)} lbs heavier</strong> on average.` },
-      { key:'yw',  name:'Yearling Weight',       abbr:'YW',          higherBetter:true,  scale:80,  unit:'lbs',
-        explain: (d,n1,n2) => d===0 ? null : `At yearling age, ${d>0?n1:n2}'s calves will be roughly <strong>${(Math.abs(d)/2).toFixed(0)} lbs heavier</strong>.` },
+      { key:'ww',  name:'Weaning Weight', abbr:'WW', higherBetter:true, scale:100,
+        explain: d => `${who(d,true)}'s calves are expected to wean about <strong>${Math.abs(d).toFixed(0)} lbs heavier</strong> on average.` },
+      { key:'yw',  name:'Yearling Weight', abbr:'YW', higherBetter:true, scale:170,
+        explain: d => `At a year old, ${who(d,true)}'s calves are expected to average about <strong>${Math.abs(d).toFixed(0)} lbs heavier</strong>.` },
     ]},
     { group:'Maternal Traits', items:[
-      { key:'mm',  name:'Milk (Maternal)',       abbr:'MM',          higherBetter:true,  scale:30,  unit:'pts',
-        explain: (d,n1,n2) => d===0 ? null : `${d>0?n1:n2}'s daughters will produce more milk — <strong>~${(Math.abs(d)/2).toFixed(0)} lbs more calf weaning weight</strong> through milk.` },
-      { key:'mww', name:'Mat. Weaning Wt.',      abbr:'MWW',         higherBetter:true,  scale:50,  unit:'lbs',
-        explain: (d,n1,n2) => d===0 ? null : `${d>0?n1:n2} produces daughters with <strong>superior total maternal value</strong> (milk + growth combined).` },
+      { key:'mm',  name:'Milk (Maternal)', abbr:'Milk', higherBetter:true, scale:40,
+        explain: d => `${who(d,true)}'s daughters are expected to wean calves about <strong>${Math.abs(d).toFixed(0)} lbs heavier</strong> from milk and mothering. More milk also means a cow that costs more to keep.` },
+      { key:'mww', name:'Mat. Weaning Wt.', abbr:'MWW', higherBetter:true, scale:100,
+        explain: d => `${who(d,true)}'s daughters are expected to wean calves about <strong>${Math.abs(d).toFixed(0)} lbs heavier</strong> (milk and growth together).` },
     ]},
     { group:'Carcass Traits', items:[
-      { key:'cw',  name:'Carcass Weight',        abbr:'CW',          higherBetter:true,  scale:60,  unit:'lbs',
-        explain: (d,n1,n2) => d===0 ? null : `${d>0?n1:n2}'s calves will have approximately <strong>${(Math.abs(d)/2).toFixed(0)} lbs more hot carcass weight</strong>.` },
-      { key:'rea', name:'Ribeye Area',            abbr:'REA',         higherBetter:true,  scale:0.6, unit:'sq in',
-        explain: (d,n1,n2) => d===0 ? null : `${d>0?n1:n2} has a <strong>${(Math.abs(d)/2).toFixed(2)} sq in ribeye advantage</strong> — more muscle, better yield grade.` },
-      { key:'marb',name:'Marbling',               abbr:'MARB',        higherBetter:true,  scale:0.6, unit:'score',
-        explain: (d,n1,n2) => d===0 ? null : `${d>0?n1:n2} sires <strong>better-marbled carcasses</strong> — higher probability of Choice or Prime grade.` },
+      { key:'cw',  name:'Carcass Weight', abbr:'CW', higherBetter:true, scale:90,
+        explain: d => `${who(d,true)}'s calves are expected to hang about <strong>${Math.abs(d).toFixed(0)} lbs more hot carcass weight</strong>.` },
+      { key:'rea', name:'Ribeye Area', abbr:'REA', higherBetter:true, scale:1.4,
+        explain: d => `${who(d,true)}'s calves are expected to average <strong>${Math.abs(d).toFixed(2)} sq in more ribeye</strong>.` },
+      { key:'marb',name:'Marbling', abbr:'MARB', higherBetter:true, scale:1.8,
+        explain: d => `${who(d,true)}'s calves are expected to average <strong>${Math.abs(d).toFixed(2)} of a marbling score higher</strong>, which raises the odds of grading Choice or Prime.` },
     ]},
-    { group:'Selection Indexes', items:[
-      { key:'sb',  name:'Beef Value Index',      abbr:'$B',          higherBetter:true,  scale:100, unit:'$',
-        explain: (d,n1,n2) => d===0 ? null : `<strong>${d>0?n1:n2} is worth $${(Math.abs(d)/2).toFixed(0)} more per calf</strong> sold on a terminal basis through the grid.` },
-      { key:'sm',  name:'Maternal Value Index',  abbr:'$M',          higherBetter:true,  scale:60,  unit:'$',
-        explain: (d,n1,n2) => d===0 ? null : `${d>0?n1:n2} produces daughters with <strong>$${(Math.abs(d)/2).toFixed(0)} more annual value</strong> as cow herd contributors.` },
-      { key:'sw',  name:'Weaning Value Index',   abbr:'$W',          higherBetter:true,  scale:50,  unit:'$',
-        explain: (d,n1,n2) => d===0 ? null : `${d>0?n1:n2}'s calves are worth <strong>$${(Math.abs(d)/2).toFixed(0)} more at weaning</strong> on average.` },
-      { key:'sf',  name:'Feedlot Value Index',   abbr:'$F',          higherBetter:true,  scale:80,  unit:'$',
-        explain: (d,n1,n2) => d===0 ? null : `${d>0?n1:n2}'s calves return <strong>$${(Math.abs(d)/2).toFixed(0)} more through the feedlot</strong>.` },
+    { group:'Selection Indexes (Angus $Values)', items:[
+      { key:'sb',  name:'Beef Value', abbr:'$B', higherBetter:true, scale:260,
+        explain: d => `<strong>${who(d,true)} is $${Math.abs(d).toFixed(0)} higher on $B</strong>: expected dollars per head for calves fed and sold on a grid.` },
+      { key:'sm',  name:'Maternal Weaned Calf Value', abbr:'$M', higherBetter:true, scale:115,
+        explain: d => `<strong>${who(d,true)} is $${Math.abs(d).toFixed(0)} higher on $M</strong>: expected dollars per cow exposed in a herd that keeps replacements and sells the rest at weaning.` },
+      { key:'sw',  name:'Weaned Calf Value', abbr:'$W', higherBetter:true, scale:120,
+        explain: d => `<strong>${who(d,true)} is $${Math.abs(d).toFixed(0)} higher on $W</strong>: expected dollars per head in preweaning value.` },
+      { key:'sf',  name:'Feedlot Value', abbr:'$F', higherBetter:true, scale:155,
+        explain: d => `<strong>${who(d,true)} is $${Math.abs(d).toFixed(0)} higher on $F</strong>: expected dollars per head in feedlot gain value.` },
     ]},
   ];
 
-  // Build insights
+  // Insights
   const insights = [];
-  const b1_bw = gv('b1-bw'), b2_bw = gv('b2-bw');
-  const b1_ce = gv('b1-ce'), b2_ce = gv('b2-ce');
-
-  if (isHeifer) {
-    if (b1_bw !== null && b1_bw > 2.0) {
-      insights.push({ type:'warn', text:`<strong>⚠ Heifer risk — ${b1n}:</strong> BW EPD of <strong>+${b1_bw}</strong> is above +2.0. This bull carries elevated calving difficulty risk on first-calf heifers. Consider using him only on mature cows.` });
-    }
-    if (b2_bw !== null && b2_bw > 2.0) {
-      insights.push({ type:'warn', text:`<strong>⚠ Heifer risk — ${b2n}:</strong> BW EPD of <strong>+${b2_bw}</strong> is above +2.0. This bull carries elevated calving difficulty risk on first-calf heifers.` });
-    }
-    if (b1_ce !== null && b1_ce < 8) {
-      insights.push({ type:'warn', text:`<strong>⚠ ${b1n} CE concern:</strong> Calving ease of <strong>${b1_ce}</strong> is below the recommended minimum of +8 for heifer use. Consider bulls with CE ≥ +10 for heifer pastures.` });
-    }
-    if (b2_ce !== null && b2_ce < 8) {
-      insights.push({ type:'warn', text:`<strong>⚠ ${b2n} CE concern:</strong> Calving ease of <strong>${b2_ce}</strong> is below the recommended minimum of +8 for heifer use.` });
-    }
+  if (!sameBreed) {
+    insights.push({ type:'warn', text:`<strong>Different breeds, different scales.</strong> ${b1n} (${BREED_NAMES[b1breed]}) and ${b2n} (${BREED_NAMES[b2breed]}) are each measured against their own breed. Their numbers cannot be compared head to head, so no winner is called below. To compare across breeds, apply the across-breed EPD adjustment factors that the U.S. Meat Animal Research Center publishes each year through the Beef Improvement Federation.` });
   }
-
-  // Low accuracy warnings
-  ['b1-ce-acc','b1-bw-acc','b1-ww-acc','b2-ce-acc','b2-bw-acc','b2-ww-acc'].forEach(id => {
+  if (isHeifer) {
+    [['b1', b1n, b1breed], ['b2', b2n, b2breed]].forEach(([p, n, breed]) => {
+      const ce = gv(p + '-ce'), bw = gv(p + '-bw'), ceAcc = gv(p + '-ce-acc'), bwAcc = gv(p + '-bw-acc');
+      if (breed === 'angus') {
+        if (ce !== null && ce < HEIFER.ceMin) insights.push({ type:'warn', text:`<strong>Heifer risk, ${n}:</strong> CE of ${sign(ce,1)} is below the Angus breed average (+${HEIFER.ceMin}). Keep him off first-calf heifers.` });
+        else if (ce !== null && ce < HEIFER.ceGood) insights.push({ type:'info', text:`<strong>${n} on heifers:</strong> CE of ${sign(ce,1)} is short of the top 25% of Angus sires (+${HEIFER.ceGood}), the usual line for a heifer bull.` });
+        if (bw !== null && bw > HEIFER.bwMax) insights.push({ type:'warn', text:`<strong>Heifer risk, ${n}:</strong> BW of ${sign(bw,1)} is over the +${HEIFER.bwMax} ceiling most Angus programs hold for heifers. Use him on mature cows.` });
+        else if (bw !== null && bw > HEIFER.bwIdeal) insights.push({ type:'info', text:`<strong>${n} on heifers:</strong> BW of ${sign(bw,1)} is above the +${HEIFER.bwIdeal} most Angus programs like for heifers. Let his CE number make the call; CE already accounts for birth weight.` });
+      } else if (ce !== null || bw !== null) {
+        insights.push({ type:'info', text:`<strong>${n} on heifers:</strong> ${BREED_NAMES[breed]} EPDs are on their own scale, so Angus cutoffs do not apply. Check his CE against the ${BREED_NAMES[breed]} percentile table and look for the top 25% or better.` });
+      }
+      [['CE', ceAcc], ['BW', bwAcc]].forEach(([t, a]) => {
+        if (a !== null && a < HEIFER.acc) insights.push({ type:'warn', text:`<strong>Unproven on heifers, ${n}:</strong> ${t} accuracy of ${a} is under ${HEIFER.acc}. His ${t} number can still move a good deal as calves are recorded. A proven bull is the safer heifer bull.` });
+      });
+    });
+  }
+  ['b1-ce-acc','b1-bw-acc','b1-ww-acc','b1-yw-acc','b2-ce-acc','b2-bw-acc','b2-ww-acc','b2-yw-acc'].forEach(id => {
     const v = gv(id);
-    if (v !== null && v < 0.45) {
-      const bname = id.startsWith('b1') ? b1n : b2n;
-      const trait = id.includes('ce') ? 'CE' : id.includes('bw') ? 'BW' : 'WW';
-      insights.push({ type:'info', text:`<strong>📊 Low accuracy — ${bname} ${trait}:</strong> Accuracy of ${v} means this EPD could change significantly as more progeny data is collected. Treat with caution.` });
+    const trait = id.split('-')[1].toUpperCase();
+    if (v !== null && v < 0.45 && !(isHeifer && (trait === 'CE' || trait === 'BW'))) {
+      insights.push({ type:'info', text:`<strong>Low accuracy, ${id.startsWith('b1') ? b1n : b2n} ${trait}:</strong> at ${v}, this EPD can change noticeably as more calves are recorded.` });
     }
   });
+  document.getElementById('insights-area').innerHTML = insights.map(i => `<div class="insight-box ${i.type==='warn'?'insight-warn':''}">${i.text}</div>`).join('');
 
-  // B2 breed warning
-  const b1breed = gs('b1-breed'), b2breed = gs('b2-breed');
-  if (b1breed !== b2breed) {
-    insights.push({ type:'info', text:`<strong>⚠ Different breeds:</strong> EPDs are breed-specific. ${b1n} (${b1breed}) and ${b2n} (${b2breed}) EPD numbers are not directly comparable — they're on different scales. Use the insights below as directional guidance only. For true cross-breed comparison, apply USMARC across-breed adjustment factors.` });
-  }
-
-  const insightsHTML = insights.map(i =>
-    `<div class="insight-box ${i.type==='warn'?'insight-warn':''}">${i.text}</div>`
-  ).join('');
-  document.getElementById('insights-area').innerHTML = insightsHTML;
-
-  // Build trait rows
+  // Trait rows
   let traitsHTML = '';
+  const data = { bull1: {}, bull2: {} };
   traits.forEach(group => {
     let hasAnyData = false;
-    let groupHTML = `<div class="group-divider">${group.group}</div>`;
-    groupHTML += `<div class="trait-row header">
-      <div>Trait</div>
-      <div class="bar-col">Comparison</div>
-      <div>${b1n.slice(0,12)}</div>
-      <div>${b2n.slice(0,12)}</div>
-      <div>Edge</div>
-    </div>`;
-
+    let groupHTML = `<div class="group-divider">${group.group}</div>
+      <div class="trait-row header"><div>Trait</div><div class="bar-col">Comparison</div><div>${esc(b1raw.slice(0,12))}</div><div>${esc(b2raw.slice(0,12))}</div><div>Edge</div></div>`;
     group.items.forEach(t => {
-      const v1 = gv('b1-' + t.key);
-      const v2 = gv('b2-' + t.key);
+      const v1 = gv('b1-' + t.key), v2 = gv('b2-' + t.key);
+      data.bull1[t.key] = v1; data.bull2[t.key] = v2;
       if (v1 === null && v2 === null) return;
       hasAnyData = true;
-
-      const diff = (v1 || 0) - (v2 || 0);
-      const b1wins = t.higherBetter ? diff > 0.05 : diff < -0.05;
-      const b2wins = t.higherBetter ? diff < -0.05 : diff > 0.05;
-
-      // Bar widths (max 45% from center)
-      const absMax = t.scale;
-      const b1pct = v1 !== null ? Math.min(Math.abs(v1) / absMax * 45, 45) : 0;
-      const b2pct = v2 !== null ? Math.min(Math.abs(v2) / absMax * 45, 45) : 0;
-
-      const winnerHTML = b1wins
-        ? `<div class="trait-winner winner-b1">${b1n.split(' ')[0]} →</div>`
-        : b2wins
-        ? `<div class="trait-winner winner-b2">← ${b2n.split(' ')[0]}</div>`
-        : `<div class="trait-winner winner-tie">Equal</div>`;
-
-      const expl = t.explain ? t.explain(diff, b1n, b2n) : null;
-
+      const both = v1 !== null && v2 !== null;
+      const diff = both ? v1 - v2 : 0;
+      const tie = Math.abs(diff) < 1e-9;
+      const b1wins = both && !tie && (t.higherBetter ? diff > 0 : diff < 0);
+      const b1pct = v1 !== null ? Math.min(Math.abs(v1) / t.scale * 45, 45) : 0;
+      const b2pct = v2 !== null ? Math.min(Math.abs(v2) / t.scale * 45, 45) : 0;
+      let winnerHTML;
+      if (!sameBreed) winnerHTML = `<div class="trait-winner winner-tie">Not comparable</div>`;
+      else if (!both) winnerHTML = `<div class="trait-winner winner-tie">One value</div>`;
+      else if (tie) winnerHTML = `<div class="trait-winner winner-tie">Equal</div>`;
+      else winnerHTML = b1wins ? `<div class="trait-winner winner-b1">${esc(b1raw.split(' ')[0])}</div>` : `<div class="trait-winner winner-b2">${esc(b2raw.split(' ')[0])}</div>`;
       groupHTML += `<div class="trait-row">
         <div><div class="trait-name">${t.name}</div><div class="trait-abbr">${t.abbr}</div></div>
-        <div class="bar-container">
-          <div class="bar-center"></div>
+        <div class="bar-container"><div class="bar-center"></div>
           ${v1 !== null ? `<div class="bar-b1" style="width:${b1pct}%"></div>` : ''}
           ${v2 !== null ? `<div class="bar-b2" style="width:${b2pct}%"></div>` : ''}
         </div>
-        <div class="val-b1">${v1 !== null ? (v1 > 0 ? '+' : '') + v1.toFixed(2).replace(/\.?0+$/,'') : '—'}</div>
-        <div class="val-b2">${v2 !== null ? (v2 > 0 ? '+' : '') + v2.toFixed(2).replace(/\.?0+$/,'') : '—'}</div>
+        <div class="val-b1">${v1 !== null ? sign(v1) : '--'}</div>
+        <div class="val-b2">${v2 !== null ? sign(v2) : '--'}</div>
         ${winnerHTML}
       </div>`;
-      if (expl) {
-        groupHTML += `<div style="padding:0 16px 8px"><div class="insight-box" style="margin:0;font-size:12px">${expl}</div></div>`;
-      }
+      if (sameBreed && both && !tie) groupHTML += `<div style="padding:0 16px 8px"><div class="insight-box" style="margin:0;font-size:12px">${t.explain(diff)}</div></div>`;
     });
-
     if (hasAnyData) traitsHTML += groupHTML;
   });
+  if (!traitsHTML) traitsHTML = '<div class="insight-box">Enter at least one EPD for a bull to see a comparison.</div>';
+  else traitsHTML += `<div class="insight-box" style="font-size:12px;margin-top:16px">How to read this: the gap between two sires' EPDs is the expected average gap between their calves, same cows, same management. It is an average over many calves, not a promise for any one calf.${angusScale ? '' : ' The index rows use American Angus $Value names; for another breed, enter that breed\'s own index in both columns or leave them blank.'}</div>`;
 
   document.getElementById('traits-area').innerHTML = traitsHTML;
   document.getElementById('comparison-results').classList.add('visible');
   document.getElementById('comparison-results').scrollIntoView({ behavior:'smooth', block:'start' });
-  document.getElementById('compare-export').style.display='flex';
+  document.getElementById('compare-export').style.display = 'flex';
 
-  // Store structured data for PDF export
-  function gv(id) { return parseFloat(document.getElementById(id)?.value) || null; }
   window._herdVisionData = {
-    type: 'comparison', generatedAt: new Date().toLocaleString(),
-    isHeifer: document.getElementById('heifer-toggle')?.checked || false,
-    bull1: { name: b1n, breed: document.getElementById('b1-breed')?.value || '',
-      ce:gv('b1-ce'),bw:gv('b1-bw'),ww:gv('b1-ww'),yw:gv('b1-yw'),mm:gv('b1-mm'),mww:gv('b1-mww'),
-      cw:gv('b1-cw'),rea:gv('b1-rea'),marb:gv('b1-marb'),sb:gv('b1-sb'),sm:gv('b1-sm'),sw:gv('b1-sw'),sf:gv('b1-sf') },
-    bull2: { name: b2n, breed: document.getElementById('b2-breed')?.value || '',
-      ce:gv('b2-ce'),bw:gv('b2-bw'),ww:gv('b2-ww'),yw:gv('b2-yw'),mm:gv('b2-mm'),mww:gv('b2-mww'),
-      cw:gv('b2-cw'),rea:gv('b2-rea'),marb:gv('b2-marb'),sb:gv('b2-sb'),sm:gv('b2-sm'),sw:gv('b2-sw'),sf:gv('b2-sf') },
-    insights: Array.from(document.querySelectorAll('#insights-area .insight-box')).map(el => el.innerText.trim()).filter(t => t.length > 0)
+    type: 'comparison', isHeifer, sameBreed,
+    bull1: Object.assign({ name: b1raw, breed: BREED_NAMES[b1breed] }, data.bull1),
+    bull2: Object.assign({ name: b2raw, breed: BREED_NAMES[b2breed] }, data.bull2),
+    insights: Array.from(document.querySelectorAll('#insights-area .insight-box')).map(el => el.innerText.trim()).filter(Boolean)
   };
-  console.log('_herdVisionData captured:', window._herdVisionData);
 }
 
 // ── Bull Selection Wizard ─────────────────────────────────────────────────────
-const GOALS = {
-  max_pounds: {
-    icon:'⚖️', name:'Maximum Pounds at Market',
-    desc:'Optimized for growth — heaviest calves at weaning or through the feedlot',
-    targets:[
-      { name:'Yearling Weight', abbr:'YW', range:'+115 to +140', desc:'Primary growth driver. Top 20–25% of breed.', priority:'high' },
-      { name:'Weaning Weight',  abbr:'WW', range:'+70 to +90',  desc:'Strong preweaning growth for heavier weaners.', priority:'high' },
-      { name:'$W Weaning Index',abbr:'$W', range:'$52+',        desc:'Combined weaning value — use this over WW alone.', priority:'high' },
-      { name:'$B Beef Value',   abbr:'$B', range:'$150+',       desc:'Terminal index — best predictor of feedlot value.', priority:'med' },
-      { name:'Calving Ease',    abbr:'CE', range:'+6 to +14',   desc:'Don\'t sacrifice CE entirely for growth.', priority:'med' },
-      { name:'Birth Weight',    abbr:'BW', range:'+1.5 to +3.5',desc:'Monitor — very high YW bulls often carry heavy BW.', priority:'med' },
-    ],
-    warnings:['High YW bulls often carry elevated BW EPDs — watch this carefully if breeding any heifers.','Milk EPD (MM) matters more than you think — heavier-milking dams raise weaning weights too.'],
-    insights:['Target bulls ranked in the top 25% of their breed for both WW and YW EPDs.','The $B (Beef Value) or $W (Weaning Value) index is more accurate than WW or YW alone — it accounts for the tradeoffs.','Avoid bulls with BW above +4.0 unless you\'re breeding only mature cows and have good calving facilities.']
-  },
-  calving_ease: {
-    icon:'🤱', name:'Calving Ease',
-    desc:'Minimized calving difficulty — safe for heifers and unattended calving',
-    targets:[
-      { name:'Calving Ease Direct',abbr:'CE', range:'+12 to +20', desc:'Primary trait. Look for top 10% of breed for heifer use.', priority:'high' },
-      { name:'Birth Weight',       abbr:'BW', range:'-1.0 to +1.5',desc:'Lighter birth weight = easier calving. Critical.', priority:'high' },
-      { name:'CE Accuracy',        abbr:'ACC',range:'0.60+',       desc:'High accuracy means the EPD is reliable. Avoid unproven bulls on heifers.', priority:'high' },
-      { name:'Weaning Weight',     abbr:'WW', range:'+50 to +70',  desc:'Accept moderate growth to maintain calving ease.', priority:'med' },
-      { name:'Yearling Weight',    abbr:'YW', range:'+80 to +110', desc:'Don\'t sacrifice too much growth.', priority:'med' },
-      { name:'Milk',               abbr:'MM', range:'+20 to +28',  desc:'Moderate milk — keeps cows in good condition.', priority:'low' },
-    ],
-    warnings:['NEVER use an unproven bull (accuracy < 0.45) on first-calf heifers — his EPD could be misleading.','CE EPDs are the most important number for heifer breeding, but BW is the backup check.','Pasture calving? Add 2–3 more CE points to your minimum threshold.'],
-    insights:['For heifer bulls, CE ≥ +10 and BW ≤ +1.5 is a good rule of thumb for most Angus-based programs.','A bull with CE +16, BW -1.2, and accuracy 0.75 is far safer than CE +8, BW +0.5, accuracy 0.30 — even if the numbers look similar.','Many ranchers leave $15–25/calf on the table by using overly-cautious CE bulls on mature cows. Save the easy-calving genetics for heifers.']
-  },
-  carcass_quality: {
-    icon:'🥩', name:'Carcass Quality / Grid Premiums',
-    desc:'Maximized marbling, quality grade, and carcass value for premium markets',
-    targets:[
-      { name:'Marbling',        abbr:'MARB',range:'+0.50 to +0.80',desc:'Primary trait for Choice/Prime percentage. Top 15%.', priority:'high' },
-      { name:'$B Beef Value',   abbr:'$B',  range:'$155+',          desc:'Best single index for total carcass value.', priority:'high' },
-      { name:'Ribeye Area',     abbr:'REA', range:'+0.35 to +0.55', desc:'More muscle = better yield grade and more ribeye steaks.', priority:'high' },
-      { name:'Carcass Weight',  abbr:'CW',  range:'+55 to +80',     desc:'More pounds on the rail at harvest.', priority:'med' },
-      { name:'Fat Thickness',   abbr:'FAT', range:'-0.05 to +0.05', desc:'Watch fat — too much hurts yield grade.', priority:'med' },
-      { name:'Yearling Weight', abbr:'YW',  range:'+100 to +125',   desc:'Moderate growth to reach target slaughter weight.', priority:'low' },
-    ],
-    warnings:['High marbling bulls sometimes carry reduced growth — run the $B index to see the full picture.','Fat EPD above +0.10 can hurt Yield Grade — calves may get heavily docked on the rail.'],
-    insights:['The $B (Beef Value) index is the gold standard for terminal carcass programs — it balances growth, carcass weight, quality grade, and yield grade.','Marbling is highly heritable (~0.45) — bull genetics make a real difference in Quality Grade.','If selling on a grid, a +0.10 MARB advantage translates to roughly $15–20/head in grid premiums at typical harvest weights.']
-  },
-  replacements: {
-    icon:'🐄', name:'Build Cow Herd',
-    desc:'High-quality replacement heifers with strong maternal genetics',
-    targets:[
-      { name:'$M Maternal Index', abbr:'$M',  range:'$62+',         desc:'The best single measure of replacement heifer value.', priority:'high' },
-      { name:'Milk (Maternal)',   abbr:'MM',  range:'+28 to +38',   desc:'Daughters will milk better — heavier-weaning grandkids.', priority:'high' },
-      { name:'Mat. Calv. Ease',  abbr:'MCE', range:'+10+',         desc:'Daughters that calve easier as 2-year-olds.', priority:'high' },
-      { name:'Mat. Weaning Wt.', abbr:'MWW', range:'+65 to +80',   desc:'Combined milk + growth of daughters.', priority:'high' },
-      { name:'Birth Weight',     abbr:'BW',  range:'+0 to +2.0',   desc:'Moderate BW keeps daughters from being over-framed.', priority:'med' },
-      { name:'Mature Weight',    abbr:'MW',  range:'Moderate',      desc:'Avoid sires that produce over-framed daughters that are hard keepers.', priority:'med' },
-    ],
-    warnings:['Very high milk EPDs (MM > 40) can produce hard-keeping cows that struggle in drought or limited pasture conditions.','Over-framed replacements from high-YW bulls often have poor body condition score at weaning and as first-calf heifers.'],
-    insights:['The $M (Maternal Value) index is the best tool for replacement heifer selection — it combines milk, growth, calving ease, and mature cow efficiency.','Aim for MM in the top 25% of breed, but check mature weight and mature cow maintenance requirements.','Daughters of high-MM sires often wean calves 15–25 lbs heavier than daughters of average-MM sires.']
-  },
-  balanced: {
-    icon:'⚡', name:'Balanced Performance',
-    desc:'Strong across growth, maternal, and carcass without extreme tradeoffs',
-    targets:[
-      { name:'$B Beef Value',    abbr:'$B',  range:'$130 to $160',  desc:'Strong terminal index without extremes.', priority:'high' },
-      { name:'$M Maternal',      abbr:'$M',  range:'$50 to $65',    desc:'Good replacement heifer quality alongside terminal value.', priority:'high' },
-      { name:'Weaning Weight',   abbr:'WW',  range:'+65 to +80',    desc:'Solid growth without sacrificing other traits.', priority:'med' },
-      { name:'Calving Ease',     abbr:'CE',  range:'+8 to +14',     desc:'Safe enough for most cow herds.', priority:'med' },
-      { name:'Milk',             abbr:'MM',  range:'+22 to +32',    desc:'Good milking daughters without hard-keeping extremes.', priority:'med' },
-      { name:'Marbling',         abbr:'MARB',range:'+0.30 to +0.55',desc:'Moderate carcass quality.', priority:'low' },
-    ],
-    warnings:['Balanced bulls are often in the middle of the pack on every trait — good for most operations but won\'t maximize any one area.'],
-    insights:['For most commercial cow-calf operations, a balanced sire in the top 30% on $B AND $M is the safest long-term choice.','Avoid bulls that are top 5% in one trait (like WW) but bottom 25% in another (like CE) — extreme EPDs almost always come with hidden costs.','The best balanced bulls often have moderate EPDs everywhere but excellent indexes — trust the indexes over individual traits.']
-  },
-  direct_market: {
-    icon:'🌿', name:'Direct-to-Consumer / Grass-Fed',
-    desc:'Grass efficiency, marbling on forage, and frame score for direct market success',
-    targets:[
-      { name:'Marbling',         abbr:'MARB',range:'+0.40 to +0.70',desc:'Marbling on grass is harder — genetics matter more.', priority:'high' },
-      { name:'$B Beef Value',    abbr:'$B',  range:'$120 to $150',  desc:'Balanced carcass value for direct market pricing.', priority:'high' },
-      { name:'Ribeye Area',      abbr:'REA', range:'+0.30 to +0.50',desc:'Good muscle expression for attractive cuts.', priority:'med' },
-      { name:'Calving Ease',     abbr:'CE',  range:'+10+',          desc:'Easy-calving bulls essential for low-input operations.', priority:'med' },
-      { name:'Milk',             abbr:'MM',  range:'+18 to +28',    desc:'Moderate milk — avoid high-milk bulls on grass-only programs.', priority:'med' },
-      { name:'Frame Score',      abbr:'Frame',range:'4.5 to 5.5',   desc:'Medium-frame cattle finish more efficiently on grass.', priority:'med' },
-    ],
-    warnings:['High-YW, large-framed bulls often produce cattle that DON\'T finish well on grass — they want grain.','Very high milk EPDs (MM > 35) can produce cows that milk so hard they lose body condition on grass alone.'],
-    insights:['For grass-fed programs, prioritize moderate frame score over raw growth numbers — small-to-medium frame cattle (4.5–5.5) finish more efficiently on forage.','Breeds with British background (Angus, Hereford, Red Angus) generally marble better on grass than continental breeds.','Direct-market beef commands a premium — even moderate marbling genetics can produce Choice-equivalent eating quality when finished on high-quality forage.']
-  }
+// Targets are percentile ranks, because a rank means the same thing in every
+// breed and every year. The Angus number beside each one comes from ANGUS above.
+const T = {
+  CED:  { name:'Calving Ease Direct', abbr:'CE' },   BW:  { name:'Birth Weight', abbr:'BW', lowerBetter:true },
+  WW:   { name:'Weaning Weight', abbr:'WW' },         YW:  { name:'Yearling Weight', abbr:'YW' },
+  MILK: { name:'Maternal Milk', abbr:'Milk' },      CW:  { name:'Carcass Weight', abbr:'CW' },
+  MARB: { name:'Marbling', abbr:'MARB' },             RE:  { name:'Ribeye Area', abbr:'REA' },
+  FAT:  { name:'Fat Thickness', abbr:'FAT', lowerBetter:true },
+  M: { name:'$M Maternal Weaned Calf Value', abbr:'$M' }, W: { name:'$W Weaned Calf Value', abbr:'$W' },
+  B: { name:'$B Beef Value', abbr:'$B' },             MW: { name:'Mature Weight', abbr:'MW', lowerBetter:true },
 };
+// rank: 'top25' | 'top10' | 'avg' (breed average or better) | 'mid' (near breed average, not extreme)
+const GOALS = {
+  max_pounds: { icon:'⚖️', name:'Maximum Pounds at Market', desc:'Built for growth: heavier calves at weaning or through the feedlot',
+    targets:[ ['YW','top25','high','The main growth driver if you retain ownership.'], ['WW','top25','high','Pounds at the scale if you sell at weaning.'], ['W','top25','high','Weaning value with milk and cow cost counted, not just weight.'], ['B','top25','med','Terminal value through the feedlot and on the rail.'], ['CED','avg','med','Do not give up calving ease for growth.'], ['BW','avg','med','High-growth bulls often carry more birth weight. Watch it.'] ],
+    warnings:['High-growth bulls often carry higher birth weight. Check CE before you use one on anything but mature cows.','Selecting hard on yearling weight raises mature cow size if you keep his daughters.'],
+    insights:['Look for bulls in the top 25% of their breed for both WW and YW.','An index does the weighing for you: $W for calves sold at weaning, $B for calves fed out.'] },
+  calving_ease: { icon:'🤱', name:'Calving Ease', desc:'Fewer hard pulls: safe for heifers and unattended calving',
+    targets:[ ['CED','top25','high','The number that matters most. Top 10% for heifers calving unattended.'], ['BW','avg','high','A backup check. CE already accounts for birth weight.'], ['ACC','0.55 or better','high','Accuracy on CE and BW. A proven bull is the safer heifer bull.'], ['WW','avg','med','Keep growth near breed average so you still sell pounds.'], ['YW','avg','med','Same idea: easy calving does not have to mean light calves.'], ['MILK','mid','low','Moderate milk keeps young cows in condition.'] ],
+    warnings:['Do not turn an unproven bull (CE accuracy under 0.55) out with first-calf heifers. His number can still move.','Use CE to pick the bull and BW as the backup check, not the other way round.'],
+    insights:['A bull at CE top 10% with 0.75 accuracy is a safer bet than one at top 25% with 0.30, even when the EPDs look close.','Easy-calving bulls usually give up some growth. Save them for the heifers and use more growth on the mature cows.'] },
+  carcass_quality: { icon:'🥩', name:'Carcass Quality / Grid Premiums', desc:'Marbling, quality grade and carcass value for calves sold on the rail',
+    targets:[ ['MARB','top25','high','Drives the share grading Choice and Prime.'], ['B','top25','high','The single best index for total terminal value.'], ['RE','avg','high','Muscle supports yield grade.'], ['CW','top25','med','More pounds on the rail.'], ['FAT','avg','med','Too much back fat costs yield grade.'], ['YW','avg','low','Enough growth to reach finish weight on time.'] ],
+    warnings:['High-marbling bulls sometimes give up growth. $B shows the whole trade.','Above-average fat EPD can cost you on yield grade.'],
+    insights:['$B balances growth, carcass weight, quality grade and yield grade for calves fed and sold on a grid.','Marbling is one of the more heritable traits, so sire choice shows up on the kill sheet.'] },
+  replacements: { icon:'🐄', name:'Build Cow Herd', desc:'Replacement heifers that calve easy, milk enough and stay moderate',
+    targets:[ ['M','top25','high','Built for herds that keep replacements and sell the rest at weaning.'], ['CED','top25','high','His daughters start as first-calf heifers. Check maternal calving ease (CEM) too.'], ['MILK','mid','high','Match milk to your feed. More is not always better.'], ['MW','avg','med','Mature size: bigger cows cost more to run.'], ['BW','avg','med','Moderate birth weight for the heifers he sires and the ones he breeds.'], ['WW','avg','med','Still sell pounds on the steer mates.'] ],
+    warnings:['Very high milk makes cows that are hard to keep in condition on short grass or in a dry year.','Selecting hard on growth makes bigger daughters with higher feed bills.'],
+    insights:['$M weighs calving ease, milk, weaning weight and mature cow size together for a keep-your-own-heifers herd.','Aim for milk and mature size that fit your country, not the top of the chart.'] },
+  balanced: { icon:'⚡', name:'Balanced Performance', desc:'Solid across calving, growth, maternal and carcass, with no extremes',
+    targets:[ ['B','avg','high','Terminal value, without chasing the extreme.'], ['M','avg','high','Maternal value alongside it.'], ['WW','avg','med','Solid growth.'], ['CED','avg','med','Safe on most cow herds.'], ['MILK','mid','med','Daughters that milk without being hard keepers.'], ['MARB','avg','low','Calves that still grade.'] ],
+    warnings:['A balanced bull will not top any one trait. That is the point.'],
+    insights:['For most cow-calf outfits, a bull at breed average or better on both the terminal and the maternal index is a sound long-term pick.','Be wary of a bull that is top 5% on one trait and bottom 25% on another. Extremes come with a cost somewhere.'] },
+  direct_market: { icon:'🌿', name:'Direct-to-Consumer / Grass-Fed', desc:'Moderate cattle that finish and eat well for freezer beef customers',
+    targets:[ ['MARB','top25','high','Marbling is harder to get on grass, so genetics matter more.'], ['MW','avg','high','Moderate mature size. Big-framed cattle are slow to finish on forage.'], ['RE','avg','med','Enough muscle for good-looking cuts.'], ['CED','top25','med','Easy calving suits a low-input outfit.'], ['MILK','mid','med','Moderate milk for a grass-only cow.'], ['FAT','mid','low','Some cover helps cattle finish on forage.'] ],
+    warnings:['High-growth, large-framed bulls often sire cattle that will not finish on grass without grain.','Very high milk can pull a grass-only cow down in condition.'],
+    insights:['For grass finishing, moderate frame and mature size matter more than raw growth numbers.','British breeds (Angus, Hereford, Red Angus) generally marble more readily on forage than Continental breeds.'] }
+};
+const RANK_LABEL = { top25:'Top 25% of the breed', top10:'Top 10% of the breed', avg:'Breed average or better', mid:'Near breed average' };
+function angusValue(key, rank) {
+  const a = ANGUS[key]; if (!a) return '';
+  const dp = (key === 'MARB' || key === 'RE') ? 2 : key === 'FAT' ? 3 : key === 'BW' ? 1 : 0;
+  const lower = T[key] && T[key].lowerBetter;
+  if (rank === 'mid') return `around ${sign(a.avg, dp)} (roughly ${sign(lower ? a.p25 : a.p75, dp)} to ${sign(lower ? a.p75 : a.p25, dp)})`;
+  const v = rank === 'top25' ? a.p25 : rank === 'top10' ? a.p10 : a.avg;
+  return `${sign(v, dp)} or ${lower ? 'lower' : 'higher'}`;
+}
 
 function runWizard() {
   const goal = window._selectedGoal;
-  if (!goal) {
-    alert('Please select a goal in Step 1 first.');
-    goWizardStep(1);
-    return;
-  }
-
+  if (!goal) { alert('Please select a goal in Step 1 first.'); goWizardStep(1); return; }
   const isHeifer  = document.getElementById('wizard-heifer').checked;
   const isPasture = document.getElementById('pasture-calving').checked;
-  const challenge = gs('main-challenge');
+  const challenge = gs('main-challenge'), dest = gs('calf-destination'), pref = gs('bull-breed-pref');
+  const cowWt = gv('cow-weight');
+  const cowBreeds = Array.from(document.querySelectorAll('#breed-chips .breed-chip.selected')).map(b => b.dataset.breed);
   const g = GOALS[goal];
+  const showAngus = pref === 'any' || pref === 'angus';
 
-  // Header
-  document.getElementById('rec-header').innerHTML = `
-    <div class="rec-icon">${g.icon}</div>
-    <div>
-      <div class="rec-goal-name">${g.name}</div>
-      <div class="rec-goal-desc">${g.desc}</div>
-    </div>
-  `;
+  document.getElementById('rec-header').innerHTML = `<div class="rec-icon">${g.icon}</div><div><div class="rec-goal-name">${g.name}</div><div class="rec-goal-desc">${g.desc}</div></div>`;
 
-  // EPD targets
-  let targets = [...g.targets];
-
-  // Adjust for heifer/pasture
+  // targets: [key, rank, priority, note]
+  let targets = g.targets.map(t => t.slice());
+  const setT = (key, rank, pri, note) => { const i = targets.findIndex(t => t[0] === key); if (i >= 0) targets[i] = [key, rank, pri, note]; else targets.unshift([key, rank, pri, note]); };
   if (isHeifer || isPasture) {
-    targets = targets.map(t => {
-      if (t.abbr === 'CE') return { ...t, priority:'high', range: isPasture ? '+14+' : '+10+', desc: 'Elevated threshold — heifer/pasture calving.' };
-      if (t.abbr === 'BW') return { ...t, priority:'high', range: '-1.0 to +1.5', desc: 'Critical for heifer safety.' };
-      return t;
-    });
-    if (!targets.find(t => t.abbr === 'CE')) {
-      targets.unshift({ name:'Calving Ease', abbr:'CE', range:'+12+', desc:'Added — heifer/pasture requirement.', priority:'high' });
-    }
+    setT('BW', 'avg', 'high', 'Backup check for heifers. On the Angus scale most programs want +1.5 or lower, +2.5 at the outside.');
+    setT('CED', isPasture ? 'top10' : 'top25', 'high', isPasture ? 'Raised: nobody is there to pull a calf.' : 'Raised: first-calf heifers in the group.');
+    if (!targets.find(t => t[0] === 'ACC')) targets.splice(2, 0, ['ACC', '0.55 or better', 'high', 'Accuracy on CE and BW. Leave unproven bulls for the mature cows.']);
   }
+  const add = (key, rank, pri, note) => { if (!targets.find(t => t[0] === key)) targets.push([key, rank, pri, note]); else setT(key, rank, pri, note); };
+  if (challenge === 'light_calves')  add('WW', 'top25', 'high', 'Added: you want more weaning weight.');
+  if (challenge === 'hard_calving')  add('CED', 'top25', 'high', 'Added: you are pulling too many calves.');
+  if (challenge === 'poor_carcass' || challenge === 'poor_marbling') add('MARB', 'top25', 'high', 'Added: you want better grades.');
+  if (challenge === 'low_milk')      add('MILK', 'top25', 'med', 'Added: you want more milk in his daughters. It only helps if you keep heifers, and it raises cow feed needs.');
+  if (challenge === 'big_cows')      add('MW', 'avg', 'high', 'Added: hold mature size at breed average or below.');
 
-  // Adjust for specific challenges
-  if (challenge === 'light_calves' && !['max_pounds'].includes(goal)) {
-    targets.push({ name:'Weaning Weight', abbr:'WW', range:'+70+', desc:'Added — your calves need more growth.', priority:'high' });
-  }
-  if (challenge === 'poor_marbling' && !['carcass_quality'].includes(goal)) {
-    targets.push({ name:'Marbling', abbr:'MARB', range:'+0.50+', desc:'Added — to address your carcass quality gap.', priority:'med' });
-  }
+  const targetsHTML = targets.map(([key, rank, pri, note]) => {
+    const isAcc = key === 'ACC';
+    const head = isAcc ? rank : RANK_LABEL[rank];
+    const sub = isAcc ? '' : (showAngus ? `<div class="epd-target-label" style="color:var(--tan)">${ANGUS.label}: ${angusValue(key, rank)}</div>` : '');
+    const nm = isAcc ? 'Accuracy (ACC)' : `${T[key].name} (${T[key].abbr})`;
+    return `<div class="epd-target-card priority-${pri}">
+      <span class="priority-badge">${pri === 'high' ? 'KEY' : pri === 'med' ? 'Important' : 'Consider'}</span>
+      <div class="epd-target-name">${nm}</div>
+      <div class="epd-target-range">${head}</div>${sub}
+      <div class="epd-target-label">${note}</div>
+    </div>`;
+  }).join('');
+  const scaleNote = showAngus
+    ? `Ranks hold for any breed. The Angus figures are from the American Angus Association percentile breakdown for current sires, Fall 2026. <a href="https://www.angus.org/tools-resources/national-cattle-evaluation/percentile-breakdowns" target="_blank" rel="noopener" style="color:var(--gold)">Check the current table</a> before a sale; they update with every evaluation.`
+    : `You picked ${BREED_NAMES[pref]}. Every breed has its own EPD scale, so look these ranks up in the ${BREED_NAMES[pref]} association's percentile table. Angus numbers do not carry over.`;
+  document.getElementById('epd-targets').innerHTML = `<div class="section-label" style="margin-bottom:12px">What to look for, by rank in the breed</div>
+    <div class="epd-target-grid">${targetsHTML}</div><div class="insight-box" style="font-size:12px">${scaleNote}</div>`;
 
-  const targetsHTML = targets.map(t => `
-    <div class="epd-target-card priority-${t.priority}">
-      <span class="priority-badge">${t.priority === 'high' ? '★ KEY' : t.priority === 'med' ? 'Important' : 'Consider'}</span>
-      <div class="epd-target-name">${t.name} (${t.abbr})</div>
-      <div class="epd-target-range">${t.range}</div>
-      <div class="epd-target-label">${t.desc}</div>
-    </div>
-  `).join('');
+  const warns = g.warnings.slice();
+  if (isHeifer)  warns.unshift('You are breeding heifers. Pick on CE first, check BW second, and insist on accuracy of 0.55 or better for both.');
+  if (isPasture) warns.unshift('Unattended calving leaves no room for a hard pull. Look for CE in the top 10% of the breed.');
+  if (cowWt !== null && cowWt >= 1400) warns.push(`Your cows average ${Math.round(cowWt).toLocaleString()} lbs. If you keep heifers, hold Mature Weight at breed average or below so the next set is not bigger still.`);
+  document.getElementById('wizard-warnings').innerHTML = warns.map(w => `<div class="warning-box">${w}</div>`).join('');
 
-  document.getElementById('epd-targets').innerHTML = `
-    <div class="section-label" style="margin-bottom:12px">Your EPD Target Ranges</div>
-    <div class="epd-target-grid">${targetsHTML}</div>
-  `;
-
-  // Warnings
-  const allWarnings = [...g.warnings];
-  if (isHeifer) allWarnings.unshift('You\'re breeding heifers — CE and BW accuracy are non-negotiable. Do NOT use a bull with CE accuracy below 0.55 on first-calf heifers.');
-  if (isPasture) allWarnings.unshift('Pasture calving means less intervention. Target CE ≥ +14 and BW ≤ +1.5 to minimize unassisted calving losses.');
-
-  document.getElementById('wizard-warnings').innerHTML = allWarnings.map(w =>
-    `<div class="warning-box">⚠ ${w}</div>`
-  ).join('');
-
-  // Insights
-  document.getElementById('wizard-insights').innerHTML = `
-    <div class="section-label" style="margin:24px 0 12px">How to use this in the bull pen</div>
-    ${g.insights.map(i => `<div class="insight-box insight-good">✓ ${i}</div>`).join('')}
-  `;
+  const tips = g.insights.slice();
+  if (dest === 'wean_sell')    tips.push('You sell at weaning, so carcass traits do not pay you directly. Weight and calving ease do.');
+  if (dest === 'feedlot')      tips.push('You retain ownership, so carcass weight, marbling and $B all show up in your check.');
+  if (dest === 'replacements') tips.push('You keep heifers, so milk, mature size and calving ease in his daughters will live in your herd for ten years.');
+  if (dest === 'direct')       tips.push('Selling freezer beef, eating quality and a finish weight your customers want matter more than commodity pounds.');
+  if (cowBreeds.length === 1 && cowBreeds[0] !== 'crossbred' && pref !== 'any' && pref === cowBreeds[0]) tips.push('Same breed on both sides gives you no hybrid vigor. A bull of a second breed on straightbred cows adds it for free.');
+  if (cowBreeds.includes('brahman')) tips.push('With Brahman influence in the cows, a British or Continental bull adds a good deal of hybrid vigor.');
+  document.getElementById('wizard-insights').innerHTML = `<div class="section-label" style="margin:24px 0 12px">How to use this in the bull pen</div>
+    ${tips.map(i => `<div class="insight-box insight-good">${i}</div>`).join('')}`;
 
   document.getElementById('wizard-results').classList.add('visible');
   document.getElementById('wizard-results').scrollIntoView({ behavior:'smooth', block:'start' });
-  document.getElementById('wizard-export').style.display='flex';
+  document.getElementById('wizard-export').style.display = 'flex';
 }
 
-function searchBulls() {
-  const goal = window._selectedGoal || '';
-  const catMap = {
-    max_pounds:'bulls', calving_ease:'bulls', carcass_quality:'bulls',
-    replacements:'bred_heifers', balanced:'bulls', direct_market:'farm_to_table'
-  };
-  const cat = catMap[goal] || 'bulls';
-  window.location.href = `/?category=${cat}#listings`;
-}
+function searchBulls() { window.location.href = '/?category=bulls#listings'; }
 
 // ── PDF Helpers (branded layout) ──────────────────────────────────────────────
 function getJsPDF() {
@@ -1767,17 +1673,17 @@ function pdfInsight(doc, text, y, type) {
 }
 
 function exportComparisonPDF() {
-  var JsPDF = getJsPDF(); if (!JsPDF) { alert('PDF library loading — please try again.'); return; }
+  var JsPDF = getJsPDF(); if (!JsPDF) { alert('PDF library loading. Please try again.'); return; }
   var d = window._herdVisionData;
   if (!d) { alert('Please run a comparison first.'); return; }
   try {
     var doc = new JsPDF({orientation:'portrait',unit:'mm',format:'a4'});
     var W = doc.internal.pageSize.getWidth(), m = 18, cW = W-m*2, y;
     var b1 = stripEmoji(d.bull1.name), b2 = stripEmoji(d.bull2.name);
-    y = pdfHeader(doc, 'Herd Vision EPD Report', b1+' vs '+b2+(d.isHeifer?' | Heifer Mode: ON':''));
-    function fmt(v) { if(v===null||v===undefined||isNaN(v))return'--'; return(v>0?'+':'')+parseFloat(v).toFixed(1); }
+    y = pdfHeader(doc, 'Herd Vision EPD Report', b1+' ('+d.bull1.breed+') vs '+b2+' ('+d.bull2.breed+')'+(d.isHeifer?' | Heifer check: on':''));
+    function fmt(v) { if(v===null||v===undefined||isNaN(v))return'--'; return(v>0?'+':'')+parseFloat(v).toFixed(2).replace(/\.?0+$/,''); }
     function np() { pdfFooter(doc,'Herd Vision EPD Comparison'); doc.addPage(); y=20; }
-    // Column headers — trait 43%, bull1 17%, bull2 17%, edge 23%
+    // Column headers: trait 43%, bull1 17%, bull2 17%, edge 23%
     doc.setFillColor(10,10,10); doc.rect(m,y,cW,7.5,'F');
     doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(201,169,110);
     doc.text('TRAIT', m+4, y+5.2);
@@ -1790,7 +1696,7 @@ function exportComparisonPDF() {
       {g:'Growth Traits',r:[['WW - Weaning Weight','ww',true],['YW - Yearling Weight','yw',true]]},
       {g:'Maternal Traits',r:[['MM - Milk','mm',true],['MWW - Maternal Weaning Wt','mww',true]]},
       {g:'Carcass Traits',r:[['CW - Carcass Weight','cw',true],['REA - Ribeye Area','rea',true],['MARB - Marbling','marb',true]]},
-      {g:'Selection Indexes',r:[['$B - Beef Value','sb',true],['$M - Maternal Value','sm',true],['$W - Weaning Value','sw',true],['$F - Feedlot Value','sf',true]]}
+      {g:'Selection Indexes (Angus $Values)',r:[['$B - Beef Value','sb',true],['$M - Maternal Value','sm',true],['$W - Weaning Value','sw',true],['$F - Feedlot Value','sf',true]]}
     ];
     var alt = false;
     traits.forEach(function(group) {
@@ -1814,9 +1720,9 @@ function exportComparisonPDF() {
         doc.text(fmt(v2), m+cW*0.77-2, y+5, {align:'right'});
         doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(100,80,60);
         if (!isNaN(n1)&&!isNaN(n2)) {
-          var diff = Math.abs(n1-n2).toFixed(1);
+          var diff = Math.abs(n1-n2).toFixed(2).replace(/\.?0+$/,'');
           var wName = b1w ? b1.split(' ')[0].slice(0,12) : b2w ? b2.split(' ')[0].slice(0,12) : 'Equal';
-          var edgeTxt = (b1w||b2w) ? wName+' +'+diff : 'Equal';
+          var edgeTxt = d.sameBreed===false ? 'n/a' : (b1w||b2w) ? wName+' by '+diff : 'Equal';
           doc.text(edgeTxt.slice(0,22), W-m-4, y+5, {align:'right'});
         }
         y+=7; alt=!alt;
@@ -1826,13 +1732,13 @@ function exportComparisonPDF() {
       y+=4; if(y>250)np(); y=pdfSection(doc,'Key Insights and Warnings',y);
       d.insights.forEach(function(ins) {
         if(y>255)np();
-        var isWarn = ins.toLowerCase().indexOf('risk')>=0 || ins.toLowerCase().indexOf('warn')>=0 || ins.indexOf('elevated')>=0;
+        var isWarn = /risk|unproven|different breeds/i.test(ins);
         y=pdfInsight(doc,ins,y,isWarn?'warning':'insight');
       });
     }
     y+=4;
     if(y>255)np();
-    var discLines = doc.splitTextToSize('EPDs are breed-specific and not directly comparable across breeds without adjustment factors. Accuracy values below 0.50 may shift significantly as more progeny data becomes available. Consult your breed association or extension specialist for herd-specific recommendations.',cW-8);
+    var discLines = doc.splitTextToSize('EPDs entered by the user. The gap between the EPDs of two sires is the expected average gap between their calves. EPDs are only comparable within one breed. Low accuracy means the number can still move. Planning aid only.',cW-8);
     var discH = discLines.length*4.5+6;
     doc.setFillColor(250,248,245); doc.rect(m,y,cW,discH,'F');
     doc.setFont('helvetica','italic'); doc.setFontSize(7.5); doc.setTextColor(120,100,80);
