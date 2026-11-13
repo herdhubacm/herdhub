@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Herd Manager | Herd Hub</title>
-<meta name="description" content="Free herd management for cattle ranchers. Track animals, weights, health records, breeding, and calving — all synced to your Herd Hub account.">
+<meta name="description" content="Free herd records for cattle ranchers. Keep animals, weights, health records, breeding and calving in your Herd Hub account.">
 <meta name="theme-color" content="#0A0A0A">
 <link rel="icon" type="image/png" href="/logo.png">
 <link rel="apple-touch-icon" href="/logo.png">
@@ -162,7 +162,15 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .batch-input:focus{outline:none;border-color:var(--gold)}
 
 /* Responsive */
+.two-up{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.two-up>*{min-width:0}
+.hint{font-family:'Inter',sans-serif;font-size:10.5px;color:var(--muted);margin-top:4px;line-height:1.5}
+.msg{font-family:'Inter',sans-serif;font-size:12.5px;color:var(--tan);margin:10px 0 0;min-height:16px}
+.rm{background:none;border:none;color:var(--muted);cursor:pointer;font-size:12px;font-family:'Inter',sans-serif;text-decoration:underline;padding:0;margin-left:8px}
+.rm:hover{color:var(--danger)}
+.fineprint{margin-top:28px;padding:14px 18px;border:1px solid rgba(201,169,110,.08);border-radius:6px;font-size:12.5px;color:var(--muted);line-height:1.65}
 @media(max-width:768px){
+  .two-up{grid-template-columns:1fr}
   .container{padding:16px 16px 60px}
   .site-header{padding:0 16px}
   .stats-bar{grid-template-columns:repeat(3,1fr)}
@@ -196,7 +204,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 <!-- Auth Gate -->
 <div id="auth-gate" class="auth-gate" style="display:none">
   <h1>Herd <em>Manager</em></h1>
-  <p>Sign in to access your Herd Manager — track animals, weights, health records, breeding, and calving all in one place.</p>
+  <p>Sign in to keep your animals, weights, health records, breeding and calving in one place.</p>
   <a href="/">Sign In on Herd Hub</a>
 </div>
 
@@ -217,7 +225,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 
   <div class="stats-bar" id="stats-bar"></div>
 
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+  <div class="two-up">
     <div class="card">
       <div class="card-title">Alerts</div>
       <div id="alerts-panel"><span style="color:var(--muted);font-size:13px">Loading...</span></div>
@@ -231,6 +239,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
   <div style="margin-top:16px">
     <button class="btn btn-ghost" onclick="showView('list')">View Full Herd List &rarr;</button>
   </div>
+  <div class="fineprint"><strong style="color:var(--tan)">About the alerts:</strong> A withdrawal date is the treatment date plus the days you entered, nothing more. The product label and your veterinarian set the real withdrawal time, and it can differ by dose, route and class of animal. Calving alerts use 283 days from the breeding date as an average; the Gestation Calculator has breed figures. These are your records, kept for you. They are not a substitute for either.</div>
 </div>
 
 <!-- ═══ HERD LIST ═══ -->
@@ -324,8 +333,8 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
         </div>
       </div>
       <div class="field-row">
-        <div class="field"><label>Sire Name</label><input type="text" id="af-sire" placeholder="Sire tag or name"></div>
-        <div class="field"><label>Dam Name</label><input type="text" id="af-dam" placeholder="Dam tag or name"></div>
+        <div class="field"><label>Sire</label><input type="text" id="af-sire" placeholder="Sire tag or name"><div class="hint">Type his tag or name exactly as it is in your herd and this calf shows under his Progeny tab</div></div>
+        <div class="field"><label>Dam</label><input type="text" id="af-dam" placeholder="Dam tag or name"></div>
       </div>
       <div class="field-row">
         <div class="field"><label>Purchase Date</label><input type="date" id="af-pdate"></div>
@@ -333,7 +342,8 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
       </div>
       <div class="field"><label>Notes</label><textarea id="af-notes" rows="2"></textarea></div>
       <div class="field"><label>Photo</label><input type="file" id="af-photo" accept="image/*" style="padding:8px"></div>
-      <div style="display:flex;gap:10px;margin-top:16px">
+      <div class="msg" id="af-msg"></div>
+      <div style="display:flex;gap:10px;margin-top:8px">
         <button type="submit" class="btn btn-primary">Save Animal</button>
         <button type="button" class="btn btn-ghost" onclick="closeModal('animal-modal')">Cancel</button>
       </div>
@@ -348,7 +358,8 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
     <h3>Record Weights</h3>
     <div class="field"><label>Weigh Date</label><input type="date" id="wm-date"></div>
     <div id="weight-batch"></div>
-    <div style="margin-top:16px"><button class="btn btn-primary" onclick="saveBatchWeights()">Save Weights</button></div>
+    <div class="msg" id="wm-msg"></div>
+    <div style="margin-top:8px"><button class="btn btn-primary" onclick="saveBatchWeights()">Save Weights</button></div>
   </div>
 </div>
 
@@ -367,12 +378,13 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
     </div>
     <div class="field-row-3">
       <div class="field"><label>Dosage</label><input type="text" id="hm-dosage" placeholder="e.g. 10ml"></div>
-      <div class="field"><label>Withdrawal (days)</label><input type="number" id="hm-withdrawal"></div>
+      <div class="field"><label>Withdrawal (days)</label><input type="number" id="hm-withdrawal" min="0" max="365"><div class="hint">From the product label</div></div>
       <div class="field"><label>Cost ($)</label><input type="number" id="hm-cost" step="0.01"></div>
     </div>
     <div class="field"><label>Administered By</label><input type="text" id="hm-admin"></div>
     <div class="field"><label>Notes</label><textarea id="hm-notes" rows="2"></textarea></div>
-    <div style="margin-top:16px"><button class="btn btn-primary" onclick="saveHealthEvent()">Save</button></div>
+    <div class="msg" id="hm-msg"></div>
+    <div style="margin-top:8px"><button class="btn btn-primary" onclick="saveHealthEvent()">Save</button></div>
   </div>
 </div>
 
@@ -421,19 +433,19 @@ async function loadDashboard() {
     document.getElementById('stats-bar').innerHTML =
       statCard(c.total, 'Total Head') + statCard(c.cows, 'Cows') + statCard(c.bulls, 'Bulls') +
       statCard(c.heifers, 'Heifers') + statCard(c.steers_calves, 'Steers/Calves') +
-      statCard(stats.avg_weight ? stats.avg_weight + ' lbs' : '—', 'Avg Weight');
+      statCard(stats.avg_weight ? Number(stats.avg_weight).toLocaleString() + ' lbs' : '-', 'Avg Last Weight');
 
     // Alerts
     let alerts = '';
     stats.withdrawals.forEach(w => {
-      alerts += '<div class="alert-item danger" onclick="openProfile(' + w.animal_id + ')">&#x26A0; <strong>' + esc(w.tag_id||w.name) + '</strong> — ' + esc(w.product) + ' withdrawal until ' + fmtDate(w.withdrawal_clear_date) + '</div>';
+      alerts += '<div class="alert-item danger" onclick="openProfile(' + w.animal_id + ')">&#x26A0; <strong>' + esc(w.tag_id||w.name) + '</strong>: ' + esc(w.product||'treatment') + ' withdrawal through ' + fmtDate(w.withdrawal_clear_date) + '</div>';
     });
     stats.upcoming_calvings.forEach(c => {
-      const due = new Date(new Date(c.event_date).getTime() + 283*86400000);
-      alerts += '<div class="alert-item warn" onclick="openProfile(' + c.animal_id + ')">&#x1F404; <strong>' + esc(c.tag_id||c.name) + '</strong> — due to calve ~' + fmtDate(due) + '</div>';
+      const overdue = String(c.due_date).slice(0,10) < todayStr();
+      alerts += '<div class="alert-item warn" onclick="openProfile(' + c.animal_id + ')">&#x1F404; <strong>' + esc(c.tag_id||c.name) + '</strong>: ' + (overdue ? 'was due about ' : 'due to calve about ') + fmtDate(c.due_date) + '</div>';
     });
     stats.stale_weights.forEach(s => {
-      alerts += '<div class="alert-item info" onclick="openProfile(' + s.animal_id + ')">&#x2696; <strong>' + esc(s.tag_id||s.name) + '</strong> — last weighed ' + fmtDate(s.last_weighed) + '</div>';
+      alerts += '<div class="alert-item info" onclick="openProfile(' + s.animal_id + ')">&#x2696; <strong>' + esc(s.tag_id||s.name) + '</strong>: last weighed ' + fmtDate(s.last_weighed) + '</div>';
     });
     if (!alerts) alerts = '<span style="color:var(--muted);font-size:13px">No alerts right now.</span>';
     document.getElementById('alerts-panel').innerHTML = alerts;
@@ -493,23 +505,23 @@ function renderList() {
   empty.style.display='none'; tbody.parentElement.style.display='';
 
   tbody.innerHTML = list.map(a => {
-    const age = a.birth_date ? calcAge(a.birth_date) : '—';
+    const age = a.birth_date ? calcAge(a.birth_date) : '-';
     const cls = 'status-' + (a.status||'active');
     const img = a.photo_url ? '<img class="animal-thumb" src="' + esc(a.photo_url) + '" alt="">' : '<div class="animal-thumb" style="display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:16px">&#x1F404;</div>';
     return '<tr onclick="openProfile(' + a.id + ')">' +
       '<td>' + img + '</td>' +
       '<td><strong style="color:var(--cream)">' + esc(a.tag_id||'') + '</strong>' + (a.name ? ' <span style="color:var(--muted)">' + esc(a.name) + '</span>' : '') + '</td>' +
-      '<td>' + esc(a.breed||'—') + '</td>' +
-      '<td style="text-transform:capitalize">' + esc(a.sex||'—') + '</td>' +
+      '<td>' + esc(a.breed||'-') + '</td>' +
+      '<td style="text-transform:capitalize">' + esc(a.sex||'-') + '</td>' +
       '<td>' + age + '</td>' +
-      '<td>' + (a.last_weight ? parseFloat(a.last_weight).toLocaleString() + ' lbs' : '—') + '</td>' +
+      '<td>' + (a.last_weight ? parseFloat(a.last_weight).toLocaleString() + ' lbs' : '-') + '</td>' +
       '<td><span class="status-badge ' + cls + '">' + esc(a.status||'active') + '</span></td>' +
       '</tr>';
   }).join('');
 }
 
 function calcAge(bd) {
-  const b = new Date(bd);
+  const b = dOnly(bd);
   const now = new Date();
   const months = (now.getFullYear() - b.getFullYear()) * 12 + (now.getMonth() - b.getMonth());
   if (months < 1) return '<1mo';
@@ -527,8 +539,9 @@ async function openProfile(id) {
 
   try {
     const a = await api('GET', '/api/herd/' + id);
-    const age = a.birth_date ? calcAge(a.birth_date) : '—';
-    const lastW = a.weights.length ? parseFloat(a.weights[0].weight).toLocaleString() + ' lbs' : '—';
+    window._current = a;
+    const age = a.birth_date ? calcAge(a.birth_date) : '-';
+    const lastW = a.weights.length ? parseFloat(a.weights[0].weight).toLocaleString() + ' lbs' : '-';
     const photoSrc = a.photo_url || '';
     const photoEl = photoSrc ? '<img class="profile-photo" src="' + esc(photoSrc) + '" alt="">' : '<div class="profile-photo" style="display:flex;align-items:center;justify-content:center;font-size:64px;color:var(--muted)">&#x1F404;</div>';
 
@@ -539,7 +552,7 @@ async function openProfile(id) {
         '<div class="profile-stat"><div class="val">' + age + '</div><div class="lbl">Age</div></div>' +
         '<div class="profile-stat"><div class="val">' + lastW + '</div><div class="lbl">Last Weight</div></div>' +
         '<div class="profile-stat"><div class="val">' + esc(a.status||'active') + '</div><div class="lbl">Status</div></div>' +
-        (a.weights.length >= 2 ? '<div class="profile-stat"><div class="val">' + calcADG(a.weights) + '</div><div class="lbl">ADG (lbs/day)</div></div>' : '') +
+        (a.weights.length >= 2 ? '<div class="profile-stat"><div class="val">' + calcADG(a.weights) + '</div><div class="lbl">ADG, first to last weight</div></div>' : '') +
       '</div>' +
       '<div class="profile-actions">' +
         '<button class="btn btn-ghost btn-sm" onclick="showAddAnimal(' + a.id + ')">Edit</button>' +
@@ -562,13 +575,13 @@ async function openProfile(id) {
     // Overview tab
     html += '<div class="tab-content active" id="t-overview"><div class="card">';
     const details = [
-      ['Birth Date', a.birth_date ? fmtDate(a.birth_date) : '—'],
-      ['Birth Weight', a.birth_weight ? a.birth_weight + ' lbs' : '—'],
-      ['Color', a.color || '—'],
-      ['Sire', a.sire_name || '—'],
-      ['Dam', a.dam_name || '—'],
-      ['Purchase Date', a.purchase_date ? fmtDate(a.purchase_date) : '—'],
-      ['Purchase Price', a.purchase_price ? '$' + parseFloat(a.purchase_price).toLocaleString() : '—'],
+      ['Birth Date', a.birth_date ? fmtDate(a.birth_date) : '-'],
+      ['Birth Weight', a.birth_weight ? a.birth_weight + ' lbs' : '-'],
+      ['Color', a.color || '-'],
+      ['Sire', a.sire_name || '-'],
+      ['Dam', a.dam_name || '-'],
+      ['Purchase Date', a.purchase_date ? fmtDate(a.purchase_date) : '-'],
+      ['Purchase Price', a.purchase_price ? '$' + parseFloat(a.purchase_price).toLocaleString() : '-'],
     ];
     html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">';
     details.forEach(([l,v]) => {
@@ -586,14 +599,14 @@ async function openProfile(id) {
       for (let i = 0; i < a.weights.length; i++) {
         const w = a.weights[i];
         const prev = a.weights[i+1];
-        let gain = '—', adg = '—';
+        let gain = '-', adg = '-';
         if (prev) {
           const g = parseFloat(w.weight) - parseFloat(prev.weight);
           gain = (g >= 0 ? '+' : '') + g.toFixed(1) + ' lbs';
-          const days = daysBetween(new Date(prev.weigh_date), new Date(w.weigh_date));
+          const days = daysBetween(dOnly(prev.weigh_date), dOnly(w.weigh_date));
           if (days > 0) adg = (g / days).toFixed(2) + ' lbs/d';
         }
-        html += '<tr><td>' + fmtDate(w.weigh_date) + '</td><td style="font-weight:600;color:var(--cream)">' + parseFloat(w.weight).toLocaleString() + ' lbs</td><td>' + gain + '</td><td>' + adg + '</td><td style="color:var(--muted)">' + esc(w.notes||'') + '</td></tr>';
+        html += '<tr><td>' + fmtDate(w.weigh_date) + '</td><td style="font-weight:600;color:var(--cream)">' + parseFloat(w.weight).toLocaleString() + ' lbs</td><td>' + gain + '</td><td>' + adg + '</td><td style="color:var(--muted)">' + esc(w.notes||'') + rmBtn(a.id,'weights',w.id) + '</td></tr>';
       }
       html += '</tbody></table></div>';
     } else { html += '<div class="card" style="text-align:center;color:var(--muted);padding:40px">No weight records yet.<br><button class="btn btn-ghost btn-sm" style="margin-top:12px" onclick="showSingleWeight(' + a.id + ')">+ Record Weight</button></div>'; }
@@ -603,17 +616,17 @@ async function openProfile(id) {
     html += '<div class="tab-content" id="t-health">';
     if (a.health.length) {
       html += '<div class="card"><div class="card-title">Health Timeline</div>';
-      const today = new Date(); today.setHours(0,0,0,0);
       a.health.forEach(h => {
-        const isActive = h.withdrawal_clear_date && new Date(h.withdrawal_clear_date) >= today;
+        const isActive = h.withdrawal_clear_date && String(h.withdrawal_clear_date).slice(0,10) >= todayStr();
         html += '<div class="timeline-item' + (isActive ? ' withdrawal-active' : '') + '">';
         html += '<div class="timeline-date">' + fmtDate(h.event_date) + '</div>';
-        html += '<div class="timeline-title">' + esc(h.event_type||'Event') + (isActive ? '<span class="withdrawal-badge">Withdrawal until ' + fmtDate(h.withdrawal_clear_date) + '</span>' : '') + '</div>';
+        html += '<div class="timeline-title" style="text-transform:capitalize">' + esc(String(h.event_type||'Event').replace(/_/g,' ')) + (isActive ? '<span class="withdrawal-badge">Withdrawal through ' + fmtDate(h.withdrawal_clear_date) + '</span>' : '') + rmBtn(a.id,'health',h.id) + '</div>';
         const parts = [];
         if (h.product) parts.push(esc(h.product));
         if (h.dosage) parts.push(esc(h.dosage));
         if (h.administered_by) parts.push('by ' + esc(h.administered_by));
         if (h.cost) parts.push('$' + parseFloat(h.cost).toFixed(2));
+        if (h.withdrawal_days) parts.push(h.withdrawal_days + ' day withdrawal' + (isActive ? '' : ', cleared ' + fmtDate(h.withdrawal_clear_date)));
         if (h.notes) parts.push(esc(h.notes));
         html += '<div class="timeline-detail">' + parts.join(' &middot; ') + '</div></div>';
       });
@@ -628,10 +641,10 @@ async function openProfile(id) {
       a.production.forEach(p => {
         html += '<div class="timeline-item">';
         html += '<div class="timeline-date">' + fmtDate(p.event_date) + '</div>';
-        html += '<div class="timeline-title" style="text-transform:capitalize">' + esc(p.event_type||'Event') + '</div>';
+        html += '<div class="timeline-title" style="text-transform:capitalize">' + esc(String(p.event_type||'Event').replace(/_/g,' ')) + rmBtn(a.id,'production',p.id) + '</div>';
         const parts = [];
         if (p.bull_name) parts.push('Bull: ' + esc(p.bull_name));
-        if (p.calving_ease) parts.push('CE: ' + p.calving_ease);
+        if (p.calving_ease) parts.push('Calving ease ' + p.calving_ease + ' of 5');
         if (p.notes) parts.push(esc(p.notes));
         html += '<div class="timeline-detail">' + parts.join(' &middot; ') + '</div></div>';
       });
@@ -644,7 +657,7 @@ async function openProfile(id) {
     if (a.progeny.length) {
       html += '<div class="card"><div class="card-title">Progeny (' + a.progeny.length + ')</div><table class="animal-table"><thead><tr><th>Tag / Name</th><th>Sex</th><th>Breed</th><th>Born</th><th>Status</th></tr></thead><tbody>';
       a.progeny.forEach(p => {
-        html += '<tr onclick="openProfile(' + p.id + ')" style="cursor:pointer"><td style="font-weight:600;color:var(--cream)">' + esc(p.tag_id||'') + ' ' + esc(p.name||'') + '</td><td style="text-transform:capitalize">' + esc(p.sex||'—') + '</td><td>' + esc(p.breed||'—') + '</td><td>' + (p.birth_date?fmtDate(p.birth_date):'—') + '</td><td><span class="status-badge status-' + (p.status||'active') + '">' + esc(p.status||'active') + '</span></td></tr>';
+        html += '<tr onclick="openProfile(' + p.id + ')" style="cursor:pointer"><td style="font-weight:600;color:var(--cream)">' + esc(p.tag_id||'') + ' ' + esc(p.name||'') + '</td><td style="text-transform:capitalize">' + esc(p.sex||'-') + '</td><td>' + esc(p.breed||'-') + '</td><td>' + (p.birth_date?fmtDate(p.birth_date):'-') + '</td><td><span class="status-badge status-' + (p.status||'active') + '">' + esc(p.status||'active') + '</span></td></tr>';
       });
       html += '</tbody></table></div>';
     } else { html += '<div class="card" style="text-align:center;color:var(--muted);padding:40px">No progeny records linked.</div>'; }
@@ -656,6 +669,19 @@ async function openProfile(id) {
   }
 }
 
+function rmBtn(animalId, kind, recordId) {
+  return '<button class="rm" title="Remove this record" onclick="event.stopPropagation();removeRecord(' + parseInt(animalId) + ',\'' + kind + '\',' + parseInt(recordId) + ')">remove</button>';
+}
+async function removeRecord(animalId, kind, recordId) {
+  if (!confirm('Remove this record? This cannot be undone.')) return;
+  try { await api('DELETE', '/api/herd/' + animalId + '/' + kind + '/' + recordId); openProfile(animalId); }
+  catch (err) { alert('Could not remove it: ' + err.message); }
+}
+function labelFor(animalId) {
+  const a = herdData.find(x => x.id === animalId) || (window._current && window._current.id === animalId ? window._current : {});
+  return { a, text: a.tag_id || a.name || '#' + animalId };
+}
+
 function switchTab(btn, tabId) {
   btn.closest('.view').querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
   btn.classList.add('active');
@@ -664,10 +690,10 @@ function switchTab(btn, tabId) {
 }
 
 function calcADG(weights) {
-  if (weights.length < 2) return '—';
+  if (weights.length < 2) return '-';
   const newest = weights[0], oldest = weights[weights.length - 1];
-  const days = daysBetween(new Date(oldest.weigh_date), new Date(newest.weigh_date));
-  if (days <= 0) return '—';
+  const days = daysBetween(dOnly(oldest.weigh_date), dOnly(newest.weigh_date));
+  if (days <= 0) return '-';
   return ((parseFloat(newest.weight) - parseFloat(oldest.weight)) / days).toFixed(2);
 }
 
@@ -693,6 +719,7 @@ async function showAddAnimal(editId) {
   document.getElementById('animal-modal-title').textContent = editId ? 'Edit Animal' : 'Add Animal';
   const form = document.getElementById('animal-form');
   form.reset();
+  document.getElementById('af-msg').textContent = '';
   document.getElementById('af-id').value = editId || '';
 
   if (editId) {
@@ -742,7 +769,7 @@ async function saveAnimal(e) {
     closeModal('animal-modal');
     if (id) openProfile(parseInt(id));
     else { showView('list'); }
-  } catch (err) { alert('Failed to save: ' + err.message); }
+  } catch (err) { document.getElementById('af-msg').textContent = err.message; }
 }
 
 async function deleteAnimal(id) {
@@ -756,6 +783,7 @@ async function deleteAnimal(id) {
 // ── Quick Weight ─────────────────────────────────────────────────────────────
 async function showQuickWeight() {
   document.getElementById('wm-date').value = todayStr();
+  document.getElementById('wm-msg').textContent = '';
   if (!herdData.length) await loadHerd();
   const active = herdData.filter(a => a.status === 'active');
   let html = '';
@@ -772,32 +800,40 @@ async function showQuickWeight() {
 
 function showSingleWeight(animalId) {
   document.getElementById('wm-date').value = todayStr();
-  const a = herdData.find(x => x.id === animalId) || {};
-  const prev = a.last_weight ? parseFloat(a.last_weight).toLocaleString() + ' lbs' : 'no prior';
-  document.getElementById('weight-batch').innerHTML = '<div class="batch-row"><div><div class="animal-label">' + esc(a.tag_id||a.name||'#'+animalId) + '</div><div class="prev-weight">Prev: ' + prev + '</div></div><input type="number" class="batch-input" data-id="' + animalId + '" step="0.1" placeholder="lbs"><div></div></div>';
+  const { a, text } = labelFor(animalId);
+  const lw = a.last_weight || (a.weights && a.weights[0] && a.weights[0].weight);
+  const prev = lw ? parseFloat(lw).toLocaleString() + ' lbs' : 'no prior';
+  document.getElementById('wm-msg').textContent = '';
+  document.getElementById('weight-batch').innerHTML = '<div class="batch-row"><div><div class="animal-label">' + esc(text) + '</div><div class="prev-weight">Prev: ' + prev + '</div></div><input type="number" class="batch-input" data-id="' + animalId + '" step="0.1" placeholder="lbs"><div></div></div>';
   openModal('weight-modal');
 }
 
 async function saveBatchWeights() {
+  const msg = document.getElementById('wm-msg');
   const date = document.getElementById('wm-date').value;
-  if (!date) { alert('Please enter a date.'); return; }
+  if (!date) { msg.textContent = 'Enter a weigh date.'; return; }
+  if (date > todayStr()) { msg.textContent = 'The weigh date cannot be in the future.'; return; }
   const inputs = document.querySelectorAll('#weight-batch .batch-input');
-  let saved = 0;
+  let saved = 0; const failed = []; let lastId = null;
   for (const inp of inputs) {
+    if (inp.value === '') continue;
     const w = parseFloat(inp.value);
-    if (!w || w <= 0) continue;
-    try {
-      await api('POST', '/api/herd/' + inp.dataset.id + '/weights', { weight: w, weigh_date: date });
-      saved++;
-    } catch {}
+    const label = inp.closest('.batch-row').querySelector('.animal-label').textContent;
+    if (!w || w <= 0) { failed.push(label); continue; }
+    try { await api('POST', '/api/herd/' + inp.dataset.id + '/weights', { weight: w, weigh_date: date }); saved++; inp.value = ''; lastId = parseInt(inp.dataset.id); }
+    catch { failed.push(label); }
   }
+  if (!saved && !failed.length) { msg.textContent = 'Enter at least one weight.'; return; }
+  if (failed.length) { msg.textContent = saved + ' saved. Not saved: ' + failed.join(', ') + '. Check those and try again.'; if (saved) { loadDashboard(); loadHerd(); } return; }
   closeModal('weight-modal');
-  if (saved) { alert(saved + ' weight(s) saved.'); loadDashboard(); await loadHerd(); }
+  if (document.getElementById('view-profile').classList.contains('active') && lastId) openProfile(lastId);
+  else { loadDashboard(); await loadHerd(); }
 }
 
 // ── Quick Health ─────────────────────────────────────────────────────────────
 async function showQuickHealth() {
   document.getElementById('hm-date').value = todayStr();
+  document.getElementById('hm-msg').textContent = '';
   if (!herdData.length) await loadHerd();
   const sel = document.getElementById('hm-animal');
   sel.innerHTML = herdData.filter(a => a.status==='active').map(a => '<option value="' + a.id + '">' + esc(a.tag_id||a.name||'#'+a.id) + '</option>').join('');
@@ -806,8 +842,8 @@ async function showQuickHealth() {
 
 function showSingleHealth(animalId) {
   document.getElementById('hm-date').value = todayStr();
-  const a = herdData.find(x => x.id === animalId) || {};
-  document.getElementById('hm-animal').innerHTML = '<option value="' + animalId + '">' + esc(a.tag_id||a.name||'#'+animalId) + '</option>';
+  document.getElementById('hm-msg').textContent = '';
+  document.getElementById('hm-animal').innerHTML = '<option value="' + animalId + '">' + esc(labelFor(animalId).text) + '</option>';
   openModal('health-modal');
 }
 
@@ -825,8 +861,8 @@ async function saveHealthEvent() {
       notes: document.getElementById('hm-notes').value
     });
     closeModal('health-modal');
-    loadDashboard();
-  } catch (err) { alert('Failed: ' + err.message); }
+    if (document.getElementById('view-profile').classList.contains('active')) openProfile(parseInt(animalId)); else loadDashboard();
+  } catch (err) { document.getElementById('hm-msg').textContent = err.message; }
 }
 
 // ── Production ───────────────────────────────────────────────────────────────
@@ -835,9 +871,9 @@ function showSingleProduction(animalId) {
     '<div class="field"><label>Event Type</label><select id="pm-type"><option value="breeding">Breeding</option><option value="calving">Calving</option><option value="preg_check">Preg Check</option><option value="weaning">Weaning</option></select></div>' +
     '<div class="field"><label>Date</label><input type="date" id="pm-date" value="' + todayStr() + '"></div>' +
     '<div class="field"><label>Bull Name</label><input type="text" id="pm-bull"></div>' +
-    '<div class="field"><label>Calving Ease (1-5)</label><input type="number" id="pm-ce" min="1" max="5"></div>' +
+    '<div class="field"><label>Calving Ease Score (calving only)</label><select id="pm-ce"><option value="">Not recorded</option><option value="1">1: no help</option><option value="2">2: easy pull</option><option value="3">3: hard pull</option><option value="4">4: C-section</option><option value="5">5: abnormal presentation</option></select></div>' +
     '<div class="field"><label>Notes</label><textarea id="pm-notes" rows="2"></textarea></div>' +
-    '<div style="margin-top:16px"><button class="btn btn-primary" onclick="saveProduction(' + animalId + ')">Save</button></div></div>';
+    '<div class="msg" id="pm-msg"></div><div style="margin-top:8px"><button class="btn btn-primary" onclick="saveProduction(' + animalId + ')">Save</button></div></div>';
   let overlay = document.getElementById('prod-modal');
   if (!overlay) { overlay = document.createElement('div'); overlay.id = 'prod-modal'; overlay.className = 'modal-overlay'; document.body.appendChild(overlay); overlay.addEventListener('click', e => { if (e.target === overlay) closeModal('prod-modal'); }); }
   overlay.innerHTML = html;
@@ -855,15 +891,16 @@ async function saveProduction(animalId) {
     });
     closeModal('prod-modal');
     openProfile(animalId);
-  } catch (err) { alert('Failed: ' + err.message); }
+  } catch (err) { document.getElementById('pm-msg').textContent = err.message; }
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 function openModal(id) { document.getElementById(id).classList.add('open'); }
 function closeModal(id) { const el = document.getElementById(id); if (el) el.classList.remove('open'); }
 function esc(s) { if (!s) return ''; const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
-function fmtDate(d) { if (!d) return '—'; const dt = new Date(d); const m=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']; return m[dt.getMonth()] + ' ' + dt.getDate() + ', ' + dt.getFullYear(); }
-function fmtDateShort(d) { if (!d) return ''; const dt = new Date(d); return (dt.getMonth()+1) + '/' + dt.getDate(); }
+function dOnly(d) { return d instanceof Date ? d : new Date(String(d).slice(0,10) + 'T00:00:00'); }
+function fmtDate(d) { if (!d) return '-'; const dt = dOnly(d); const m=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']; return m[dt.getMonth()] + ' ' + dt.getDate() + ', ' + dt.getFullYear(); }
+function fmtDateShort(d) { if (!d) return ''; const dt = dOnly(d); return (dt.getMonth()+1) + '/' + dt.getDate(); }
 function todayStr() { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); }
 function daysBetween(a, b) { return Math.round((b - a) / 86400000); }
 
@@ -952,27 +989,27 @@ function pdfTable(doc, headers, rows, y, toolName) {
 async function exportAnimalPDF(id) {
   try {
     const a = await api('GET', '/api/herd/' + id);
-    var JsPDF=getJsPDF();if(!JsPDF){alert('PDF loading.');return;}var doc=new JsPDF();var y0=pdfHeader(doc,'Animal Record — ' + (a.name || a.tag_id || 'Unknown'));
+    var JsPDF=getJsPDF();if(!JsPDF){alert('PDF loading.');return;}var doc=new JsPDF();var y0=pdfHeader(doc,'Animal Record', (a.tag_id ? 'Tag ' + a.tag_id + '  ' : '') + (a.name || ''));
     let y = y0;
-    const age = a.birth_date ? calcAge(a.birth_date) : '—';
-    const lastW = a.weights && a.weights.length ? parseFloat(a.weights[0].weight).toLocaleString() + ' lbs' : '—';
+    const age = a.birth_date ? calcAge(a.birth_date) : '-';
+    const lastW = a.weights && a.weights.length ? parseFloat(a.weights[0].weight).toLocaleString() + ' lbs' : '-';
     doc.setFontSize(11); doc.setTextColor(10, 10, 10);
     doc.text((a.name || a.tag_id || 'Unnamed'), 14, y); y += 8;
     const details = [
-      ['Tag ID', a.tag_id || '—'],
-      ['Name', a.name || '—'],
-      ['Breed', a.breed || '—'],
-      ['Sex', a.sex || '—'],
+      ['Tag ID', a.tag_id || '-'],
+      ['Name', a.name || '-'],
+      ['Breed', a.breed || '-'],
+      ['Sex', a.sex || '-'],
       ['Age', age],
       ['Status', a.status || 'active'],
       ['Last Weight', lastW],
-      ['Birth Date', a.birth_date ? fmtDate(a.birth_date) : '—'],
-      ['Birth Weight', a.birth_weight ? a.birth_weight + ' lbs' : '—'],
-      ['Color', a.color || '—'],
-      ['Sire', a.sire_name || '—'],
-      ['Dam', a.dam_name || '—'],
-      ['Purchase Date', a.purchase_date ? fmtDate(a.purchase_date) : '—'],
-      ['Purchase Price', a.purchase_price ? '$' + parseFloat(a.purchase_price).toLocaleString() : '—'],
+      ['Birth Date', a.birth_date ? fmtDate(a.birth_date) : '-'],
+      ['Birth Weight', a.birth_weight ? a.birth_weight + ' lbs' : '-'],
+      ['Color', a.color || '-'],
+      ['Sire', a.sire_name || '-'],
+      ['Dam', a.dam_name || '-'],
+      ['Purchase Date', a.purchase_date ? fmtDate(a.purchase_date) : '-'],
+      ['Purchase Price', a.purchase_price ? '$' + parseFloat(a.purchase_price).toLocaleString() : '-'],
     ];
     y = pdfTable(doc, ['Field', 'Value'], details, y, "Herd Hub");
     if (a.weights && a.weights.length) {
@@ -980,10 +1017,15 @@ async function exportAnimalPDF(id) {
       const wRows = a.weights.slice(0, 20).map(w => [fmtDate(w.weigh_date), parseFloat(w.weight).toLocaleString() + ' lbs', w.notes || '']);
       y = pdfTable(doc, ['Date', 'Weight', 'Notes'], wRows, y, "Herd Hub");
     }
-    if (a.health_records && a.health_records.length) {
+    if (a.health && a.health.length) {
       y += 4; doc.setFontSize(10); doc.setTextColor(10, 10, 10); doc.text('Health Records', 14, y); y += 6;
-      const hRows = a.health_records.slice(0, 20).map(h => [fmtDate(h.event_date), h.event_type || '', h.product || '', h.cost ? '$' + h.cost : '']);
-      y = pdfTable(doc, ['Date', 'Event', 'Product', 'Cost'], hRows, y, "Herd Hub");
+      const hRows = a.health.slice(0, 30).map(h => [fmtDate(h.event_date), String(h.event_type || '').replace(/_/g,' '), h.product || '', h.dosage || '', h.withdrawal_clear_date ? 'through ' + fmtDate(h.withdrawal_clear_date) : 'none']);
+      y = pdfTable(doc, ['Date', 'Event', 'Product', 'Dose', 'Withdrawal'], hRows, y, "Herd Hub");
+    }
+    if (a.production && a.production.length) {
+      y += 4; doc.setFontSize(10); doc.setTextColor(10, 10, 10); doc.text('Production', 14, y); y += 6;
+      const pRows = a.production.slice(0, 30).map(pr => [fmtDate(pr.event_date), String(pr.event_type || '').replace(/_/g,' '), pr.bull_name || '', pr.calving_ease ? pr.calving_ease + ' of 5' : '']);
+      y = pdfTable(doc, ['Date', 'Event', 'Bull', 'Calving ease'], pRows, y, "Herd Hub");
     }
     if (a.notes) {
       y += 4; doc.setFontSize(9); doc.setTextColor(60, 60, 60);
@@ -999,15 +1041,15 @@ function exportRosterPDF() {
   var JsPDF=getJsPDF();if(!JsPDF){alert('PDF loading.');return;}var doc=new JsPDF();var y0=pdfHeader(doc,'Herd Roster');
   let y = y0;
   doc.setFontSize(9); doc.setTextColor(60, 60, 60);
-  doc.text('Total Animals: ' + herdData.length, 14, y); y += 8;
+  doc.text('Animals on this roster: ' + herdData.length + ' (all statuses)', 14, y); y += 8;
   const headers = ['Tag ID', 'Name', 'Breed', 'Sex', 'Age', 'Last Weight', 'Status'];
   const rows = herdData.map(a => [
-    a.tag_id || '—',
-    a.name || '—',
-    a.breed || '—',
-    a.sex || '—',
-    a.birth_date ? calcAge(a.birth_date).replace(/<[^>]+>/g, '') : '—',
-    a.last_weight ? parseFloat(a.last_weight).toLocaleString() + ' lbs' : '—',
+    a.tag_id || '-',
+    a.name || '-',
+    a.breed || '-',
+    a.sex || '-',
+    a.birth_date ? calcAge(a.birth_date).replace(/<[^>]+>/g, '') : '-',
+    a.last_weight ? parseFloat(a.last_weight).toLocaleString() + ' lbs' : '-',
     a.status || 'active'
   ]);
   y = pdfTable(doc, headers, rows, y, "Herd Hub");
