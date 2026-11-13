@@ -114,7 +114,15 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 /* Disclaimer */
 .disclaimer{margin-top:40px;padding:16px 20px;background:rgba(10,10,10,.4);border:1px solid rgba(201,169,110,.08);border-radius:6px;font-size:13px;color:var(--muted);line-height:1.7}
 
+
+.two-up{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.charts-row>*,.two-up>*,.stats-bar>*{min-width:0}
+.chart-wrap{overflow:hidden}
+.hint{font-family:'Inter',sans-serif;font-size:10.5px;color:var(--muted);margin-top:4px;line-height:1.5}
+.formula{font-family:'Inter',sans-serif;font-size:11.5px;color:var(--muted);line-height:1.6;margin-top:8px}
+.msg{font-family:'Inter',sans-serif;font-size:12.5px;color:var(--tan);margin:8px 0;min-height:16px}
 @media(max-width:768px){
+  .two-up{grid-template-columns:1fr}
   .container{padding:16px 16px 60px}.site-header{padding:0 16px}
   .stats-bar{grid-template-columns:1fr 1fr}.charts-row{grid-template-columns:1fr}
   .field-row,.field-row-3,.field-row-4{grid-template-columns:1fr}
@@ -141,7 +149,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 
 <div id="auth-gate" class="auth-gate" style="display:none">
   <h1>Ranch <em>Finance</em></h1>
-  <p>Sign in to track your ranch income, expenses, and profit — with break-even calculators and tax year exports.</p>
+  <p>Sign in to keep your ranch income and expenses in one place, with break-even calculators and a year-end export for your accountant.</p>
   <a href="/">Sign In on Herd Hub</a>
 </div>
 
@@ -151,7 +159,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
   <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:8px">
     <h2 style="font-family:'Libre Baskerville',serif;font-size:28px;font-weight:900">Ranch <span style="color:var(--gold)">Finance</span></h2>
     <div class="year-select">
-      <label>Tax Year:</label>
+      <label for="year-sel">Year:</label>
       <select id="year-sel" onchange="loadAll()"></select>
     </div>
   </div>
@@ -180,12 +188,13 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
     <div style="display:flex;gap:8px;margin-bottom:12px">
       <button class="btn btn-primary btn-sm" onclick="exportPnLPDF()">&#x1F4C4; Download P&amp;L PDF / Print</button>
     </div>
+    <div class="msg" id="load-msg"></div>
     <div class="stats-bar" id="pnl-stats"></div>
     <div class="charts-row">
       <div class="chart-wrap"><canvas id="donut-chart"></canvas></div>
       <div class="chart-wrap"><canvas id="monthly-chart"></canvas></div>
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+    <div class="two-up">
       <div class="card"><div class="card-title">Top Income</div><div id="top-income"></div></div>
       <div class="card"><div class="card-title">Top Expenses</div><div id="top-expenses"></div></div>
     </div>
@@ -206,7 +215,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
       <button class="btn btn-primary" onclick="showTxModal()">+ Add Transaction</button>
     </div>
     <div style="overflow-x:auto">
-      <table class="tx-table"><thead><tr><th>Date</th><th>Description</th><th>Category</th><th>Type</th><th style="text-align:right">Amount</th><th style="text-align:right">Balance</th><th></th></tr></thead>
+      <table class="tx-table"><thead><tr><th>Date</th><th>Description</th><th>Category</th><th>Type</th><th style="text-align:right">Amount</th><th style="text-align:right" title="Income minus expenses, added up from the oldest row shown">Running net</th><th></th></tr></thead>
       <tbody id="ledger-tbody"></tbody></table>
     </div>
     <div id="ledger-empty" style="display:none;text-align:center;padding:40px;color:var(--muted)">No transactions yet. Add your first one above.</div>
@@ -232,7 +241,7 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 
   <!-- ═══ CALCULATORS ═══ -->
   <div class="tab-content" id="t-calcs">
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+    <div class="two-up">
 
       <!-- Cost of Gain -->
       <div class="card">
@@ -269,6 +278,10 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
         <div class="field"><label>Avg Weaning Wt</label><input type="number" id="cc-ww" value="550"></div>
         <div class="field"><label>Calf Price ($/cwt)</label><input type="number" id="cc-price" value="270" step="0.01"></div>
       </div>
+      <div class="field-row">
+        <div class="field"><label>Other Cost/Cow/Year ($)</label><input type="number" id="cc-other" value="0"><div class="hint">Labor, fuel, interest, depreciation, replacements. Leave 0 and the answer covers feed, vet, land and bull only.</div></div>
+        <div class="field"><label>Cull and Other Income/Cow/Year ($)</label><input type="number" id="cc-cull" value="0"><div class="hint">Cull cow and bull sales spread over the herd</div></div>
+      </div>
       <button class="btn btn-primary" onclick="calcCC()">Calculate</button>
       <div id="cc-result"></div>
     </div>
@@ -276,14 +289,14 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 
   <!-- ═══ TAX SUMMARY ═══ -->
   <div class="tab-content" id="t-tax">
-    <div class="section-desc">Summary of income and expenses for your selected tax year. Export to CSV for your accountant.</div>
-    <div style="margin-bottom:16px"><button class="btn btn-primary" onclick="exportCSV()">Export to CSV</button></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+    <div class="section-desc">Income and expenses for the calendar year you picked, by category. Every transaction is counted in the year of its date. Export the detail to CSV for your accountant.</div>
+    <div style="margin-bottom:16px"><button class="btn btn-primary" onclick="exportCSV()">Export to CSV</button><div class="msg" id="csv-msg"></div></div>
+    <div class="two-up">
       <div class="card"><div class="card-title">Income by Category</div><div id="tax-income"></div></div>
       <div class="card"><div class="card-title">Expenses by Category</div><div id="tax-expenses"></div></div>
     </div>
     <div class="result-grid" id="tax-totals"></div>
-    <div class="disclaimer"><strong style="color:var(--tan)">Disclaimer:</strong> This is not tax advice. The information provided is for record-keeping purposes only. Consult your accountant or tax professional for tax preparation and filing.</div>
+    <div class="disclaimer"><strong style="color:var(--tan)">What this is and is not:</strong> a cash record of what you entered, added up by the categories on this page. It is not a tax return. These categories are not Schedule F lines, and depreciation, the cost of livestock bought for resale, inventory changes and unpaid bills are not handled here. Give the CSV to your accountant; they decide what is deductible and when.</div>
   </div>
 
 </div><!-- /container -->
@@ -301,13 +314,14 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
     </div>
     <div class="field"><label>Category</label><select id="tx-cat"></select></div>
     <div class="field"><label>Description</label><input type="text" id="tx-desc" placeholder="e.g. Sold 10 steers at OKC"></div>
-    <div class="field"><label>Amount ($)</label><input type="number" id="tx-amount" step="0.01"></div>
+    <div class="field"><label>Amount ($)</label><input type="number" id="tx-amount" step="0.01" min="0"><div class="hint">Leave blank and fill head count and price per head, or total weight and price per cwt, and it is worked out for you.</div></div>
+    <div class="msg" id="tx-msg"></div>
     <div class="field-row">
       <div class="field"><label>Head Count</label><input type="number" id="tx-head"></div>
       <div class="field"><label>Price/Head ($)</label><input type="number" id="tx-pph" step="0.01"></div>
     </div>
     <div class="field-row">
-      <div class="field"><label>Weight (lbs)</label><input type="number" id="tx-wt" step="0.1"></div>
+      <div class="field"><label>Total Weight (lbs)</label><input type="number" id="tx-wt" step="0.1"></div>
       <div class="field"><label>Price/CWT ($)</label><input type="number" id="tx-cwt" step="0.01"></div>
     </div>
     <div class="field"><label>Notes</label><textarea id="tx-notes" rows="2" style="width:100%;padding:10px;background:rgba(28,15,6,.6);border:1px solid rgba(201,169,110,.2);border-radius:4px;color:var(--cream);font-family:'Libre Baskerville',serif;font-size:14px;resize:vertical"></textarea></div>
@@ -354,9 +368,11 @@ async function loadAll(){
 async function loadSummary(){
   try{
     summaryData=await api('GET','/api/finance/summary?year='+getYear());
-    renderDashboard();
+    document.getElementById('load-msg').textContent='';
     renderTax();
-  }catch{}
+    renderBudgets();
+    renderDashboard();
+  }catch(e){ document.getElementById('load-msg').textContent='Could not load your records. Check your connection and reload.'; }
 }
 
 function renderDashboard(){
@@ -371,6 +387,7 @@ function renderDashboard(){
   // Donut
   const incCats=s.by_category.filter(c=>c.type==='income');
   const expCats=s.by_category.filter(c=>c.type==='expense');
+  if(typeof Chart==='undefined'){renderTopCats(incCats,expCats);return;}
   if(donutChart)donutChart.destroy();
   donutChart=new Chart(document.getElementById('donut-chart'),{
     type:'doughnut',
@@ -397,7 +414,9 @@ function renderDashboard(){
     scales:{x:{ticks:{color:'#8C7560',font:{family:'Inter',size:10}},grid:{color:'rgba(201,169,110,.06)'}},y:{ticks:{color:'#8C7560',font:{family:'Inter',size:10},callback:v=>'$'+commas(v)},grid:{color:'rgba(201,169,110,.06)'}}}}
   });
 
-  // Top cats
+  renderTopCats(incCats,expCats);
+}
+function renderTopCats(incCats,expCats){
   document.getElementById('top-income').innerHTML=incCats.slice(0,5).map(c=>'<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(201,169,110,.06);font-size:13px"><span style="color:var(--light)">'+esc(c.category)+'</span><span style="color:var(--good);font-weight:600">$'+commas(Math.round(parseFloat(c.total)))+'</span></div>').join('')||'<span style="color:var(--muted)">No income recorded</span>';
   document.getElementById('top-expenses').innerHTML=expCats.slice(0,5).map(c=>'<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(201,169,110,.06);font-size:13px"><span style="color:var(--light)">'+esc(c.category)+'</span><span style="color:var(--danger);font-weight:600">$'+commas(Math.round(parseFloat(c.total)))+'</span></div>').join('')||'<span style="color:var(--muted)">No expenses recorded</span>';
 }
@@ -441,7 +460,7 @@ function renderLedger(){
     const amt=parseFloat(t.amount);
     const sign=t.type==='income'?'+':'-';
     const color=t.type==='income'?'var(--good)':'var(--danger)';
-    return'<tr class="'+t.type+'"><td>'+fmtDate(t.transaction_date)+'</td><td>'+esc(t.description||'—')+'</td><td>'+esc(t.category||'')+'</td><td style="text-transform:capitalize">'+t.type+'</td><td style="text-align:right;color:'+color+';font-weight:600">'+sign+'$'+commas(amt.toFixed(2))+'</td><td style="text-align:right;color:var(--tan)">$'+commas((t._bal||0).toFixed(2))+'</td><td><button class="btn btn-sm btn-ghost" onclick="event.stopPropagation();editTx('+t.id+')">Edit</button> <button class="btn btn-sm btn-danger" onclick="event.stopPropagation();deleteTx('+t.id+')">Del</button></td></tr>';
+    return'<tr class="'+t.type+'"><td>'+fmtDate(t.transaction_date)+'</td><td>'+esc(t.description||'')+'</td><td>'+esc(t.category||'')+'</td><td style="text-transform:capitalize">'+t.type+'</td><td style="text-align:right;color:'+color+';font-weight:600">'+sign+'$'+commas(amt.toFixed(2))+'</td><td style="text-align:right;color:var(--tan)">'+((t._bal||0)<0?'-':'')+'$'+commas(Math.abs(t._bal||0).toFixed(2))+'</td><td><button class="btn btn-sm btn-ghost" onclick="event.stopPropagation();editTx('+t.id+')">Edit</button> <button class="btn btn-sm btn-danger" onclick="event.stopPropagation();deleteTx('+t.id+')">Del</button></td></tr>';
   }).join('');
 }
 
@@ -518,13 +537,30 @@ async function saveTx(){
     weight_lbs:document.getElementById('tx-wt').value,
     price_per_cwt:document.getElementById('tx-cwt').value,
     notes:document.getElementById('tx-notes').value,
-    tax_year:getYear()
   };
+  const msg=document.getElementById('tx-msg');
+  const n=v=>{const x=parseFloat(v);return isNaN(x)?null:x;};
+  let amt=n(body.amount);
+  if(amt===null){
+    if(n(body.head_count)!==null&&n(body.price_per_head)!==null) amt=n(body.head_count)*n(body.price_per_head);
+    else if(n(body.weight_lbs)!==null&&n(body.price_per_cwt)!==null) amt=n(body.weight_lbs)/100*n(body.price_per_cwt);
+    if(amt!==null){amt=Math.round(amt*100)/100;body.amount=amt;}
+  }
+  if(!body.transaction_date){msg.textContent='Pick a date.';return;}
+  if(amt===null||amt<=0){msg.textContent='Enter an amount above zero. Record a refund as income, not a negative expense.';return;}
+  msg.textContent='';
   try{
     if(id)await api('PUT','/api/finance/transactions/'+id,body);
     else await api('POST','/api/finance/transactions',body);
-    closeModal();loadAll();
-  }catch(e){alert('Failed: '+e.message);}
+    closeModal();
+    const y=parseInt(body.transaction_date.slice(0,4));
+    if(y!==getYear()){
+      const sel=document.getElementById('year-sel');
+      if(![...sel.options].some(o=>+o.value===y)) sel.insertAdjacentHTML('beforeend','<option value="'+y+'">'+y+'</option>');
+      sel.value=y;
+    }
+    loadAll();
+  }catch(e){msg.textContent='Could not save. Check the entries and try again.';}
 }
 
 async function deleteTx(id){
@@ -582,10 +618,22 @@ function renderTax(){
   document.getElementById('tax-totals').innerHTML=
     '<div class="result-stat"><div class="lbl">Total Income</div><div class="val">$'+commas(Math.round(s.total_income))+'</div></div>'+
     '<div class="result-stat"><div class="lbl">Total Expenses</div><div class="val">$'+commas(Math.round(s.total_expenses))+'</div></div>'+
-    '<div class="result-stat '+netC+'"><div class="lbl">Net Farm Income</div><div class="val">'+(s.net_profit>=0?'+':'-')+'$'+commas(Math.round(Math.abs(s.net_profit)))+'</div></div>';
+    '<div class="result-stat '+netC+'"><div class="lbl">Net (income minus expenses)</div><div class="val">'+(s.net_profit>=0?'+':'-')+'$'+commas(Math.round(Math.abs(s.net_profit)))+'</div></div>';
 }
 
-function exportCSV(){window.open('/api/finance/export?year='+getYear()+'&token='+encodeURIComponent(authToken));}
+// The export needs your sign-in, which a plain link cannot carry (and a token
+// has no business in a URL). Fetch it with the header and save the file.
+async function exportCSV(){
+  const msg=document.getElementById('csv-msg'); msg.textContent='Preparing the file...';
+  try{
+    const r=await fetch('/api/finance/export?year='+getYear(),{headers:{Authorization:'Bearer '+authToken}});
+    if(!r.ok) throw new Error('export '+r.status);
+    const blob=await r.blob(); const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob); a.download='herdhub-finance-'+getYear()+'.csv';
+    document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),3000);
+    msg.textContent='Downloaded.';
+  }catch(e){ msg.textContent='Could not export. Reload the page and try again.'; }
+}
 
 // Calculators
 function calcCOG(){
@@ -599,39 +647,38 @@ function calcCOG(){
   const cogPerLb=gain>0?totalCost/gain:0;
   const totalAll=pp+totalCost;
   const beCwt=sw>0?(totalAll/sw)*100:0;
-  document.getElementById('cog-result').innerHTML='<div class="result-grid" style="margin-top:16px"><div class="result-stat"><div class="lbl">Cost/Lb Gain</div><div class="val">$'+cogPerLb.toFixed(2)+'</div></div><div class="result-stat"><div class="lbl">Total Cost</div><div class="val">$'+commas(Math.round(totalAll))+'</div></div><div class="result-stat"><div class="lbl">Break-Even</div><div class="val">$'+beCwt.toFixed(2)+'/cwt</div></div></div>';
+  if(gain<=0){document.getElementById('cog-result').innerHTML='<div class="formula">Sell weight has to be above purchase weight.</div>';return;}
+  document.getElementById('cog-result').innerHTML='<div class="result-grid" style="margin-top:16px"><div class="result-stat"><div class="lbl">Cost/Lb Gain</div><div class="val">$'+cogPerLb.toFixed(2)+'</div><div class="sub">'+Math.round(gain)+' lbs gained</div></div><div class="result-stat"><div class="lbl">Total Cost</div><div class="val">$'+commas(Math.round(totalAll))+'</div></div><div class="result-stat"><div class="lbl">Break-Even</div><div class="val">$'+beCwt.toFixed(2)+'/cwt</div></div></div><div class="formula">Cost of gain = (feed + other costs) &divide; pounds gained. Break-even = (purchase price + feed + other costs) &divide; sell weight &times; 100. All per head.</div>';
 }
 
 function calcBE(){
   const cost=parseFloat(document.getElementById('be-cost').value)||0;
   const wt=parseFloat(document.getElementById('be-wt').value)||0;
   const beCwt=wt>0?(cost/wt)*100:0;
-  document.getElementById('be-result').innerHTML='<div class="result-grid" style="margin-top:16px"><div class="result-stat"><div class="lbl">Break-Even</div><div class="val">$'+beCwt.toFixed(2)+'/cwt</div></div><div class="result-stat"><div class="lbl">Break-Even/Head</div><div class="val">$'+commas(Math.round(cost))+'</div></div></div>';
+  document.getElementById('be-result').innerHTML='<div class="result-grid" style="margin-top:16px"><div class="result-stat"><div class="lbl">Break-Even</div><div class="val">$'+beCwt.toFixed(2)+'/cwt</div></div><div class="result-stat"><div class="lbl">Break-Even/Head</div><div class="val">$'+commas(Math.round(cost))+'</div></div></div><div class="formula">Break-even $/cwt = total cost per head &divide; sell weight &times; 100.</div>';
 }
 
 function calcCC(){
-  const cows=parseInt(document.getElementById('cc-cows').value)||0;
-  const bull=parseFloat(document.getElementById('cc-bull').value)||0;
-  const feed=parseFloat(document.getElementById('cc-feed').value)||0;
-  const vet=parseFloat(document.getElementById('cc-vet').value)||0;
-  const land=parseFloat(document.getElementById('cc-land').value)||0;
-  const crop=parseFloat(document.getElementById('cc-crop').value)||90;
-  const ww=parseFloat(document.getElementById('cc-ww').value)||0;
-  const price=parseFloat(document.getElementById('cc-price').value)||0;
-
-  const totalCostPerCow=feed+vet+land+(bull/cows);
-  const calvesWeaned=Math.round(cows*(crop/100));
-  const costPerCalf=calvesWeaned>0?(cows*totalCostPerCow)/calvesWeaned:0;
-  const beCwt=ww>0?(costPerCalf/ww)*100:0;
-  const revenuePerCalf=(price/100)*ww;
-  const profitPerCow=calvesWeaned>0?((revenuePerCalf*calvesWeaned)-(cows*totalCostPerCow))/cows:0;
+  const v=id=>{const x=parseFloat(document.getElementById(id).value);return isNaN(x)?0:x;};
+  const cows=Math.floor(v('cc-cows')), bull=v('cc-bull'), feed=v('cc-feed'), vet=v('cc-vet'), land=v('cc-land');
+  const crop=v('cc-crop'), ww=v('cc-ww'), price=v('cc-price'), other=v('cc-other'), cull=v('cc-cull');
+  const out=document.getElementById('cc-result');
+  if(cows<=0||crop<=0||crop>100||ww<=0){out.innerHTML='<div class="formula">Enter a cow count, a calf crop between 1 and 100 percent, and a weaning weight.</div>';return;}
+  const costPerCow=feed+vet+land+other+(bull/cows);
+  const calvesPerCow=crop/100;
+  const calves=cows*calvesPerCow;
+  const netCostPerCow=costPerCow-cull;                      // cull income offsets cost
+  const costPerCalf=netCostPerCow/calvesPerCow;
+  const beCwt=costPerCalf/ww*100;
+  const revPerCow=price/100*ww*calvesPerCow;
+  const profitPerCow=revPerCow-netCostPerCow;
   const pClass=profitPerCow>=0?'profit':'loss';
-
-  document.getElementById('cc-result').innerHTML='<div class="result-grid" style="margin-top:16px">'+
-    '<div class="result-stat"><div class="lbl">Cost/Calf Produced</div><div class="val">$'+commas(Math.round(costPerCalf))+'</div></div>'+
-    '<div class="result-stat"><div class="lbl">Break-Even Calf Price</div><div class="val">$'+beCwt.toFixed(2)+'/cwt</div></div>'+
-    '<div class="result-stat"><div class="lbl">Calves Weaned</div><div class="val">'+calvesWeaned+'</div><div class="sub">'+crop+'% crop</div></div>'+
-    '<div class="result-stat '+pClass+'"><div class="lbl">Profit/Loss Per Cow</div><div class="val">'+(profitPerCow>=0?'+':'-')+'$'+commas(Math.round(Math.abs(profitPerCow)))+'</div></div></div>';
+  out.innerHTML='<div class="result-grid" style="margin-top:16px">'+
+    '<div class="result-stat"><div class="lbl">Cost per cow</div><div class="val">$'+commas(Math.round(costPerCow))+'</div><div class="sub">'+(cull>0?'$'+commas(Math.round(netCostPerCow))+' after cull income':'per year')+'</div></div>'+
+    '<div class="result-stat"><div class="lbl">Cost per calf weaned</div><div class="val">$'+commas(Math.round(costPerCalf))+'</div><div class="sub">'+calves.toFixed(1)+' calves at '+crop+'%</div></div>'+
+    '<div class="result-stat"><div class="lbl">Break-even calf price</div><div class="val">$'+beCwt.toFixed(2)+'/cwt</div><div class="sub">on '+Math.round(ww)+' lb calves</div></div>'+
+    '<div class="result-stat '+pClass+'"><div class="lbl">Profit or loss per cow</div><div class="val">'+(profitPerCow>=0?'+':'-')+'$'+commas(Math.round(Math.abs(profitPerCow)))+'</div><div class="sub">'+(profitPerCow>=0?'+':'-')+'$'+commas(Math.round(Math.abs(profitPerCow*cows)))+' for the herd</div></div></div>'+
+    '<div class="formula">Cost per cow = feed + vet + land + other + bull cost &divide; cows. Cost per calf = (cost per cow - cull income) &divide; calf crop. Break-even = cost per calf &divide; weaning weight &times; 100. Calf crop is calves weaned per cow exposed.'+(other===0?' Labor, fuel, interest, depreciation and replacements are not in this answer until you enter them under Other Cost.':'')+'</div>';
 }
 
 // Tab switching
@@ -645,7 +692,7 @@ function switchTab(btn,id){
 // Helpers
 function esc(s){if(!s)return'';const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
 function commas(n){return String(n).replace(/\B(?=(\d{3})+(?!\d))/g,',');}
-function fmtDate(d){if(!d)return'—';const dt=new Date(d);const m=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return m[dt.getMonth()]+' '+dt.getDate()+', '+dt.getFullYear();}
+function fmtDate(d){if(!d)return'';const dt=new Date(String(d).slice(0,10)+'T00:00:00');const m=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return m[dt.getMonth()]+' '+dt.getDate()+', '+dt.getFullYear();}
 function todayStr(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 
 // Modal close on overlay
@@ -726,11 +773,11 @@ function pdfTable(doc, headers, rows, y, toolName) {
 }
 
 function exportPnLPDF() {
-  const s = summaryData;
-  var JsPDF=getJsPDF();if(!JsPDF){alert('PDF loading.');return;}var doc=new JsPDF();var y0=pdfHeader(doc,'Ranch Financial Report — ' + getYear());
+  const s = summaryData; if(!s){alert('Nothing to export yet.');return;}
+  var JsPDF=getJsPDF();if(!JsPDF){alert('PDF loading.');return;}var doc=new JsPDF();var y0=pdfHeader(doc,'Ranch Finance ' + getYear(), 'Cash record of entered transactions. Not a tax return.');
   let y = y0;
   doc.setFontSize(11); doc.setTextColor(10, 10, 10);
-  doc.text('Tax Year: ' + getYear(), 14, y); y += 10;
+  y += 2;
   // Summary stats
   const summaryRows = [
     ['Total Income', '$' + commas(Math.round(s.total_income))],
@@ -756,15 +803,6 @@ function exportPnLPDF() {
   pdfFooter(doc,'Herd Hub');
   doc.save('RanchFinance_' + getYear() + '_' + new Date().toISOString().slice(0,10) + '.pdf');
 }
-
-// CSV export needs auth token in query since it's a direct download
-const origExport=exportCSV;
-exportCSV=function(){
-  const url='/api/finance/export?year='+getYear();
-  fetch(url,{headers:{Authorization:'Bearer '+authToken}}).then(r=>r.blob()).then(b=>{
-    const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='herdhub-finance-'+getYear()+'.csv';a.click();
-  }).catch(()=>alert('Export failed'));
-};
 
 document.addEventListener('DOMContentLoaded',initAuth);
 

@@ -8,6 +8,19 @@ function san(s, max) { return s ? String(s).trim().slice(0, max) : null; }
 function num(v) { const n = parseFloat(v); return isNaN(n) ? null : n; }
 function intN(v) { const n = parseInt(v); return isNaN(n) ? null : n; }
 
+// A transaction belongs to the calendar year of its date (cash records).
+// Returns { error } or the cleaned fields shared by create and update.
+function cleanTx(b) {
+  const txDate = String(b.transaction_date || '').slice(0, 10);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(txDate) || isNaN(new Date(txDate + 'T00:00:00Z').getTime())) return { error: 'A valid date is required' };
+  const type = b.type === 'income' || b.type === 'expense' ? b.type : null;
+  if (!type) return { error: 'Type must be income or expense' };
+  const amount = num(b.amount);
+  if (amount === null || amount <= 0) return { error: 'Amount must be more than zero' };
+  if (amount > 99999999.99) return { error: 'Amount is too large' };
+  return { txDate, type, amount, taxYear: parseInt(txDate.slice(0, 4)) };
+}
+
 // ── GET /api/finance/transactions ─────────────────────
 router.get('/transactions', authenticateToken, async (req, res) => {
   try {
@@ -35,14 +48,15 @@ router.get('/transactions', authenticateToken, async (req, res) => {
 router.post('/transactions', authenticateToken, async (req, res) => {
   try {
     const b = req.body;
-    const txDate = b.transaction_date || new Date().toISOString().slice(0, 10);
-    const taxYear = intN(b.tax_year) || new Date(txDate).getFullYear();
+    const c = cleanTx(b);
+    if (c.error) return res.status(400).json({ error: c.error });
+    const { txDate, taxYear } = c;
     const { rows } = await query(
       `INSERT INTO finance_transactions (user_id, transaction_date, category, type, description,
         amount, head_count, price_per_head, weight_lbs, price_per_cwt, animal_id, tax_year, notes)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) RETURNING *`,
-      [req.user.id, txDate, san(b.category, 50), san(b.type, 10),
-       san(b.description, 200), num(b.amount), intN(b.head_count),
+      [req.user.id, txDate, san(b.category, 50), c.type,
+       san(b.description, 200), c.amount, intN(b.head_count),
        num(b.price_per_head), num(b.weight_lbs), num(b.price_per_cwt),
        intN(b.animal_id), taxYear, san(b.notes, 1000)]);
     res.status(201).json(rows[0]);
@@ -57,15 +71,16 @@ router.put('/transactions/:id', authenticateToken, async (req, res) => {
   try {
     const id = parseInt(req.params.id);
     const b = req.body;
-    const txDate = b.transaction_date || new Date().toISOString().slice(0, 10);
-    const taxYear = intN(b.tax_year) || new Date(txDate).getFullYear();
+    const c = cleanTx(b);
+    if (c.error) return res.status(400).json({ error: c.error });
+    const { txDate, taxYear } = c;
     const { rows, rowCount } = await query(
       `UPDATE finance_transactions SET transaction_date=$2, category=$3, type=$4, description=$5,
         amount=$6, head_count=$7, price_per_head=$8, weight_lbs=$9, price_per_cwt=$10,
         animal_id=$11, tax_year=$12, notes=$13
        WHERE id=$1 AND user_id=$14 RETURNING *`,
-      [id, txDate, san(b.category, 50), san(b.type, 10), san(b.description, 200),
-       num(b.amount), intN(b.head_count), num(b.price_per_head), num(b.weight_lbs),
+      [id, txDate, san(b.category, 50), c.type, san(b.description, 200),
+       c.amount, intN(b.head_count), num(b.price_per_head), num(b.weight_lbs),
        num(b.price_per_cwt), intN(b.animal_id), taxYear, san(b.notes, 1000), req.user.id]);
     if (!rowCount) return res.status(404).json({ error: 'Not found' });
     res.json(rows[0]);
@@ -140,32 +155,22 @@ router.get('/budgets', authenticateToken, async (req, res) => {
 });
 
 // ── POST /api/finance/budgets ─────────────────────────
+// One budget per category per year: replace whatever is there.
 router.post('/budgets', authenticateToken, async (req, res) => {
   try {
-    const { category, budgeted_amount, tax_year } = req.body;
-    const year = parseInt(tax_year) || new Date().getFullYear();
+    const year = parseInt(req.body.tax_year) || new Date().getFullYear();
+    const category = san(req.body.category, 50);
+    const amount = num(req.body.budgeted_amount);
+    if (!category) return res.status(400).json({ error: 'Category is required' });
+    if (amount === null || amount < 0) return res.status(400).json({ error: 'Budget must be zero or more' });
+    await query('DELETE FROM finance_budgets WHERE user_id=$1 AND category=$2 AND tax_year=$3', [req.user.id, category, year]);
     const { rows } = await query(
-      `INSERT INTO finance_budgets (user_id, category, budgeted_amount, tax_year)
-       VALUES ($1,$2,$3,$4)
-       ON CONFLICT ON CONSTRAINT finance_budgets_user_cat_year
-       DO UPDATE SET budgeted_amount=$3 RETURNING *`,
-      [req.user.id, san(category, 50), num(budgeted_amount), year]);
+      `INSERT INTO finance_budgets (user_id, category, budgeted_amount, tax_year) VALUES ($1,$2,$3,$4) RETURNING *`,
+      [req.user.id, category, amount, year]);
     res.json(rows[0]);
   } catch (err) {
-    // If constraint doesn't exist, try upsert manually
-    try {
-      const year = parseInt(req.body.tax_year) || new Date().getFullYear();
-      await query('DELETE FROM finance_budgets WHERE user_id=$1 AND category=$2 AND tax_year=$3',
-        [req.user.id, san(req.body.category, 50), year]);
-      const { rows } = await query(
-        `INSERT INTO finance_budgets (user_id, category, budgeted_amount, tax_year)
-         VALUES ($1,$2,$3,$4) RETURNING *`,
-        [req.user.id, san(req.body.category, 50), num(req.body.budgeted_amount), year]);
-      res.json(rows[0]);
-    } catch (err2) {
-      console.error('POST budget error:', err2.message);
-      res.status(500).json({ error: 'Failed to save budget' });
-    }
+    console.error('POST budget error:', err.message);
+    res.status(500).json({ error: 'Failed to save budget' });
   }
 });
 
@@ -179,13 +184,15 @@ router.get('/export', authenticateToken, async (req, res) => {
        FROM finance_transactions WHERE user_id=$1 AND tax_year=$2
        ORDER BY transaction_date ASC`, [req.user.id, year]);
 
-    let csv = 'Date,Type,Category,Description,Amount,Head Count,Price/Head,Weight(lbs),Price/CWT,Notes\n';
+    // Quote text cells; a leading = + - @ would run as a formula in a spreadsheet
+    const cell = v => { let t = String(v || ''); if (/^[=+\-@]/.test(t)) t = "'" + t; return '"' + t.replace(/"/g, '""') + '"'; };
+    let csv = 'Date,Type,Category,Description,Amount,Head Count,Price/Head,Total Weight (lbs),Price/CWT,Notes\n';
     rows.forEach(r => {
       csv += [
         r.transaction_date ? r.transaction_date.toISOString().slice(0,10) : '',
-        r.type, r.category, '"' + (r.description||'').replace(/"/g,'""') + '"',
+        r.type, cell(r.category), cell(r.description),
         r.amount, r.head_count||'', r.price_per_head||'', r.weight_lbs||'',
-        r.price_per_cwt||'', '"' + (r.notes||'').replace(/"/g,'""') + '"'
+        r.price_per_cwt||'', cell(r.notes)
       ].join(',') + '\n';
     });
 
