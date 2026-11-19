@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Herd Vision: EPD Comparison and Bull Selection | Herd Hub</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600;700&family=Archivo:wdth,wght@125,900&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 
@@ -14,7 +14,7 @@
   --brown:   #0A0A0A;
   --rust:    #8B3214;
   --rust2:   #A63D1A;
-  --gold:    #C9A96E;
+  --gold:    #C4A060;
   --gold2:   #E8C87A;
   --cream:   #F5EFE0;
   --tan:     #C4A882;
@@ -61,8 +61,11 @@ body::before {
   z-index: 100;
 }
 .logo {
-  font-family: 'Libre Baskerville', serif;
-  font-size: 22px;
+  font-family: 'Archivo', 'Arial Black', sans-serif;
+  font-stretch: 125%;
+  text-transform: uppercase;
+  letter-spacing: .01em;
+  font-size: 17px;
   font-weight: 900;
   color: var(--cream);
   text-decoration: none;
@@ -147,7 +150,7 @@ body::before {
 .tool-tabs {
   display: inline-flex;
   background: rgba(255,255,255,.04);
-  border: 1px solid rgba(201,169,110,.2);
+  border: 1px solid rgba(196,160,96,.2);
   border-radius: 4px;
   padding: 4px;
   gap: 4px;
@@ -210,7 +213,7 @@ body::before {
 /* ── Cards ── */
 .card {
   background: rgba(255,255,255,.035);
-  border: 1px solid rgba(201,169,110,.12);
+  border: 1px solid rgba(196,160,96,.12);
   border-radius: 6px;
   padding: 28px;
   margin-bottom: 20px;
@@ -230,7 +233,7 @@ body::before {
   content: '';
   flex: 1;
   height: 1px;
-  background: rgba(201,169,110,.15);
+  background: rgba(196,160,96,.15);
 }
 
 /* ── Form elements ── */
@@ -247,7 +250,7 @@ input[type=number], input[type=text], select {
   width: 100%;
   padding: 10px 14px;
   background: rgba(255,255,255,.06);
-  border: 1px solid rgba(201,169,110,.2);
+  border: 1px solid rgba(196,160,96,.2);
   border-radius: 4px;
   color: var(--cream);
   font-family: 'Libre Baskerville', serif;
@@ -293,7 +296,7 @@ select option { background: var(--brown); color: var(--cream); }
 .btn-ghost {
   background: transparent;
   color: var(--tan);
-  border: 1px solid rgba(201,169,110,.3);
+  border: 1px solid rgba(196,160,96,.3);
 }
 .btn-ghost:hover { border-color: var(--gold); color: var(--gold); }
 
@@ -432,7 +435,7 @@ select option { background: var(--brown); color: var(--cream); }
   padding: 3px 10px;
   border-radius: 12px;
 }
-.winner-b1 { background: rgba(201,169,110,.15); color: var(--gold); }
+.winner-b1 { background: rgba(196,160,96,.15); color: var(--gold); }
 .winner-b2 { background: rgba(126,200,200,.12); color: #7EC8C8; }
 .winner-tie { background: rgba(255,255,255,.06); color: var(--muted); }
 
@@ -529,7 +532,7 @@ select option { background: var(--brown); color: var(--cream); }
 }
 .goal-card {
   background: rgba(255,255,255,.035);
-  border: 1px solid rgba(201,169,110,.12);
+  border: 1px solid rgba(196,160,96,.12);
   border-radius: 6px;
   padding: 22px 18px;
   cursor: pointer;
@@ -537,7 +540,7 @@ select option { background: var(--brown); color: var(--cream); }
   text-align: center;
 }
 .goal-card:hover {
-  border-color: rgba(201,169,110,.4);
+  border-color: rgba(196,160,96,.4);
   background: rgba(255,255,255,.06);
 }
 .goal-card.selected {
@@ -638,7 +641,7 @@ select option { background: var(--brown); color: var(--cream); }
   border-radius: 10px;
 }
 .priority-high .priority-badge { background: rgba(139,50,20,.3); color: #E07060; }
-.priority-med  .priority-badge { background: rgba(201,169,110,.2); color: var(--gold); }
+.priority-med  .priority-badge { background: rgba(196,160,96,.2); color: var(--gold); }
 .priority-low  .priority-badge { background: rgba(255,255,255,.06); color: var(--muted); }
 
 .warning-box {
@@ -683,13 +686,13 @@ select option { background: var(--brown); color: var(--cream); }
   letter-spacing: .06em;
   padding: 6px 16px;
   border-radius: 20px;
-  border: 1px solid rgba(201,169,110,.2);
+  border: 1px solid rgba(196,160,96,.2);
   color: var(--muted);
   cursor: pointer;
   transition: all .15s;
   background: transparent;
 }
-.breed-chip:hover { border-color: rgba(201,169,110,.5); color: var(--tan); }
+.breed-chip:hover { border-color: rgba(196,160,96,.5); color: var(--tan); }
 .breed-chip.selected { background: var(--rust); border-color: var(--rust); color: var(--cream); }
 
 /* ── Heifer toggle ── */
@@ -777,7 +780,7 @@ select option { background: var(--brown); color: var(--cream); }
   #comparison-results::before, #wizard-results::before {
     content:'HERD HUB  -  EPD Report  -  theherdhub.com';
     display:block;font-family:sans-serif;font-size:10pt;color:#8B3214;
-    border-bottom:1pt solid #C9A96E;padding-bottom:8px;margin-bottom:16px;
+    border-bottom:1pt solid #C4A060;padding-bottom:8px;margin-bottom:16px;
     letter-spacing:.1em;visibility:visible
   }
 }
@@ -1630,7 +1633,7 @@ function pdfHeader(doc, title, subtitle) {
   doc.setFillColor(139,50,20); doc.rect(0,30,W,2.5,'F');
   doc.setFont('helvetica','bold'); doc.setFontSize(16); doc.setTextColor(245,239,224);
   doc.text('HERD HUB', m, 13);
-  doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(201,169,110);
+  doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(196,160,96);
   doc.text('AMERICAN CATTLE MARKETPLACE', m, 21);
   doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor(245,239,224);
   doc.text(stripEmoji(title).toUpperCase().slice(0,35), W-m, 13, {align:'right'});
@@ -1655,7 +1658,7 @@ function pdfSection(doc, title, y) {
 function pdfFooter(doc, toolName) {
   var W = doc.internal.pageSize.getWidth(), H = doc.internal.pageSize.getHeight(), m = 18;
   var pg = doc.internal.getCurrentPageInfo().pageNumber;
-  doc.setDrawColor(201,169,110); doc.setLineWidth(0.4); doc.line(m,H-14,W-m,H-14);
+  doc.setDrawColor(196,160,96); doc.setLineWidth(0.4); doc.line(m,H-14,W-m,H-14);
   doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(140,117,96);
   doc.text('theherdhub.com', m, H-8);
   doc.text('Page '+pg, W-m, H-8, {align:'right'});
@@ -1685,7 +1688,7 @@ function exportComparisonPDF() {
     function np() { pdfFooter(doc,'Herd Vision EPD Comparison'); doc.addPage(); y=20; }
     // Column headers: trait 43%, bull1 17%, bull2 17%, edge 23%
     doc.setFillColor(10,10,10); doc.rect(m,y,cW,7.5,'F');
-    doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(201,169,110);
+    doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(196,160,96);
     doc.text('TRAIT', m+4, y+5.2);
     doc.text(b1.slice(0,14).toUpperCase(), m+cW*0.6-2, y+5.2, {align:'right'});
     doc.text(b2.slice(0,14).toUpperCase(), m+cW*0.77-2, y+5.2, {align:'right'});
@@ -1773,7 +1776,7 @@ function exportWizardPDF() {
       var c0X=m, c1X=m+62, c2X=m+94, c3X=m+120;
       var c0W=58, c1W=28, c2W=22, c3W=cW-120+m;
       doc.setFillColor(10,10,10); doc.rect(m,y,cW,7,'F');
-      doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(201,169,110);
+      doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(196,160,96);
       doc.text('TRAIT',c0X+2,y+5); doc.text('PRIORITY',c1X+2,y+5);
       doc.text('TARGET',c2X+2,y+5); doc.text('NOTES',c3X+2,y+5);
       y+=9; var alt=false;

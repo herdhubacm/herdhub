@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'herdhub-v3';
+const CACHE_VERSION = 'herdhub-v4';
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const API_CACHE = `${CACHE_VERSION}-api`;
 
@@ -39,7 +39,7 @@ const OFFLINE_HTML = `<!DOCTYPE html>
   }
   p { font-size: 15px; color: #8C7560; line-height: 1.6; max-width: 320px; }
   .rule { width: 40px; height: 2px; background: #8B3214; margin: 20px auto; }
-  .url { font-size: 13px; color: #C9A96E; margin-top: 16px; }
+  .url { font-size: 13px; color: #C4A060; margin-top: 16px; }
 </style>
 </head>
 <body>
