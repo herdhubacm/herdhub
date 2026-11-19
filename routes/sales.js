@@ -296,7 +296,7 @@ async function endExpiredAuctions() {
               `<div style="font-family:sans-serif;max-width:500px;margin:0 auto">
                 <h2 style="color:#2C1A0E">Auction Ended — You're the High Bidder!</h2>
                 <p>You had the highest bid on <strong>${lot.title || 'Lot #' + lot.lot_number}</strong>.</p>
-                <p style="font-size:24px;color:#C9A96E;font-weight:bold">Your bid: $${parseFloat(lot.current_bid).toFixed(2)}</p>
+                <p style="font-size:24px;color:#C4A060;font-weight:bold">Your bid: $${parseFloat(lot.current_bid).toFixed(2)}</p>
                 <p>The seller will review and confirm the sale shortly. You'll receive their contact info once confirmed.</p>
                 <p style="color:#666;font-size:12px">— Herd Hub Lot Sales</p>
               </div>`);

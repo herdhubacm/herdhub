@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Libre+Baskerville:wght@700&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-:root{--bg:#0f1117;--surface:#1a1d27;--border:#2a2d3e;--text:#e2e8f0;--muted:#8892a4;--rust:#c0522a;--rust-light:#e06030;--gold:#d4a92a;--green:#22c55e;--red:#ef4444;--blue:#3b82f6;--purple:#a855f7}
+:root{--bg:#0f1117;--surface:#1a1d27;--border:#2a2d3e;--text:#e2e8f0;--muted:#8892a4;--rust:#c0522a;--rust-light:#e06030;--gold:#C4A060;--green:#22c55e;--red:#ef4444;--blue:#3b82f6;--purple:#a855f7}
 body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex}
 
 /* Sidebar */
@@ -70,7 +70,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
 .badge{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:4px}
 .badge-green{background:rgba(34,197,94,.15);color:#86efac}
 .badge-red{background:rgba(239,68,68,.15);color:#fca5a5}
-.badge-gold{background:rgba(212,169,42,.15);color:#fcd34d}
+.badge-gold{background:rgba(196,160,96,.15);color:#fcd34d}
 .badge-blue{background:rgba(59,130,246,.15);color:#93c5fd}
 .badge-purple{background:rgba(168,85,247,.15);color:#d8b4fe}
 .badge-gray{background:rgba(255,255,255,.08);color:var(--muted)}
@@ -79,8 +79,8 @@ tr:hover td{background:rgba(255,255,255,.02)}
 .btn{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:5px;font-size:12px;font-weight:600;cursor:pointer;border:none;transition:all .15s}
 .btn-danger{background:rgba(239,68,68,.15);color:#fca5a5;border:1px solid rgba(239,68,68,.2)}
 .btn-danger:hover{background:rgba(239,68,68,.25)}
-.btn-warn{background:rgba(212,169,42,.15);color:#fcd34d;border:1px solid rgba(212,169,42,.2)}
-.btn-warn:hover{background:rgba(212,169,42,.25)}
+.btn-warn{background:rgba(196,160,96,.15);color:#fcd34d;border:1px solid rgba(196,160,96,.2)}
+.btn-warn:hover{background:rgba(196,160,96,.25)}
 .btn-success{background:rgba(34,197,94,.15);color:#86efac;border:1px solid rgba(34,197,94,.2)}
 .btn-success:hover{background:rgba(34,197,94,.25)}
 .btn-primary{background:var(--rust);color:white;border:1px solid var(--rust)}
@@ -503,7 +503,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
             <button class="btn" onclick="loadFeaturedListings({featured:'true'})" style="font-size:11px;padding:6px 12px">Featured Only</button>
             <button class="btn" onclick="loadFeaturedListings()" style="font-size:11px;padding:6px 12px">All</button>
           </div>
-          <div id="feat-bulk-bar" style="display:none;background:rgba(201,169,110,.1);border:1px solid rgba(201,169,110,.2);border-radius:6px;padding:10px 16px;margin-bottom:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <div id="feat-bulk-bar" style="display:none;background:rgba(196,160,96,.1);border:1px solid rgba(196,160,96,.2);border-radius:6px;padding:10px 16px;margin-bottom:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
             <span style="font-size:12px;color:var(--gold);font-weight:600" id="feat-sel-count">0 selected</span>
             <button class="btn" style="font-size:11px;padding:5px 10px;background:#5a7a4a;color:white" onclick="bulkFeature('farm_to_table','farm_to_table')">🌿 Farm to Table</button>
             <button class="btn" style="font-size:11px;padding:5px 10px;background:#a855f7;color:white" onclick="bulkFeature('filet')">👑 Prime (Stakeholder)</button>
@@ -598,9 +598,9 @@ tr:hover td{background:rgba(255,255,255,.02)}
           </div>
         </div>
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px">
-          <div style="background:rgba(255,255,255,.04);border:1px solid rgba(201,169,110,.12);border-radius:6px;padding:14px;text-align:center"><div id="cat-stat-total" style="font-size:24px;font-weight:700;color:var(--gold)">-</div><div style="font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-top:4px">Total Signups</div></div>
-          <div style="background:rgba(255,255,255,.04);border:1px solid rgba(201,169,110,.12);border-radius:6px;padding:14px;text-align:center"><div id="cat-stat-sent" style="font-size:24px;font-weight:700;color:#2e7d4f">-</div><div style="font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-top:4px">Catalogs Sent</div></div>
-          <div style="background:rgba(255,255,255,.04);border:1px solid rgba(201,169,110,.12);border-radius:6px;padding:14px;text-align:center"><div id="cat-stat-pending" style="font-size:24px;font-weight:700;color:var(--rust)">-</div><div style="font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-top:4px">Pending Send</div></div>
+          <div style="background:rgba(255,255,255,.04);border:1px solid rgba(196,160,96,.12);border-radius:6px;padding:14px;text-align:center"><div id="cat-stat-total" style="font-size:24px;font-weight:700;color:var(--gold)">-</div><div style="font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-top:4px">Total Signups</div></div>
+          <div style="background:rgba(255,255,255,.04);border:1px solid rgba(196,160,96,.12);border-radius:6px;padding:14px;text-align:center"><div id="cat-stat-sent" style="font-size:24px;font-weight:700;color:#2e7d4f">-</div><div style="font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-top:4px">Catalogs Sent</div></div>
+          <div style="background:rgba(255,255,255,.04);border:1px solid rgba(196,160,96,.12);border-radius:6px;padding:14px;text-align:center"><div id="cat-stat-pending" style="font-size:24px;font-weight:700;color:var(--rust)">-</div><div style="font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-top:4px">Pending Send</div></div>
         </div>
         <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
           <input id="cat-search" type="text" placeholder="Search name, email, city, state, ZIP..." oninput="filterCatTable()" style="flex:1;min-width:180px;padding:8px 12px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px">
@@ -627,9 +627,9 @@ tr:hover td{background:rgba(255,255,255,.02)}
           </div>
         </div>
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px">
-          <div style="background:rgba(255,255,255,.04);border:1px solid rgba(201,169,110,.12);border-radius:6px;padding:14px;text-align:center"><div id="bb-stat-total" style="font-size:24px;font-weight:700;color:var(--gold)">-</div><div style="font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-top:4px">Total Claims</div></div>
-          <div style="background:rgba(255,255,255,.04);border:1px solid rgba(201,169,110,.12);border-radius:6px;padding:14px;text-align:center"><div id="bb-stat-fulfilled" style="font-size:24px;font-weight:700;color:#2e7d4f">-</div><div style="font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-top:4px">Shipped</div></div>
-          <div style="background:rgba(255,255,255,.04);border:1px solid rgba(201,169,110,.12);border-radius:6px;padding:14px;text-align:center"><div id="bb-stat-pending" style="font-size:24px;font-weight:700;color:var(--rust)">-</div><div style="font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-top:4px">Pending Ship</div></div>
+          <div style="background:rgba(255,255,255,.04);border:1px solid rgba(196,160,96,.12);border-radius:6px;padding:14px;text-align:center"><div id="bb-stat-total" style="font-size:24px;font-weight:700;color:var(--gold)">-</div><div style="font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-top:4px">Total Claims</div></div>
+          <div style="background:rgba(255,255,255,.04);border:1px solid rgba(196,160,96,.12);border-radius:6px;padding:14px;text-align:center"><div id="bb-stat-fulfilled" style="font-size:24px;font-weight:700;color:#2e7d4f">-</div><div style="font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-top:4px">Shipped</div></div>
+          <div style="background:rgba(255,255,255,.04);border:1px solid rgba(196,160,96,.12);border-radius:6px;padding:14px;text-align:center"><div id="bb-stat-pending" style="font-size:24px;font-weight:700;color:var(--rust)">-</div><div style="font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-top:4px">Pending Ship</div></div>
         </div>
         <div style="display:flex;gap:8px;margin-bottom:12px">
           <select id="bb-filter-status" onchange="filterBBTable()" style="padding:8px 12px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px"><option value="">All</option><option value="false">Pending</option><option value="true">Shipped</option></select>
@@ -659,9 +659,9 @@ tr:hover td{background:rgba(255,255,255,.02)}
           </div>
         </div>
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px">
-          <div style="background:rgba(255,255,255,.04);border:1px solid rgba(201,169,110,.12);border-radius:6px;padding:14px;text-align:center"><div id="adv-stat-total" style="font-size:24px;font-weight:700;color:var(--gold)">-</div><div style="font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-top:4px">Total</div></div>
-          <div style="background:rgba(255,255,255,.04);border:1px solid rgba(201,169,110,.12);border-radius:6px;padding:14px;text-align:center"><div id="adv-stat-new" style="font-size:24px;font-weight:700;color:var(--rust)">-</div><div style="font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-top:4px">New</div></div>
-          <div style="background:rgba(255,255,255,.04);border:1px solid rgba(201,169,110,.12);border-radius:6px;padding:14px;text-align:center"><div id="adv-stat-contacted" style="font-size:24px;font-weight:700;color:#2e7d4f">-</div><div style="font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-top:4px">Contacted</div></div>
+          <div style="background:rgba(255,255,255,.04);border:1px solid rgba(196,160,96,.12);border-radius:6px;padding:14px;text-align:center"><div id="adv-stat-total" style="font-size:24px;font-weight:700;color:var(--gold)">-</div><div style="font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-top:4px">Total</div></div>
+          <div style="background:rgba(255,255,255,.04);border:1px solid rgba(196,160,96,.12);border-radius:6px;padding:14px;text-align:center"><div id="adv-stat-new" style="font-size:24px;font-weight:700;color:var(--rust)">-</div><div style="font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-top:4px">New</div></div>
+          <div style="background:rgba(255,255,255,.04);border:1px solid rgba(196,160,96,.12);border-radius:6px;padding:14px;text-align:center"><div id="adv-stat-contacted" style="font-size:24px;font-weight:700;color:#2e7d4f">-</div><div style="font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-top:4px">Contacted</div></div>
         </div>
         <div class="table-wrap"><table>
           <thead><tr><th>#</th><th>Date</th><th>Name</th><th>Business</th><th>Email</th><th>Phone</th><th>Interests</th><th>Status</th></tr></thead>
@@ -678,8 +678,8 @@ tr:hover td{background:rgba(255,255,255,.02)}
           </div>
         </div>
         <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px">
-          <div style="background:rgba(255,255,255,.04);border:1px solid rgba(201,169,110,.12);border-radius:6px;padding:14px;text-align:center"><div id="rep-stat-open" style="font-size:24px;font-weight:700;color:var(--rust)">0</div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em">Open reports</div></div>
-          <div style="background:rgba(255,255,255,.04);border:1px solid rgba(201,169,110,.12);border-radius:6px;padding:14px;text-align:center"><div id="rep-stat-hidden" style="font-size:24px;font-weight:700;color:var(--rust)">0</div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em">Listings hidden by reports</div></div>
+          <div style="background:rgba(255,255,255,.04);border:1px solid rgba(196,160,96,.12);border-radius:6px;padding:14px;text-align:center"><div id="rep-stat-open" style="font-size:24px;font-weight:700;color:var(--rust)">0</div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em">Open reports</div></div>
+          <div style="background:rgba(255,255,255,.04);border:1px solid rgba(196,160,96,.12);border-radius:6px;padding:14px;text-align:center"><div id="rep-stat-hidden" style="font-size:24px;font-weight:700;color:var(--rust)">0</div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em">Listings hidden by reports</div></div>
         </div>
         <div id="reports-body"><div style="color:var(--muted);padding:24px;text-align:center">Loading...</div></div>
       </div>
@@ -1989,7 +1989,7 @@ async function loadPayments() {
       <tr>
         <td><a href="javascript:void(0)" onclick="openListingDetail(${l.id})" style="color:var(--rust-light)">${escHtml(l.title)}</a></td>
         <td>${escHtml(l.seller_name || '—')}</td>
-        <td><span style="background:rgba(212,169,42,.15);color:#fcd34d;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600">${l.tier?.toUpperCase()}</span></td>
+        <td><span style="background:rgba(196,160,96,.15);color:#fcd34d;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600">${l.tier?.toUpperCase()}</span></td>
         <td>${fmtDate(l.created_at)}</td>
         <td>${l.expires_at ? fmtDate(l.expires_at) : '—'}</td>
         <td><span style="color:#86efac;font-size:12px">● Active</span></td>
@@ -2205,8 +2205,8 @@ async function drawPostCard(kit) {
   ctx.fillStyle = '#F5EFE0'; ctx.font = '700 56px "Libre Baskerville", Georgia, serif';
   for (const line of wrapLines(ctx, t.headline, W - left * 2, 2)) { ctx.fillText(line, left, y); y += 66; }
   ctx.fillStyle = '#8B3214'; ctx.fillRect(left, y - 26, 40, 4); y += 16;
-  ctx.fillStyle = '#C9A96E'; ctx.font = '700 68px "Libre Baskerville", Georgia, serif'; ctx.fillText(t.price, left, y + 40); y += 92;
-  ctx.fillStyle = '#C9A96E'; ctx.font = '500 28px Inter, Arial, sans-serif'; ctx.fillText(t.url, left, y + 14);
+  ctx.fillStyle = '#C4A060'; ctx.font = '700 68px "Libre Baskerville", Georgia, serif'; ctx.fillText(t.price, left, y + 40); y += 92;
+  ctx.fillStyle = '#C4A060'; ctx.font = '500 28px Inter, Arial, sans-serif'; ctx.fillText(t.url, left, y + 14);
 }
 function downloadCanvas(canvasId, filename) {
   const cv = document.getElementById(canvasId);
@@ -2321,7 +2321,7 @@ async function drawSteakholderCard(kit, name) {
   const body = t.body ? wrapLines(ctx, t.body, W - left * 2, head.length > 1 ? 1 : 2) : [];
   for (const line of body) { ctx.fillText(line, left, y); y += 38; }
   y += 14;
-  ctx.fillStyle = '#C9A96E'; ctx.font = '500 32px Inter, Arial, sans-serif'; ctx.fillText(t.url, left, y + 16);
+  ctx.fillStyle = '#C4A060'; ctx.font = '500 32px Inter, Arial, sans-serif'; ctx.fillText(t.url, left, y + 16);
   if (t.footer) { ctx.fillStyle = '#8C7560'; ctx.font = '500 20px Inter, Arial, sans-serif'; ctx.textAlign = 'right'; ctx.fillText(t.footer, W - left, H - 44); ctx.textAlign = 'left'; }
 }
 function downloadSteakholderCard() { downloadCanvas('stk-card', `herdhub-steakholder-${stkKit ? stkKit.id : 'card'}.jpg`); }

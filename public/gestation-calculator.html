@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="icon" type="image/png" href="/logo.png">
 <link rel="apple-touch-icon" href="/logo.png">
-<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600;700&family=Archivo:wdth,wght@125,900&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 
@@ -18,7 +18,7 @@
   --brown:   #0A0A0A;
   --rust:    #8B3214;
   --rust2:   #A63D1A;
-  --gold:    #C9A96E;
+  --gold:    #C4A060;
   --gold2:   #E8C87A;
   --cream:   #F5EFE0;
   --tan:     #C4A882;
@@ -64,8 +64,11 @@ body::before {
   z-index: 100;
 }
 .logo {
-  font-family: 'Libre Baskerville', serif;
-  font-size: 22px;
+  font-family: 'Archivo', 'Arial Black', sans-serif;
+  font-stretch: 125%;
+  text-transform: uppercase;
+  letter-spacing: .01em;
+  font-size: 17px;
   font-weight: 900;
   color: var(--cream);
   text-decoration: none;
@@ -163,7 +166,7 @@ body::before {
   text-transform: uppercase;
   padding: 12px 28px;
   border-radius: 4px;
-  border: 1px solid rgba(201,169,110,.2);
+  border: 1px solid rgba(196,160,96,.2);
   background: transparent;
   color: var(--tan);
   cursor: pointer;
@@ -216,7 +219,7 @@ body::before {
 /* ── Cards ── */
 .card {
   background: rgba(10,10,10,.6);
-  border: 1px solid rgba(201,169,110,.12);
+  border: 1px solid rgba(196,160,96,.12);
   border-radius: 8px;
   padding: 28px;
   margin-bottom: 20px;
@@ -246,7 +249,7 @@ body::before {
   width: 100%;
   padding: 12px 14px;
   background: rgba(28,15,6,.6);
-  border: 1px solid rgba(201,169,110,.2);
+  border: 1px solid rgba(196,160,96,.2);
   border-radius: 4px;
   color: var(--cream);
   font-family: 'Libre Baskerville', serif;
@@ -275,7 +278,7 @@ body::before {
 }
 .btn-primary { background: var(--rust); color: white; }
 .btn-primary:hover { background: var(--rust2); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(139,50,20,.4); }
-.btn-ghost { background: transparent; color: var(--tan); border: 1px solid rgba(201,169,110,.3); }
+.btn-ghost { background: transparent; color: var(--tan); border: 1px solid rgba(196,160,96,.3); }
 .btn-ghost:hover { border-color: var(--gold); color: var(--gold); }
 .btn-sm { padding: 8px 16px; font-size: 11px; }
 .btn-danger { background: var(--danger); color: white; }
@@ -319,7 +322,7 @@ body::before {
 /* ── Progress Bar ── */
 .progress-wrap {
   background: rgba(28,15,6,.6);
-  border: 1px solid rgba(201,169,110,.15);
+  border: 1px solid rgba(196,160,96,.15);
   border-radius: 6px;
   overflow: hidden;
   height: 28px;
@@ -354,7 +357,7 @@ body::before {
 }
 .result-stat {
   background: rgba(28,15,6,.5);
-  border: 1px solid rgba(201,169,110,.12);
+  border: 1px solid rgba(196,160,96,.12);
   border-radius: 6px;
   padding: 20px;
   text-align: center;
@@ -386,7 +389,7 @@ body::before {
   color: var(--tan);
   padding: 12px 16px;
   border-left: 3px solid var(--gold);
-  background: rgba(201,169,110,.06);
+  background: rgba(196,160,96,.06);
   border-radius: 0 6px 6px 0;
   margin: 0 0 8px;
 }
@@ -405,7 +408,7 @@ body::before {
 /* ── Stage Info ── */
 .stage-card {
   background: rgba(10,10,10,.6);
-  border: 1px solid rgba(201,169,110,.15);
+  border: 1px solid rgba(196,160,96,.15);
   border-radius: 8px;
   padding: 24px;
   margin: 24px 0;
@@ -444,7 +447,7 @@ body::before {
 }
 .cal-nav button {
   background: rgba(10,10,10,.6);
-  border: 1px solid rgba(201,169,110,.2);
+  border: 1px solid rgba(196,160,96,.2);
   color: var(--tan);
   font-family: 'Inter', sans-serif;
   font-size: 14px;
@@ -471,7 +474,7 @@ body::before {
 }
 .cal-cell {
   background: rgba(28,15,6,.4);
-  border: 1px solid rgba(201,169,110,.06);
+  border: 1px solid rgba(196,160,96,.06);
   border-radius: 4px;
   min-height: 90px;
   padding: 6px;
@@ -499,7 +502,7 @@ body::before {
   text-overflow: ellipsis;
 }
 .cal-entry.due-now { background: rgba(192,57,43,.35); color: #f5b7b1; border-left: 3px solid var(--danger); }
-.cal-entry.due-soon { background: rgba(201,169,110,.2); color: var(--gold2); border-left: 3px solid var(--gold); }
+.cal-entry.due-soon { background: rgba(196,160,96,.2); color: var(--gold2); border-left: 3px solid var(--gold); }
 .cal-entry.due-later { background: rgba(245,239,224,.08); color: var(--light); border-left: 3px solid var(--muted); }
 
 /* ── Herd Table ── */
@@ -516,15 +519,15 @@ body::before {
   color: var(--muted);
   text-align: left;
   padding: 10px 12px;
-  border-bottom: 1px solid rgba(201,169,110,.15);
+  border-bottom: 1px solid rgba(196,160,96,.15);
 }
 .herd-table td {
   padding: 10px 12px;
   font-size: 14px;
-  border-bottom: 1px solid rgba(201,169,110,.06);
+  border-bottom: 1px solid rgba(196,160,96,.06);
   color: var(--light);
 }
-.herd-table tr:hover td { background: rgba(201,169,110,.04); }
+.herd-table tr:hover td { background: rgba(196,160,96,.04); }
 
 /* ── Detail Modal ── */
 .modal-overlay {
@@ -539,7 +542,7 @@ body::before {
 .modal-overlay.open { display: flex; }
 .modal-box {
   background: var(--brown);
-  border: 1px solid rgba(201,169,110,.2);
+  border: 1px solid rgba(196,160,96,.2);
   border-radius: 10px;
   padding: 32px;
   max-width: 440px;
@@ -586,7 +589,7 @@ body::before {
   margin-top: 60px;
   padding: 20px 24px;
   background: rgba(10,10,10,.4);
-  border: 1px solid rgba(201,169,110,.08);
+  border: 1px solid rgba(196,160,96,.08);
   border-radius: 6px;
   font-size: 13px;
   line-height: 1.7;
@@ -1333,7 +1336,7 @@ function pdfHeader(doc, title, subtitle) {
   doc.setFillColor(139,50,20); doc.rect(0,30,W,2.5,'F');
   doc.setFont('helvetica','bold'); doc.setFontSize(16); doc.setTextColor(245,239,224);
   doc.text('HERD HUB', m, 13);
-  doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(201,169,110);
+  doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(196,160,96);
   doc.text('AMERICAN CATTLE MARKETPLACE', m, 21);
   doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor(245,239,224);
   doc.text(stripEmoji(title).toUpperCase().slice(0,35), W-m, 13, {align:'right'});
@@ -1358,7 +1361,7 @@ function pdfSection(doc, title, y) {
 function pdfFooter(doc, toolName) {
   var W = doc.internal.pageSize.getWidth(), H = doc.internal.pageSize.getHeight(), m = 18;
   var pg = doc.internal.getCurrentPageInfo().pageNumber;
-  doc.setDrawColor(201,169,110); doc.setLineWidth(0.4); doc.line(m,H-14,W-m,H-14);
+  doc.setDrawColor(196,160,96); doc.setLineWidth(0.4); doc.line(m,H-14,W-m,H-14);
   doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(140,117,96);
   doc.text('theherdhub.com', m, H-8);
   doc.text('Page '+pg, W-m, H-8, {align:'right'});
@@ -1367,7 +1370,7 @@ function pdfFooter(doc, toolName) {
 function pdfTable(doc, headers, rows, y, toolName) {
   var W = doc.internal.pageSize.getWidth(), m = 18, cW = W-m*2, colW = cW/headers.length;
   doc.setFillColor(10,10,10); doc.rect(m,y,cW,7.5,'F');
-  doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(201,169,110);
+  doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(196,160,96);
   headers.forEach(function(h,i){doc.text(stripEmoji(h).toUpperCase().slice(0,Math.floor(colW/2)),m+4+i*colW,y+5.2);});
   y+=9; var alt=false;
   rows.forEach(function(r){

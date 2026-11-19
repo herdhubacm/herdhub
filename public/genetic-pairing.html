@@ -7,14 +7,14 @@
 <meta name="description" content="Predict calf crop performance by pairing your bull EPDs against your cowherd. Free genetic analysis tool for cattle ranchers.">
 <meta name="theme-color" content="#0A0A0A">
 <link rel="icon" type="image/png" href="/logo.png">
-<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600;700&family=Archivo:wdth,wght@125,900&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{--dark:#000000;--brown:#0A0A0A;--rust:#8B3214;--rust2:#A63D1A;--gold:#C9A96E;--gold2:#E8C87A;--cream:#F5EFE0;--tan:#C4A882;--muted:#8C7560;--light:#E8DCC8;--danger:#C0392B;--warn:#D4820A;--good:#2E7D4F}
+:root{--dark:#000000;--brown:#0A0A0A;--rust:#8B3214;--rust2:#A63D1A;--gold:#C4A060;--gold2:#E8C87A;--cream:#F5EFE0;--tan:#C4A882;--muted:#8C7560;--light:#E8DCC8;--danger:#C0392B;--warn:#D4820A;--good:#2E7D4F}
 body{font-family:'Libre Baskerville',serif;background:var(--dark);color:var(--cream);min-height:100vh;overflow-x:hidden}
 body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:0;opacity:.6}
 .site-header{background:var(--brown);border-bottom:2px solid var(--rust);padding:0 40px;display:flex;align-items:center;justify-content:space-between;height:64px;position:sticky;top:0;z-index:100}
-.logo{font-family:'Libre Baskerville',serif;font-size:22px;font-weight:900;color:var(--cream);text-decoration:none}.logo span{color:var(--gold)}
+.logo{font-family:'Archivo','Arial Black',sans-serif;font-stretch:125%;font-weight:900;text-transform:uppercase;letter-spacing:.01em;font-size:17px;color:var(--cream);text-decoration:none}.logo span{color:var(--gold)}
 .back-link{font-family:'Inter',sans-serif;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--tan);text-decoration:none}.back-link:hover{color:var(--gold)}
 .hero{position:relative;padding:60px 40px 50px;text-align:center;z-index:1}
 .hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(139,50,20,.25) 0%,transparent 70%);pointer-events:none}
@@ -25,37 +25,37 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .section{margin-bottom:32px}
 .section-title{font-family:'Libre Baskerville',serif;font-size:24px;font-weight:900;color:var(--cream);margin-bottom:6px}
 .section-desc{font-size:14px;color:var(--muted);line-height:1.6;margin-bottom:16px}
-.card{background:rgba(10,10,10,.6);border:1px solid rgba(201,169,110,.12);border-radius:8px;padding:24px;margin-bottom:16px}
+.card{background:rgba(10,10,10,.6);border:1px solid rgba(196,160,96,.12);border-radius:8px;padding:24px;margin-bottom:16px}
 .card-title{font-family:'Inter',sans-serif;font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:16px}
 .field{margin-bottom:12px}
 .field label{display:block;font-family:'Inter',sans-serif;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--tan);margin-bottom:4px}
-.field input,.field select{width:100%;padding:8px 10px;background:rgba(28,15,6,.6);border:1px solid rgba(201,169,110,.2);border-radius:4px;color:var(--cream);font-family:'Libre Baskerville',serif;font-size:14px}
+.field input,.field select{width:100%;padding:8px 10px;background:rgba(28,15,6,.6);border:1px solid rgba(196,160,96,.2);border-radius:4px;color:var(--cream);font-family:'Libre Baskerville',serif;font-size:14px}
 .field input:focus,.field select:focus{outline:none;border-color:var(--gold)}
 .field select option{background:var(--brown);color:var(--cream)}
 .epd-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px}
 .epd-grid .field input{text-align:center;padding:6px}
 .btn{font-family:'Inter',sans-serif;font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:12px 24px;border-radius:4px;border:none;cursor:pointer;transition:all .2s}
 .btn-primary{background:var(--rust);color:white}.btn-primary:hover{background:var(--rust2)}
-.btn-ghost{background:transparent;color:var(--tan);border:1px solid rgba(201,169,110,.3)}.btn-ghost:hover{border-color:var(--gold);color:var(--gold)}
+.btn-ghost{background:transparent;color:var(--tan);border:1px solid rgba(196,160,96,.3)}.btn-ghost:hover{border-color:var(--gold);color:var(--gold)}
 .btn-sm{padding:6px 12px;font-size:11px}
 .result-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin:20px 0}
-.result-stat{background:rgba(28,15,6,.5);border:1px solid rgba(201,169,110,.12);border-radius:6px;padding:16px;text-align:center}
+.result-stat{background:rgba(28,15,6,.5);border:1px solid rgba(196,160,96,.12);border-radius:6px;padding:16px;text-align:center}
 .result-stat .lbl{font-family:'Inter',sans-serif;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
 .result-stat .val{font-family:'Libre Baskerville',serif;font-size:24px;font-weight:700;color:var(--gold)}
 .result-stat .sub{font-size:11px;color:var(--tan);margin-top:2px}
 .risk-low{color:var(--good)}.risk-moderate{color:var(--gold)}.risk-high{color:var(--warn)}.risk-very-high{color:var(--danger)}
-.summary-box{background:rgba(10,10,10,.6);border:1px solid rgba(201,169,110,.15);border-radius:8px;padding:24px;margin:20px 0;font-size:15px;line-height:1.8;color:var(--light)}
+.summary-box{background:rgba(10,10,10,.6);border:1px solid rgba(196,160,96,.15);border-radius:8px;padding:24px;margin:20px 0;font-size:15px;line-height:1.8;color:var(--light)}
 .summary-box strong{color:var(--gold)}
-.cow-rank{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid rgba(201,169,110,.06);font-size:13px}
+.cow-rank{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid rgba(196,160,96,.06);font-size:13px}
 .cow-rank:last-child{border:none}
 .cow-rank .name{color:var(--cream);font-weight:600}
 .cow-rank .score{font-family:'Inter',sans-serif;font-weight:600}
 .tab-bar{display:flex;gap:4px;margin-bottom:16px}
-.tab-btn{font-family:'Inter',sans-serif;font-size:12px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;padding:8px 16px;background:transparent;border:1px solid rgba(201,169,110,.2);border-radius:4px;color:var(--tan);cursor:pointer;transition:all .2s}
+.tab-btn{font-family:'Inter',sans-serif;font-size:12px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;padding:8px 16px;background:transparent;border:1px solid rgba(196,160,96,.2);border-radius:4px;color:var(--tan);cursor:pointer;transition:all .2s}
 .tab-btn.active{background:var(--rust);border-color:var(--rust);color:white}
-.saved-list .saved-item{display:flex;justify-content:space-between;align-items:center;padding:12px;border-bottom:1px solid rgba(201,169,110,.06)}
-.disclaimer{margin-top:40px;padding:16px;background:rgba(10,10,10,.4);border:1px solid rgba(201,169,110,.08);border-radius:6px;font-size:12px;color:var(--muted);line-height:1.6}
-.two{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}.three{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px}.hint{font-family:'Inter',sans-serif;font-size:10.5px;color:var(--muted);margin-top:4px;line-height:1.5}.note{border-left:3px solid var(--gold);background:rgba(201,169,110,.06);border-radius:0 6px 6px 0;padding:12px 16px;font-size:13.5px;color:var(--tan);line-height:1.65;margin:10px 0}.note.warn{border-left-color:var(--warn)}.note strong{color:var(--cream)}.check{display:flex;align-items:center;gap:10px;font-family:'Inter',sans-serif;font-size:13px;color:var(--tan)}.check input{width:18px;height:18px}.disclaimer a{color:var(--tan)}
+.saved-list .saved-item{display:flex;justify-content:space-between;align-items:center;padding:12px;border-bottom:1px solid rgba(196,160,96,.06)}
+.disclaimer{margin-top:40px;padding:16px;background:rgba(10,10,10,.4);border:1px solid rgba(196,160,96,.08);border-radius:6px;font-size:12px;color:var(--muted);line-height:1.6}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}.three{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px}.hint{font-family:'Inter',sans-serif;font-size:10.5px;color:var(--muted);margin-top:4px;line-height:1.5}.note{border-left:3px solid var(--gold);background:rgba(196,160,96,.06);border-radius:0 6px 6px 0;padding:12px 16px;font-size:13.5px;color:var(--tan);line-height:1.65;margin:10px 0}.note.warn{border-left-color:var(--warn)}.note strong{color:var(--cream)}.check{display:flex;align-items:center;gap:10px;font-family:'Inter',sans-serif;font-size:13px;color:var(--tan)}.check input{width:18px;height:18px}.disclaimer a{color:var(--tan)}
 @media(max-width:768px){.container{padding:0 16px 60px}.site-header{padding:0 16px}.hero{padding:40px 16px 30px}.epd-grid{grid-template-columns:repeat(3,1fr)}.two,.three{grid-template-columns:1fr}.cow-rank{flex-direction:column;align-items:flex-start;gap:4px}}
 @media print {
   .site-header, .hero, .btn, button, .tool-tabs, .tab-bar, .filter-tabs,
@@ -309,13 +309,13 @@ function runPairing(){
   document.getElementById('result-summary').innerHTML = notes.join('');
 
   // EPD table
-  const th='text-align:center;padding:6px;border-bottom:1px solid rgba(201,169,110,.15);font-family:Inter,sans-serif;font-size:10px;letter-spacing:.1em;color:var(--muted)';
-  const td='text-align:center;padding:6px;border-bottom:1px solid rgba(201,169,110,.06)';
+  const th='text-align:center;padding:6px;border-bottom:1px solid rgba(196,160,96,.15);font-family:Inter,sans-serif;font-size:10px;letter-spacing:.1em;color:var(--muted)';
+  const td='text-align:center;padding:6px;border-bottom:1px solid rgba(196,160,96,.06)';
   let h='<div class="card"><div class="card-title">'+(sameBreed?'Expected calf EPDs (average of sire and dam)':'EPDs as entered')+'</div><div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr><th style="'+th+';text-align:left">Trait</th><th style="'+th+'">Bull</th><th style="'+th+'">Cows</th>'+(sameBreed?'<th style="'+th+';color:var(--gold)">Calves</th>':'')+'</tr></thead><tbody>';
   let any=false;
   EPD_TRAITS.forEach(t=>{
     if(bull[t.key]===null && cow[t.key]===null) return; any=true;
-    h+='<tr><td style="padding:6px;border-bottom:1px solid rgba(201,169,110,.06)">'+t.desc+' ('+t.label+')</td><td style="'+td+'">'+fmt(bull[t.key],t.dp)+'</td><td style="'+td+'">'+fmt(cow[t.key],t.dp)+'</td>'+(sameBreed?'<td style="'+td+';color:var(--gold);font-weight:600">'+fmt(calf[t.key],t.dp)+'</td>':'')+'</tr>';
+    h+='<tr><td style="padding:6px;border-bottom:1px solid rgba(196,160,96,.06)">'+t.desc+' ('+t.label+')</td><td style="'+td+'">'+fmt(bull[t.key],t.dp)+'</td><td style="'+td+'">'+fmt(cow[t.key],t.dp)+'</td>'+(sameBreed?'<td style="'+td+';color:var(--gold);font-weight:600">'+fmt(calf[t.key],t.dp)+'</td>':'')+'</tr>';
   });
   h+='</tbody></table></div><div class="hint" style="margin-top:8px">'+(sameBreed?'A dash means one side was left blank. The calf figure is an EPD, not a weight: it says how the calves should compare as parents or as feeders against the rest of the breed.':'Not on a common scale. Do not compare the two columns.')+'</div></div>';
   document.getElementById('result-epd-table').innerHTML = any? h : '';
@@ -415,7 +415,7 @@ function pdfHeader(doc, title, subtitle) {
   doc.setFillColor(139,50,20); doc.rect(0,30,W,2.5,'F');
   doc.setFont('helvetica','bold'); doc.setFontSize(16); doc.setTextColor(245,239,224);
   doc.text('HERD HUB', m, 13);
-  doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(201,169,110);
+  doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(196,160,96);
   doc.text('AMERICAN CATTLE MARKETPLACE', m, 21);
   doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor(245,239,224);
   doc.text(stripEmoji(title).toUpperCase().slice(0,35), W-m, 13, {align:'right'});
@@ -440,7 +440,7 @@ function pdfSection(doc, title, y) {
 function pdfFooter(doc, toolName) {
   var W = doc.internal.pageSize.getWidth(), H = doc.internal.pageSize.getHeight(), m = 18;
   var pg = doc.internal.getCurrentPageInfo().pageNumber;
-  doc.setDrawColor(201,169,110); doc.setLineWidth(0.4); doc.line(m,H-14,W-m,H-14);
+  doc.setDrawColor(196,160,96); doc.setLineWidth(0.4); doc.line(m,H-14,W-m,H-14);
   doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(140,117,96);
   doc.text('theherdhub.com', m, H-8);
   doc.text('Page '+pg, W-m, H-8, {align:'right'});
@@ -449,7 +449,7 @@ function pdfFooter(doc, toolName) {
 function pdfTable(doc, headers, rows, y, toolName) {
   var W = doc.internal.pageSize.getWidth(), m = 18, cW = W-m*2, colW = cW/headers.length;
   doc.setFillColor(10,10,10); doc.rect(m,y,cW,7.5,'F');
-  doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(201,169,110);
+  doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(196,160,96);
   headers.forEach(function(h,i){doc.text(stripEmoji(h).toUpperCase().slice(0,Math.floor(colW/2)),m+4+i*colW,y+5.2);});
   y+=9; var alt=false;
   rows.forEach(function(r){

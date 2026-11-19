@@ -479,7 +479,7 @@ router.post('/newsletter', async (req, res) => {
           <body style="font-family:Georgia,serif;background:#f5efe0;margin:0;padding:20px">
           <div style="max-width:560px;margin:0 auto;background:#fff;border-radius:6px;overflow:hidden">
             <div style="background:#2c1a0e;padding:24px 32px;text-align:center">
-              <h1 style="font-family:Georgia,serif;color:#f5efe0;font-size:24px;margin:0">Herd <span style="color:#c9a96e">Hub</span> Newsletter</h1>
+              <h1 style="font-family:Georgia,serif;color:#f5efe0;font-size:24px;margin:0">Herd <span style="color:#C4A060">Hub</span> Newsletter</h1>
             </div>
             <div style="padding:32px">
               <p style="color:#333;line-height:1.7">You're on the list!</p>
@@ -537,7 +537,7 @@ router.post('/contact', async (req, res) => {
       subject: 'We received your message — Herd Hub Support',
       html: `<div style="font-family:Georgia,serif;max-width:560px;margin:0 auto">
         <div style="background:#2c1a0e;padding:20px;text-align:center">
-          <h1 style="color:#f5efe0;margin:0;font-size:22px">Herd <span style="color:#c9a96e">Hub</span></h1>
+          <h1 style="color:#f5efe0;margin:0;font-size:22px">Herd <span style="color:#C4A060">Hub</span></h1>
         </div>
         <div style="padding:28px;background:#fff">
           <p style="color:#333;line-height:1.7">Hey ${name},</p>

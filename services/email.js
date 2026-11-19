@@ -45,7 +45,7 @@ function emailBase(content) {
   .wrap{max-width:560px;margin:0 auto;background:#fff;border-radius:6px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.08)}
   .header{background:#2c1a0e;padding:24px 32px;text-align:center}
   .header h1{font-family:Georgia,serif;color:#f5efe0;font-size:24px;margin:0}
-  .header span{color:#c9a96e}
+  .header span{color:#C4A060}
   .body{padding:32px}
   .body p{color:#333;line-height:1.7;margin:0 0 16px}
   .btn{display:inline-block;background:#8b3214;color:#fff!important;padding:12px 28px;border-radius:4px;text-decoration:none;font-family:Arial,sans-serif;font-size:14px;font-weight:700;letter-spacing:.05em;margin:8px 0}
@@ -120,7 +120,7 @@ function newMessageEmail(recipientName, senderName, listingTitle, messageBody) {
     html: emailBase(`
       <p>Hey ${recipientName},</p>
       <p><strong>${senderName}</strong> sent you a message about your listing: <strong>${listingTitle}</strong></p>
-      <div style="background:#f9f4ec;border-left:3px solid #c9a96e;padding:14px 18px;border-radius:0 4px 4px 0;margin:16px 0">
+      <div style="background:#f9f4ec;border-left:3px solid #C4A060;padding:14px 18px;border-radius:0 4px 4px 0;margin:16px 0">
         <p style="margin:0;color:#333;font-style:italic">"${messageBody.slice(0, 200)}${messageBody.length > 200 ? '…' : ''}"</p>
       </div>
       <a href="https://theherdhub.com" class="btn">Reply on Herd Hub →</a>
