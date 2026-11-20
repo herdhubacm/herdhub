@@ -95,7 +95,7 @@ router.get('/stats', async (_req, res) => {
 // ── GET /api/admin/listings ────────────────────────────
 router.get('/listings', async (req, res) => {
   try {
-    const { page = 1, limit = 25, status, category, q, tier } = req.query;
+    const { page = 1, limit = 25, status, category, q, tier, awaiting } = req.query;
     const safeLimit = Math.min(Math.max(1, parseInt(limit) || 25), 200);
     const safePage  = Math.max(1, parseInt(page) || 1);
     const offset = (safePage - 1) * safeLimit;
@@ -104,6 +104,7 @@ router.get('/listings', async (req, res) => {
     let p = 1;
 
     if (status)   { conditions.push(`l.status = $${p++}`);   params.push(status); }
+    if (awaiting === 'true') conditions.push('l.awaiting_approval');
     if (category) { conditions.push(`l.category = $${p++}`); params.push(category); }
     if (tier)     { conditions.push(`l.tier = $${p++}`);     params.push(tier); }
     if (q)        { conditions.push(`(l.title ILIKE $${p} OR u.email ILIKE $${p} OR u.name ILIKE $${p})`); params.push(`%${q}%`); p++; }
@@ -114,6 +115,7 @@ router.get('/listings', async (req, res) => {
       query(`SELECT l.id, l.title, l.category, l.breed, l.price, l.price_type,
               l.state, l.city, l.tier, l.status, l.is_featured,
               l.payment_status, l.created_at, l.expires_at, l.social_posted_at,
+              l.launch_promo, l.awaiting_approval, l.deleted_at,
               u.id AS user_id, u.name AS seller_name, u.email AS seller_email,
               (SELECT COUNT(*) FROM listing_photos WHERE listing_id=l.id) AS photo_count,
               (SELECT url FROM listing_photos WHERE listing_id=l.id ORDER BY sort_order LIMIT 1) AS thumb
@@ -163,6 +165,35 @@ router.delete('/listings/:id', async (req, res) => {
 
 // ── Post this listing (share to social) ────────────────
 // Everything the admin Post action needs for one listing, in one call.
+// ── POST /api/admin/listings/:id/approve ── Prime/Choice launch trial goes live
+router.post('/listings/:id(\\d+)/approve', async (req, res) => {
+  try {
+    const plans = require('../services/plans');
+    const id = parseInt(req.params.id);
+    const { rows } = await query(
+      `UPDATE listings
+          SET status='active', awaiting_approval=FALSE,
+              expires_at = NOW() + make_interval(days => $2::int), updated_at = NOW()
+        WHERE id=$1 AND awaiting_approval AND deleted_at IS NULL
+        RETURNING id, title, tier, expires_at`,
+      [id, plans.LAUNCH_RUN_DAYS]
+    );
+    if (!rows.length) return res.status(404).json({ error: 'Nothing to approve: the listing is gone or already approved.' });
+    // An open report still holds it back; the report review restores it.
+    const { rows: open } = await query(`SELECT 1 FROM listing_reports WHERE listing_id=$1 AND status='open' LIMIT 1`, [id]);
+    if (open.length) await query(`UPDATE listings SET status='pending' WHERE id=$1`, [id]);
+    await query(
+      `INSERT INTO audit_log (user_id, action, entity, entity_id, meta, ip) VALUES ($1,'listing.approve','listing',$2,$3,$4)`,
+      [req.user.id, id, JSON.stringify({ title: rows[0].title, tier: rows[0].tier }), req.ip || null]
+    ).catch(e => console.warn('audit listing.approve:', e.message));
+    if (global.apiCache?.clearListingCache) global.apiCache.clearListingCache();
+    res.json({ ok: true, listing: rows[0], held_by_reports: open.length > 0 });
+  } catch (err) {
+    console.error('Admin approve listing:', err.message);
+    res.status(500).json({ error: 'Could not approve the listing' });
+  }
+});
+
 router.get('/listings/:id(\\d+)/post-kit', async (req, res) => {
   try {
     const { rows } = await query(
@@ -314,7 +345,7 @@ router.put('/reports/:id', async (req, res) => {
     const { rows: left } = await query(`SELECT COUNT(*)::int AS n FROM listing_reports WHERE listing_id=$1 AND status='open'`, [listingId]);
     let restored = false;
     if (left[0].n === 0) {
-      const r2 = await query(`UPDATE listings SET status='active' WHERE id=$1 AND status='pending' RETURNING id`, [listingId]);
+      const r2 = await query(`UPDATE listings SET status='active' WHERE id=$1 AND status='pending' AND NOT awaiting_approval RETURNING id`, [listingId]);
       restored = r2.rows.length > 0;
       if (restored && global.apiCache) global.apiCache.clearListingCache();
     }
@@ -328,7 +359,7 @@ router.put('/reports/:id', async (req, res) => {
 // POST /api/admin/reports/listing/:id/restore  — put a report-hidden listing back live
 router.post('/reports/listing/:id/restore', async (req, res) => {
   try {
-    const { rows } = await query(`UPDATE listings SET status='active' WHERE id=$1 AND status='pending' RETURNING id, title`, [req.params.id]);
+    const { rows } = await query(`UPDATE listings SET status='active' WHERE id=$1 AND status='pending' AND NOT awaiting_approval RETURNING id, title`, [req.params.id]);
     if (!rows.length) return res.status(404).json({ error: 'Listing not found, or not hidden' });
     if (global.apiCache) global.apiCache.clearListingCache();
     console.log(`♻️  Admin ${req.user.email} restored listing ${rows[0].id}: ${rows[0].title}`);

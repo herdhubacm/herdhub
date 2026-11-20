@@ -237,13 +237,17 @@ tr:hover td{background:rgba(255,255,255,.02)}
                 <option value="active">Active</option>
                 <option value="expired">Expired</option>
                 <option value="pending">Pending</option>
+                <option value="sold">Sold</option>
+                <option value="awaiting">Awaiting approval</option>
               </select>
               <select id="listing-tier" onchange="loadListings()">
-                <option value="">All Tiers</option>
-                <option value="basic">Basic</option>
+                <option value="">All Plans</option>
+                <option value="burger">Burger (free)</option>
+                <option value="sirloin">Sirloin</option>
                 <option value="ribeye">Ribeye</option>
-                <option value="filet">Filet</option>
-                <option value="t_bone">T-Bone</option>
+                <option value="t_bone">Choice</option>
+                <option value="filet">Prime</option>
+                <option value="farm_to_table">Farm to Table</option>
               </select>
             </div>
           </div>
@@ -1075,9 +1079,11 @@ function renderBarChart(containerId, data, labelKey, countKey) {
 // ── Listings ──────────────────────────────────────────
 async function loadListings() {
   const q        = document.getElementById('listing-search')?.value || '';
-  const status   = document.getElementById('listing-status')?.value || '';
+  const statusSel = document.getElementById('listing-status')?.value || '';
+  const awaiting = statusSel === 'awaiting' ? 'true' : '';
+  const status   = awaiting ? '' : statusSel;
   const tier     = document.getElementById('listing-tier')?.value || '';
-  const params   = new URLSearchParams({ page: listingsPage, limit: 25, q, status, tier });
+  const params   = new URLSearchParams({ page: listingsPage, limit: 25, q, status, tier, awaiting });
   try {
     const r = await fetch(`${API}/api/admin/listings?${params}`, { headers: { Authorization: `Bearer ${token}` } });
     const d = await r.json();
@@ -1088,11 +1094,12 @@ async function loadListings() {
         <td style="font-size:11px">${l.category.replace(/_/g,' ')}</td>
         <td style="font-size:12px">${l.seller_name}<br><span style="color:var(--muted)">${l.seller_email}</span></td>
         <td>${l.state || '—'}</td>
-        <td>${tierBadge(l.tier)}</td>
-        <td>${statusBadge(l.status)}</td>
+        <td>${tierBadge(l.tier)}${l.launch_promo ? '<br><span class="badge badge-gold" title="Free launch trial of a paid plan">Launch</span>' : ''}</td>
+        <td>${l.deleted_at ? '<span class="badge badge-red">Deleted</span>' : l.awaiting_approval ? '<span class="badge badge-gold">Awaiting approval</span>' : statusBadge(l.status)}</td>
         <td style="text-align:center">${l.photo_count}</td>
         <td style="font-size:12px;color:var(--muted)">${timeAgo(l.created_at)}</td>
         <td><div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+          ${l.awaiting_approval && !l.deleted_at ? `<button class="btn btn-success" onclick="approveListing(${l.id}, this)">Approve</button>` : ''}
           <button class="btn btn-ghost" onclick="openPostListing(${l.id})">Post</button>
           ${l.social_posted_at ? `<span class="badge badge-green" title="Posted ${escHtml(fmtDate(l.social_posted_at))}">Posted</span>` : ''}
           <button class="btn btn-danger" onclick="openDeleteListing(${l.id},'${escHtml(l.title)}')">Delete</button>
@@ -1102,6 +1109,19 @@ async function loadListings() {
     document.getElementById('listings-prev').disabled = d.page <= 1;
     document.getElementById('listings-next').disabled = d.page >= d.pages;
   } catch (err) { console.error(err); }
+}
+
+// Prime/Choice launch trials wait here until approved; the free 30-day run starts now
+async function approveListing(id, btn) {
+  if (btn) { btn.disabled = true; btn.textContent = 'Approving...'; }
+  try {
+    const r = await fetch(`${API}/api/admin/listings/${id}/approve`, { method: 'POST', headers: { Authorization: `Bearer ${token}` } });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) { showToast(d.error || 'Could not approve', 'error'); return; }
+    showToast(d.held_by_reports ? 'Approved, but it stays hidden until its open report is reviewed.' : 'Approved. It is live now.');
+    loadListings();
+  } catch (e) { showToast('Connection error', 'error'); }
+  finally { if (btn) { btn.disabled = false; btn.textContent = 'Approve'; } }
 }
 
 // ── Users ─────────────────────────────────────────────

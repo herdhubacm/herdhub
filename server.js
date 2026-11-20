@@ -662,9 +662,24 @@ async function start() {
     setInterval(runHousekeeping, 24 * 60 * 60 * 1000);
 
     // ── Listing expiry cron — runs every 6 hours ──────
-    const { sendEmail, listingExpiryEmail } = require('./services/email');
+    const { sendEmail, listingExpiryEmail, launchRunEndingEmail } = require('./services/email');
     async function runExpiryCron() {
       try {
+        // 0. Free launch trial of a paid plan has run out: the listing stays up as
+        //    a regular free listing for 30 more days instead of expiring.
+        const { rows: dropped } = await query(
+          `UPDATE listings
+              SET tier = CASE WHEN category='farm_to_table' THEN 'farm_to_table' ELSE 'burger' END,
+                  is_featured = FALSE, launch_promo = FALSE, launch_ended_at = NOW(),
+                  expires_at = NOW() + INTERVAL '30 days', updated_at = NOW()
+            WHERE status='active' AND launch_promo AND expires_at IS NOT NULL AND expires_at < NOW()
+            RETURNING id`
+        );
+        if (dropped.length) {
+          console.log(`⏰  ${dropped.length} launch trial(s) ended; now regular listings`);
+          if (global.apiCache?.clearListingCache) global.apiCache.clearListingCache();
+        }
+
         // 1. Expire listings that have passed their expiry date
         const { rows: expired } = await query(
           `UPDATE listings SET status='expired'
@@ -675,15 +690,17 @@ async function start() {
 
         // 2. Send expiry warnings for listings expiring in 3 days
         const { rows: expiringSoon } = await query(
-          `SELECT l.id, l.title, l.expires_at, u.name, u.email
+          `SELECT l.id, l.title, l.expires_at, l.launch_promo, u.name, u.email
            FROM listings l JOIN users u ON u.id = l.user_id
-           WHERE l.status='active'
+           WHERE l.status='active' AND l.deleted_at IS NULL
              AND l.expires_at IS NOT NULL
              AND l.expires_at BETWEEN NOW() + INTERVAL '2 days 22 hours'
                                    AND NOW() + INTERVAL '3 days 2 hours'`
         );
         for (const l of expiringSoon) {
-          const tmpl = listingExpiryEmail(l.name, l.title, l.expires_at, l.id);
+          const tmpl = l.launch_promo
+            ? launchRunEndingEmail(l.name, l.title, l.expires_at)
+            : listingExpiryEmail(l.name, l.title, l.expires_at, l.id);
           await sendEmail({ to: l.email, ...tmpl }).catch(() => {});
         }
         if (expiringSoon.length) console.log(`📧  Sent ${expiringSoon.length} expiry warning(s)`);
