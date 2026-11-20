@@ -3,6 +3,7 @@ const multer  = require('multer');
 const { query, pool } = require('../db/database');
 const { authenticateToken, optionalAuth, requireVerifiedEmail } = require('../middleware/auth');
 const storage = require('../services/storage');
+const plans   = require('../services/plans');
 
 const router = express.Router();
 
@@ -60,9 +61,8 @@ function tierPhotoLimit(tier) {
   return parseInt(process.env.MAX_PHOTOS_BASIC) || 1;
 }
 function expiresAt(tier) {
-  // t_bone = recurring (90 day window), filet = 30 day one-time, ribeye = 90 day featured, farm_to_table = 90 day free, basic = 30 day free
-  const days = (tier === 't_bone' || tier === 'ribeye' || tier === 'farm_to_table') ? 90 : 30;
-  return new Date(Date.now() + days * 86400000);
+  // Run lengths live in services/plans.js (they match the plan cards; launch trials run 30 days)
+  return plans.daysFromNow(plans.runDays(tier));
 }
 
 // ── GET /api/listings ──────────────────────────────────
@@ -75,8 +75,9 @@ router.get('/', optionalAuth, async (req, res) => {
       tier, status = 'active',
     } = req.query;
 
-    const conditions = ['l.status = $1'];
-    const params     = [status];
+    // Public browse: only live or sold listings, never pending/draft/deleted ones
+    const conditions = ['l.status = $1', 'l.deleted_at IS NULL'];
+    const params     = [status === 'sold' ? 'sold' : 'active'];
     let p = 2;
 
     if (q) {
@@ -226,13 +227,35 @@ router.get('/user/me', authenticateToken, async (req, res) => {
               (SELECT url       FROM listing_photos WHERE listing_id=l.id ORDER BY sort_order LIMIT 1) AS thumb,
               (SELECT thumb_url FROM listing_photos WHERE listing_id=l.id ORDER BY sort_order LIMIT 1) AS thumb_small
        FROM listings l
-       WHERE l.user_id = $1
+       WHERE l.user_id = $1 AND l.deleted_at IS NULL
        ORDER BY l.created_at DESC`,
       [req.user.id]
     );
     res.json(rows);
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch your listings' });
+  }
+});
+
+// The seller's running Sirloin/Ribeye launch trial, if any (one at a time during launch)
+async function runningFeaturedTrial(userId) {
+  if (plans.PAID_PLANS_LIVE) return null;
+  const { rows } = await query(
+    `SELECT id, title, expires_at FROM listings
+      WHERE user_id=$1 AND launch_promo AND tier = ANY($2)
+        AND status IN ('active','pending') AND deleted_at IS NULL
+      ORDER BY created_at DESC LIMIT 1`,
+    [userId, plans.SELLER_FEATURED]
+  );
+  return rows[0] || null;
+}
+
+// ── GET /api/listings/user/me/plans ── what the post form should offer this seller
+router.get('/user/me/plans', authenticateToken, async (req, res) => {
+  try {
+    res.json({ paid_plans_live: plans.PAID_PLANS_LIVE, featured_trial: await runningFeaturedTrial(req.user.id) });
+  } catch (err) {
+    res.status(500).json({ error: 'Could not load your plan options' });
   }
 });
 
@@ -314,8 +337,9 @@ router.get('/homepage', async (_req, res) => {
     const Q = (where, limit) => query(`SELECT ${SECTION_COLS_FULL} FROM listings l JOIN users u ON u.id=l.user_id WHERE ${where} AND ${ACTIVE} ORDER BY RANDOM() LIMIT ${limit}`);
 
     const [stakeholders, featuredAds, featuredCattle, featuredEquipment, farmToTable, recent] = await Promise.all([
-      Q("l.tier='filet'", 6),
-      Q("l.tier='t_bone'", 12),
+      // Steakholders and Featured Ads show every live placement; the side columns grow to fit
+      Q("l.tier='filet'", 100),
+      Q("l.tier='t_bone'", 100),
       Q("l.tier IN ('sirloin','ribeye') AND l.category IN ('bulls','bred_heifers','bred_cows','open_heifers','open_cows','cow_calf_pairs','feeder_stocker','showstock','dairy','bottle_calves','beef_cattle','fat_cattle','embryos','semen','full_herd')", 15),
       Q("l.tier IN ('sirloin','ribeye') AND l.category IN ('equipment','trailers','chutes_pens')", 8),
       query(`SELECT ${SECTION_COLS_FULL}, l.farm_name, l.farm_proteins, l.farm_production_methods, l.farm_operation_size FROM listings l JOIN users u ON u.id=l.user_id WHERE l.category='farm_to_table' AND ${ACTIVE} ORDER BY RANDOM() LIMIT 8`),
@@ -341,11 +365,11 @@ router.get('/homepage', async (_req, res) => {
 });
 
 router.get('/stakeholders', async (_req, res) => {
-  try { const { rows } = await query(`SELECT ${SECTION_COLS_FULL} FROM listings l JOIN users u ON u.id=l.user_id WHERE l.tier='filet' AND l.status='active' AND (l.expires_at IS NULL OR l.expires_at>NOW()) ORDER BY RANDOM() LIMIT 6`); res.json(rows); }
+  try { const { rows } = await query(`SELECT ${SECTION_COLS_FULL} FROM listings l JOIN users u ON u.id=l.user_id WHERE l.tier='filet' AND l.status='active' AND (l.expires_at IS NULL OR l.expires_at>NOW()) ORDER BY RANDOM() LIMIT 100`); res.json(rows); }
   catch (e) { res.json([]); }
 });
 router.get('/featured-ads', async (_req, res) => {
-  try { const { rows } = await query(`SELECT ${SECTION_COLS_FULL} FROM listings l JOIN users u ON u.id=l.user_id WHERE l.tier='t_bone' AND l.status='active' AND (l.expires_at IS NULL OR l.expires_at>NOW()) ORDER BY RANDOM() LIMIT 12`); res.json(rows); }
+  try { const { rows } = await query(`SELECT ${SECTION_COLS_FULL} FROM listings l JOIN users u ON u.id=l.user_id WHERE l.tier='t_bone' AND l.status='active' AND (l.expires_at IS NULL OR l.expires_at>NOW()) ORDER BY RANDOM() LIMIT 100`); res.json(rows); }
   catch (e) { res.json([]); }
 });
 router.get('/farm-to-table', async (_req, res) => {
@@ -370,6 +394,24 @@ router.get('/hay-feed', async (_req, res) => {
 });
 
 // ── GET /api/listings/:id ─────────────────────────────
+// ── GET /api/listings/:id/mine ── owner's copy for editing (any status, no view count)
+router.get('/:id/mine', authenticateToken, async (req, res) => {
+  try {
+    const l = await ownListing(req, res); if (!l) return;
+    const { rows } = await query(
+      'SELECT id, url, thumb_url, width, height, size_bytes, sort_order FROM listing_photos WHERE listing_id=$1 ORDER BY sort_order',
+      [l.id]
+    );
+    delete l.search_vector;
+    l.photos = rows;
+    l.photo_limit = tierPhotoLimit(l.tier);
+    res.json(l);
+  } catch (err) {
+    console.error('GET /listings/:id/mine:', err.message);
+    res.status(500).json({ error: 'Could not load your listing. Please try again.' });
+  }
+});
+
 router.get('/:id', optionalAuth, async (req, res) => {
   try {
     const id = parseInt(req.params.id);
@@ -380,7 +422,7 @@ router.get('/:id', optionalAuth, async (req, res) => {
               u.state AS seller_state, u.city AS seller_city
        FROM listings l
        JOIN users u ON u.id = l.user_id
-       WHERE l.id = $1 AND l.status = 'active'`,
+       WHERE l.id = $1 AND l.status = 'active' AND l.deleted_at IS NULL`,
       [id]
     );
     if (!rows.length) return res.status(404).json({ error: 'Listing not found' });
@@ -448,6 +490,19 @@ router.post('/', authenticateToken, requireVerifiedEmail, upload.array('photos',
     const safeTier   = ['burger','sirloin','ribeye','filet','t_bone','farm_to_table'].includes(tier) ? tier : 'burger';
     const isFeatured = ['sirloin','ribeye','filet','t_bone','farm_to_table'].includes(safeTier);
     const photoLimit = tierPhotoLimit(safeTier);
+    const launchTrial   = plans.isLaunchTrial(safeTier);
+    const needsApproval = launchTrial && plans.NEEDS_APPROVAL.includes(safeTier);
+
+    // Launch: one free Sirloin/Ribeye featured spot per seller at a time
+    if (launchTrial && plans.SELLER_FEATURED.includes(safeTier)) {
+      const running = await runningFeaturedTrial(req.user.id);
+      if (running) {
+        return res.status(409).json({
+          code: 'FEATURED_LIMIT',
+          error: `You already have a featured listing running ("${running.title}"). While we launch, each seller gets one free featured spot at a time. Post this one on the free Burger plan, or post it after that run ends.`,
+        });
+      }
+    }
 
     await client.query('BEGIN');
 
@@ -464,9 +519,11 @@ router.post('/', authenticateToken, requireVerifiedEmail, upload.array('photos',
           farm_processing, farm_delivery, farm_availability, farm_harvest_date,
           farm_certifications, farm_price_hanging, farm_price_takehome,
           farm_deposit_required, farm_deposit_amount, farm_call_for_price,
-          farm_tours, farm_operation_size, farm_years)
+          farm_tours, farm_operation_size, farm_years,
+          status, launch_promo, awaiting_approval)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,
-               $21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,$38,$39)
+               $21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,$38,$39,
+               $40,$41,$42)
        RETURNING id`,
       [
         req.user.id, title, description, category,
@@ -476,8 +533,9 @@ router.post('/', authenticateToken, requireVerifiedEmail, upload.array('photos',
         weight_lbs ? +weight_lbs : null,
         age_months ? +age_months : null,
         sex || null, state, city, zip || null,
-        safeTier, isFeatured, expiresAt(safeTier),
-        (safeTier === 'burger' || safeTier === 'farm_to_table') ? 'free' : 'pending',
+        // Prime/Choice launch trials wait for approval; their run starts when approved
+        safeTier, isFeatured, needsApproval ? null : expiresAt(safeTier),
+        (launchTrial || safeTier === 'burger' || safeTier === 'farm_to_table') ? 'free' : 'pending',
         req.body.website_url || null,
         clientLat, clientLng,
         // Farm to Table fields
@@ -498,6 +556,7 @@ router.post('/', authenticateToken, requireVerifiedEmail, upload.array('photos',
         req.body.farm_tours === 'true',
         req.body.farm_operation_size || null,
         req.body.farm_years ? +req.body.farm_years : null,
+        needsApproval ? 'pending' : 'active', launchTrial, needsApproval,
       ]
     );
     const listingId = rows[0].id;
@@ -527,7 +586,6 @@ router.post('/', authenticateToken, requireVerifiedEmail, upload.array('photos',
       for (const file of req.files) {
         if (!validateImageBytes(file.buffer)) {
           await client.query('ROLLBACK');
-          client.release();
           return res.status(415).json({ error: 'Invalid image file. Only real JPEG, PNG, WEBP, or GIF files are accepted.' });
         }
       }
@@ -584,7 +642,11 @@ router.post('/', authenticateToken, requireVerifiedEmail, upload.array('photos',
     } catch(e) { console.error('Beef box check error:', e.message); }
 
     console.log(`Listing ${listingId} created by user ${req.user.id} — beef_box: ${show_beef_box_offer}, lister#: ${lister_number}`);
-    res.status(201).json({ id: listingId, message: 'Listing created', show_beef_box_offer, lister_number });
+    res.status(201).json({
+      id: listingId, message: 'Listing created', show_beef_box_offer, lister_number,
+      tier: safeTier, launch_trial: launchTrial, awaiting_approval: needsApproval,
+      run_days: plans.runDays(safeTier),
+    });
 
   } catch (err) {
     await client.query('ROLLBACK');
@@ -598,51 +660,134 @@ router.post('/', authenticateToken, requireVerifiedEmail, upload.array('photos',
 });
 
 // ── PUT /api/listings/:id ─────────────────────────────
+// Edits the listing's details. Only the fields sent are changed, so a partial
+// body never blanks the rest. Status changes go through /sold and /renew.
+const VALID_CATEGORIES = [
+  'bulls','bucking_bulls','bred_heifers','bred_cows','open_heifers','open_cows',
+  'feeder_stocker','fat_cattle','bottle_calves','cow_calf_pairs',
+  'embryos','semen','showstock','dairy',
+  'equipment','trailers','chutes_pens','working_dogs','feed_hay',
+  'sale_barns','ranches_farms','breed_associations',
+  'farm_to_table','livestock_services','feed_stores',
+  'insurance_finance','full_herd'
+];
+const VALID_PRICE_TYPES = ['fixed','negotiable','obo','call','per_head','per_lb','per_cwt','firm'];
+
+async function ownListing(req, res) {
+  const id = parseInt(req.params.id);
+  if (isNaN(id)) { res.status(400).json({ error: 'Invalid listing ID' }); return null; }
+  const { rows } = await query('SELECT * FROM listings WHERE id=$1 AND deleted_at IS NULL', [id]);
+  if (!rows.length) { res.status(404).json({ error: 'Listing not found. It may have been deleted.' }); return null; }
+  if (rows[0].user_id !== req.user.id && req.user.role !== 'admin') {
+    res.status(403).json({ error: 'You can only change your own listings.' }); return null;
+  }
+  return rows[0];
+}
+
 router.put('/:id', authenticateToken, async (req, res) => {
   try {
-    const { rows } = await query('SELECT * FROM listings WHERE id=$1', [req.params.id]);
-    if (!rows.length) return res.status(404).json({ error: 'Listing not found' });
-    if (rows[0].user_id !== req.user.id && req.user.role !== 'admin')
-      return res.status(403).json({ error: 'Not authorized' });
+    const l = await ownListing(req, res); if (!l) return;
+    const b = req.body || {};
+    const has = k => Object.prototype.hasOwnProperty.call(b, k);
 
-    const { title, description, breed, price, price_type, quantity, state, city, zip, status, category, sold_at } = req.body;
+    const title = has('title') ? sanitizeText(b.title, MAX_TITLE_LEN) : l.title;
+    const description = has('description') ? sanitizeText(b.description, MAX_DESC_LEN) : l.description;
+    const state = has('state') ? sanitizeText(b.state, 2) : l.state;
+    const city = has('city') ? sanitizeText(b.city, MAX_CITY_LEN) : l.city;
+    if (!title || !description || !state || !city)
+      return res.status(400).json({ error: 'Title, description, state and city can\'t be blank.' });
+    if (has('category') && !VALID_CATEGORIES.includes(b.category))
+      return res.status(400).json({ error: 'Pick a category from the list.' });
+    if (has('price_type') && b.price_type && !VALID_PRICE_TYPES.includes(b.price_type))
+      return res.status(400).json({ error: 'Pick a price type from the list.' });
+    const price = has('price') ? (b.price === '' || b.price == null ? null : +b.price) : l.price;
+    if (price != null && (!isFinite(price) || price < 0))
+      return res.status(400).json({ error: 'Price must be a number, or leave it blank.' });
+    const quantity = has('quantity') ? parseInt(b.quantity) : l.quantity;
+    if (!(quantity > 0)) return res.status(400).json({ error: 'Quantity must be 1 or more.' });
 
-    // Validate category if provided
-    const validCategories = [
-      'bulls','bucking_bulls','bred_heifers','bred_cows','open_heifers','open_cows',
-      'feeder_stocker','fat_cattle','bottle_calves','cow_calf_pairs',
-      'embryos','semen','showstock','dairy',
-      'equipment','trailers','chutes_pens','working_dogs','feed_hay',
-      'sale_barns','ranches_farms','breed_associations',
-      'farm_to_table','livestock_services','feed_stores',
-      'insurance_finance','full_herd'
-    ];
-    const safeCategory = category && validCategories.includes(category)
-      ? category : rows[0].category;
-
-    const newStatus = status || 'active';
-    const soldAt = newStatus === 'sold' && sold_at ? new Date(sold_at) : (newStatus === 'sold' ? new Date() : null);
+    // The old edit form also sent status; only "sold" is honored here.
+    const markSold = b.status === 'sold' && l.status !== 'sold';
 
     await query(
       `UPDATE listings
        SET title=$1, description=$2, breed=$3, price=$4, price_type=$5,
-           quantity=$6, state=$7, city=$8, zip=$9, status=$10, category=$11,
-           sold_at=COALESCE($12, sold_at), updated_at=NOW()
-       WHERE id=$13`,
+           quantity=$6, state=$7, city=$8, zip=$9, category=$10,
+           status = CASE WHEN $11 THEN 'sold' ELSE status END,
+           sold_at = CASE WHEN $11 THEN NOW() ELSE sold_at END,
+           updated_at=NOW()
+       WHERE id=$12`,
       [
-        title, description, breed || null,
-        price ? +price : null, price_type || 'fixed',
-        +quantity || 1, state, city, zip || null,
-        newStatus, safeCategory, soldAt, req.params.id,
+        title, description,
+        has('breed') ? (b.breed || null) : l.breed,
+        price,
+        has('price_type') ? (b.price_type || 'fixed') : l.price_type,
+        quantity, state, city,
+        has('zip') ? (b.zip || null) : l.zip,
+        has('category') ? b.category : l.category,
+        markSold, l.id,
       ]
     );
+    if (global.apiCache?.clearListingCache) global.apiCache.clearListingCache();
     res.json({ message: 'Listing updated' });
   } catch (err) {
-    res.status(500).json({ error: 'Failed to update listing' });
+    console.error('PUT /listings/:id:', err.message);
+    res.status(500).json({ error: 'Could not save your changes. Please try again.' });
   }
 });
 
-// ── POST /api/listings/:id/photos ─────────────────────
+// ── POST /api/listings/:id/sold ───────────────────────
+router.post('/:id/sold', authenticateToken, async (req, res) => {
+  try {
+    const l = await ownListing(req, res); if (!l) return;
+    if (l.status === 'sold') return res.json({ message: 'Already marked sold' });
+    await query(`UPDATE listings SET status='sold', sold_at=NOW(), awaiting_approval=FALSE, updated_at=NOW() WHERE id=$1`, [l.id]);
+    if (global.apiCache?.clearListingCache) global.apiCache.clearListingCache();
+    res.json({ message: 'Marked sold' });
+  } catch (err) {
+    console.error('POST /listings/:id/sold:', err.message);
+    res.status(500).json({ error: 'Could not mark it sold. Please try again.' });
+  }
+});
+
+// ── POST /api/listings/:id/renew ──────────────────────
+// Relist a sold or expired listing, or renew one that is close to running out.
+// A renewal is always a regular free listing for 30 days; a launch featured
+// trial is not renewed (it drops to a regular listing on its own).
+router.post('/:id/renew', authenticateToken, async (req, res) => {
+  try {
+    const l = await ownListing(req, res); if (!l) return;
+    if (l.awaiting_approval)
+      return res.status(400).json({ error: 'This listing is still waiting for review. It goes live once it is approved.' });
+    if (l.status === 'pending')
+      return res.status(400).json({ error: 'This listing is under review after a report. We will restore it if everything checks out.' });
+    if (l.status === 'active' && l.launch_promo)
+      return res.status(400).json({ error: 'Your free featured run is still going. When it ends, the listing stays up as a regular listing.' });
+    const photoCount = (await query('SELECT COUNT(*)::int AS c FROM listing_photos WHERE listing_id=$1', [l.id])).rows[0].c;
+    if (!photoCount)
+      return res.status(400).json({ error: 'Add at least one photo (Edit) before relisting.' });
+
+    // Active: add 30 days to whatever is left. Sold or expired: 30 days from now.
+    const fromDate = l.status === 'active' && l.expires_at && new Date(l.expires_at) > new Date() ? new Date(l.expires_at) : new Date();
+    const newExpiry = new Date(fromDate.getTime() + plans.REGULAR_RUN_DAYS * 86400000);
+    const paidRunGoing = !l.launch_promo && plans.PAID_TIERS.includes(l.tier) && l.payment_status === 'paid';
+    await query(
+      `UPDATE listings
+          SET status='active', sold_at=NULL, expires_at=$1, updated_at=NOW(),
+              tier = CASE WHEN $2 THEN tier WHEN category='farm_to_table' THEN 'farm_to_table' ELSE 'burger' END,
+              is_featured = CASE WHEN $2 THEN is_featured ELSE FALSE END,
+              launch_promo = FALSE
+        WHERE id=$3`,
+      [newExpiry, paidRunGoing, l.id]
+    );
+    if (global.apiCache?.clearListingCache) global.apiCache.clearListingCache();
+    res.json({ message: 'Listing is live', expires_at: newExpiry });
+  } catch (err) {
+    console.error('POST /listings/:id/renew:', err.message);
+    res.status(500).json({ error: 'Could not relist it. Please try again.' });
+  }
+});
+
 // Add more photos to an existing listing.
 router.post('/:id/photos', authenticateToken, upload.array('photos', 20), async (req, res) => {
   const client = await pool.connect();
@@ -756,8 +901,10 @@ router.delete('/:id', authenticateToken, async (req, res) => {
       [req.params.id]
     );
 
-    // Soft-delete the listing
-    await query(`UPDATE listings SET status='expired' WHERE id=$1`, [req.params.id]);
+    // Soft-delete the listing (deleted_at keeps it out of My Listings and relisting)
+    await query(`UPDATE listings SET status='expired', deleted_at=NOW(), awaiting_approval=FALSE WHERE id=$1`, [req.params.id]);
+    await query('DELETE FROM listing_photos WHERE listing_id=$1', [req.params.id]);
+    if (global.apiCache?.clearListingCache) global.apiCache.clearListingCache();
 
     // Hard-delete photos from cloud (fire and forget — don't fail the request)
     const keys = photos.flatMap(p => [p.storage_key, p.thumb_key].filter(Boolean));

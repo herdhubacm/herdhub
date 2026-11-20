@@ -139,12 +139,30 @@ function listingExpiryEmail(name, listingTitle, expiresAt, listingId) {
     html: emailBase(`
       <p>Hey ${name},</p>
       <p>Your listing <strong>${listingTitle}</strong> is expiring in <strong>${days} day${days !== 1 ? 's' : ''}</strong>.</p>
-      <p>Renew it now to keep it visible to buyers across all 50 states.</p>
-      <a href="https://theherdhub.com" class="btn">Renew My Listing →</a>
+      <p>Renew it with one tap from My Listings to keep it in front of buyers for another 30 days. It's free.</p>
+      <a href="https://theherdhub.com/?my=listings" class="btn">Renew My Listing →</a>
       <div class="divider"></div>
-      <p style="font-size:13px;color:#666">If your livestock has sold, you can mark the listing as sold from your account page.</p>
+      <p style="font-size:13px;color:#666">If it has sold, tap Mark Sold on the same screen.</p>
     `),
-    text: `Your listing "${listingTitle}" expires in ${days} days. Renew at https://theherdhub.com`,
+    text: `Your listing "${listingTitle}" expires in ${days} days. Renew it free from My Listings: https://theherdhub.com/?my=listings`,
+  };
+}
+
+// A free launch trial of a paid plan (Sirloin, Ribeye, Choice, Prime) is ending.
+// The listing is not going away: it becomes a regular free listing.
+function launchRunEndingEmail(name, listingTitle, endsAt) {
+  const when = new Date(endsAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
+  return {
+    subject: `Your free featured run for "${listingTitle}" ends ${when}`,
+    html: emailBase(`
+      <p>Hey ${name},</p>
+      <p>Your free featured run for <strong>${listingTitle}</strong> ends on <strong>${when}</strong>.</p>
+      <p>Your listing stays up after that as a regular free listing, so buyers can still find it. There's nothing you need to do, and you won't be charged.</p>
+      <a href="https://theherdhub.com/?my=listings" class="btn">See My Listings →</a>
+      <div class="divider"></div>
+      <p style="font-size:13px;color:#666">If it has sold, tap Mark Sold in My Listings.</p>
+    `),
+    text: `Your free featured run for "${listingTitle}" ends ${when}. Your listing stays up as a regular free listing after that. Nothing to do, and you won't be charged. My Listings: https://theherdhub.com/?my=listings`,
   };
 }
 
@@ -155,4 +173,5 @@ module.exports = {
   passwordResetEmail,
   newMessageEmail,
   listingExpiryEmail,
+  launchRunEndingEmail,
 };

@@ -295,6 +295,8 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
 .mlc-status{display:inline-block;font-family:'Inter',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:3px 8px;border-radius:3px;margin-left:8px}
 .mlc-status.active{background:#d4edda;color:#155724}
 .mlc-status.expired{background:#f8d7da;color:#721c24}
+.mlc-status.pending{background:#fef3c7;color:#92400e}
+.mlc-status.sold{background:#e0e7ff;color:#3730a3}
 /* Photo upload area */
 .photo-upload-area{border:2px dashed var(--tan);border-radius:6px;padding:24px;text-align:center;cursor:pointer;transition:all .2s;background:rgba(196,160,96,.05);margin-bottom:12px}
 .photo-upload-area:hover{border-color:var(--rust);background:rgba(181,69,27,.05)}
@@ -313,7 +315,7 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
 
 /* ── 3-COLUMN HOMEPAGE LAYOUT ── */
 .home-3col{display:grid;grid-template-columns:210px 1fr 210px;align-items:stretch}
-.home-sidebar{min-height:100%;overflow-y:auto;scrollbar-width:thin}
+.home-sidebar{min-height:100%;overflow:visible}
 .home-sidebar::-webkit-scrollbar{width:3px}
 .home-sidebar-left{background:var(--dark-brown);border-right:2px solid var(--mid-brown)}
 .home-sidebar-left::-webkit-scrollbar-thumb{background:var(--mid-brown)}
@@ -418,6 +420,13 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
 .pcb-free{background:#d1fae5;color:#065f46}
 .pcb-paid{background:rgba(181,69,27,.1);color:var(--rust)}
 .pcb-gold{background:rgba(196,160,96,.15);color:#92670a}
+.pcb-launch{background:#d1fae5;color:#065f46}
+.plan-card-regular{font-family:'Inter',sans-serif;font-size:10px;color:#888;margin-bottom:4px}
+.plan-card-regular s{color:#aaa}
+.plan-card.plan-unavailable{opacity:.55;cursor:not-allowed}
+.plan-card.plan-unavailable:hover{border-color:var(--light-tan)}
+.plan-unavailable-note{display:block;font-size:10px;color:var(--rust);margin-top:4px;line-height:1.4}
+.launch-note{font-size:12px;color:#065f46;background:#ecfdf5;border:1px solid #a7f3d0;border-radius:4px;padding:8px 10px;margin-bottom:12px;line-height:1.5}
 .photo-limit-hint{font-family:'Inter',sans-serif;font-size:10px;letter-spacing:.06em;color:var(--rust);background:rgba(181,69,27,.07);border:1px solid rgba(181,69,27,.18);border-radius:3px;padding:6px 10px;margin-bottom:10px}
 /* listing type tabs in post modal - wider */
 .lt-tab-wide{padding:12px 8px}
@@ -1991,7 +2000,7 @@ header.scrolled{background:rgba(10,10,10,.92)!important;backdrop-filter:blur(12p
         </div>
         <div class="form-group"><label for="acct-pl-description">Description</label><textarea id="acct-pl-description" rows="4" placeholder="Describe your listing in detail…"></textarea></div>
         <div class="form-group" id="acct-pl-website-group" style="display:none">
-          <label>Website URL <span style="font-size:11px;color:#aaa;font-weight:400">(optional — links directly to your business)</span></label>
+          <label>Website URL <span style="font-size:11px;color:#aaa;font-weight:400">(optional, links directly to your business)</span></label>
           <input type="url" id="acct-pl-website-url" placeholder="https://yourfarm.com">
         </div>
         <div class="form-row" id="acct-pl-price-row">
@@ -2026,11 +2035,11 @@ header.scrolled{background:rgba(10,10,10,.92)!important;backdrop-filter:blur(12p
         </div>
         <div class="form-row">
           <div class="form-group"><label>Quantity</label><input type="number" id="acct-pl-quantity" value="1" min="1"></div>
-          <div class="form-group"><label>Listing Tier</label><select id="acct-pl-tier">
+          <div class="form-group"><label>Plan</label><select id="acct-pl-tier">
             <optgroup label="🐄 Listings (cattle, equipment, dogs, hay)">
-              <option value="burger">🍔 Burger – Free (browse page only)</option>
-              <option value="sirloin">🥩 Sirloin – $5.99/mo (Featured Cattle/Equipment section)</option>
-              <option value="ribeye">🥩 Ribeye – $9.99 one-time (Featured Cattle/Equipment section)</option>
+              <option value="burger">🍔 Burger: free, 1 photo</option>
+              <option value="sirloin">🥩 Sirloin: free during launch, 3 photos, featured row</option>
+              <option value="ribeye">🥩 Ribeye: free during launch, 3 photos, featured row</option>
             </optgroup>
           </select></div>
         </div>
@@ -2459,20 +2468,9 @@ header.scrolled{background:rgba(10,10,10,.92)!important;backdrop-filter:blur(12p
     <h2>Edit Listing</h2>
     <input type="hidden" id="el-id">
 
-    <div class="form-row">
-      <div class="form-group" style="flex:2">
-        <label>Title *</label>
-        <input type="text" id="el-title" placeholder="e.g. 10 Angus Steers — 650lb avg">
-      </div>
-      <div class="form-group">
-        <label>Status</label>
-        <select id="el-status">
-          <option value="active">Active</option>
-          <option value="sold">Sold</option>
-          <option value="expired">Expired</option>
-          <option value="draft">Draft</option>
-        </select>
-      </div>
+    <div class="form-group">
+      <label>Title *</label>
+      <input type="text" id="el-title" placeholder="e.g. 10 Angus Steers, 650 lb avg">
     </div>
 
     <div class="form-row">
@@ -2549,7 +2547,7 @@ header.scrolled{background:rgba(10,10,10,.92)!important;backdrop-filter:blur(12p
 
     <div class="form-group">
       <label>Description</label>
-      <textarea id="el-description" rows="4" placeholder="Describe your listing — weight, age, health history, pricing details…"></textarea>
+      <textarea id="el-description" rows="4" placeholder="Describe your listing: weight, age, health history, pricing details…"></textarea>
     </div>
 
     <div class="form-row">
@@ -2639,6 +2637,8 @@ header.scrolled{background:rgba(10,10,10,.92)!important;backdrop-filter:blur(12p
       </button>
     </div>
 
+    <div class="launch-note">Paid plans are free to try while we launch. You won't be charged, and nothing renews on its own. When the free run ends, your listing stays up as a regular listing.</div>
+
     <!-- Plan cards — Regular -->
     <div id="pl-seller-plans">
       <div style="font-family:'Inter',sans-serif;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--mid-brown);margin-bottom:10px">Select Your Plan</div>
@@ -2651,19 +2651,20 @@ header.scrolled{background:rgba(10,10,10,.92)!important;backdrop-filter:blur(12p
           <div class="plan-card-features">1 photo · 30-day listing<br>Basic visibility</div>
         </div>
         <div class="plan-card" data-plan="sirloin" data-action="select-plan">
-          <span class="plan-card-badge pcb-gold">Best Value</span>
+          <span class="plan-card-badge pcb-launch">Free during launch</span>
           <div class="plan-card-icon">🥩</div>
           <div class="plan-card-name">Sirloin</div>
-          <div style="font-family:'Inter',sans-serif;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--rust);margin-bottom:2px">Billed Yearly</div>
-          <div class="plan-card-price">$5.99/mo</div>
-          <div class="plan-card-features">3 photos · Billed yearly<br>Auto-renewing</div>
+          <div class="plan-card-price">Free</div>
+          <div class="plan-card-regular">Regularly <s>$5.99/mo</s>, billed yearly</div>
+          <div class="plan-card-features">3 photos · Featured Cattle or Equipment row<br>30 days free</div>
         </div>
         <div class="plan-card" data-plan="ribeye" data-action="select-plan">
-          <span class="plan-card-badge pcb-paid">One-Time</span>
+          <span class="plan-card-badge pcb-launch">Free during launch</span>
           <div class="plan-card-icon">🥩</div>
           <div class="plan-card-name">Ribeye</div>
-          <div class="plan-card-price">$9.99</div>
-          <div class="plan-card-features">3 photos · 30-day featured<br>One-time payment</div>
+          <div class="plan-card-price">Free</div>
+          <div class="plan-card-regular">Regularly <s>$9.99</s> one-time</div>
+          <div class="plan-card-features">3 photos · Featured Cattle or Equipment row<br>30 days free</div>
         </div>
       </div>
     </div>
@@ -2680,19 +2681,20 @@ header.scrolled{background:rgba(10,10,10,.92)!important;backdrop-filter:blur(12p
           <div class="plan-card-features">3 photos · F2T scroll section<br>Direct beef listings only</div>
         </div>
         <div class="plan-card" data-plan="t_bone" data-action="select-plan">
-          <span class="plan-card-badge pcb-paid">One-Time</span>
+          <span class="plan-card-badge pcb-launch">Free during launch</span>
           <div class="plan-card-icon">⭐</div>
           <div class="plan-card-name">Choice</div>
-          <div class="plan-card-price">$49.99</div>
-          <div class="plan-card-features">5 photos · 30-day Featured Ads sidebar</div>
+          <div class="plan-card-price">Free</div>
+          <div class="plan-card-regular">Regularly <s>$49.99</s> one-time</div>
+          <div class="plan-card-features">5 photos · Featured Ads sidebar<br>30 days free · Reviewed before it goes live</div>
         </div>
         <div class="plan-card" data-plan="filet" data-action="select-plan">
-          <span class="plan-card-badge pcb-gold">Best Value</span>
+          <span class="plan-card-badge pcb-launch">Free during launch</span>
           <div class="plan-card-icon">👑</div>
           <div class="plan-card-name">Prime</div>
-          <div style="font-family:'Inter',sans-serif;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#92400e;margin-bottom:2px">Billed Yearly</div>
-          <div class="plan-card-price">$39.99/mo</div>
-          <div class="plan-card-features">5 photos · Stakeholders — top placement year-round</div>
+          <div class="plan-card-price">Free</div>
+          <div class="plan-card-regular">Regularly <s>$39.99/mo</s>, billed yearly</div>
+          <div class="plan-card-features">5 photos · Our Steakholders, top placement<br>30 days free · Reviewed before it goes live</div>
         </div>
       </div>
     </div>
@@ -2700,7 +2702,7 @@ header.scrolled{background:rgba(10,10,10,.92)!important;backdrop-filter:blur(12p
     <div id="listing-form-error" class="form-error" style="display:none"></div>
     <div id="listing-form-success" class="form-success" style="display:none"></div>
 
-    <div class="form-group"><label for="pl-title">Title</label><input type="text" id="pl-title" placeholder="e.g. Registered Black Angus Herd Bull — 2yr"></div>
+    <div class="form-group"><label for="pl-title">Title</label><input type="text" id="pl-title" placeholder="e.g. Registered Black Angus Herd Bull, 2 yr"></div>
 
     <div class="form-row">
       <div class="form-group">
@@ -2774,9 +2776,9 @@ header.scrolled{background:rgba(10,10,10,.92)!important;backdrop-filter:blur(12p
       </div>
     </div>
 
-    <div class="form-group"><label for="pl-description">Description</label><textarea id="pl-description" rows="3" placeholder="Describe your listing — weight, age, health history, pricing details…"></textarea></div>
+    <div class="form-group"><label for="pl-description">Description</label><textarea id="pl-description" rows="3" placeholder="Describe your listing: weight, age, health history, pricing details…"></textarea></div>
     <div class="form-group" id="pl-website-group" style="display:none">
-      <label>Website URL <span style="font-size:11px;color:#aaa;font-weight:400">(optional — links directly to your business)</span></label>
+      <label>Website URL <span style="font-size:11px;color:#aaa;font-weight:400">(optional, links directly to your business)</span></label>
       <input type="url" id="pl-website-url" placeholder="https://yourfarm.com">
     </div>
     <div class="form-row" id="pl-price-row">
@@ -2818,7 +2820,7 @@ header.scrolled{background:rgba(10,10,10,.92)!important;backdrop-filter:blur(12p
     <!-- Photo upload with live limit display -->
     <div class="form-group">
       <label>Photos <span id="photo-count-hint" style="font-weight:400;color:#888;text-transform:none;letter-spacing:0"></span></label>
-      <div class="photo-limit-hint" id="pl-photo-hint">📸 Your plan allows <strong id="pl-photo-limit-label">1 photo</strong> (Burger — Free)</div>
+      <div class="photo-limit-hint" id="pl-photo-hint">📸 Your plan allows <strong id="pl-photo-limit-label">1 photo</strong> (Burger, free)</div>
       <div class="photo-upload-area" id="photo-drop-area">
         <input type="file" id="pl-photos" multiple accept="image/jpeg,image/png,image/webp" required>
         <div style="font-size:11px;color:var(--rust);margin-top:4px;font-weight:600">* At least 1 photo required to post a listing</div>
@@ -4073,9 +4075,9 @@ async function openEditListing(id) {
   openModal('edit-listing');
 
   try {
-    const r = await fetch(`${API}/api/listings/${id}`);
-    if (!r.ok) throw new Error('Could not load listing');
-    const l = await r.json();
+    const r = await fetch(`${API}/api/listings/${id}/mine`, { headers: { Authorization: `Bearer ${authToken}` } });
+    const l = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(l.error || 'Could not load your listing');
 
     // Populate fields
     document.getElementById('el-title').value       = l.title        || '';
@@ -4089,12 +4091,11 @@ async function openEditListing(id) {
     setSelectVal('el-breed',      l.breed || '');
     setSelectVal('el-price-type', l.price_type || 'fixed');
     setSelectVal('el-state',      l.state);
-    setSelectVal('el-status',     l.status || 'active');
 
     // Photo limit hint
-    const limit = {burger:1, sirloin:3, ribeye:3, farm_to_table:3, filet:5, t_bone:5, basic:1}[l.tier] || 1;
+    const limit = l.photo_limit || TIER_PHOTO_LIMITS[l.tier] || 1;
     document.getElementById('el-photo-hint').textContent =
-      `(${(l.photos||[]).length} existing · up to ${limit} total for ${l.tier} tier)`;
+      `(${(l.photos||[]).length} of ${limit} for the ${PLAN_NAMES[l.tier] || l.tier} plan)`;
 
     // Render existing photos with delete buttons
     const photosEl = document.getElementById('el-existing-photos');
@@ -4111,7 +4112,7 @@ async function openEditListing(id) {
       photosEl.innerHTML = '<span style="font-size:12px;color:#aaa">No photos yet</span>';
     }
   } catch(e) {
-    document.getElementById('el-error').textContent = 'Failed to load listing: ' + e.message;
+    document.getElementById('el-error').textContent = e.message;
     document.getElementById('el-error').style.display = 'block';
   }
 }
@@ -4168,7 +4169,6 @@ async function doSaveEditListing() {
         quantity:    parseInt(document.getElementById('el-quantity').value) || 1,
         state:       document.getElementById('el-state').value,
         city:        document.getElementById('el-city').value.trim(),
-        status:      document.getElementById('el-status').value,
         category:    document.getElementById('el-category').value,
       })
     });
@@ -4414,6 +4414,8 @@ function initEventDelegation() {
     else if (action === 'delete-listing') deleteMyListing(el.dataset.id);
     else if (action === 'edit-listing') openEditListing(el.dataset.id);
     else if (action === 'mark-sold')    markListingSold(el.dataset.id);
+    else if (action === 'renew-listing') renewMyListing(el.dataset.id);
+    else if (action === 'save-edit-listing') doSaveEditListing();
     else if (action === 'listing-type') {
       const isAdvert = el.dataset.type === 'advertise';
       document.getElementById('lt-regular').classList.toggle('active', !isAdvert);
@@ -4473,6 +4475,7 @@ function initEventDelegation() {
     }
     else if (action === 'select-plan') {
       const plan = el.dataset.plan;
+      if (el.classList.contains('plan-unavailable')) { showToast(el.dataset.unavailableMsg || 'That plan is not available right now.'); return; }
       // Deselect siblings
       el.closest('.plan-card-grid').querySelectorAll('.plan-card').forEach(c => c.classList.remove('selected'));
       el.classList.add('selected');
@@ -4528,16 +4531,17 @@ function initEventDelegation() {
       if (tierSel) {
         tierSel.innerHTML = isAdvert
           ? `<optgroup label="📢 Ads (businesses, brands, farms)">
-              <option value="farm_to_table">🌿 Farm-to-Table — Free (Farm-to-Table section)</option>
-              <option value="t_bone">⭐ Choice — $49.99 one-time (Featured Ads sidebar)</option>
-              <option value="filet">👑 Prime — $39.99/mo (Stakeholders — top placement)</option>
+              <option value="farm_to_table">🌿 Farm to Table: free, Farm to Table section</option>
+              <option value="t_bone">⭐ Choice: free during launch, Featured Ads sidebar, reviewed first</option>
+              <option value="filet">👑 Prime: free during launch, Our Steakholders, reviewed first</option>
              </optgroup>`
           : `<optgroup label="🐄 Listings (cattle, equipment, dogs, hay)">
-              <option value="burger">🍔 Burger — Free (browse page only)</option>
-              <option value="sirloin">🥩 Sirloin — $5.99/mo (Featured Cattle/Equipment section)</option>
-              <option value="ribeye">🥩 Ribeye — $9.99 one-time (Featured Cattle/Equipment section)</option>
+              <option value="burger">🍔 Burger: free, 1 photo</option>
+              <option value="sirloin">🥩 Sirloin: free during launch, 3 photos, featured row</option>
+              <option value="ribeye">🥩 Ribeye: free during launch, 3 photos, featured row</option>
              </optgroup>`;
         tierSel.value = isAdvert ? 'farm_to_table' : 'burger';
+        applyFeaturedTrialLimit();
       }
       // Hide price row for advertisements
       const priceRow = document.getElementById('acct-pl-price-row');
@@ -5608,6 +5612,7 @@ function resetPostModal() {
   document.getElementById('pl-tier').value = 'burger';
   document.querySelectorAll('#pl-seller-plans .plan-card').forEach((c,i) => c.classList.toggle('selected', i===0));
   updatePlPhotoHint('burger');
+  loadPlanAvailability();
   // Clear form fields
   ['pl-title','pl-description','pl-city','pl-website-url'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
   const errEl = document.getElementById('listing-form-error');
@@ -5616,10 +5621,58 @@ function resetPostModal() {
   if(sucEl) sucEl.style.display='none';
 }
 
+// Launch: one free Sirloin/Ribeye featured spot per seller at a time (server enforces it too)
+let _featuredTrial = null;
+async function loadPlanAvailability() {
+  _featuredTrial = null;
+  applyFeaturedTrialLimit();
+  if (!authToken) return;
+  try {
+    const r = await fetch(`${API}/api/listings/user/me/plans`, { headers: { Authorization: `Bearer ${authToken}` } });
+    if (!r.ok) return;
+    const d = await r.json();
+    _featuredTrial = d.featured_trial || null;
+  } catch (e) { /* the server still enforces the limit */ }
+  applyFeaturedTrialLimit();
+}
+function applyFeaturedTrialLimit() {
+  const msg = _featuredTrial
+    ? `You already have a featured listing running ("${_featuredTrial.title}"). One free featured spot at a time while we launch.`
+    : '';
+  document.querySelectorAll('#pl-seller-plans .plan-card[data-plan="sirloin"], #pl-seller-plans .plan-card[data-plan="ribeye"]').forEach(card => {
+    card.classList.toggle('plan-unavailable', !!_featuredTrial);
+    card.dataset.unavailableMsg = msg;
+    let note = card.querySelector('.plan-unavailable-note');
+    if (_featuredTrial && !note) { note = document.createElement('span'); note.className = 'plan-unavailable-note'; card.appendChild(note); }
+    if (note) note.textContent = _featuredTrial ? 'You have one running' : '';
+    if (_featuredTrial && card.classList.contains('selected')) {
+      card.classList.remove('selected');
+      const burger = document.querySelector('#pl-seller-plans .plan-card[data-plan="burger"]');
+      if (burger) burger.classList.add('selected');
+      const tierEl = document.getElementById('pl-tier'); if (tierEl) tierEl.value = 'burger';
+      updatePlPhotoHint('burger');
+    }
+  });
+  const acctTier = document.getElementById('acct-pl-tier');
+  if (acctTier) {
+    Array.from(acctTier.options).forEach(o => {
+      if (o.value === 'sirloin' || o.value === 'ribeye') o.disabled = !!_featuredTrial;
+    });
+    if (_featuredTrial && (acctTier.value === 'sirloin' || acctTier.value === 'ribeye')) acctTier.value = 'burger';
+  }
+}
+
+// What to tell the seller after a successful post
+function postedMessage(d) {
+  if (d.awaiting_approval) return "✅ Saved. Prime and Choice spots are reviewed by hand while we launch. It goes live as soon as it's approved, and your free 30 days start then.";
+  if (d.launch_trial) return '✅ Posted. Your free featured run lasts 30 days, then it stays up as a regular listing.';
+  return '✅ Listing posted!';
+}
+
 function updatePlPhotoHint(plan) {
   const limit = TIER_PHOTO_LIMITS[plan] || 1;
-  const names = {burger:'Burger — Free', sirloin:'Sirloin', ribeye:'Ribeye',
-    farm_to_table:'Farm to Table — Free', filet:'Filet', t_bone:'T-Bone'};
+  const names = {burger:'Burger, free', sirloin:'Sirloin, free during launch', ribeye:'Ribeye, free during launch',
+    farm_to_table:'Farm to Table, free', filet:'Prime, free during launch', t_bone:'Choice, free during launch'};
   const label = document.getElementById('pl-photo-limit-label');
   const hint = document.getElementById('pl-photo-hint');
   if (label) label.textContent = `${limit} photo${limit>1?'s':''}`;
@@ -5666,7 +5719,7 @@ async function doPostListing() {
     formData.append('breed', document.getElementById('pl-breed').value);
   }
   formData.append('price', document.getElementById('pl-price').value);
-  formData.append('price_type', 'fixed');
+  formData.append('price_type', document.getElementById('pl-price-type')?.value || 'fixed');
   const websiteUrlEl = document.getElementById('pl-website-url');
   if (websiteUrlEl && websiteUrlEl.value) formData.append('website_url', websiteUrlEl.value);
   formData.append('quantity', document.getElementById('pl-quantity').value);
@@ -5687,15 +5740,16 @@ async function doPostListing() {
     const d = await r.json();
     if (!r.ok) {
       if (r.status === 403 && d.code === 'EMAIL_NOT_VERIFIED') { closeModal('post-listing'); showVerifyGateModal(); return; }
-      errEl.textContent = d.error || 'Failed to post listing'; errEl.style.display='block'; return;
+      if (d.code === 'FEATURED_LIMIT') loadPlanAvailability();
+      errEl.textContent = d.error || 'Could not post your listing. Please try again.'; errEl.style.display='block'; return;
     }
-    sucEl.textContent = '✅ Listing posted! Redirecting to your account…'; sucEl.style.display='block';
+    sucEl.textContent = postedMessage(d) + ' Taking you to My Listings…'; sucEl.style.display='block';
     console.log('Listing response:', JSON.stringify({id:d.id, show_beef_box_offer:d.show_beef_box_offer, lister_number:d.lister_number}));
     // Check for beef box offer
     if (d.show_beef_box_offer && !localStorage.getItem('beef_box_dismissed')) {
       setTimeout(function(){ closeModal('post-listing'); showBeefBoxOffer(d.lister_number, d.id); loadHomepageSections(); loadRecentListings(); }, 1500);
     } else {
-      setTimeout(function(){ if(window._trackEvent) window._trackEvent('listings','post_listing','success'); closeModal('post-listing'); showPage('account'); loadHomepageSections(); loadRecentListings(); }, 1500);
+      setTimeout(function(){ if(window._trackEvent) window._trackEvent('listings','post_listing','success'); closeModal('post-listing'); showPage('account'); switchAcctTab('listings'); loadHomepageSections(); loadRecentListings(); }, d.awaiting_approval ? 3500 : 2000);
     }
   } catch(e) { errEl.textContent = 'Connection error'; errEl.style.display='block'; }
 }
@@ -6252,6 +6306,7 @@ async function loadAccountPage() {
 function switchAcctTab(tab) {
   // Account page's own post form: same confirm-email gate as the post buttons (H4)
   if (tab === 'post' && needsEmailConfirm()) { showVerifyGateModal(); return; }
+  if (tab === 'post') loadPlanAvailability();
   document.querySelectorAll('.acct-tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.acct-panel').forEach(p => p.classList.remove('active'));
   document.querySelector(`.acct-tab[data-tab="${tab}"]`).classList.add('active');
@@ -6311,6 +6366,23 @@ function daysUntilExpiry(expiresAt) {
   return Math.ceil((new Date(expiresAt) - new Date()) / 86400000);
 }
 
+const PLAN_NAMES = { burger:'Burger', sirloin:'Sirloin', ribeye:'Ribeye', t_bone:'Choice', filet:'Prime', farm_to_table:'Farm to Table', basic:'Burger' };
+function myListingPlanLine(l) {
+  const plan = PLAN_NAMES[l.tier] || l.tier;
+  if (l.awaiting_approval) return `${plan}, free during launch`;
+  if (l.launch_promo) return `${plan}, free during launch`;
+  if (l.tier === 'burger' || l.tier === 'basic' || l.tier === 'farm_to_table') return `${plan}, free`;
+  return plan;
+}
+function myListingState(l) {
+  if (l.awaiting_approval) return { key:'review', label:'Waiting for review', cls:'pending' };
+  if (l.status === 'pending') return { key:'reported', label:'Under review', cls:'pending' };
+  if (l.status === 'sold') return { key:'sold', label:'Sold', cls:'sold' };
+  const days = daysUntilExpiry(l.expires_at);
+  if (l.status !== 'active' || (days !== null && days <= 0)) return { key:'expired', label:'Expired', cls:'expired' };
+  return { key:'active', label:'Live', cls:'active' };
+}
+
 async function loadMyListings() {
   const container = document.getElementById('my-listings-container');
   container.innerHTML = '<div class="loading">Loading your listings…</div>';
@@ -6322,37 +6394,46 @@ async function loadMyListings() {
       container.innerHTML = '<p style="color:#888;padding:20px 0">You have no listings yet. <a href="javascript:void(0)" data-action="acct-tab" data-tab="post" style="color:var(--rust)">Post your first listing →</a></p>';
       return;
     }
+    const pill = 'font-size:10px;padding:2px 7px;border-radius:10px;font-family:\'Inter\',sans-serif;letter-spacing:.05em';
     container.innerHTML = listings.map(l => {
       const thumbSrc = l.thumb_small || l.thumb;
       const thumb = thumbSrc
-        ? `<img src="${thumbSrc}" loading="lazy" style="width:90px;height:72px;object-fit:cover;border-radius:4px;flex-shrink:0">`
+        ? `<img src="${escHtml(thumbSrc)}" loading="lazy" alt="" style="width:90px;height:72px;object-fit:cover;border-radius:4px;flex-shrink:0">`
         : `<div style="width:90px;height:72px;background:var(--light-tan);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0">${catEmoji(l.category)}</div>`;
-      const statusCls = l.status === 'active' ? 'active' : 'expired';
+      const st = myListingState(l);
       const price = l.price ? '$' + Number(l.price).toLocaleString() : 'Call for price';
       const days = daysUntilExpiry(l.expires_at);
-      const expiryBadge = days !== null
-        ? days <= 0
-          ? `<span style="background:#fee2e2;color:#991b1b;font-size:10px;padding:2px 7px;border-radius:10px;font-family:'Inter',sans-serif;letter-spacing:.05em">EXPIRED</span>`
-          : days <= 7
-          ? `<span style="background:#fef3c7;color:#92400e;font-size:10px;padding:2px 7px;border-radius:10px;font-family:'Inter',sans-serif;letter-spacing:.05em">Expires in ${days}d</span>`
-          : `<span style="font-size:11px;color:#aaa">Expires ${new Date(l.expires_at).toLocaleDateString('en-US',{month:'short',day:'numeric'})}</span>`
-        : '';
+      const fmt = d => new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric'});
+      let note = '';
+      if (st.key === 'review') note = `<span style="background:#fef3c7;color:#92400e;${pill}">Reviewed by hand during launch. Your free 30 days start when it goes live.</span>`;
+      else if (st.key === 'reported') note = `<span style="background:#fef3c7;color:#92400e;${pill}">Hidden while we look at a report. We'll restore it if everything checks out.</span>`;
+      else if (st.key === 'active' && l.launch_promo && days !== null) note = `<span style="font-size:11px;color:#065f46">Featured free until ${fmt(l.expires_at)}, then it stays up as a regular listing</span>`;
+      else if (st.key === 'active' && days !== null && days <= 7) note = `<span style="background:#fef3c7;color:#92400e;${pill}">Expires in ${days} day${days===1?'':'s'}</span>`;
+      else if (st.key === 'active' && days !== null) note = `<span style="font-size:11px;color:#aaa">Live until ${fmt(l.expires_at)}</span>`;
+      else if (st.key === 'expired') note = `<span style="font-size:11px;color:#991b1b">Not showing to buyers. Relist it free for 30 days.</span>`;
+      else if (st.key === 'sold') note = `<span style="font-size:11px;color:#aaa">${l.sold_at ? 'Sold ' + fmt(l.sold_at) : 'Sold'}. Relist it if you have more.</span>`;
+
+      const btn = (action, label, style) => `<button class="mlc-btn ${style||''}" data-action="${action}" data-id="${l.id}">${label}</button>`;
+      const btns = [btn('edit-listing', '✏️ Edit', 'mlc-btn-edit')];
+      if (st.key === 'active') {
+        btns.push(`<button class="mlc-btn" style="background:#dcfce7;color:#166534;border:1px solid #bbf7d0" data-action="mark-sold" data-id="${l.id}">✓ Mark Sold</button>`);
+        if (!l.launch_promo && days !== null && days <= 7) btns.push(btn('renew-listing', '↻ Renew 30 days'));
+      }
+      if (st.key === 'expired' || st.key === 'sold') btns.push(btn('renew-listing', '↻ Relist'));
+      btns.push(btn('delete-listing', '🗑️ Delete', 'mlc-btn-delete'));
+
       return `<div class="my-listing-card">
         ${thumb}
         <div class="mlc-info">
-          <div class="mlc-title">${l.title}<span class="mlc-status ${statusCls}">${l.status}</span></div>
-          <div class="mlc-meta">${l.category.replace(/_/g,' ')} · ${l.city}, ${l.state} · ${price} · ${l.tier} tier</div>
-          ${expiryBadge ? `<div style="margin:4px 0">${expiryBadge}</div>` : ''}
-          <div class="mlc-actions">
-            <button class="mlc-btn mlc-btn-edit" data-action="edit-listing" data-id="${l.id}">✏️ Edit</button>
-            <button class="mlc-btn" style="background:#dcfce7;color:#166534;border:1px solid #bbf7d0" data-action="mark-sold" data-id="${l.id}">✓ Mark Sold</button>
-            <button class="mlc-btn mlc-btn-delete" data-action="delete-listing" data-id="${l.id}">🗑️ Delete</button>
-          </div>
+          <div class="mlc-title">${escHtml(l.title)}<span class="mlc-status ${st.cls}">${st.label}</span></div>
+          <div class="mlc-meta">${fmtCat(l.category)} · ${escHtml(l.city || '')}, ${escHtml(l.state || '')} · ${price} · ${myListingPlanLine(l)}</div>
+          ${note ? `<div style="margin:4px 0">${note}</div>` : ''}
+          <div class="mlc-actions">${btns.join('')}</div>
         </div>
       </div>`;
     }).join('');
   } catch(e) {
-    container.innerHTML = '<p style="color:#dc3545">Could not load listings.</p>';
+    container.innerHTML = '<p style="color:#dc3545">Could not load your listings. Check your connection and try again.</p>';
   }
 }
 
@@ -6506,7 +6587,7 @@ async function changePassword() {
 }
 
 async function deleteMyListing(id) {
-  if (!confirm('Are you sure you want to delete this listing?')) return;
+  if (!confirm('Delete this listing for good? Its photos are removed and it cannot be relisted. If it sold, use Mark Sold instead.')) return;
   try {
     await fetch(`${API}/api/listings/${id}`, { method:'DELETE', headers:{ Authorization:`Bearer ${authToken}` } });
     loadMyListings();
@@ -6515,16 +6596,25 @@ async function deleteMyListing(id) {
 }
 
 async function markListingSold(id) {
-  if (!confirm('Mark this listing as sold? It will be removed from active listings.')) return;
+  if (!confirm('Mark this listing as sold? It comes off the site, and you can relist it later.')) return;
   try {
-    const r = await fetch(`${API}/api/listings/${id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type':'application/json', Authorization:`Bearer ${authToken}` },
-      body: JSON.stringify({ status: 'sold', sold_at: new Date().toISOString() })
-    });
-    if (r.ok) { loadMyListings(); showToast('🎉 Congrats on the sale! Listing marked as sold.'); }
-    else showToast('Could not update listing');
-  } catch(e) { showToast('Connection error'); }
+    const r = await fetch(`${API}/api/listings/${id}/sold`, { method: 'POST', headers: { Authorization:`Bearer ${authToken}` } });
+    const d = await r.json().catch(() => ({}));
+    if (r.ok) { loadMyListings(); showToast('🎉 Congrats on the sale! Listing marked as sold.'); loadHomepageSections(); }
+    else showToast(d.error || 'Could not mark it sold. Please try again.', 'error');
+  } catch(e) { showToast('Connection error. Check your signal and try again.', 'error'); }
+}
+
+async function renewMyListing(id) {
+  try {
+    const r = await fetch(`${API}/api/listings/${id}/renew`, { method: 'POST', headers: { Authorization:`Bearer ${authToken}` } });
+    const d = await r.json().catch(() => ({}));
+    if (r.ok) {
+      const until = d.expires_at ? new Date(d.expires_at).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '';
+      showToast('Your listing is live' + (until ? ' until ' + until : '') + '.');
+      loadMyListings(); loadHomepageSections();
+    } else showToast(d.error || 'Could not relist it. Please try again.', 'error');
+  } catch(e) { showToast('Connection error. Check your signal and try again.', 'error'); }
 }
 
 
@@ -6541,6 +6631,10 @@ function initPhotoUpload(inputId, previewId, dropAreaId) {
       return TIER_PHOTO_LIMITS[tier] || 1;
     }
     if (inputId === 'ftf-photos') return 8;
+    if (inputId === 'acct-pl-photos') {
+      const tier = (document.getElementById('acct-pl-tier') || {}).value || 'burger';
+      return TIER_PHOTO_LIMITS[tier] || 1;
+    }
     return 20;
   }
 
@@ -6634,15 +6728,16 @@ async function acctPostListing() {
     const d = await r.json();
     if (!r.ok) {
       if (r.status === 403 && d.code === 'EMAIL_NOT_VERIFIED') { showVerifyGateModal(); return; }
-      errEl.textContent = d.error || 'Failed to post listing'; errEl.style.display='block'; return;
+      if (d.code === 'FEATURED_LIMIT') loadPlanAvailability();
+      errEl.textContent = d.error || 'Could not post your listing. Please try again.'; errEl.style.display='block'; return;
     }
-    sucEl.textContent = '✅ Listing posted successfully!'; sucEl.style.display='block';
+    sucEl.textContent = postedMessage(d); sucEl.style.display='block';
     // Reset form
     ['acct-pl-title','acct-pl-breed','acct-pl-description','acct-pl-price','acct-pl-city'].forEach(id => {
       const el = document.getElementById(id); if(el) el.value = '';
     });
     document.getElementById('acct-photo-previews').innerHTML = '';
-    setTimeout(() => { sucEl.style.display='none'; switchAcctTab('listings'); }, 2000);
+    setTimeout(() => { sucEl.style.display='none'; switchAcctTab('listings'); }, d.awaiting_approval ? 3500 : 2000);
   } catch(e) { errEl.textContent = 'Connection error'; errEl.style.display='block'; }
 }
 
@@ -7610,6 +7705,17 @@ async function doResetPassword() {
     setTimeout(() => showAuthView('login'), 1800);
   } catch(e) { fail('Connection error. Please try again.'); }
 }
+
+// Expiry and launch-run emails link to /?my=listings: open My Listings once signed in.
+(function checkMyListingsParam() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('my') !== 'listings') return;
+  window.history.replaceState({}, '', window.location.pathname);
+  setTimeout(() => {
+    if (!authToken) { showToast('Sign in to see your listings.'); openModal('auth'); return; }
+    showPage('account'); switchAcctTab('listings');
+  }, 1200);
+})();
 
 // Confirm-email link landed here (?verified=1 or 0). Waits a moment so the
 // cookie session restore has finished and we know who is signed in.
