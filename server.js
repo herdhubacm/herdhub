@@ -237,7 +237,10 @@ app.use((req, res, next) => {
 // HTML — no cache so users always get latest version
 app.use(express.static(path.join(__dirname, 'public'), {
   setHeaders(res, filePath) {
-    if (filePath.endsWith('.html')) {
+    const base = path.basename(filePath);
+    if (filePath.endsWith('.html') || base === 'sw.js' || base === 'manifest.json') {
+      // The service worker and manifest must always be rechecked, or Cloudflare
+      // and installed apps keep the old version (and old icons) for a week.
       res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
     } else if (/\.(css|js|woff2?|ttf|otf)$/.test(filePath)) {
       // Fonts and scripts — cache for 7 days
