@@ -44,9 +44,9 @@
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preload" as="image" href="/hero_mark.png" fetchpriority="high">
-<link rel="icon" type="image/png" href="/logo.png">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png">
-<link rel="apple-touch-startup-image" href="/icons/icon-512.png">
+<link rel="icon" type="image/png" href="/logo.png?v=5">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png?v=5">
+<link rel="apple-touch-startup-image" href="/icons/icon-512.png?v=5">
 <link rel="manifest" href="/manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -563,7 +563,7 @@ header.scrolled{background:rgba(10,10,10,.92)!important;backdrop-filter:blur(12p
 <header>
   <div class="header-inner">
     <div class="logo-wrap" data-action="page" data-page="home">
-      <img src="/logo.png" alt="Herd Hub — American Cattle Marketplace" style="height:48px;width:auto;object-fit:contain;">
+      <img src="/logo.png?v=5" alt="Herd Hub — American Cattle Marketplace" style="height:48px;width:auto;object-fit:contain;">
       <div class="logo-text"><div class="site-name">Herd <span style="color:var(--gold)">Hub</span></div><div class="site-tagline">American Cattle Marketplace</div></div>
     </div>
     <nav aria-label="Main navigation">
@@ -1211,7 +1211,7 @@ header.scrolled{background:rgba(10,10,10,.92)!important;backdrop-filter:blur(12p
   <!-- ABOUT NAV BAR -->
   <div style="background:var(--dark-brown);padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:100;border-bottom:1px solid rgba(196,160,96,.15)">
     <button data-action="page" data-page="home" style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:10px;padding:0" aria-label="Go to Herd Hub homepage">
-      <img src="/logo.png" alt="Herd Hub" style="height:38px;width:auto;object-fit:contain;">
+      <img src="/logo.png?v=5" alt="Herd Hub" style="height:38px;width:auto;object-fit:contain;">
       <span style="font-family:'Archivo','Arial Black',sans-serif;font-stretch:125%;font-weight:900;text-transform:uppercase;letter-spacing:.01em;font-size:16px;color:var(--cream)">Herd <span style="color:var(--gold)">Hub</span></span>
     </button>
     <div style="display:flex;align-items:center;gap:8px">
@@ -3784,7 +3784,7 @@ window._initShopifyMerch=loadMerchProducts;
 <footer role="contentinfo">
   <div class="footer-inner">
     <div class="footer-grid">
-      <div class="footer-brand"><img src="/logo.png" alt="Herd Hub" style="height:56px;width:auto;object-fit:contain;margin-bottom:10px;display:block"><div class="fn">Herd <span style="color:var(--gold)">Hub</span></div><p>Becoming America's most trusted online cattle marketplace. Connecting ranchers, farmers and buyers across all 50 states since 2018.</p><div class="footer-social">
+      <div class="footer-brand"><img src="/logo.png?v=5" alt="Herd Hub" style="height:56px;width:auto;object-fit:contain;margin-bottom:10px;display:block"><div class="fn">Herd <span style="color:var(--gold)">Hub</span></div><p>Becoming America's most trusted online cattle marketplace. Connecting ranchers, farmers and buyers across all 50 states since 2018.</p><div class="footer-social">
   <a href="https://www.facebook.com/herdhubcattle" target="_blank" rel="noopener" class="soc-btn" title="Facebook" aria-label="Follow Herd Hub on Facebook">
     <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
   </a>
@@ -7867,7 +7867,7 @@ function closeMobileNav(){document.getElementById('mobile-nav').classList.remove
 </div>
 <script>
 // Service Worker Registration
-if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').catch(()=>{});}
+if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js?v=5').catch(()=>{});}
 
 // PWA Install Prompt
 let deferredPrompt=null;
@@ -7961,7 +7961,7 @@ async function submitBeefBoxClaim() {
   <div style="background:#0A0A0A;border:1px solid rgba(196,160,96,.3);border-radius:12px;max-width:480px;width:100%;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.8)">
     <div style="position:relative;overflow:hidden;background:linear-gradient(135deg,#8B3214,#C4A060);padding:22px 24px 20px;text-align:center">
       <img src="/hero_mark.png" alt="" aria-hidden="true" style="position:absolute;left:50%;top:50%;width:220px;height:220px;transform:translate(-50%,-50%);opacity:.08;pointer-events:none">
-      <img src="/logo.png" alt="Herd Hub" style="position:relative;height:44px;width:auto;display:block;margin:0 auto 10px;filter:drop-shadow(0 1px 2px rgba(0,0,0,.35))">
+      <img src="/logo.png?v=5" alt="Herd Hub" style="position:relative;height:44px;width:auto;display:block;margin:0 auto 10px;filter:drop-shadow(0 1px 2px rgba(0,0,0,.35))">
       <div style="position:relative;font-family:'Libre Baskerville',serif;font-size:22px;font-weight:700;color:#fff;margin-bottom:4px">You Made The List.</div>
       <div style="position:relative;font-family:'Inter',sans-serif;font-size:13px;color:rgba(255,255,255,.85)">You're one of our first 1,000 producers on Herd Hub</div>
     </div>
@@ -7997,7 +7997,7 @@ async function submitBeefBoxClaim() {
      padding:14px 20px;box-shadow:0 -4px 20px rgba(0,0,0,.4)">
   <div style="display:flex;align-items:center;gap:14px;
        max-width:560px;margin:0 auto">
-    <img src="/icons/icon-192.png"
+    <img src="/icons/icon-192.png?v=5"
          style="width:44px;height:44px;border-radius:10px;flex-shrink:0"
          alt="Herd Hub app icon">
     <div style="flex:1;min-width:0">

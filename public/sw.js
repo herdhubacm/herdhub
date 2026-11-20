@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'herdhub-v4';
+const CACHE_VERSION = 'herdhub-v5';
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const API_CACHE = `${CACHE_VERSION}-api`;
 
@@ -12,8 +12,8 @@ const PRECACHE_URLS = [
   '/herd-vision.html',
   '/genetic-pairing.html',
   '/ranch-finance.html',
-  '/icons/icon-192.png',
-  '/icons/icon-512.png',
+  '/icons/icon-192.png?v=5',
+  '/icons/icon-512.png?v=5',
   '/manifest.json'
 ];
 
