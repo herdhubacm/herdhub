@@ -331,7 +331,7 @@ const SECTION_COLS_FULL = SECTION_COLS + `
 router.get('/homepage', async (_req, res) => {
   try {
     const { getCached, setCached } = global.apiCache || {};
-    if (getCached) { const c = getCached('homepage-all'); if (c) { res.set('Cache-Control', 'public, max-age=300'); return res.json(c); } }
+    if (getCached) { const c = getCached('homepage-all'); if (c) { res.set('Cache-Control', 'no-cache'); return res.json(c); } }
 
     const ACTIVE = "l.status='active' AND (l.expires_at IS NULL OR l.expires_at>NOW())";
     const Q = (where, limit) => query(`SELECT ${SECTION_COLS_FULL} FROM listings l JOIN users u ON u.id=l.user_id WHERE ${where} AND ${ACTIVE} ORDER BY RANDOM() LIMIT ${limit}`);
@@ -356,7 +356,7 @@ router.get('/homepage', async (_req, res) => {
     };
 
     if (setCached) setCached('homepage-all', result, 300);
-    res.set('Cache-Control', 'public, max-age=300');
+    res.set('Cache-Control', 'no-cache');
     res.json(result);
   } catch (e) {
     console.error('Homepage query error:', e.message);
