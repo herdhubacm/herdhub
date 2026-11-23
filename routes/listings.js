@@ -4,6 +4,7 @@ const { query, pool } = require('../db/database');
 const { authenticateToken, optionalAuth, requireVerifiedEmail } = require('../middleware/auth');
 const storage = require('../services/storage');
 const plans   = require('../services/plans');
+const zipcodes = require('zipcodes');
 
 const router = express.Router();
 
@@ -16,6 +17,60 @@ const MAX_CITY_LEN        = 80;
 function sanitizeText(str, maxLen) {
   if (!str) return null;
   return String(str).trim().slice(0, maxLen);
+}
+
+const PRICE_TYPES   = ['fixed','negotiable','obo','call','per_head','per_lb','per_cwt','firm','each','per_pair'];
+const SEXES         = ['bull','cow','heifer','steer','calf'];
+const CONTACT_PREFS = ['message','phone','either'];
+
+function lookupZip(zip) {
+  if (!/^\d{5}$/.test(String(zip || ''))) return null;
+  const z = zipcodes.lookup(String(zip));
+  return z ? { zip: z.zip, city: z.city, state: z.state, lat: z.latitude, lng: z.longitude } : null;
+}
+
+// The optional detail fields the listing form sends. Returns { error } or clean values.
+// Only keys present in the body are returned, so an edit can send a subset.
+function listingExtras(b) {
+  const out = {};
+  const has = k => Object.prototype.hasOwnProperty.call(b, k);
+  const num = v => (v === '' || v == null) ? null : Number(v);
+  if (has('weight_lbs')) {
+    const w = num(b.weight_lbs);
+    if (w !== null && !(w > 0 && w <= 5000)) return { error: 'Weight should be between 1 and 5,000 lb, or leave it blank.' };
+    out.weight_lbs = w;
+  }
+  if (has('age_months')) {
+    const a = num(b.age_months);
+    if (a !== null && !(Number.isInteger(a) && a >= 0 && a <= 600)) return { error: 'Age should be a whole number of months (up to 50 years), or leave it blank.' };
+    out.age_months = a;
+  }
+  if (has('sex')) {
+    if (b.sex && !SEXES.includes(b.sex)) return { error: 'Pick bull, cow, heifer, steer or calf, or leave it blank.' };
+    out.sex = b.sex || null;
+  }
+  if (has('price_type')) {
+    if (b.price_type && !PRICE_TYPES.includes(b.price_type)) return { error: 'Pick a price unit from the list.' };
+    out.price_type = b.price_type || 'fixed';
+  }
+  if (has('contact_pref')) {
+    if (b.contact_pref && !CONTACT_PREFS.includes(b.contact_pref)) return { error: 'Pick how buyers should reach you.' };
+    out.contact_pref = b.contact_pref || 'either';
+  }
+  if (has('zip')) {
+    if (b.zip === '' || b.zip == null) { out.zip = null; }
+    else {
+      const z = lookupZip(b.zip);
+      if (!z) return { error: "We couldn't find that ZIP code. Check it, or leave it blank and enter your city and state." };
+      out.zip = z.zip; out.zip_place = z;
+    }
+  }
+  if (has('website_url')) {
+    const u = sanitizeText(b.website_url, MAX_WEBSITE_LEN);
+    if (u && !/^https?:\/\//i.test(u)) return { error: 'Website should start with http:// or https://' };
+    out.website_url = u;
+  }
+  return out;
 }
 
 // ── Multer — memory storage only ──────────────────────
@@ -250,6 +305,14 @@ async function runningFeaturedTrial(userId) {
   return rows[0] || null;
 }
 
+// ── GET /api/listings/zip-lookup/:zip ── fills city and state in the listing form
+router.get('/zip-lookup/:zip', (req, res) => {
+  const z = lookupZip(req.params.zip);
+  if (!z) return res.status(404).json({ error: "We couldn't find that ZIP code." });
+  res.set('Cache-Control', 'public, max-age=86400');
+  res.json({ zip: z.zip, city: z.city, state: z.state });
+});
+
 // ── GET /api/listings/user/me/plans ── what the post form should offer this seller
 router.get('/user/me/plans', authenticateToken, async (req, res) => {
   try {
@@ -443,7 +506,7 @@ router.get('/:id', optionalAuth, async (req, res) => {
       const { rows: contactRows } = await query(
         'SELECT phone FROM users WHERE id=$1', [listing.user_id]
       );
-      if (contactRows.length) listing.seller_phone = contactRows[0].phone;
+      if (contactRows.length && listing.contact_pref !== 'message') listing.seller_phone = contactRows[0].phone;
       const { rows: saved } = await query(
         'SELECT 1 FROM saved_listings WHERE user_id=$1 AND listing_id=$2',
         [req.user.id, id]
@@ -487,6 +550,9 @@ router.post('/', authenticateToken, requireVerifiedEmail, upload.array('photos',
     ];
     if (!validCategories.includes(category))
       return res.status(400).json({ error: 'Invalid category' });
+    const extra = listingExtras(req.body);
+    if (extra.error) return res.status(400).json({ error: extra.error });
+    const place = extra.zip_place || null;
     const safeTier   = ['burger','sirloin','ribeye','filet','t_bone','farm_to_table'].includes(tier) ? tier : 'burger';
     const isFeatured = ['sirloin','ribeye','filet','t_bone','farm_to_table'].includes(safeTier);
     const photoLimit = tierPhotoLimit(safeTier);
@@ -507,8 +573,9 @@ router.post('/', authenticateToken, requireVerifiedEmail, upload.array('photos',
     await client.query('BEGIN');
 
     // 1. Insert listing (with optional client-side lat/lng)
-    const clientLat = req.body.lat ? parseFloat(req.body.lat) : null;
-    const clientLng = req.body.lng ? parseFloat(req.body.lng) : null;
+    // A known ZIP gives the map point; otherwise the client's point, otherwise geocode below
+    const clientLat = place ? place.lat : (req.body.lat ? parseFloat(req.body.lat) : null);
+    const clientLng = place ? place.lng : (req.body.lng ? parseFloat(req.body.lng) : null);
     const { rows } = await client.query(
       `INSERT INTO listings
          (user_id, title, description, category, subcategory, breed,
@@ -520,23 +587,23 @@ router.post('/', authenticateToken, requireVerifiedEmail, upload.array('photos',
           farm_certifications, farm_price_hanging, farm_price_takehome,
           farm_deposit_required, farm_deposit_amount, farm_call_for_price,
           farm_tours, farm_operation_size, farm_years,
-          status, launch_promo, awaiting_approval)
+          status, launch_promo, awaiting_approval, contact_pref)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,
                $21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,$38,$39,
-               $40,$41,$42)
+               $40,$41,$42,$43)
        RETURNING id`,
       [
-        req.user.id, title, description, category,
-        subcategory || null, breed || null,
-        price ? +price : null, price_type,
-        +quantity,
-        weight_lbs ? +weight_lbs : null,
-        age_months ? +age_months : null,
-        sex || null, state, city, zip || null,
+        req.user.id, sanitizeText(title, MAX_TITLE_LEN), sanitizeText(description, MAX_DESC_LEN), category,
+        subcategory || null, sanitizeText(breed, 60),
+        price ? +price : null, extra.price_type || 'fixed',
+        Math.max(1, parseInt(quantity) || 1),
+        extra.weight_lbs ?? null,
+        extra.age_months ?? null,
+        extra.sex ?? null, sanitizeText(state, 2), sanitizeText(city, MAX_CITY_LEN), extra.zip ?? null,
         // Prime/Choice launch trials wait for approval; their run starts when approved
         safeTier, isFeatured, needsApproval ? null : expiresAt(safeTier),
         (launchTrial || safeTier === 'burger' || safeTier === 'farm_to_table') ? 'free' : 'pending',
-        req.body.website_url || null,
+        extra.website_url ?? null,
         clientLat, clientLng,
         // Farm to Table fields
         req.body.farm_name || null,
@@ -557,6 +624,7 @@ router.post('/', authenticateToken, requireVerifiedEmail, upload.array('photos',
         req.body.farm_operation_size || null,
         req.body.farm_years ? +req.body.farm_years : null,
         needsApproval ? 'pending' : 'active', launchTrial, needsApproval,
+        extra.contact_pref || 'either',
       ]
     );
     const listingId = rows[0].id;
@@ -671,7 +739,6 @@ const VALID_CATEGORIES = [
   'farm_to_table','livestock_services','feed_stores',
   'insurance_finance','full_herd'
 ];
-const VALID_PRICE_TYPES = ['fixed','negotiable','obo','call','per_head','per_lb','per_cwt','firm'];
 
 async function ownListing(req, res) {
   const id = parseInt(req.params.id);
@@ -698,8 +765,6 @@ router.put('/:id', authenticateToken, async (req, res) => {
       return res.status(400).json({ error: 'Title, description, state and city can\'t be blank.' });
     if (has('category') && !VALID_CATEGORIES.includes(b.category))
       return res.status(400).json({ error: 'Pick a category from the list.' });
-    if (has('price_type') && b.price_type && !VALID_PRICE_TYPES.includes(b.price_type))
-      return res.status(400).json({ error: 'Pick a price type from the list.' });
     const price = has('price') ? (b.price === '' || b.price == null ? null : +b.price) : l.price;
     if (price != null && (!isFinite(price) || price < 0))
       return res.status(400).json({ error: 'Price must be a number, or leave it blank.' });
@@ -708,6 +773,10 @@ router.put('/:id', authenticateToken, async (req, res) => {
 
     // The old edit form also sent status; only "sold" is honored here.
     const markSold = b.status === 'sold' && l.status !== 'sold';
+    const extra = listingExtras(b);
+    if (extra.error) return res.status(400).json({ error: extra.error });
+    const keep = (k) => Object.prototype.hasOwnProperty.call(extra, k) ? extra[k] : l[k];
+    const place = extra.zip_place || null;
 
     await query(
       `UPDATE listings
@@ -715,17 +784,21 @@ router.put('/:id', authenticateToken, async (req, res) => {
            quantity=$6, state=$7, city=$8, zip=$9, category=$10,
            status = CASE WHEN $11 THEN 'sold' ELSE status END,
            sold_at = CASE WHEN $11 THEN NOW() ELSE sold_at END,
+           weight_lbs=$13, age_months=$14, sex=$15, contact_pref=$16, website_url=$17,
+           lat = COALESCE($18, lat), lng = COALESCE($19, lng),
            updated_at=NOW()
        WHERE id=$12`,
       [
         title, description,
         has('breed') ? (b.breed || null) : l.breed,
         price,
-        has('price_type') ? (b.price_type || 'fixed') : l.price_type,
+        keep('price_type'),
         quantity, state, city,
-        has('zip') ? (b.zip || null) : l.zip,
+        keep('zip'),
         has('category') ? b.category : l.category,
         markSold, l.id,
+        keep('weight_lbs'), keep('age_months'), keep('sex'), keep('contact_pref'), keep('website_url'),
+        place ? place.lat : null, place ? place.lng : null,
       ]
     );
     if (global.apiCache?.clearListingCache) global.apiCache.clearListingCache();
@@ -733,6 +806,26 @@ router.put('/:id', authenticateToken, async (req, res) => {
   } catch (err) {
     console.error('PUT /listings/:id:', err.message);
     res.status(500).json({ error: 'Could not save your changes. Please try again.' });
+  }
+});
+
+// ── PUT /api/listings/:id/photos/order ── { ids: [photoId, ...] } first one is the cover
+router.put('/:id/photos/order', authenticateToken, async (req, res) => {
+  try {
+    const l = await ownListing(req, res); if (!l) return;
+    const ids = Array.isArray(req.body?.ids) ? req.body.ids.map(n => parseInt(n)).filter(n => n > 0) : [];
+    const { rows } = await query('SELECT id FROM listing_photos WHERE listing_id=$1', [l.id]);
+    const have = new Set(rows.map(r => Number(r.id)));
+    if (!ids.length || ids.length !== have.size || !ids.every(id => have.has(id)) || new Set(ids).size !== ids.length)
+      return res.status(400).json({ error: 'Photo order is out of date. Reopen the listing and try again.' });
+    for (let i = 0; i < ids.length; i++) {
+      await query('UPDATE listing_photos SET sort_order=$1 WHERE id=$2 AND listing_id=$3', [i, ids[i], l.id]);
+    }
+    if (global.apiCache?.clearListingCache) global.apiCache.clearListingCache();
+    res.json({ message: 'Photo order saved' });
+  } catch (err) {
+    console.error('PUT /listings/:id/photos/order:', err.message);
+    res.status(500).json({ error: 'Could not save the photo order. Please try again.' });
   }
 });
 
@@ -829,22 +922,25 @@ router.post('/:id/photos', authenticateToken, upload.array('photos', 20), async 
     );
     let sortOrder = parseInt(sortRes[0].max_sort) + 1;
 
+    const newIds = [];
     for (const r of succeeded) {
-      await client.query(
+      const ins = await client.query(
         `INSERT INTO listing_photos
            (listing_id, url, thumb_url, storage_key, thumb_key,
             width, height, size_bytes, sort_order)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)`,
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING id`,
         [
           req.params.id, r.url, r.thumbUrl || null,
           r.key, r.thumbKey || null,
           r.width || null, r.height || null, r.size || null, sortOrder++,
         ]
       );
+      newIds.push(ins.rows[0].id);
     }
 
     await client.query('COMMIT');
-    res.json({ added: succeeded.length, failed: failed.length, slots_remaining: slots - succeeded.length });
+    if (global.apiCache?.clearListingCache) global.apiCache.clearListingCache();
+    res.json({ added: succeeded.length, failed: failed.length, slots_remaining: slots - succeeded.length, ids: newIds });
   } catch (err) {
     await client.query('ROLLBACK');
     await Promise.allSettled(uploadedKeys.map(k => storage.deleteFile(k)));
