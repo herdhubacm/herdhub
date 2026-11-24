@@ -282,16 +282,38 @@ footer{background:var(--dark-brown);color:var(--tan);padding:56px 24px 20px}
 .acct-tab.active{color:var(--rust);border-bottom-color:var(--rust)}
 .acct-tab:hover{color:var(--rust)}
 .acct-panel{display:none}.acct-panel.active{display:block}
-.my-listing-card{background:white;border:1px solid var(--light-tan);border-radius:6px;padding:18px;margin-bottom:14px;display:flex;gap:16px;align-items:flex-start}
-.mlc-thumb{width:90px;height:72px;object-fit:cover;border-radius:4px;background:var(--light-tan);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:28px}
+.my-listing-card{background:white;border:1px solid var(--light-tan);border-radius:6px;padding:16px;margin-bottom:12px}
+.mlc-top{display:flex;gap:14px;align-items:flex-start}
+.mlc-thumb{width:110px;height:88px;object-fit:cover;border-radius:4px;background:var(--light-tan);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:30px;cursor:pointer;border:none;padding:0}
+.mlc-thumb img{width:100%;height:100%;object-fit:cover;border-radius:4px;display:block}
 .mlc-info{flex:1;min-width:0}
-.mlc-title{font-family:'Libre Baskerville',serif;font-size:17px;font-weight:700;color:var(--dark-brown);margin-bottom:4px}
-.mlc-meta{font-size:12px;color:#888;font-family:'Inter',sans-serif;letter-spacing:.05em;text-transform:uppercase;margin-bottom:8px}
-.mlc-actions{display:flex;gap:8px;flex-wrap:wrap}
-.mlc-btn{font-family:'Inter',sans-serif;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:6px 14px;border-radius:3px;border:none;cursor:pointer;transition:all .2s}
-.mlc-btn-edit{background:var(--dark-brown);color:white}
-.mlc-btn-photos{background:var(--gold);color:var(--dark-brown)}
-.mlc-btn-delete{background:#dc3545;color:white}
+.mlc-title{font-family:'Libre Baskerville',serif;font-size:17px;font-weight:700;color:var(--dark-brown);margin-bottom:4px;overflow-wrap:anywhere}
+.mlc-meta{font-size:13px;color:#666;margin-bottom:6px;line-height:1.5}
+.mlc-note{font-size:13px;line-height:1.5;margin-top:4px}
+.mlc-note.warn{color:#92400e}.mlc-note.good{color:#065f46}.mlc-note.bad{color:#991b1b}.mlc-note.quiet{color:#888}
+.mlc-actions{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin-top:14px}
+.mlc-btn{font-family:'Inter',sans-serif;font-size:14px;font-weight:600;min-height:46px;padding:8px 12px;border-radius:4px;border:2px solid var(--dark-brown);background:white;color:var(--dark-brown);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:background .15s}
+.mlc-btn:hover{background:var(--light-tan)}
+.mlc-btn:disabled{opacity:.5;cursor:wait}
+.mlc-btn-main{background:var(--dark-brown);color:white}.mlc-btn-main:hover{background:#3a2412}
+.mlc-btn-sold{background:#166534;border-color:#166534;color:white}.mlc-btn-sold:hover{background:#14532d}
+.mlc-btn-relist{background:var(--rust);border-color:var(--rust);color:white}.mlc-btn-relist:hover{background:#9a3a17}
+.mlc-btn-delete{border-color:#dc2626;color:#b91c1c}.mlc-btn-delete:hover{background:#fef2f2}
+.mlc-btn-danger{background:#dc2626;border-color:#dc2626;color:white}.mlc-btn-danger:hover{background:#b91c1c}
+.mlc-confirm{margin-top:14px;padding:12px;border-radius:4px;background:#fffbeb;border:1px solid #fcd34d}
+.mlc-confirm.danger{background:#fef2f2;border-color:#fecaca}
+.mlc-confirm p{font-size:14px;color:var(--dark-brown);line-height:1.5;margin:0 0 10px}
+.mlc-confirm .mlc-actions{margin-top:0}
+.mlc-err{font-size:13px;color:#991b1b;font-weight:600;margin-top:10px}
+.mlc-err:empty{display:none}
+.ml-summary{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.ml-chip{font-family:'Inter',sans-serif;font-size:13px;font-weight:600;padding:6px 12px;border-radius:20px;background:var(--light-tan);color:var(--dark-brown)}
+.ml-group{font-family:'Inter',sans-serif;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--rust);margin:20px 0 10px}
+@media(max-width:600px){
+  .my-listing-card{padding:12px}
+  .mlc-thumb{width:88px;height:70px}
+  .mlc-actions{grid-template-columns:1fr 1fr}
+}
 .mlc-status{display:inline-block;font-family:'Inter',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:3px 8px;border-radius:3px;margin-left:8px}
 .mlc-status.active{background:#d4edda;color:#155724}
 .mlc-status.expired{background:#f8d7da;color:#721c24}
@@ -1847,7 +1869,7 @@ header.scrolled{background:rgba(10,10,10,.92)!important;backdrop-filter:blur(12p
     <div class="acct-panel" id="acct-panel-listings">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
         <h3 style="font-family:'Libre Baskerville',serif;font-size:20px;color:var(--dark-brown)">My Listings</h3>
-        <button class="btn-primary" style="padding:9px 18px;font-size:13px" data-action="acct-tab" data-tab="post">+ Post New Listing</button>
+        <button class="btn-primary" style="padding:12px 18px;font-size:14px;min-height:46px" data-action="acct-tab" data-tab="post">+ Post a Listing</button>
       </div>
       <div id="my-listings-container"><div class="loading">Loading your listings…</div></div>
     </div>
@@ -3855,9 +3877,13 @@ function initEventDelegation() {
     else if (action === 'save-profile') saveProfile();
     else if (action === 'change-password') changePassword();
     else if (action === 'acct-tab')    switchAcctTab(el.dataset.tab);
-    else if (action === 'delete-listing') deleteMyListing(el.dataset.id);
+    else if (action === 'delete-listing') redrawMyListing(el.dataset.id, 'delete');
+    else if (action === 'ml-delete-yes') deleteMyListing(el.dataset.id);
+    else if (action === 'ml-sold-yes')   markListingSold(el.dataset.id);
+    else if (action === 'ml-cancel')     redrawMyListing(el.dataset.id);
+    else if (action === 'ml-view')       openListing(el.dataset.id);
     else if (action === 'edit-listing') openListingForm({ editId: el.dataset.id });
-    else if (action === 'mark-sold')    markListingSold(el.dataset.id);
+    else if (action === 'mark-sold')    redrawMyListing(el.dataset.id, 'sold');
     else if (action === 'renew-listing') renewMyListing(el.dataset.id);
     else if (action === 'scroll') {
       const target = document.getElementById(el.dataset.target);
@@ -5508,6 +5534,13 @@ function myListingState(l) {
   return { key:'active', label:'Live', cls:'active' };
 }
 
+// My Listings keeps the last list so confirmations can redraw one card without a reload
+let _myListings = [];
+const ML_GROUPS = [
+  ['active', 'Live'], ['review', 'Waiting for review'], ['reported', 'Under review'],
+  ['expired', 'Not showing'], ['sold', 'Sold'],
+];
+
 async function loadMyListings() {
   const container = document.getElementById('my-listings-container');
   container.innerHTML = '<div class="loading">Loading your listings…</div>';
@@ -5515,51 +5548,146 @@ async function loadMyListings() {
     const r = await fetch(`${API}/api/listings/user/me`, { headers: { Authorization: `Bearer ${authToken}` } });
     const listings = await r.json();
     if (!Array.isArray(listings)) throw new Error('Bad response');
-    if (!listings.length) {
-      container.innerHTML = '<p style="color:#888;padding:20px 0">You have no listings yet. <a href="javascript:void(0)" data-action="acct-tab" data-tab="post" style="color:var(--rust)">Post your first listing →</a></p>';
-      return;
-    }
-    const pill = 'font-size:10px;padding:2px 7px;border-radius:10px;font-family:\'Inter\',sans-serif;letter-spacing:.05em';
-    container.innerHTML = listings.map(l => {
-      const thumbSrc = l.thumb_small || l.thumb;
-      const thumb = thumbSrc
-        ? `<img src="${escHtml(thumbSrc)}" loading="lazy" alt="" style="width:90px;height:72px;object-fit:cover;border-radius:4px;flex-shrink:0">`
-        : `<div style="width:90px;height:72px;background:var(--light-tan);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0">${catEmoji(l.category)}</div>`;
-      const st = myListingState(l);
-      const price = l.price ? '$' + Number(l.price).toLocaleString() : 'Call for price';
-      const days = daysUntilExpiry(l.expires_at);
-      const fmt = d => new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric'});
-      let note = '';
-      if (st.key === 'review') note = `<span style="background:#fef3c7;color:#92400e;${pill}">Reviewed by hand during launch. Your free 30 days start when it goes live.</span>`;
-      else if (st.key === 'reported') note = `<span style="background:#fef3c7;color:#92400e;${pill}">Hidden while we look at a report. We'll restore it if everything checks out.</span>`;
-      else if (st.key === 'active' && l.launch_promo && days !== null) note = `<span style="font-size:11px;color:#065f46">Featured free until ${fmt(l.expires_at)}, then it stays up as a regular listing</span>`;
-      else if (st.key === 'active' && days !== null && days <= 7) note = `<span style="background:#fef3c7;color:#92400e;${pill}">Expires in ${days} day${days===1?'':'s'}</span>`;
-      else if (st.key === 'active' && days !== null) note = `<span style="font-size:11px;color:#aaa">Live until ${fmt(l.expires_at)}</span>`;
-      else if (st.key === 'expired') note = `<span style="font-size:11px;color:#991b1b">Not showing to buyers. Relist it free for 30 days.</span>`;
-      else if (st.key === 'sold') note = `<span style="font-size:11px;color:#aaa">${l.sold_at ? 'Sold ' + fmt(l.sold_at) : 'Sold'}. Relist it if you have more.</span>`;
-
-      const btn = (action, label, style) => `<button class="mlc-btn ${style||''}" data-action="${action}" data-id="${l.id}">${label}</button>`;
-      const btns = [btn('edit-listing', '✏️ Edit', 'mlc-btn-edit')];
-      if (st.key === 'active') {
-        btns.push(`<button class="mlc-btn" style="background:#dcfce7;color:#166534;border:1px solid #bbf7d0" data-action="mark-sold" data-id="${l.id}">✓ Mark Sold</button>`);
-        if (!l.launch_promo && days !== null && days <= 7) btns.push(btn('renew-listing', '↻ Renew 30 days'));
-      }
-      if (st.key === 'expired' || st.key === 'sold') btns.push(btn('renew-listing', '↻ Relist'));
-      btns.push(btn('delete-listing', '🗑️ Delete', 'mlc-btn-delete'));
-
-      return `<div class="my-listing-card">
-        ${thumb}
-        <div class="mlc-info">
-          <div class="mlc-title">${escHtml(l.title)}<span class="mlc-status ${st.cls}">${st.label}</span></div>
-          <div class="mlc-meta">${fmtCat(l.category)} · ${escHtml(l.city || '')}, ${escHtml(l.state || '')} · ${price} · ${myListingPlanLine(l)}</div>
-          ${note ? `<div style="margin:4px 0">${note}</div>` : ''}
-          <div class="mlc-actions">${btns.join('')}</div>
-        </div>
-      </div>`;
-    }).join('');
+    _myListings = listings;
+    renderMyListings();
   } catch(e) {
-    container.innerHTML = '<p style="color:#dc3545">Could not load your listings. Check your connection and try again.</p>';
+    container.innerHTML = `<p style="color:#991b1b;padding:12px 0">Could not load your listings. Check your connection, then <a href="javascript:void(0)" data-action="acct-tab" data-tab="listings" style="color:var(--rust)">try again</a>.</p>`;
   }
+}
+
+function renderMyListings() {
+  const container = document.getElementById('my-listings-container');
+  if (!_myListings.length) {
+    container.innerHTML = `<div style="text-align:center;padding:32px 12px;background:white;border:1px dashed var(--light-tan);border-radius:6px">
+      <div style="font-size:36px;margin-bottom:8px">🐄</div>
+      <p style="font-size:15px;color:#555;margin-bottom:14px">You haven't posted anything yet. It's free, and it takes a few minutes.</p>
+      <button class="btn-primary" style="min-height:46px;padding:12px 22px" data-action="acct-tab" data-tab="post">Post Your First Listing</button></div>`;
+    return;
+  }
+  const byKey = {};
+  _myListings.forEach(l => { const k = myListingState(l).key; (byKey[k] = byKey[k] || []).push(l); });
+  const chips = ML_GROUPS.filter(([k]) => byKey[k]).map(([k, label]) => `<span class="ml-chip">${byKey[k].length} ${label.toLowerCase()}</span>`).join('');
+  container.innerHTML = `<div class="ml-summary">${chips}</div>` + ML_GROUPS.filter(([k]) => byKey[k]).map(([k, label]) =>
+    `<div class="ml-group">${label} (${byKey[k].length})</div>` + byKey[k].map(myListingCard).join('')
+  ).join('');
+}
+
+function myListingCard(l, confirm) {
+  const st = myListingState(l);
+  const days = daysUntilExpiry(l.expires_at);
+  const fmt = d => new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  const unit = {per_head:'/head', per_cwt:'/cwt', per_lb:'/lb', per_pair:'/pair', each:' each'}[l.price_type] || '';
+  const price = l.price ? '$' + Number(l.price).toLocaleString() + unit : 'Call for price';
+  const thumbSrc = l.thumb_small || l.thumb;
+  const canView = st.key === 'active';
+  const thumb = `<button type="button" class="mlc-thumb" ${canView ? `data-action="ml-view" data-id="${l.id}" aria-label="View ${escHtml(l.title)}"` : 'tabindex="-1" aria-hidden="true"'}>${thumbSrc ? `<img src="${escHtml(thumbSrc)}" loading="lazy" alt="">` : catEmoji(l.category)}</button>`;
+
+  let note = '', cls = 'quiet';
+  if (st.key === 'review') { note = 'Prime and Choice spots are reviewed by hand while we launch. Your free 30 days start when it goes live.'; cls = 'warn'; }
+  else if (st.key === 'reported') { note = "Hidden while we look at a report. We'll put it back if everything checks out."; cls = 'warn'; }
+  else if (st.key === 'active' && l.launch_promo && days !== null) { note = `Featured free until ${fmt(l.expires_at)}. After that it stays up as a regular listing.`; cls = 'good'; }
+  else if (st.key === 'active' && days !== null && days <= 7) { note = `Comes down in ${days} day${days === 1 ? '' : 's'} unless you renew it. Renewing is free.`; cls = 'warn'; }
+  else if (st.key === 'active' && days !== null) note = `Live until ${fmt(l.expires_at)}.`;
+  else if (st.key === 'expired') { note = 'Buyers can’t see it right now. Relist it free for 30 days.'; cls = 'bad'; }
+  else if (st.key === 'sold') note = `${l.sold_at ? 'Sold ' + fmt(l.sold_at) : 'Sold'}. Relist it if you have more.`;
+  const views = st.key === 'active' ? ` · Seen ${Number(l.views || 0).toLocaleString()} time${Number(l.views) === 1 ? '' : 's'}` : '';
+
+  const b = (action, label, cls2) => `<button type="button" class="mlc-btn ${cls2 || ''}" data-action="${action}" data-id="${l.id}">${label}</button>`;
+  let actions;
+  if (confirm === 'sold') {
+    actions = `<div class="mlc-confirm"><p>Mark <strong>${escHtml(l.title)}</strong> sold? It comes off the site. You can relist it later.</p>
+      <div class="mlc-actions">${b('ml-sold-yes', 'Yes, it sold', 'mlc-btn-sold')}${b('ml-cancel', 'Cancel')}</div><div class="mlc-err" id="mlc-err-${l.id}"></div></div>`;
+  } else if (confirm === 'delete') {
+    actions = `<div class="mlc-confirm danger"><p>Delete <strong>${escHtml(l.title)}</strong> for good? The photos are removed and it can’t be relisted.${st.key === 'active' ? ' If it sold, use Mark Sold instead.' : ''}</p>
+      <div class="mlc-actions">${b('ml-delete-yes', 'Yes, delete it', 'mlc-btn-danger')}${b('ml-cancel', 'Keep it')}</div><div class="mlc-err" id="mlc-err-${l.id}"></div></div>`;
+  } else {
+    const btns = [];
+    if (st.key === 'active') {
+      btns.push(b('ml-view', '👁 View', 'mlc-btn-main'));
+      btns.push(b('edit-listing', '✏️ Edit'));
+      btns.push(b('mark-sold', '✓ Mark Sold', 'mlc-btn-sold'));
+      if (!l.launch_promo && days !== null && days <= 7) btns.push(b('renew-listing', '↻ Renew 30 days', 'mlc-btn-relist'));
+      btns.push(`<button type="button" class="mlc-btn" data-action="share-copy" data-id="${l.id}">🔗 Copy Link</button>`);
+    } else if (st.key === 'expired' || st.key === 'sold') {
+      btns.push(b('renew-listing', '↻ Relist Free', 'mlc-btn-relist'));
+      btns.push(b('edit-listing', '✏️ Edit'));
+    } else {
+      btns.push(b('edit-listing', '✏️ Edit'));
+    }
+    btns.push(b('delete-listing', '🗑 Delete', 'mlc-btn-delete'));
+    actions = `<div class="mlc-actions">${btns.join('')}</div><div class="mlc-err" id="mlc-err-${l.id}"></div>`;
+  }
+
+  return `<div class="my-listing-card" id="mlc-${l.id}">
+    <div class="mlc-top">${thumb}
+      <div class="mlc-info">
+        <div class="mlc-title">${escHtml(l.title)}<span class="mlc-status ${st.cls}">${st.label}</span></div>
+        <div class="mlc-meta">${fmtCat(l.category)} · ${escHtml(l.city || '')}, ${escHtml(l.state || '')} · ${price}<br>${myListingPlanLine(l)}${views}</div>
+        ${note ? `<div class="mlc-note ${cls}">${note}</div>` : ''}
+      </div>
+    </div>
+    ${actions}
+  </div>`;
+}
+
+// Redraw one card (for confirmations and errors) without reloading the list
+function redrawMyListing(id, confirm) {
+  const l = _myListings.find(x => String(x.id) === String(id));
+  const el = document.getElementById('mlc-' + id);
+  if (!l || !el) return;
+  el.outerHTML = myListingCard(l, confirm);
+  const fresh = document.getElementById('mlc-' + id);
+  const first = fresh && fresh.querySelector(confirm ? '.mlc-confirm button' : 'button.mlc-btn');
+  if (first) first.focus();
+}
+function myListingError(id, msg) {
+  const e = document.getElementById('mlc-err-' + id);
+  if (e) e.textContent = msg; else showToast(msg, 'error');
+}
+function myListingBusy(id, label) {
+  const card = document.getElementById('mlc-' + id);
+  if (!card) return;
+  card.querySelectorAll('button').forEach(btn => { btn.disabled = true; });
+  const yes = card.querySelector('.mlc-confirm .mlc-btn');
+  if (yes && label) yes.textContent = label;
+}
+
+async function deleteMyListing(id) {
+  myListingBusy(id, 'Deleting…');
+  try {
+    const r = await fetch(`${API}/api/listings/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${authToken}` } });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) { redrawMyListing(id, 'delete'); myListingError(id, d.error || 'Could not delete it. Please try again.'); return; }
+    _myListings = _myListings.filter(x => String(x.id) !== String(id));
+    renderMyListings();
+    showToast('Listing deleted.');
+    try { loadHomepageSections(); } catch (e) {}
+  } catch (e) { redrawMyListing(id, 'delete'); myListingError(id, 'Connection problem. Check your signal and try again.'); }
+}
+
+async function markListingSold(id) {
+  myListingBusy(id, 'Marking sold…');
+  try {
+    const r = await fetch(`${API}/api/listings/${id}/sold`, { method: 'POST', headers: { Authorization: `Bearer ${authToken}` } });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) { redrawMyListing(id, 'sold'); myListingError(id, d.error || 'Could not mark it sold. Please try again.'); return; }
+    showToast('🎉 Congrats on the sale! It’s marked sold.');
+    loadMyListings();
+    try { loadHomepageSections(); } catch (e) {}
+  } catch (e) { redrawMyListing(id, 'sold'); myListingError(id, 'Connection problem. Check your signal and try again.'); }
+}
+
+async function renewMyListing(id) {
+  myListingBusy(id);
+  try {
+    const r = await fetch(`${API}/api/listings/${id}/renew`, { method: 'POST', headers: { Authorization: `Bearer ${authToken}` } });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) { redrawMyListing(id); myListingError(id, d.error || 'Could not relist it. Please try again.'); return; }
+    const until = d.expires_at ? new Date(d.expires_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
+    showToast('It’s live' + (until ? ' until ' + until : '') + '.');
+    loadMyListings();
+    try { loadHomepageSections(); } catch (e) {}
+  } catch (e) { redrawMyListing(id); myListingError(id, 'Connection problem. Check your signal and try again.'); }
 }
 
 async function loadSavedListings() {
@@ -5709,37 +5837,6 @@ async function changePassword() {
     document.getElementById('pw-confirm').value='';
     setTimeout(() => sucEl.style.display='none', 3000);
   } catch(e) { errEl.textContent = 'Connection error'; errEl.style.display='block'; }
-}
-
-async function deleteMyListing(id) {
-  if (!confirm('Delete this listing for good? Its photos are removed and it cannot be relisted. If it sold, use Mark Sold instead.')) return;
-  try {
-    await fetch(`${API}/api/listings/${id}`, { method:'DELETE', headers:{ Authorization:`Bearer ${authToken}` } });
-    loadMyListings();
-    showToast('Listing deleted');
-  } catch(e) { showToast('Could not delete listing'); }
-}
-
-async function markListingSold(id) {
-  if (!confirm('Mark this listing as sold? It comes off the site, and you can relist it later.')) return;
-  try {
-    const r = await fetch(`${API}/api/listings/${id}/sold`, { method: 'POST', headers: { Authorization:`Bearer ${authToken}` } });
-    const d = await r.json().catch(() => ({}));
-    if (r.ok) { loadMyListings(); showToast('🎉 Congrats on the sale! Listing marked as sold.'); loadHomepageSections(); }
-    else showToast(d.error || 'Could not mark it sold. Please try again.', 'error');
-  } catch(e) { showToast('Connection error. Check your signal and try again.', 'error'); }
-}
-
-async function renewMyListing(id) {
-  try {
-    const r = await fetch(`${API}/api/listings/${id}/renew`, { method: 'POST', headers: { Authorization:`Bearer ${authToken}` } });
-    const d = await r.json().catch(() => ({}));
-    if (r.ok) {
-      const until = d.expires_at ? new Date(d.expires_at).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '';
-      showToast('Your listing is live' + (until ? ' until ' + until : '') + '.');
-      loadMyListings(); loadHomepageSections();
-    } else showToast(d.error || 'Could not relist it. Please try again.', 'error');
-  } catch(e) { showToast('Connection error. Check your signal and try again.', 'error'); }
 }
 
 
