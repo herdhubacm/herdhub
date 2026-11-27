@@ -2057,12 +2057,11 @@ header.scrolled{background:rgba(10,10,10,.92)!important;backdrop-filter:blur(12p
       <p style="text-align:center;margin-top:10px;font-size:13px"><a href="javascript:void(0)" onclick="showForgotPassword()" style="color:var(--rust);text-decoration:none">Forgot your password?</a></p>
     </div>
     <div id="form-register" data-auth-view="register" style="display:none">
-      <h2>Create Account</h2><p>Free. Takes about a minute.</p>
+      <h2>Create Account</h2><p>Free. Your name, your email and a password. That's it.</p>
       <div id="register-error" class="form-error" style="display:none"></div>
-      <div class="form-row"><div class="form-group"><label for="reg-name">Full Name</label><input type="text" id="reg-name" placeholder="Jake Harrington" autocomplete="name" aria-label="Full name"></div><div class="form-group"><label for="reg-phone">Phone</label><input type="tel" id="reg-phone" placeholder="(806) 555-1234" autocomplete="tel" aria-label="Phone number"></div></div>
-      <div class="form-group"><label for="reg-email">Email</label><input type="email" id="reg-email" placeholder="you@example.com" autocomplete="email" aria-label="Email address"></div>
-      <div class="form-group"><label for="reg-password">Password</label><input type="password" id="reg-password" placeholder="Min 8 characters" autocomplete="new-password" aria-label="Password, minimum 8 characters"></div>
-      <div class="form-row"><div class="form-group"><label>State</label><select id="reg-state"><option value="">Select…</option><option>AL</option><option>AK</option><option>AZ</option><option>AR</option><option>CA</option><option>CO</option><option>CT</option><option>DE</option><option>FL</option><option>GA</option><option>HI</option><option>ID</option><option>IL</option><option>IN</option><option>IA</option><option>KS</option><option>KY</option><option>LA</option><option>ME</option><option>MD</option><option>MA</option><option>MI</option><option>MN</option><option>MS</option><option>MO</option><option>MT</option><option>NE</option><option>NV</option><option>NH</option><option>NJ</option><option>NM</option><option>NY</option><option>NC</option><option>ND</option><option>OH</option><option>OK</option><option>OR</option><option>PA</option><option>RI</option><option>SC</option><option>SD</option><option>TN</option><option>TX</option><option>UT</option><option>VT</option><option>VA</option><option>WA</option><option>WV</option><option>WI</option><option>WY</option></select></div><div class="form-group"><label for="reg-city">City</label><input type="text" id="reg-city" placeholder="Amarillo" autocomplete="address-level2" aria-label="City"></div></div>
+      <div class="form-group"><label for="reg-name">Your Name</label><input type="text" id="reg-name" placeholder="Jake Harrington" autocomplete="name" aria-label="Your name"></div>
+      <div class="form-group"><label for="reg-email">Email</label><input type="email" id="reg-email" placeholder="you@example.com" autocomplete="email" inputmode="email" aria-label="Email address"></div>
+      <div class="form-group"><label for="reg-password">Password</label><input type="password" id="reg-password" placeholder="At least 8 characters" autocomplete="new-password" aria-label="Password, at least 8 characters"></div>
 
       <!-- Terms agreement checkbox — required -->
       <div style="margin:14px 0 10px;padding:14px;background:var(--cream);border:1.5px solid var(--light-tan);border-radius:4px">
@@ -2076,7 +2075,7 @@ header.scrolled{background:rgba(10,10,10,.92)!important;backdrop-filter:blur(12p
       <div style="margin:0 0 14px;padding:12px 14px;background:rgba(122,140,110,.08);border:1px solid rgba(122,140,110,.25);border-radius:4px">
         <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:13px;color:#555;line-height:1.6;font-family:'Libre Baskerville',serif;font-weight:400;text-transform:none;letter-spacing:0">
           <input type="checkbox" id="reg-newsletter-check" style="margin-top:3px;flex-shrink:0;accent-color:var(--sage);width:15px;height:15px" checked>
-          <span>Yes, send me the Herd Hub monthly newsletter — market prices, featured ranches, new listings, and ranch news. <span style="color:#888;font-size:12px">(Optional — unsubscribe anytime)</span></span>
+          <span>Yes, send me the Herd Hub monthly newsletter: market prices, featured ranches, new listings and ranch news. <span style="color:#888;font-size:12px">(Optional. Unsubscribe anytime.)</span></span>
         </label>
       </div>
 
@@ -3918,18 +3917,22 @@ function updateAuthUI() {
 }
 
 async function doLogin() {
-  const email = document.getElementById('login-email').value;
+  const email = document.getElementById('login-email').value.trim();
   const password = document.getElementById('login-password').value;
   const errEl = document.getElementById('login-error');
   errEl.style.display = 'none';
+  if (!email || !password) { errEl.textContent = !email ? 'Enter your email address.' : 'Enter your password.'; errEl.style.display = 'block'; return; }
   try {
     const r = await fetch(`${API}/api/auth/login`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({email,password}) });
     const d = await r.json();
     if (!r.ok) {
-      errEl.textContent = d.error || 'Login failed';
+      errEl.textContent = d.error || 'Could not sign you in. Please try again.';
+      if (d.code === 'BAD_LOGIN') {
+        errEl.innerHTML = escHtml(d.error) + ' <a href="javascript:void(0)" onclick="showForgotPassword()" style="color:var(--rust)">Reset password</a>';
+      }
       // Show reset link on too many attempts
       if (r.status === 429) {
-        errEl.innerHTML = d.error + ' <a href="javascript:void(0)" onclick="showForgotPassword()" style="color:var(--rust)">Reset password →</a>';
+        errEl.innerHTML = escHtml(d.error) + ' <a href="javascript:void(0)" onclick="showForgotPassword()" style="color:var(--rust)">Reset password →</a>';
       }
       errEl.style.display = 'block';
       return;
@@ -3963,9 +3966,16 @@ async function doRegister() {
   errEl.style.display = 'none';
 
   // Enforce terms agreement
+  const regName = document.getElementById('reg-name').value.trim();
+  const regEmail = document.getElementById('reg-email').value.trim();
+  if (!regName || !regEmail) {
+    errEl.textContent = !regName ? 'Enter your name.' : 'Enter your email address.';
+    errEl.style.display = 'block';
+    return;
+  }
   const termsCheck = document.getElementById('reg-terms-check');
   if (!termsCheck || !termsCheck.checked) {
-    errEl.textContent = 'You must agree to the Terms of Service, Privacy Policy, and User Agreement to create an account.';
+    errEl.textContent = 'Tick the box to agree to the Terms of Service, Privacy Policy and User Agreement, then tap Create Free Account.';
     errEl.style.display = 'block';
     return;
   }
@@ -3988,9 +3998,6 @@ async function doRegister() {
     name: document.getElementById('reg-name').value,
     email: document.getElementById('reg-email').value,
     password: document.getElementById('reg-password').value,
-    phone: document.getElementById('reg-phone').value,
-    state: document.getElementById('reg-state').value,
-    city: document.getElementById('reg-city').value,
     newsletter_opt_in: newsletterOptIn ? newsletterOptIn.checked : false,
     terms_accepted: true,
     terms_accepted_at: new Date().toISOString(),
@@ -4001,7 +4008,13 @@ async function doRegister() {
     r = await fetch(`${API}/api/auth/register`, { method:'POST', headers:{'Content-Type':'application/json','X-CSRF-Token': csrfToken||''}, body: JSON.stringify(body) });
     d = await r.json();
   } catch(e) { errEl.textContent = 'Connection error'; errEl.style.display='block'; return; }
-  if (!r.ok) { errEl.textContent = d.error || 'Registration failed'; errEl.style.display='block'; return; }
+  if (!r.ok) {
+    errEl.textContent = d.error || 'Could not create your account. Please try again.';
+    if (d.code === 'EMAIL_TAKEN') {
+      errEl.innerHTML = escHtml(d.error) + ' <a href="javascript:void(0)" onclick="document.getElementById(\'login-email\').value=document.getElementById(\'reg-email\').value;showAuthView(\'login\')" style="color:var(--rust)">Go to Sign In</a>';
+    }
+    errEl.style.display = 'block'; return;
+  }
   authToken = d.token; currentUser = d.user;
   // The confirm-email panel comes first, so nothing below can hide it
   showVerifySent(d.user.email, 'register');
@@ -6815,7 +6828,7 @@ function completeOnboardStep(id, page, tab, postListing, verify) {
 
 // Forgot / reset password live in their own auth views (H17). Nothing here
 // overwrites the Sign In form any more.
-function showForgotPassword() { showAuthView('forgot'); }
+function showForgotPassword() { showAuthView('forgot'); const f = document.getElementById('forgot-email'), l = document.getElementById('login-email'); if (f && l && !f.value) f.value = l.value.trim(); }
 
 async function doForgotPassword() {
   const email = document.getElementById('forgot-email')?.value?.trim();
@@ -7388,6 +7401,6 @@ function dismissPWABanner() {
 }
 </script>
 
-<script src="/listing-form.js?v=3"></script>
+<script src="/listing-form.js?v=4"></script>
 </body>
 </html>

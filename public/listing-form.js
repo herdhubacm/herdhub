@@ -94,7 +94,7 @@
       category: '', title: '', breed: '', quantity: '1', weight_lbs: '', age_value: '', age_unit: 'months', sex: '',
       description: '', website_url: '', price: '', price_type: '', call: false,
       zip: '', city: u.city || '', state: u.state || '', place_ok: false,
-      contact_pref: u.phone ? 'either' : 'message', tier: 'burger',
+      contact_pref: u.phone ? 'either' : 'message', phone: u.phone || '', tier: 'burger',
     };
   }
   function steps() {
@@ -156,7 +156,7 @@
           sex: l.sex || '', description: l.description || '', website_url: l.website_url || '',
           price: l.price == null ? '' : String(Number(l.price)), price_type: l.price_type || 'fixed', call: l.price_type === 'call',
           zip: l.zip || '', city: l.city || '', state: l.state || '', place_ok: true,
-          contact_pref: l.contact_pref || 'either', tier: l.tier,
+          contact_pref: l.contact_pref || 'either', phone: me().phone || '', tier: l.tier,
         });
         S.photos = (l.photos || []).map(p => ({ kind: 'old', id: Number(p.id), url: p.thumb_url || p.url }));
         S.photoLimit = l.photo_limit || (PLANS[l.tier] || {}).photos || 1;
@@ -318,14 +318,15 @@
     html += field('zip', 'ZIP code', `<input type="text" id="lf-zip" inputmode="numeric" autocomplete="postal-code" maxlength="5" value="${esc(d.zip)}" placeholder="e.g. 79101">`,
       'We use it to fill in your town and put the listing on the map. Buyers see the town, never the ZIP.');
     html += `<div id="lf-place">${placeHtml()}</div>`;
-    const hasPhone = !!me().phone;
-    const opt = (v, l, dis) => `<label class="lf-radio${dis ? ' disabled' : ''}"><input type="radio" name="lf-contact" value="${v}" ${d.contact_pref === v ? 'checked' : ''} ${dis ? 'disabled' : ''}> ${l}</label>`;
+    const opt = (v, l) => `<label class="lf-radio"><input type="radio" name="lf-contact" value="${v}" ${d.contact_pref === v ? 'checked' : ''}> ${l}</label>`;
     html += `<div class="form-group lf-field"><label>How should buyers reach you?</label>
-      ${opt('message', 'Message me on Herd Hub', false)}
-      ${opt('phone', 'Call or text me', !hasPhone)}
-      ${opt('either', 'Either one', !hasPhone)}
-      ${hasPhone ? `<div class="lf-hint">Your phone (${esc(me().phone)}) shows only to signed-in buyers, and only if you pick call or either.</div>` : `<div class="lf-hint">Add a phone number on your Profile page to let buyers call you.</div>`}
-      <div class="lf-ferr" id="lf-e-contact"></div></div>`;
+      ${opt('message', 'Message me on Herd Hub')}
+      ${opt('phone', 'Call or text me')}
+      ${opt('either', 'Either one')}
+      <div class="lf-ferr" id="lf-e-contact"></div></div>
+      <div id="lf-phone-wrap"${d.contact_pref === 'message' ? ' hidden' : ''}>` +
+      field('phone', 'Your phone number', `<input type="tel" id="lf-phone" inputmode="tel" autocomplete="tel" maxlength="20" value="${esc(d.phone || '')}" placeholder="(806) 555-1234">`,
+        'Shows only to signed-in buyers. It is saved to your account for your other listings too.') + `</div>`;
     return html;
   }
   function placeHtml() {
@@ -382,7 +383,7 @@
     html += row('Category', esc((CAT[d.category] || {}).label || d.category), 'what');
     html += row('Details', `${esc(d.title)}${pills.length ? '<br>' + pills.join(' · ') : ''}`, 'details');
     html += row('Photos', `${S.photos.length} photo${S.photos.length === 1 ? '' : 's'}${S.photos.length > limit ? `. This plan shows your first ${limit}.` : ''}`, 'photos');
-    html += row('Price and location', `${price ? esc(price) + '<br>' : ''}${esc(d.city)}, ${esc(d.state)}${d.zip ? ' ' + esc(d.zip) : ''}<br>Buyers reach you by: ${contact}`, 'price');
+    html += row('Price and location', `${price ? esc(price) + '<br>' : ''}${esc(d.city)}, ${esc(d.state)}${d.zip ? ' ' + esc(d.zip) : ''}<br>Buyers reach you by: ${contact}${d.contact_pref !== 'message' && d.phone ? ' at ' + esc(d.phone) : ''}`, 'price');
     const P = PLANS[d.tier] || { name: d.tier };
     html += row('Plan', `${P.icon || ''} ${esc(P.name)}${P.launch ? ', free during launch' : ', free'}${d.tier === 't_bone' || d.tier === 'filet' ? '. Reviewed by hand before it goes live.' : ''}`, S.mode === 'new' ? 'plan' : null);
     html += `</div>`;
@@ -402,7 +403,8 @@
       bind('lf-price', 'price'); bind('lf-unit', 'price_type');
       const call = $('lf-call');
       if (call) call.addEventListener('change', () => { d.call = call.checked; $('lf-price').disabled = call.checked; $('lf-unit').disabled = call.checked; saveDraft(); });
-      document.querySelectorAll('input[name="lf-contact"]').forEach(r => r.addEventListener('change', () => { d.contact_pref = r.value; saveDraft(); }));
+      document.querySelectorAll('input[name="lf-contact"]').forEach(r => r.addEventListener('change', () => { d.contact_pref = r.value; const w = $('lf-phone-wrap'); if (w) w.hidden = r.value === 'message'; saveDraft(); }));
+      bind('lf-phone', 'phone');
       const zip = $('lf-zip');
       zip.addEventListener('input', () => {
         zip.value = zip.value.replace(/\D/g, '').slice(0, 5);
@@ -547,6 +549,7 @@
       if (k !== 'business' && !d.call && !(Number(d.price) > 0)) bad('price', 'Enter a price, or check Call for price.');
       if (!d.city || !d.state) { ok = false; const e = $('lf-e-place'); if (e) e.textContent = 'Enter your ZIP, or your town and state.'; if (!S.editPlace && !d.place_ok) { S.editPlace = true; $('lf-place').innerHTML = placeHtml(); wirePlace(); } }
       if (d.zip && d.zip.length !== 5) bad('zip', 'A ZIP code is 5 digits. Or clear it and enter your town and state.');
+      if (d.contact_pref !== 'message' && !phoneDigits(d.phone)) bad('phone', 'Enter a 10-digit phone number, or pick Message me on Herd Hub.');
     }
     if (!ok) showError('Fix the highlighted fields to keep going.');
     return ok;
@@ -573,6 +576,28 @@
     return p;
   }
 
+  // US numbers: 10 digits, a leading 1 dropped. Returns '' when it isn't one.
+  function phoneDigits(v) {
+    let x = String(v || '').replace(/\D/g, '');
+    if (x.length === 11 && x[0] === '1') x = x.slice(1);
+    return x.length === 10 && !/^[01]/.test(x) && !/^.{3}[01]/.test(x) ? x : '';
+  }
+  // Saves the phone to the account first when the seller picked call or text
+  // and typed a new one. Returns false (with the error shown) if it fails.
+  async function savePhoneIfNeeded() {
+    const d = S.data;
+    if (d.contact_pref === 'message') return true;
+    if (phoneDigits(d.phone) === phoneDigits(me().phone)) return true;
+    try {
+      const r = await fetch(`${API}/api/auth/me/phone`, { method: 'PUT', headers: { ...authHeaders(), 'Content-Type': 'application/json' }, body: JSON.stringify({ phone: d.phone }) });
+      const res = await r.json().catch(() => ({}));
+      if (!r.ok) { showError(res.error || 'Could not save your phone number. Please try again.'); return false; }
+      if (typeof currentUser !== 'undefined' && currentUser) currentUser.phone = res.phone;
+      d.phone = res.phone;
+      return true;
+    } catch (e) { showError('Connection problem. Check your signal and try again. Nothing was lost.'); return false; }
+  }
+
   async function submitNew() {
     const d = S.data;
     const limit = (PLANS[d.tier] || PLANS.burger).photos;
@@ -581,6 +606,7 @@
     fd.append('tier', d.tier);
     S.photos.slice(0, limit).forEach((p, i) => fd.append('photos', p.blob, `photo-${i + 1}.jpg`));
     busy(true, 'Posting your listing…');
+    if (!(await savePhoneIfNeeded())) { busy(false); return; }
     try {
       const r = await fetch(`${API}/api/listings`, { method: 'POST', headers: authHeaders(), body: fd });
       const res = await r.json().catch(() => ({}));
@@ -607,6 +633,7 @@
   async function submitEdit() {
     const id = S.id;
     busy(true, 'Saving…');
+    if (!(await savePhoneIfNeeded())) { busy(false); return; }
     try {
       const r = await fetch(`${API}/api/listings/${id}`, { method: 'PUT', headers: { ...authHeaders(), 'Content-Type': 'application/json' }, body: JSON.stringify(fieldsPayload()) });
       const res = await r.json().catch(() => ({}));
@@ -671,7 +698,7 @@
     const d = S.data, k = kindOf(d.category);
     if (name === 'details') return (d.title || '').trim().length >= 5 && (d.description || '').trim().length >= 10 && (k === 'business' || parseInt(d.quantity) >= 1);
     if (name === 'photos') return S.photos.length > 0 && !S.processing;
-    if (name === 'price') return (k === 'business' || d.call || Number(d.price) > 0) && !!d.city && !!d.state;
+    if (name === 'price') return (k === 'business' || d.call || Number(d.price) > 0) && !!d.city && !!d.state && (d.contact_pref === 'message' || !!phoneDigits(d.phone));
     return true;
   }
 })();
