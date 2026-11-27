@@ -28,6 +28,16 @@ function clearAuthCookie(res) {
   res.clearCookie('hh_auth', { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'strict', path: '/' });
 }
 
+// US phone numbers only: 10 digits (a leading 1 is dropped), stored as (806) 555-1234.
+// Returns '' for blank input and null for something that is not a phone number.
+function normalizePhone(v) {
+  if (v === undefined || v === null || String(v).trim() === '') return '';
+  let d = String(v).replace(/\D/g, '');
+  if (d.length === 11 && d[0] === '1') d = d.slice(1);
+  if (d.length !== 10 || /^[01]/.test(d) || /^.{3}[01]/.test(d)) return null;
+  return `(${d.slice(0, 3)}) ${d.slice(3, 6)}-${d.slice(6)}`;
+}
+
 // ── POST /api/auth/register ────────────────────────────
 router.post('/register', async (req, res) => {
   try {
@@ -37,17 +47,19 @@ router.post('/register', async (req, res) => {
     // Honeypot bot protection — hidden field should always be empty
     if (website) return res.status(400).json({ error: 'Registration failed.' });
 
-    if (!email || !password || !name)
-      return res.status(400).json({ error: 'email, password and name are required' });
+    if (!name || !String(name).trim() || !email || !password)
+      return res.status(400).json({ error: 'Enter your name, your email and a password.' });
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email).trim()))
+      return res.status(400).json({ error: 'That email address does not look right. Check it and try again.' });
     if (password.length < 8)
       return res.status(400).json({ error: 'Password must be at least 8 characters' });
     if (!terms_accepted)
       return res.status(400).json({ error: 'You must agree to the Terms of Service to create an account.' });
 
     const { rows: exists } = await query(
-      'SELECT id FROM users WHERE email = $1', [email.toLowerCase()]
+      'SELECT id FROM users WHERE email = $1', [email.toLowerCase().trim()]
     );
-    if (exists.length) return res.status(409).json({ error: 'Email already registered' });
+    if (exists.length) return res.status(409).json({ error: 'That email already has an account. Sign in instead.', code: 'EMAIL_TAKEN' });
 
     const hash = await bcrypt.hash(password, 12);
     const acceptedAt = terms_accepted_at ? new Date(terms_accepted_at) : new Date();
@@ -61,7 +73,7 @@ router.post('/register', async (req, res) => {
                           email_verify_token_hash, email_verify_sent_at)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW())
        RETURNING id, email, name, role, email_verified_at`,
-      [email.toLowerCase(), hash, name, phone || null, state || null, city || null,
+      [email.toLowerCase().trim(), hash, String(name).trim(), normalizePhone(phone) || null, state || null, city || null,
        true, acceptedAt, newsletter_opt_in === true, verifyHash]
     );
 
@@ -86,7 +98,7 @@ router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
     if (!email || !password)
-      return res.status(400).json({ error: 'Email and password required' });
+      return res.status(400).json({ error: 'Enter your email and your password.' });
 
     const identifier = email.toLowerCase().trim();
 
@@ -132,7 +144,8 @@ router.post('/login', async (req, res) => {
               ELSE NULL END
         `, [identifier]);
       } catch (e) { console.warn('Failed to record attempt (non-fatal):', e.message); }
-      return res.status(401).json({ error: 'Invalid email or password' });
+      // Same answer whether or not the email exists, so nobody can test which emails have accounts.
+      return res.status(401).json({ error: "That email and password don't match. Check them and try again, or reset your password.", code: 'BAD_LOGIN' });
     }
 
     // Step 5 — Success: clear attempts and issue token
@@ -253,6 +266,21 @@ router.put('/me', authenticateToken, async (req, res) => {
   }
 });
 
+// ── PUT /api/auth/me/phone ─────────────────────────────
+// Sets only the phone. The listing form uses it when a seller picks call or text.
+router.put('/me/phone', authenticateToken, async (req, res) => {
+  try {
+    const phone = normalizePhone(req.body && req.body.phone);
+    if (!phone) return res.status(400).json({ error: 'Enter a 10-digit phone number, like (806) 555-1234.' });
+    const { rows } = await query('UPDATE users SET phone=$1, updated_at=NOW() WHERE id=$2 RETURNING phone', [phone, req.user.id]);
+    if (!rows.length) return res.status(404).json({ error: 'Account not found' });
+    res.json({ phone: rows[0].phone });
+  } catch (err) {
+    console.error('PUT /api/auth/me/phone error:', err.message);
+    res.status(500).json({ error: 'Could not save your phone number. Please try again.' });
+  }
+});
+
 // PUT /api/auth/profile — full profile save with new fields
 router.put('/profile', authenticateToken, async (req, res) => {
   try {
@@ -364,6 +392,7 @@ router.get('/saved-listings', authenticateToken, async (req, res) => {
 });
 
 module.exports = router;
+module.exports.normalizePhone = normalizePhone;
 
 // ── POST /api/auth/forgot-password ────────────────────
 router.post('/forgot-password', async (req, res) => {
