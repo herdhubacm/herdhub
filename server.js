@@ -632,7 +632,7 @@ async function start() {
         const { rows } = await query("SELECT DISTINCT category FROM listings WHERE status='active'");
         const valid = new Set(['bulls','bucking_bulls','bred_heifers','bred_cows','open_heifers','open_cows',
           'feeder_stocker','fat_cattle','bottle_calves','cow_calf_pairs','embryos','semen','showstock','dairy',
-          'equipment','trailers','chutes_pens','working_dogs','feed_hay','farm_to_table',
+          'equipment','trailers','chutes_pens','working_dogs','feed_hay','farm_to_table','processors',
           'sale_barns','ranches_farms','breed_associations','livestock_services','feed_stores',
           'insurance_finance','full_herd','beef_cattle']);
         const unknown = rows.map(r => r.category).filter(c => !valid.has(c));
@@ -669,7 +669,7 @@ async function start() {
         //    a regular free listing for 30 more days instead of expiring.
         const { rows: dropped } = await query(
           `UPDATE listings
-              SET tier = CASE WHEN category='farm_to_table' THEN 'farm_to_table' ELSE 'burger' END,
+              SET tier = CASE WHEN category IN ('farm_to_table','processors') THEN 'farm_to_table' ELSE 'burger' END,
                   is_featured = FALSE, launch_promo = FALSE, launch_ended_at = NOW(),
                   expires_at = NOW() + INTERVAL '30 days', updated_at = NOW()
             WHERE status='active' AND launch_promo AND expires_at IS NOT NULL AND expires_at < NOW()

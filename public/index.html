@@ -384,6 +384,8 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
 .ftf-opsize-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px 16px}
 .ftf-checkbox-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px 12px}
 @media(max-width:600px){.ftf-opsize-grid{grid-template-columns:1fr}.ftf-checkbox-grid{grid-template-columns:1fr 1fr}}
+.lf-checks{display:grid;grid-template-columns:repeat(auto-fill,minmax(135px,1fr));gap:0 12px}
+.lf-checks .lf-check{margin:0;padding:6px 0;line-height:1.3;align-items:flex-start}
 .ftf-pill{display:inline-block;background:rgba(90,122,74,.12);color:#5a7a4a;font-family:'Inter',sans-serif;font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:4px 10px;border-radius:12px;margin:2px}
 .ftf-detail-section{border-top:1px solid var(--light-tan);padding-top:14px;margin-top:14px}
 .ftf-detail-label{font-family:'Inter',sans-serif;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#888;margin-bottom:6px}
@@ -674,7 +676,8 @@ header.scrolled{background:rgba(10,10,10,.92)!important;backdrop-filter:blur(12p
           <option value="equipment">Equipment</option>
           <option value="trailers">Trailers</option>
           <option value="working_dogs">Working Dogs</option>
-          <option value="farm_to_table">Farm to Table</option>
+          <option value="farm_to_table">Buy Beef (Farm to Table)</option>
+          <option value="processors">Processors and Lockers</option>
           <option value="feed_hay">Feed &amp; Hay</option>
         </select>
       </div>
@@ -1582,7 +1585,8 @@ header.scrolled{background:rgba(10,10,10,.92)!important;backdrop-filter:blur(12p
         </optgroup>
         <optgroup label="Other">
           <option value="working_dogs">Working Dogs</option>
-          <option value="farm_to_table">Farm to Table</option>
+          <option value="farm_to_table">Buy Beef (Farm to Table)</option>
+          <option value="processors">Processors and Lockers</option>
         </optgroup>
       </select>
       <select id="f-state" onchange="loadListings()" aria-label="Filter by state" style="padding:8px 12px;border:1.5px solid var(--light-tan);border-radius:4px;font-family:'Libre Baskerville',serif;font-size:14px;outline:none">
@@ -1907,7 +1911,8 @@ header.scrolled{background:rgba(10,10,10,.92)!important;backdrop-filter:blur(12p
               <option value="trailers">Trailers</option>
               <option value="working_dogs">Working Dogs</option>
               <option value="feed_hay">Feed & Hay</option>
-              <option value="farm_to_table">Farm to Table</option>
+              <option value="farm_to_table">Buy Beef (Farm to Table)</option>
+              <option value="processors">Processors and Lockers</option>
             </select>
           </div>
           <div>
@@ -2127,223 +2132,6 @@ header.scrolled{background:rgba(10,10,10,.92)!important;backdrop-filter:blur(12p
 </div>
 
 <!-- FARM TO TABLE LISTING MODAL -->
-<div class="modal-overlay" id="modal-farm-to-table-listing" role="dialog" aria-modal="true" aria-hidden="true" aria-label="List your farm to table operation">
-  <div class="modal" style="max-width:760px">
-    <button class="modal-close" data-action="close-modal" data-modal="farm-to-table-listing" aria-label="Close dialog">✕</button>
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:4px">
-      <div style="width:48px;height:48px;background:#5a7a4a;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">🌿</div>
-      <div>
-        <h2 style="margin:0;font-size:24px;font-weight:900">Farm to Table Listing</h2>
-        <div style="font-family:'Inter',sans-serif;font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:#5a7a4a;font-weight:600">Direct from the Ranch — Free to List</div>
-      </div>
-    </div>
-
-    <div id="ftf-form-error" class="form-error" style="display:none"></div>
-    <div id="ftf-form-success" class="form-success" style="display:none"></div>
-
-    <!-- Section 1: Operation Info -->
-    <fieldset style="border:1px solid var(--light-tan);border-radius:6px;padding:16px;margin:16px 0 0">
-      <legend style="font-family:'Inter',sans-serif;font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:#5a7a4a;padding:0 8px">Your Operation</legend>
-      <div class="sf"><label for="ftf-farm-name">Farm / Ranch Name *</label><input id="ftf-farm-name" type="text" placeholder="e.g. Rolling Hills Ranch" required></div>
-      <div class="sf"><label for="ftf-your-name">Your Name *</label><input id="ftf-your-name" type="text" placeholder="Full name" required></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-        <div class="sf"><label for="ftf-state">State *</label><select id="ftf-state" required><option value="">Select</option><option>Alabama</option><option>Alaska</option><option>Arizona</option><option>Arkansas</option><option>California</option><option>Colorado</option><option>Connecticut</option><option>Delaware</option><option>Florida</option><option>Georgia</option><option>Hawaii</option><option>Idaho</option><option>Illinois</option><option>Indiana</option><option>Iowa</option><option>Kansas</option><option>Kentucky</option><option>Louisiana</option><option>Maine</option><option>Maryland</option><option>Massachusetts</option><option>Michigan</option><option>Minnesota</option><option>Mississippi</option><option>Missouri</option><option>Montana</option><option>Nebraska</option><option>Nevada</option><option>New Hampshire</option><option>New Jersey</option><option>New Mexico</option><option>New York</option><option>North Carolina</option><option>North Dakota</option><option>Ohio</option><option>Oklahoma</option><option>Oregon</option><option>Pennsylvania</option><option>Rhode Island</option><option>South Carolina</option><option>South Dakota</option><option>Tennessee</option><option>Texas</option><option>Utah</option><option>Vermont</option><option>Virginia</option><option>Washington</option><option>West Virginia</option><option>Wisconsin</option><option>Wyoming</option></select></div>
-        <div class="sf"><label for="ftf-city">City *</label><input id="ftf-city" type="text" placeholder="City" required oninput="validateFtfLocation()"></div>
-      </div>
-      <div id="ftf-location-indicator" style="margin-top:-4px;margin-bottom:8px;min-height:18px"></div>
-      <input type="hidden" id="ftf-lat"><input type="hidden" id="ftf-lng">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-        <div class="sf"><label for="ftf-years">Years in Operation</label><input id="ftf-years" type="number" min="0" max="200" placeholder="e.g. 15"></div>
-        <div class="sf"><label for="ftf-website">Farm Website</label><input id="ftf-website" type="url" placeholder="https://"></div>
-      </div>
-      <div class="sf"><label>Operation Size</label>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px">
-          <label style="display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid rgba(196,160,96,.2);border-radius:6px;cursor:pointer;background:rgba(255,255,255,.03)">
-            <input type="radio" name="ftf-op-size" value="family_farm" style="flex-shrink:0;accent-color:#8B3214;width:16px;height:16px">
-            <span style="font-size:13px;color:var(--cream);line-height:1.3">Family Farm<br><span style="font-size:11px;color:var(--muted)">Under 50 acres</span></span>
-          </label>
-          <label style="display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid rgba(196,160,96,.2);border-radius:6px;cursor:pointer;background:rgba(255,255,255,.03)">
-            <input type="radio" name="ftf-op-size" value="small_ranch" style="flex-shrink:0;accent-color:#8B3214;width:16px;height:16px">
-            <span style="font-size:13px;color:var(--cream);line-height:1.3">Small Ranch<br><span style="font-size:11px;color:var(--muted)">50–500 acres</span></span>
-          </label>
-          <label style="display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid rgba(196,160,96,.2);border-radius:6px;cursor:pointer;background:rgba(255,255,255,.03)">
-            <input type="radio" name="ftf-op-size" value="mid_size" style="flex-shrink:0;accent-color:#8B3214;width:16px;height:16px">
-            <span style="font-size:13px;color:var(--cream);line-height:1.3">Mid-Size<br><span style="font-size:11px;color:var(--muted)">500–2,000 acres</span></span>
-          </label>
-          <label style="display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid rgba(196,160,96,.2);border-radius:6px;cursor:pointer;background:rgba(255,255,255,.03)">
-            <input type="radio" name="ftf-op-size" value="large" style="flex-shrink:0;accent-color:#8B3214;width:16px;height:16px">
-            <span style="font-size:13px;color:var(--cream);line-height:1.3">Large Operation<br><span style="font-size:11px;color:var(--muted)">2,000+ acres</span></span>
-          </label>
-        </div>
-      </div>
-      <div class="sf"><label>Farm Tours / Visits Available?</label>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px">
-          <label style="display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid rgba(196,160,96,.2);border-radius:6px;cursor:pointer;background:rgba(255,255,255,.03)">
-            <input type="radio" name="ftf-tours" value="yes" style="flex-shrink:0;accent-color:#8B3214;width:16px;height:16px">
-            <span style="font-size:13px;color:var(--cream)">Yes — visitors welcome</span>
-          </label>
-          <label style="display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid rgba(196,160,96,.2);border-radius:6px;cursor:pointer;background:rgba(255,255,255,.03)">
-            <input type="radio" name="ftf-tours" value="no" checked style="flex-shrink:0;accent-color:#8B3214;width:16px;height:16px">
-            <span style="font-size:13px;color:var(--cream)">No — not at this time</span>
-          </label>
-        </div>
-      </div>
-    </fieldset>
-
-    <!-- Section 2: What Are You Selling? -->
-    <fieldset style="border:1px solid var(--light-tan);border-radius:6px;padding:16px;margin:16px 0 0">
-      <legend style="font-family:'Inter',sans-serif;font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:#5a7a4a;padding:0 8px">What Are You Selling?</legend>
-      <div style="font-size:12px;color:#888;margin-bottom:10px">Select all that apply</div>
-      <div style="font-family:'Inter',sans-serif;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--mid-brown);margin-bottom:6px">Specialty Proteins</div>
-      <div class="ftf-checkbox-grid" style="margin-bottom:14px">
-        <label class="ftf-check"><input type="checkbox" name="ftf-proteins" value="beef"> Beef</label>
-        <label class="ftf-check"><input type="checkbox" name="ftf-proteins" value="wagyu_beef"> Wagyu Beef</label>
-        <label class="ftf-check"><input type="checkbox" name="ftf-proteins" value="bison"> Bison</label>
-        <label class="ftf-check"><input type="checkbox" name="ftf-proteins" value="elk_venison"> Elk / Venison</label>
-        <label class="ftf-check"><input type="checkbox" name="ftf-proteins" value="lamb_goat"> Lamb / Goat</label>
-        <label class="ftf-check"><input type="checkbox" name="ftf-proteins" value="pork"> Pork</label>
-        <label class="ftf-check"><input type="checkbox" name="ftf-proteins" value="chicken_poultry"> Chicken / Poultry</label>
-        <label class="ftf-check"><input type="checkbox" name="ftf-proteins" value="duck"> Duck</label>
-        <label class="ftf-check"><input type="checkbox" name="ftf-proteins" value="chicken_eggs"> Chicken Eggs</label>
-        <label class="ftf-check"><input type="checkbox" name="ftf-proteins" value="duck_eggs"> Duck Eggs</label>
-        <label class="ftf-check"><input type="checkbox" name="ftf-proteins" value="heritage_breeds"> Heritage Breeds</label>
-        <label class="ftf-check"><input type="checkbox" name="ftf-proteins" value="other_protein"> Other</label>
-      </div>
-      <div style="font-family:'Inter',sans-serif;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--mid-brown);margin-bottom:6px">Product Forms</div>
-      <div class="ftf-checkbox-grid">
-        <label class="ftf-check"><input type="checkbox" name="ftf-forms" value="whole_animal"> Whole Animal</label>
-        <label class="ftf-check"><input type="checkbox" name="ftf-forms" value="half_animal"> Half Animal</label>
-        <label class="ftf-check"><input type="checkbox" name="ftf-forms" value="quarter_animal"> Quarter Animal</label>
-        <label class="ftf-check"><input type="checkbox" name="ftf-forms" value="custom_cuts"> Custom Cuts / Bundles</label>
-        <label class="ftf-check"><input type="checkbox" name="ftf-forms" value="bulk_ground"> Bulk Ground</label>
-        <label class="ftf-check"><input type="checkbox" name="ftf-forms" value="specialty_cuts"> Specialty Cuts</label>
-        <label class="ftf-check"><input type="checkbox" name="ftf-forms" value="organ_meats"> Organ Meats / Offal</label>
-        <label class="ftf-check"><input type="checkbox" name="ftf-forms" value="bones_marrow"> Bones &amp; Marrow</label>
-        <label class="ftf-check"><input type="checkbox" name="ftf-forms" value="tallow_lard"> Tallow / Lard</label>
-        <label class="ftf-check"><input type="checkbox" name="ftf-forms" value="hides"> Hides</label>
-        <label class="ftf-check"><input type="checkbox" name="ftf-forms" value="pet_treats"> Dog Chews / Pet Treats</label>
-        <label class="ftf-check"><input type="checkbox" name="ftf-forms" value="bone_broth"> Bone Broth / Collagen</label>
-        <label class="ftf-check"><input type="checkbox" name="ftf-forms" value="jerky"> Jerky / Dried Meats</label>
-        <label class="ftf-check"><input type="checkbox" name="ftf-forms" value="live_to_locker"> Live Animal to Locker</label>
-        <label class="ftf-check"><input type="checkbox" name="ftf-forms" value="other_form"> Other</label>
-      </div>
-    </fieldset>
-
-    <!-- Section 3: Production Methods -->
-    <fieldset style="border:1px solid var(--light-tan);border-radius:6px;padding:16px;margin:16px 0 0">
-      <legend style="font-family:'Inter',sans-serif;font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:#5a7a4a;padding:0 8px">Production Methods</legend>
-      <div class="ftf-checkbox-grid">
-        <label class="ftf-check"><input type="checkbox" name="ftf-methods" value="grass_fed"> 100% Grass-Fed</label>
-        <label class="ftf-check"><input type="checkbox" name="ftf-methods" value="grain_fed"> Grain-Fed</label>
-        <label class="ftf-check"><input type="checkbox" name="ftf-methods" value="grass_grain_finished"> Grass-Fed / Grain-Finished</label>
-        <label class="ftf-check"><input type="checkbox" name="ftf-methods" value="pasture_raised"> Pasture-Raised</label>
-        <label class="ftf-check"><input type="checkbox" name="ftf-methods" value="certified_organic"> Certified Organic</label>
-        <label class="ftf-check"><input type="checkbox" name="ftf-methods" value="no_hormones"> No Hormones / No Antibiotics</label>
-        <label class="ftf-check"><input type="checkbox" name="ftf-methods" value="regenerative"> Regenerative / Sustainable</label>
-      </div>
-    </fieldset>
-
-    <!-- Section 4: Processing & Availability -->
-    <fieldset style="border:1px solid var(--light-tan);border-radius:6px;padding:16px;margin:16px 0 0">
-      <legend style="font-family:'Inter',sans-serif;font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:#5a7a4a;padding:0 8px">Processing &amp; Availability</legend>
-      <div style="font-family:'Inter',sans-serif;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--mid-brown);margin-bottom:6px">Processing</div>
-      <div style="display:grid;grid-template-columns:1fr;gap:4px;margin-bottom:14px">
-        <label class="ftf-check"><input type="checkbox" name="ftf-processing" value="usda_inspected"> USDA Inspected Facility</label>
-        <label class="ftf-check"><input type="checkbox" name="ftf-processing" value="custom_exempt"> Custom Exempt (State Inspected)</label>
-        <label class="ftf-check"><input type="checkbox" name="ftf-processing" value="buyer_arranges"> Buyer Arranges Processing</label>
-      </div>
-      <div style="font-family:'Inter',sans-serif;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--mid-brown);margin-bottom:6px">Delivery Options</div>
-      <div style="display:grid;grid-template-columns:1fr;gap:4px;margin-bottom:14px">
-        <label class="ftf-check"><input type="checkbox" name="ftf-delivery" value="farm_pickup"> Farm Pickup Only</label>
-        <label class="ftf-check"><input type="checkbox" name="ftf-delivery" value="local_delivery"> Local Delivery Available</label>
-        <label class="ftf-check"><input type="checkbox" name="ftf-delivery" value="ships_regional"> Ships Regionally (Frozen)</label>
-        <label class="ftf-check"><input type="checkbox" name="ftf-delivery" value="ships_nationwide"> Ships Nationwide (Frozen)</label>
-      </div>
-      <div style="font-family:'Inter',sans-serif;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--mid-brown);margin-bottom:6px">Availability</div>
-      <div style="display:flex;flex-direction:column;gap:6px">
-        <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer"><input type="radio" name="ftf-avail" value="ready_now" checked> Ready Now</label>
-        <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer"><input type="radio" name="ftf-avail" value="seasonal"> Seasonal</label>
-        <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer"><input type="radio" name="ftf-avail" value="pre_order"> Pre-Order for Upcoming Harvest</label>
-      </div>
-      <div class="sf" style="margin-top:8px"><label for="ftf-harvest-date">Harvest / Ready Date (optional)</label><input id="ftf-harvest-date" type="date"></div>
-    </fieldset>
-
-    <!-- Section 5: Pricing -->
-    <fieldset style="border:1px solid var(--light-tan);border-radius:6px;padding:16px;margin:16px 0 0">
-      <legend style="font-family:'Inter',sans-serif;font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:#5a7a4a;padding:0 8px">Pricing</legend>
-      <div id="ftf-price-fields">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-          <div class="sf"><label for="ftf-price-hanging">Price/lb — Hanging Weight</label><input id="ftf-price-hanging" type="number" step="0.01" min="0" placeholder="e.g. 4.50"></div>
-          <div class="sf"><label for="ftf-price-takehome">Price/lb — Take-Home Weight</label><input id="ftf-price-takehome" type="number" step="0.01" min="0" placeholder="e.g. 7.00"></div>
-        </div>
-        <div class="sf">
-          <label>Deposit Required?</label>
-          <div style="display:flex;gap:16px;align-items:center">
-            <label style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:400;cursor:pointer"><input type="radio" name="ftf-deposit" value="yes" onchange="document.getElementById('ftf-deposit-amt').style.display='block'"> Yes</label>
-            <label style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:400;cursor:pointer"><input type="radio" name="ftf-deposit" value="no" checked onchange="document.getElementById('ftf-deposit-amt').style.display='none'"> No</label>
-          </div>
-        </div>
-        <div class="sf" id="ftf-deposit-amt" style="display:none"><label for="ftf-deposit-amount">Deposit Amount ($)</label><input id="ftf-deposit-amount" type="number" step="0.01" min="0" placeholder="e.g. 200"></div>
-      </div>
-      <label class="ftf-check" style="margin-top:8px"><input type="checkbox" id="ftf-call-price" onchange="document.getElementById('ftf-price-fields').style.display=this.checked?'none':'block'"> Call for Pricing</label>
-    </fieldset>
-
-    <!-- Section 6: Certifications -->
-    <fieldset style="border:1px solid var(--light-tan);border-radius:6px;padding:16px;margin:16px 0 0">
-      <legend style="font-family:'Inter',sans-serif;font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:#5a7a4a;padding:0 8px">Certifications (Optional)</legend>
-      <div class="ftf-checkbox-grid">
-        <label class="ftf-check"><input type="checkbox" name="ftf-certs" value="usda_organic"> USDA Organic Certified</label>
-        <label class="ftf-check"><input type="checkbox" name="ftf-certs" value="animal_welfare"> Animal Welfare Approved</label>
-        <label class="ftf-check"><input type="checkbox" name="ftf-certs" value="certified_humane"> Certified Humane</label>
-        <label class="ftf-check"><input type="checkbox" name="ftf-certs" value="non_gmo"> Non-GMO</label>
-        <label class="ftf-check"><input type="checkbox" name="ftf-certs" value="bqa"> BQA Certified</label>
-        <label class="ftf-check"><input type="checkbox" name="ftf-certs" value="state_inspected"> State Inspected</label>
-      </div>
-    </fieldset>
-
-    <!-- Section 7: Tell Your Story -->
-    <fieldset style="border:1px solid var(--light-tan);border-radius:6px;padding:16px;margin:16px 0 0">
-      <legend style="font-family:'Inter',sans-serif;font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:#5a7a4a;padding:0 8px">Tell Your Story</legend>
-      <div class="sf"><label for="ftf-description">Describe your operation *</label>
-        <textarea id="ftf-description" rows="10" maxlength="2000" required placeholder="Tell buyers about your farm — your land, your animals, your practices, your family. This is where you build trust and connection with the people who will feed their families with your products." oninput="document.getElementById('ftf-char-count').textContent=this.value.length+' / 2000'"></textarea>
-        <div id="ftf-char-count" style="text-align:right;font-size:11px;color:#888;margin-top:2px">0 / 2000</div>
-      </div>
-    </fieldset>
-
-    <!-- Section 8: Photos -->
-    <fieldset style="border:1px solid var(--light-tan);border-radius:6px;padding:16px;margin:16px 0 0">
-      <legend style="font-family:'Inter',sans-serif;font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:#5a7a4a;padding:0 8px">Photos (Up to 8)</legend>
-      <div style="font-size:12px;color:#888;margin-bottom:8px">Great photos: your land, pastures, animals, processing setup, family, products</div>
-      <div class="photo-upload-area" id="ftf-photo-drop-area">
-        <input type="file" id="ftf-photos" multiple accept="image/jpeg,image/png,image/webp">
-        <div class="photo-previews" id="ftf-photo-previews"></div>
-      </div>
-    </fieldset>
-
-    <!-- Section 9: Contact & Submit -->
-    <fieldset style="border:1px solid var(--light-tan);border-radius:6px;padding:16px;margin:16px 0 0">
-      <legend style="font-family:'Inter',sans-serif;font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:#5a7a4a;padding:0 8px">Contact Info</legend>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-        <div class="sf"><label for="ftf-phone">Phone Number *</label><input id="ftf-phone" type="tel" placeholder="(555) 555-5555" required></div>
-        <div class="sf"><label for="ftf-email">Email</label><input id="ftf-email" type="email" placeholder="you@email.com"></div>
-      </div>
-      <div class="sf"><label>Preferred Contact Method</label>
-        <div style="display:flex;gap:16px">
-          <label style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:400;cursor:pointer"><input type="radio" name="ftf-contact-pref" value="phone"> Phone</label>
-          <label style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:400;cursor:pointer"><input type="radio" name="ftf-contact-pref" value="email"> Email</label>
-          <label style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:400;cursor:pointer"><input type="radio" name="ftf-contact-pref" value="either" checked> Either</label>
-        </div>
-      </div>
-      <div style="background:rgba(90,122,74,.08);border:1px solid rgba(90,122,74,.2);border-radius:4px;padding:12px;margin-top:8px">
-        <div style="font-family:'Inter',sans-serif;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#5a7a4a;margin-bottom:4px">🌿 Farm to Table Plan — Free</div>
-        <div style="font-size:12px;color:#666;line-height:1.5">Up to 8 photos · Featured in Farm to Table section · Direct buyer connections · 90-day listing</div>
-      </div>
-    </fieldset>
-
-    <button class="btn-primary" style="width:100%;justify-content:center;margin-top:16px;background:#5a7a4a;border-color:#5a7a4a;padding:14px" data-action="post-ftf-listing">List My Farm to Table Operation →</button>
-  </div>
-</div>
-
 <!-- POST LISTING -->
 <!-- LISTING DETAIL MODAL -->
 <div class="modal-overlay" id="modal-listing-detail" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Listing details">
@@ -3860,7 +3648,6 @@ function initEventDelegation() {
     else if (action === 'search-listings') { loadListings(); if (currentView === 'map') loadBrowseMapListings(); }
     else if (action === 'login')       doLogin();
     else if (action === 'register')    doRegister();
-    else if (action === 'post-ftf-listing') doPostFtfListing();
     else if (action === 'post-topic')  doPostTopic();
     else if (action === 'subscribe')   submitCatalogSignup();
     else if (action === 'bb-signup')   doBeefBoxSignup();
@@ -4277,7 +4064,7 @@ function renderCompactCard(l) {
     : `<span class="cc-badge cc-badge-new">New</span>`;
   const price = l.price
     ? `$${Number(l.price).toLocaleString()}${l.price_type && l.price_type !== 'fixed' ? '<small style="font-size:9px;font-weight:400;color:#aaa"> ' + l.price_type.replace(/_/g,' ') + '</small>' : ''}`
-    : `<span style="font-size:10px;color:#aaa">Call</span>`;
+    : NO_PRICE_CATS.includes(l.category) ? '' : `<span style="font-size:10px;color:#aaa">Call</span>`;
   return `<div class="compact-card cc-animate" onclick="openListing(${l.id})" onkeydown="if(event.key==='Enter'||event.key===' ')openListing(${l.id})" tabindex="0" role="button" aria-label="View listing: ${escHtml(l.title)}">
     <div class="cc-img">${imgHtml}${badge}</div>
     <div class="cc-body">
@@ -4450,7 +4237,7 @@ function renderListingCard(l, darkBg) {
     : '<span class="listing-badge new">New</span>';
   const price = l.price
     ? `$${Number(l.price).toLocaleString()}<small>${l.price_type !== 'fixed' ? l.price_type.replace(/_/g,' ') : ''}</small>`
-    : `<span style="font-size:14px;color:#888">Call for price</span>`;
+    : NO_PRICE_CATS.includes(l.category) ? '' : `<span style="font-size:14px;color:#888">Call for price</span>`;
   return `
     <div class="listing-card" onclick="openListing(${l.id})">
       <div class="listing-img">${img}${badge}<button class="listing-fav" onclick="event.stopPropagation();toggleSave(${l.id},this)">♡</button></div>
@@ -4469,12 +4256,17 @@ function catEmoji(cat) {
     feeder_stocker:'🐄', fat_cattle:'🐄', bottle_calves:'🐮', cow_calf_pairs:'🐄',
     embryos:'🔬', semen:'🔬', showstock:'🏆', dairy:'🥛', beef_cattle:'🐄',
     equipment:'🚜', trailers:'🚛', chutes_pens:'🔩', working_dogs:'🐕', feed_hay:'🌾',
-    sale_barns:'🏪', ranches_farms:'🏡', breed_associations:'📋', farm_to_table:'🥩',
+    sale_barns:'🏪', ranches_farms:'🏡', breed_associations:'📋', farm_to_table:'🥩', processors:'🏭',
     livestock_services:'🩺', feed_stores:'🌾', insurance_finance:'📊', full_herd:'🐄'
   };
   return m[cat] || '📋';
 }
-function fmtCat(cat) { return (cat||'').replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase()); }
+// Businesses and processors have no price; their cards show none instead of "Call for price"
+const NO_PRICE_CATS = ['processors','ranches_farms','sale_barns','breed_associations','livestock_services','feed_stores','insurance_finance'];
+function fmtCat(cat) {
+  const named = { farm_to_table: 'Buy Beef', processors: 'Processors and Lockers' };
+  return named[cat] || (cat||'').replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
+}
 
 // ── Listings Page ──────────────────────────────────────
 function showAllListings() { showPage('listings'); document.getElementById('f-category').value=''; document.getElementById('listings-title').innerHTML='All <span>Listings</span>'; loadListings(); }
@@ -4607,75 +4399,56 @@ async function loadRecentListings() {
   } catch(e) { el.innerHTML = '<div style="grid-column:1/-1;color:#aaa">Could not load listings.</div>'; }
 }
 
-// ── Farm to Table detail panel ──────────────────────────
+// ── Farm to Table detail panel (Buy Beef and Processors) ─
+const FTF_WORDS = {
+  beef:'Beef', wagyu_beef:'Wagyu beef', bison:'Bison', pork:'Pork', lamb_goat:'Lamb or goat', chicken_poultry:'Chicken', chicken_eggs:'Eggs', other_protein:'Other',
+  whole_animal:'Whole', half_animal:'Half', quarter_animal:'Quarter', custom_cuts:'Boxes and bundles', specialty_cuts:'Retail cuts', bulk_ground:'Ground in bulk', live_to_locker:'Live animal to the locker', other_form:'Other',
+  grass_fed:'100% grass-fed', grass_grain_finished:'Grass-fed, grain-finished', grain_fed:'Grain-fed', pasture_raised:'Pasture-raised', certified_organic:'Certified organic', no_hormones:'No hormones or antibiotics', regenerative:'Regenerative',
+  usda_inspected:'USDA inspected plant', custom_exempt:'Custom exempt', buyer_arranges:'Buyer books the processor',
+  farm_pickup:'Pickup at the farm', local_delivery:'Local delivery', ships_regional:'Ships in the region (frozen)', ships_nationwide:'Ships nationwide (frozen)',
+  usda:'USDA inspected', state:'State inspected',
+  hogs:'Hogs', sheep_goats:'Sheep and goats', deer_game:'Deer and game', poultry:'Poultry',
+  slaughter:'Harvest at the plant', mobile_slaughter:'On-farm harvest', cut_wrap:'Cut and wrap', sausage:'Sausage', smoking_curing:'Smoking and curing', dry_aging:'Dry aging', vacuum_pack:'Vacuum packing',
+  ready_now:'Ready now', pre_order:'Taking orders for the next harvest', seasonal:'Seasonal', sold_out:'Sold out for now',
+};
 function ftfLabel(val) {
-  return (val||'').replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
+  return FTF_WORDS[val] || (val||'').replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
 }
 function buildFtfDetail(l) {
   const sections = [];
-  // Farm name & badge
+  const pills = (arr) => (arr || []).map(v => `<span class="ftf-pill">${escHtml(ftfLabel(v))}</span>`).join('');
+  const block = (label, inner) => `<div class="ftf-detail-section"><div class="ftf-detail-label">${label}</div>${inner}</div>`;
+  const line = (arr) => `<div style="font-size:13px;color:#555;line-height:1.8">${(arr || []).map(v => escHtml(ftfLabel(v))).join(' · ')}</div>`;
+  if (l.category === 'processors') {
+    sections.push(`<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px"><span class="ftf-pill">🏭 Processor</span>${pills(l.proc_inspection)}</div>`);
+    if ((l.proc_species || []).length) sections.push(block('Processes', line(l.proc_species)));
+    if ((l.proc_services || []).length) sections.push(block('Services', line(l.proc_services)));
+    const book = [];
+    if (l.proc_lead_weeks != null) book.push(Number(l.proc_lead_weeks) === 0 ? 'Taking animals now' : `Booking about ${Number(l.proc_lead_weeks)} week${Number(l.proc_lead_weeks) === 1 ? '' : 's'} out`);
+    if (l.proc_capacity) book.push(`About ${Number(l.proc_capacity)} head a week`);
+    if (l.proc_haul) book.push('Can pick up live animals');
+    if (book.length) sections.push(block('Booking', `<div style="font-size:13px;color:#555;line-height:1.8">${book.map(escHtml).join('<br>')}</div>`));
+    return sections.join('');
+  }
   if (l.farm_name) {
-    sections.push(`<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+    sections.push(`<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap">
       <span style="background:#5a7a4a;color:white;font-family:'Inter',sans-serif;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:4px 10px;border-radius:3px">🌿 Farm Direct</span>
-      <span style="font-family:'Libre Baskerville',serif;font-size:18px;font-weight:900;color:var(--dark-brown)">${l.farm_name}</span>
-      ${l.farm_tours ? '<span style="background:rgba(90,122,74,.1);color:#5a7a4a;font-size:10px;font-weight:600;padding:3px 8px;border-radius:10px">🚜 Tours Available</span>' : ''}
-    </div>`);
+      <span style="font-family:'Libre Baskerville',serif;font-size:18px;font-weight:900;color:var(--dark-brown)">${escHtml(l.farm_name)}</span></div>`);
   }
-  // Production methods
-  const methods = l.farm_production_methods;
-  if (methods && methods.length) {
-    sections.push(`<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px">${methods.map(m => `<span class="ftf-pill">${ftfLabel(m)}</span>`).join('')}</div>`);
-  }
-  // Proteins
-  const proteins = l.farm_proteins;
-  if (proteins && proteins.length) {
-    sections.push(`<div class="ftf-detail-section"><div class="ftf-detail-label">Specialty Proteins</div><div style="display:flex;flex-wrap:wrap;gap:4px">${proteins.map(p => `<span style="background:var(--light-tan);padding:4px 10px;border-radius:12px;font-size:12px;font-weight:600">🥩 ${ftfLabel(p)}</span>`).join('')}</div></div>`);
-  }
-  // Product forms
-  const forms = l.farm_product_forms;
-  if (forms && forms.length) {
-    sections.push(`<div class="ftf-detail-section"><div class="ftf-detail-label">Available Products</div><div style="font-size:13px;color:#555;line-height:1.8">${forms.map(f => ftfLabel(f)).join(' · ')}</div></div>`);
-  }
-  // Processing & Delivery
-  const proc = l.farm_processing;
-  const deliv = l.farm_delivery;
-  if ((proc && proc.length) || (deliv && deliv.length)) {
+  if ((l.farm_production_methods || []).length) sections.push(`<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px">${pills(l.farm_production_methods)}</div>`);
+  if ((l.farm_proteins || []).length) sections.push(block('Sells', line(l.farm_proteins)));
+  if ((l.farm_product_forms || []).length) sections.push(block('Sold as', line(l.farm_product_forms)));
+  const proc = l.farm_processing || [], deliv = l.farm_delivery || [];
+  if (proc.length || deliv.length) {
     let html = '<div class="ftf-detail-section"><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">';
-    if (proc && proc.length) html += `<div><div class="ftf-detail-label">Processing</div><div style="font-size:13px;color:#555;line-height:1.7">${proc.map(p => '✓ ' + ftfLabel(p)).join('<br>')}</div></div>`;
-    if (deliv && deliv.length) html += `<div><div class="ftf-detail-label">Delivery</div><div style="font-size:13px;color:#555;line-height:1.7">${deliv.map(d => '✓ ' + ftfLabel(d)).join('<br>')}</div></div>`;
-    html += '</div></div>';
-    sections.push(html);
+    if (proc.length) html += `<div><div class="ftf-detail-label">Processed at</div><div style="font-size:13px;color:#555;line-height:1.7">${proc.map(p => escHtml(ftfLabel(p))).join('<br>')}</div></div>`;
+    if (deliv.length) html += `<div><div class="ftf-detail-label">Getting it</div><div style="font-size:13px;color:#555;line-height:1.7">${deliv.map(d => escHtml(ftfLabel(d))).join('<br>')}</div></div>`;
+    sections.push(html + '</div></div>');
   }
-  // Pricing
-  if (l.farm_call_for_price) {
-    sections.push(`<div class="ftf-detail-section"><div class="ftf-detail-label">Pricing</div><div style="font-size:14px;color:var(--rust);font-weight:600">📞 Call for Pricing</div></div>`);
-  } else if (l.farm_price_hanging || l.farm_price_takehome) {
-    let priceHtml = '<div class="ftf-detail-section"><div class="ftf-detail-label">Pricing</div><div style="display:flex;gap:20px;flex-wrap:wrap">';
-    if (l.farm_price_hanging) priceHtml += `<div><span style="font-size:11px;color:#888">Hanging Weight</span><br><span style="font-family:'Libre Baskerville',serif;font-size:20px;font-weight:900;color:var(--rust)">$${Number(l.farm_price_hanging).toFixed(2)}/lb</span></div>`;
-    if (l.farm_price_takehome) priceHtml += `<div><span style="font-size:11px;color:#888">Take-Home Weight</span><br><span style="font-family:'Libre Baskerville',serif;font-size:20px;font-weight:900;color:var(--rust)">$${Number(l.farm_price_takehome).toFixed(2)}/lb</span></div>`;
-    priceHtml += '</div>';
-    if (l.farm_deposit_required) priceHtml += `<div style="font-size:12px;color:#666;margin-top:6px">💰 Deposit required${l.farm_deposit_amount ? ': $' + Number(l.farm_deposit_amount).toFixed(2) : ''}</div>`;
-    priceHtml += '</div>';
-    sections.push(priceHtml);
-  }
-  // Certifications
-  const certs = l.farm_certifications;
-  if (certs && certs.length) {
-    sections.push(`<div class="ftf-detail-section"><div class="ftf-detail-label">Certifications</div><div style="display:flex;flex-wrap:wrap;gap:4px">${certs.map(c => `<span style="background:#dcfce7;color:#166534;font-size:11px;font-weight:600;padding:4px 10px;border-radius:12px">✓ ${ftfLabel(c)}</span>`).join('')}</div></div>`);
-  }
-  // Availability
+  if (l.farm_deposit_required && l.farm_deposit_amount) sections.push(block('Deposit', `<div style="font-size:13px;color:#555">$${Number(l.farm_deposit_amount).toLocaleString()} holds an order</div>`));
   if (l.farm_availability) {
-    const availLabel = {ready_now:'Ready Now',seasonal:'Seasonal',pre_order:'Pre-Order'}[l.farm_availability] || l.farm_availability;
-    sections.push(`<div class="ftf-detail-section"><div class="ftf-detail-label">Availability</div><div style="font-size:13px;color:#555">${availLabel}${l.farm_harvest_date ? ' — ' + new Date(l.farm_harvest_date).toLocaleDateString('en-US',{month:'long',year:'numeric'}) : ''}</div></div>`);
+    sections.push(block('Availability', `<div style="font-size:13px;color:#555">${escHtml(ftfLabel(l.farm_availability))}${l.farm_harvest_date ? '. Next harvest ' + new Date(String(l.farm_harvest_date).slice(0, 10) + 'T12:00:00').toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}) : ''}</div>`));
   }
-  // Operation info
-  const opInfo = [];
-  if (l.farm_operation_size) opInfo.push(ftfLabel(l.farm_operation_size));
-  if (l.farm_years) opInfo.push(l.farm_years + ' years');
-  if (opInfo.length) {
-    sections.push(`<div class="ftf-detail-section"><div class="ftf-detail-label">Operation</div><div style="font-size:13px;color:#555">${opInfo.join(' · ')}</div></div>`);
-  }
-
   return sections.join('');
 }
 
@@ -4717,10 +4490,10 @@ async function openListing(id) {
     }
 
     // Price display
-    const priceLabel = {per_head:'/head', per_cwt:'/cwt', per_lb:'/lb', per_pair:'/pair', each:' each', obo:' OBO', negotiable:', negotiable', call:'', fixed:''}[l.price_type] || '';
+    const priceLabel = {per_lb_hanging:'/lb hanging', per_head:'/head', per_cwt:'/cwt', per_lb:'/lb', per_pair:'/pair', each:' each', obo:' OBO', negotiable:', negotiable', call:'', fixed:''}[l.price_type] || '';
     const priceHtml = l.price
       ? `<span style="font-family:'Libre Baskerville',serif;font-size:28px;font-weight:900;color:var(--rust)">$${Number(l.price).toLocaleString()}<span style="font-size:15px;font-weight:400;color:#888">${priceLabel}</span></span>`
-      : `<span style="font-size:18px;color:#888;font-style:italic">Call for price</span>`;
+      : NO_PRICE_CATS.includes(l.category) ? '' : `<span style="font-size:18px;color:#888;font-style:italic">Call for price</span>`;
 
     // Tier badge
     const tierBadge = {filet:'🥩 Prime Partner', t_bone:'🥩 Choice Advertiser', sirloin:'🥩 Sirloin Featured',
@@ -4769,7 +4542,7 @@ async function openListing(id) {
 
         ${pills ? `<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px">${pills}</div>` : ''}
 
-        ${l.category === 'farm_to_table' ? buildFtfDetail(l) : ''}
+        ${l.category === 'farm_to_table' || l.category === 'processors' ? buildFtfDetail(l) : ''}
 
         ${l.description ? `<div style="font-size:14px;color:#444;line-height:1.7;margin-bottom:20px;white-space:pre-line">${escHtml(l.description)}</div>` : ''}
 
@@ -4917,123 +4690,6 @@ async function toggleSave(id, btn) {
 }
 
 // Posting and editing listings: public/listing-form.js
-
-// ── Farm to Table Listing ──────────────────────────────
-function resetFtfModal() {
-  ['ftf-farm-name','ftf-your-name','ftf-city','ftf-years','ftf-website','ftf-description',
-   'ftf-phone','ftf-harvest-date','ftf-price-hanging','ftf-price-takehome','ftf-deposit-amount'].forEach(id => {
-    const el = document.getElementById(id); if(el) el.value = '';
-  });
-  document.getElementById('ftf-state').value = '';
-  document.querySelectorAll('#modal-farm-to-table-listing input[type=checkbox]').forEach(c => c.checked = false);
-  document.querySelectorAll('input[name="ftf-avail"][value="ready_now"]').forEach(r => r.checked = true);
-  document.querySelectorAll('input[name="ftf-tours"][value="no"]').forEach(r => r.checked = true);
-  document.querySelectorAll('input[name="ftf-deposit"][value="no"]').forEach(r => r.checked = true);
-  document.querySelectorAll('input[name="ftf-contact-pref"][value="either"]').forEach(r => r.checked = true);
-  const errEl = document.getElementById('ftf-form-error');
-  const sucEl = document.getElementById('ftf-form-success');
-  if(errEl) errEl.style.display='none';
-  if(sucEl) sucEl.style.display='none';
-  document.getElementById('ftf-price-fields').style.display = 'block';
-  document.getElementById('ftf-deposit-amt').style.display = 'none';
-  document.getElementById('ftf-char-count').textContent = '0 / 2000';
-  // Pre-fill email if logged in
-  if (currentUser?.email) document.getElementById('ftf-email').value = currentUser.email;
-  // Init photo upload (params: inputId, previewId, dropAreaId)
-  initPhotoUpload('ftf-photos', 'ftf-photo-previews', 'ftf-photo-drop-area');
-}
-
-function getCheckedValues(name) {
-  return Array.from(document.querySelectorAll(`input[name="${name}"]:checked`)).map(c => c.value);
-}
-function getRadioValue(name) {
-  const el = document.querySelector(`input[name="${name}"]:checked`);
-  return el ? el.value : '';
-}
-
-async function doPostFtfListing() {
-  if (!authToken) { closeModal('farm-to-table-listing'); openModal('auth'); return; }
-  const errEl = document.getElementById('ftf-form-error');
-  const sucEl = document.getElementById('ftf-form-success');
-  errEl.style.display='none'; sucEl.style.display='none';
-
-  const farmName    = document.getElementById('ftf-farm-name').value.trim();
-  const yourName    = document.getElementById('ftf-your-name').value.trim();
-  const state       = document.getElementById('ftf-state').value;
-  const city        = document.getElementById('ftf-city').value.trim();
-  const description = document.getElementById('ftf-description').value.trim();
-  const phone       = document.getElementById('ftf-phone').value.trim();
-
-  if (!farmName || !yourName || !state || !city || !description || !phone) {
-    errEl.textContent = 'Please fill in all required fields: Farm Name, Your Name, State, City, Description, and Phone.';
-    errEl.style.display = 'block'; return;
-  }
-
-  const proteins = getCheckedValues('ftf-proteins');
-  if (!proteins.length) {
-    errEl.textContent = 'Please select at least one protein you sell.';
-    errEl.style.display = 'block'; return;
-  }
-
-  const photos = document.getElementById('ftf-photos').files;
-  if (!photos.length) {
-    errEl.textContent = 'At least 1 photo is required. Show buyers your operation!';
-    errEl.style.display = 'block'; return;
-  }
-  if (photos.length > 8) {
-    errEl.textContent = 'Maximum 8 photos allowed. Please remove ' + (photos.length - 8) + '.';
-    errEl.style.display = 'block'; return;
-  }
-
-  const formData = new FormData();
-  formData.append('title', farmName + ' — Farm to Table');
-  formData.append('description', description);
-  formData.append('category', 'farm_to_table');
-  formData.append('state', state);
-  formData.append('city', city);
-  formData.append('tier', 'farm_to_table');
-  const ftfLat = document.getElementById('ftf-lat')?.value;
-  const ftfLng = document.getElementById('ftf-lng')?.value;
-  if (ftfLat && ftfLng) { formData.append('lat', ftfLat); formData.append('lng', ftfLng); }
-  formData.append('farm_name', farmName);
-  formData.append('farm_years', document.getElementById('ftf-years').value || '');
-  formData.append('farm_operation_size', getRadioValue('ftf-op-size'));
-  formData.append('farm_tours', getRadioValue('ftf-tours') === 'yes' ? 'true' : 'false');
-  formData.append('website_url', document.getElementById('ftf-website').value || '');
-  formData.append('farm_proteins', JSON.stringify(proteins));
-  formData.append('farm_product_forms', JSON.stringify(getCheckedValues('ftf-forms')));
-  formData.append('farm_production_methods', JSON.stringify(getCheckedValues('ftf-methods')));
-  formData.append('farm_processing', JSON.stringify(getCheckedValues('ftf-processing')));
-  formData.append('farm_delivery', JSON.stringify(getCheckedValues('ftf-delivery')));
-  formData.append('farm_availability', getRadioValue('ftf-avail'));
-  formData.append('farm_harvest_date', document.getElementById('ftf-harvest-date').value || '');
-  formData.append('farm_certifications', JSON.stringify(getCheckedValues('ftf-certs')));
-  const callForPrice = document.getElementById('ftf-call-price').checked;
-  formData.append('farm_call_for_price', callForPrice ? 'true' : 'false');
-  if (!callForPrice) {
-    formData.append('farm_price_hanging', document.getElementById('ftf-price-hanging').value || '');
-    formData.append('farm_price_takehome', document.getElementById('ftf-price-takehome').value || '');
-  }
-  const depositYes = document.querySelector('input[name="ftf-deposit"][value="yes"]')?.checked;
-  formData.append('farm_deposit_required', depositYes ? 'true' : 'false');
-  if (depositYes) formData.append('farm_deposit_amount', document.getElementById('ftf-deposit-amount').value || '');
-  Array.from(photos).forEach(f => formData.append('photos', f));
-
-  try {
-    const r = await fetch(`${API}/api/listings`, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${authToken}` },
-      body: formData
-    });
-    const d = await r.json();
-    if (!r.ok) {
-      if (r.status === 403 && d.code === 'EMAIL_NOT_VERIFIED') { closeModal('farm-to-table-listing'); showVerifyGateModal(); return; }
-      errEl.textContent = d.error || 'Failed to post listing'; errEl.style.display='block'; return;
-    }
-    sucEl.textContent = '✅ Farm to Table listing posted! Redirecting…'; sucEl.style.display='block';
-    setTimeout(() => { closeModal('farm-to-table-listing'); showPage('account'); loadHomepageSections(); }, 1500);
-  } catch(e) { errEl.textContent = 'Connection error'; errEl.style.display='block'; }
-}
 
 async function loadForumSidebar() {
   try {
@@ -5338,8 +4994,10 @@ let _modalTrigger = null;
 function openModal(id) {
   // Every post-a-listing road goes to the step-by-step form (it handles sign-in and the email gate)
   if (id === 'post-listing') { openListingForm({}); return; }
+  if (id === 'farm-to-table-listing') { openListingForm({ category: 'farm_to_table' }); return; }
+  if (id === 'processor-listing') { openListingForm({ category: 'processors' }); return; }
   // If trying to post a listing but not logged in, show register tab instead
-  if ((id === 'post-listing' || id === 'farm-to-table-listing') && !authToken) {
+  if (id === 'post-listing' && !authToken) {
     const authEl = document.getElementById('modal-auth');
     if (authEl) {
       authEl.classList.add('open');
@@ -5355,13 +5013,12 @@ function openModal(id) {
     return;
   }
   // Signed in but email not confirmed: the confirm pop-up instead of the post form (H4)
-  if ((id === 'post-listing' || id === 'farm-to-table-listing') && needsEmailConfirm()) { showVerifyGateModal(); return; }
+  if (id === 'post-listing' && needsEmailConfirm()) { showVerifyGateModal(); return; }
   const el = document.getElementById('modal-' + id);
   if (!el) { console.warn('Modal not found: modal-' + id); return; }
   // Store trigger element to restore focus on close
   _modalTrigger = document.activeElement;
   // Reset post modal to clean state every time it opens
-  if (id === 'farm-to-table-listing') resetFtfModal();
   if (id === 'auth') showAuthView('login'); // always open on Sign In (H17)
   el.classList.add('open');
   el.removeAttribute('aria-hidden');
@@ -5589,19 +5246,21 @@ function myListingCard(l, confirm) {
   const st = myListingState(l);
   const days = daysUntilExpiry(l.expires_at);
   const fmt = d => new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-  const unit = {per_head:'/head', per_cwt:'/cwt', per_lb:'/lb', per_pair:'/pair', each:' each'}[l.price_type] || '';
-  const price = l.price ? '$' + Number(l.price).toLocaleString() + unit : 'Call for price';
+  const unit = {per_lb_hanging:'/lb hanging', per_head:'/head', per_cwt:'/cwt', per_lb:'/lb', per_pair:'/pair', each:' each'}[l.price_type] || '';
+  const price = l.price ? '$' + Number(l.price).toLocaleString() + unit : NO_PRICE_CATS.includes(l.category) ? '' : 'Call for price';
   const thumbSrc = l.thumb_small || l.thumb;
   const canView = st.key === 'active';
   const thumb = `<button type="button" class="mlc-thumb" ${canView ? `data-action="ml-view" data-id="${l.id}" aria-label="View ${escHtml(l.title)}"` : 'tabindex="-1" aria-hidden="true"'}>${thumbSrc ? `<img src="${escHtml(thumbSrc)}" loading="lazy" alt="">` : catEmoji(l.category)}</button>`;
 
+  // Farm to Table listings (Buy Beef, Processors) renew for 90 days; everything else for 30
+  const renewDays = (l.category === 'farm_to_table' || l.category === 'processors') ? 90 : 30;
   let note = '', cls = 'quiet';
   if (st.key === 'review') { note = 'Prime and Choice spots are reviewed by hand while we launch. Your free 30 days start when it goes live.'; cls = 'warn'; }
   else if (st.key === 'reported') { note = "Hidden while we look at a report. We'll put it back if everything checks out."; cls = 'warn'; }
   else if (st.key === 'active' && l.launch_promo && days !== null) { note = `Featured free until ${fmt(l.expires_at)}. After that it stays up as a regular listing.`; cls = 'good'; }
   else if (st.key === 'active' && days !== null && days <= 7) { note = `Comes down in ${days} day${days === 1 ? '' : 's'} unless you renew it. Renewing is free.`; cls = 'warn'; }
   else if (st.key === 'active' && days !== null) note = `Live until ${fmt(l.expires_at)}.`;
-  else if (st.key === 'expired') { note = 'Buyers can’t see it right now. Relist it free for 30 days.'; cls = 'bad'; }
+  else if (st.key === 'expired') { note = `Buyers can’t see it right now. Relist it free for ${renewDays} days.`; cls = 'bad'; }
   else if (st.key === 'sold') note = `${l.sold_at ? 'Sold ' + fmt(l.sold_at) : 'Sold'}. Relist it if you have more.`;
   const views = st.key === 'active' ? ` · Seen ${Number(l.views || 0).toLocaleString()} time${Number(l.views) === 1 ? '' : 's'}` : '';
 
@@ -5618,8 +5277,8 @@ function myListingCard(l, confirm) {
     if (st.key === 'active') {
       btns.push(b('ml-view', '👁 View', 'mlc-btn-main'));
       btns.push(b('edit-listing', '✏️ Edit'));
-      btns.push(b('mark-sold', '✓ Mark Sold', 'mlc-btn-sold'));
-      if (!l.launch_promo && days !== null && days <= 7) btns.push(b('renew-listing', '↻ Renew 30 days', 'mlc-btn-relist'));
+      if (!NO_PRICE_CATS.includes(l.category)) btns.push(b('mark-sold', '✓ Mark Sold', 'mlc-btn-sold'));
+      if (!l.launch_promo && days !== null && days <= 7) btns.push(b('renew-listing', `↻ Renew ${renewDays} days`, 'mlc-btn-relist'));
       btns.push(`<button type="button" class="mlc-btn" data-action="share-copy" data-id="${l.id}">🔗 Copy Link</button>`);
     } else if (st.key === 'expired' || st.key === 'sold') {
       btns.push(b('renew-listing', '↻ Relist Free', 'mlc-btn-relist'));
@@ -5635,7 +5294,7 @@ function myListingCard(l, confirm) {
     <div class="mlc-top">${thumb}
       <div class="mlc-info">
         <div class="mlc-title">${escHtml(l.title)}<span class="mlc-status ${st.cls}">${st.label}</span></div>
-        <div class="mlc-meta">${fmtCat(l.category)} · ${escHtml(l.city || '')}, ${escHtml(l.state || '')} · ${price}<br>${myListingPlanLine(l)}${views}</div>
+        <div class="mlc-meta">${fmtCat(l.category)} · ${escHtml(l.city || '')}, ${escHtml(l.state || '')}${price ? ' · ' + price : ''}<br>${myListingPlanLine(l)}${views}</div>
         ${note ? `<div class="mlc-note ${cls}">${note}</div>` : ''}
       </div>
     </div>
@@ -5717,7 +5376,7 @@ async function loadSavedListings() {
       return;
     }
     container.innerHTML = listings.map(l => {
-      const price = l.price ? '$' + Number(l.price).toLocaleString() : 'Call';
+      const price = l.price ? '$' + Number(l.price).toLocaleString() : NO_PRICE_CATS.includes(l.category) ? '' : 'Call';
       const thumb = l.thumb
         ? `<img src="${l.thumb}" style="width:90px;height:72px;object-fit:cover;object-position:center top;border-radius:4px;flex-shrink:0">`
         : `<div style="width:90px;height:72px;background:var(--light-tan);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0">${catEmoji(l.category)}</div>`;
@@ -5725,7 +5384,7 @@ async function loadSavedListings() {
         ${thumb}
         <div class="mlc-info">
           <div class="mlc-title">${l.title}</div>
-          <div class="mlc-meta">${fmtCat(l.category)} · ${l.city || ''}, ${l.state || ''} · ${price}</div>
+          <div class="mlc-meta">${fmtCat(l.category)} · ${l.city || ''}, ${l.state || ''}${price ? ' · ' + price : ''}</div>
           <div class="mlc-actions">
             <button class="mlc-btn" onclick="event.stopPropagation();openListing(${l.id})">View Listing</button>
             <button class="mlc-btn mlc-btn-delete" onclick="event.stopPropagation();unsaveListing(${l.id}, this)">✕ Remove</button>
@@ -5861,7 +5520,6 @@ function initPhotoUpload(inputId, previewId, dropAreaId) {
   if (!input || !preview || !dropArea) return;
 
   function getLimit() {
-    if (inputId === 'ftf-photos') return 8;
     return 20;
   }
 
@@ -6132,7 +5790,7 @@ const CATTLE_CATS = ['bulls','bucking_bulls','bred_heifers','bred_cows','open_he
 
 function getMarkerColor(cat) {
   if (CATTLE_CATS.includes(cat)) return '#8B3214';
-  if (cat === 'farm_to_table') return '#5a7a4a';
+  if (cat === 'farm_to_table' || cat === 'processors') return '#5a7a4a';
   if (['equipment','trailers','chutes_pens'].includes(cat)) return '#8B6914';
   if (cat === 'feed_hay') return '#C4A060';
   if (cat === 'working_dogs') return '#5a5a8a';
@@ -6141,6 +5799,7 @@ function getMarkerColor(cat) {
 function mapCatEmoji(cat) {
   if (CATTLE_CATS.includes(cat)) return '🐄';
   if (cat === 'farm_to_table') return '🌿';
+  if (cat === 'processors') return '🏭';
   if (['equipment','trailers','chutes_pens'].includes(cat)) return '🚜';
   if (cat === 'feed_hay') return '🌾';
   if (cat === 'working_dogs') return '🐕';
@@ -6346,7 +6005,6 @@ function validateLocation(cityId, stateId, latId, lngId, indicatorId) {
     } catch(e) { ind.innerHTML = ''; }
   }, 800);
 }
-function validateFtfLocation() { validateLocation('ftf-city', 'ftf-state', 'ftf-lat', 'ftf-lng', 'ftf-location-indicator'); }
 
 // ── Browse Map (Zillow-style toggle) ────────────────────
 let browseMap = null;
@@ -7401,6 +7059,6 @@ function dismissPWABanner() {
 }
 </script>
 
-<script src="/listing-form.js?v=4"></script>
+<script src="/listing-form.js?v=5"></script>
 </body>
 </html>
