@@ -367,6 +367,12 @@ input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-sea
 .sidebar-right-card .sidebar-ad-name{color:var(--cream)}
 .sidebar-right-card .sidebar-ad-sub{color:rgba(245,239,224,.45)}
 /* FTF scroll */
+.f-f2t{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:-12px 0 20px}
+.f-f2t select{padding:8px 12px;border:1.5px solid var(--light-tan);border-radius:4px;font-size:13px;background:#fff;max-width:100%}
+.f-f2t label{display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer}
+.ftf-row-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.ftf-row-title{font-family:'Inter',sans-serif;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--tan)}
+.ftf-mini-badge{position:absolute;top:4px;left:4px;background:var(--gold);color:var(--dark-brown);font-family:'Inter',sans-serif;font-size:8px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:2px 5px;border-radius:2px}
 .ftf-scroll-track{display:flex;gap:10px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
 .ftf-scroll-track::-webkit-scrollbar{display:none}
 .ftf-mini-card{flex:0 0 130px;background:rgba(255,255,255,.06);border:1px solid rgba(122,140,110,.25);border-radius:4px;overflow:hidden;cursor:pointer;transition:transform .15s}
@@ -605,7 +611,8 @@ header.scrolled{background:rgba(10,10,10,.92)!important;backdrop-filter:blur(12p
         <a href="javascript:void(0)">Sell</a>
         <div class="dropdown-menu">
           <a href="javascript:void(0)" data-action="modal" data-modal="post-listing">Post a Listing</a>
-          <a href="javascript:void(0)" data-action="modal" data-modal="farm-to-table-listing">🌿 List Farm to Table</a>
+          <a href="javascript:void(0)" data-action="modal" data-modal="farm-to-table-listing">🥩 List Beef Direct</a>
+          <a href="javascript:void(0)" data-action="modal" data-modal="processor-listing">🏭 List a Processor</a>
           <div class="sep"></div>
           <a href="/digital-sales.html">Browse Lot Sales</a>
           <a href="/digital-sales.html#post">Post a Lot Sale</a>
@@ -771,11 +778,19 @@ header.scrolled{background:rgba(10,10,10,.92)!important;backdrop-filter:blur(12p
       <!-- FARM TO TABLE -->
       <div style="background:var(--dark-brown);padding:18px 16px 20px">
         <div style="font-family:'Inter',sans-serif;font-size:9px;letter-spacing:.25em;text-transform:uppercase;color:var(--sage);margin-bottom:5px">Direct from the Ranch</div>
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-          <div style="font-family:'Libre Baskerville',serif;font-size:16px;font-weight:900;color:var(--cream)">Farm to Table</div>
-          <a class="hcs-see-all" style="color:var(--tan)" data-action="category" data-cat="farm_to_table" data-label="Farm to Table">Shop All →</a>
+        <div style="font-family:'Libre Baskerville',serif;font-size:16px;font-weight:900;color:var(--cream);margin-bottom:10px">Farm to Table</div>
+        <div class="ftf-row-head">
+          <div class="ftf-row-title">🥩 Buy Beef</div>
+          <a class="hcs-see-all" style="color:var(--tan)" data-action="category" data-cat="farm_to_table" data-label="Buy Beef">Shop All →</a>
         </div>
         <div class="ftf-scroll-track" id="ftf-scroll-track">
+          <div class="loading" style="color:var(--tan);font-size:12px">Loading…</div>
+        </div>
+        <div class="ftf-row-head" style="margin-top:16px">
+          <div class="ftf-row-title">🏭 Find a Processor</div>
+          <a class="hcs-see-all" style="color:var(--tan)" data-action="category" data-cat="processors" data-label="Processors and Lockers">See All →</a>
+        </div>
+        <div class="ftf-scroll-track" id="proc-scroll-track">
           <div class="loading" style="color:var(--tan);font-size:12px">Loading…</div>
         </div>
       </div>
@@ -1480,10 +1495,10 @@ header.scrolled{background:rgba(10,10,10,.92)!important;backdrop-filter:blur(12p
         <div style="font-family:'Inter',sans-serif;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#16a34a;margin-bottom:16px">Always Free &middot; Farm Products</div>
         <div style="font-family:'Libre Baskerville',serif;font-size:36px;font-weight:900;color:#16a34a;margin-bottom:20px">$0</div>
         <ul style="list-style:none;padding:0;margin-bottom:24px">
-          <li style="padding:7px 0;border-bottom:1px solid #f3f4f6;font-size:13px;display:flex;align-items:center;gap:8px"><span style="color:#16a34a;font-weight:700;font-size:15px">&#10003;</span>3 photos per listing</li>
-          <li style="padding:7px 0;border-bottom:1px solid #f3f4f6;font-size:13px;display:flex;align-items:center;gap:8px"><span style="color:#16a34a;font-weight:700;font-size:15px">&#10003;</span>Farm-raised beef &amp; products</li>
+          <li style="padding:7px 0;border-bottom:1px solid #f3f4f6;font-size:13px;display:flex;align-items:center;gap:8px"><span style="color:#16a34a;font-weight:700;font-size:15px">&#10003;</span>Up to 8 photos, up for 90 days</li>
+          <li style="padding:7px 0;border-bottom:1px solid #f3f4f6;font-size:13px;display:flex;align-items:center;gap:8px"><span style="color:#16a34a;font-weight:700;font-size:15px">&#10003;</span>Beef direct: halves, quarters, boxes</li>
           <li style="padding:7px 0;border-bottom:1px solid #f3f4f6;font-size:13px;display:flex;align-items:center;gap:8px"><span style="color:#16a34a;font-weight:700;font-size:15px">&#10003;</span>Dedicated homepage section</li>
-          <li style="padding:7px 0;font-size:13px;display:flex;align-items:center;gap:8px"><span style="color:#16a34a;font-weight:700;font-size:15px">&#10003;</span>Custom beef products welcome</li>
+          <li style="padding:7px 0;font-size:13px;display:flex;align-items:center;gap:8px"><span style="color:#16a34a;font-weight:700;font-size:15px">&#10003;</span>Processors and lockers list free too</li>
         </ul>
         <button class="btn-primary" style="width:100%;justify-content:center;background:#16a34a;border-color:#16a34a;font-size:13px" data-action="modal" data-modal="farm-to-table-listing">Post Farm to Table &rarr;</button>
       </div>
@@ -1649,7 +1664,7 @@ header.scrolled{background:rgba(10,10,10,.92)!important;backdrop-filter:blur(12p
         <span style="font-size:12px;color:#888;font-family:'Inter',sans-serif">—</span>
         <input type="number" id="f-price-max" placeholder="Any" aria-label="Max price" min="0" style="padding:8px 10px;border:1.5px solid var(--light-tan);border-radius:4px;font-size:13px;outline:none;width:80px" onkeydown="if(event.key==='Enter')loadListings()">
       </div>
-      <div style="display:flex;align-items:center;gap:4px">
+      <div id="f-weight-group" style="display:flex;align-items:center;gap:4px">
         <span style="font-size:12px;color:#888;white-space:nowrap;font-family:'Inter',sans-serif;letter-spacing:.05em">LBS</span>
         <input type="number" id="f-weight-min" placeholder="0" aria-label="Min weight lbs" min="0" style="padding:8px 10px;border:1.5px solid var(--light-tan);border-radius:4px;font-size:13px;outline:none;width:75px" onkeydown="if(event.key==='Enter')loadListings()">
         <span style="font-size:12px;color:#888;font-family:'Inter',sans-serif">—</span>
@@ -1664,8 +1679,9 @@ header.scrolled{background:rgba(10,10,10,.92)!important;backdrop-filter:blur(12p
         <option value="weight_desc">Weight: High → Low</option>
       </select>
       <button class="btn-primary" style="padding:9px 20px;font-size:13px" data-action="search-listings">Search</button>
-      <button class="btn-secondary" style="padding:9px 14px;font-size:12px" onclick="clearFilters()">Clear</button>
+      <button class="btn-secondary" style="padding:9px 14px;font-size:12px;color:var(--dark-brown);border-color:var(--light-tan);background:#fff" onclick="clearFilters()">Clear</button>
     </div>
+    <div id="f-f2t" class="f-f2t" hidden></div>
     <div class="listings-grid" id="all-listings"><div class="loading">Loading listings…</div></div>
     <div style="text-align:center;margin-top:30px" id="pagination"></div>
     </div><!-- end listings-list-view -->
@@ -4159,21 +4175,26 @@ function renderRotationPage(key, gridId, dotsId, countId, page) {
 // ── FTF mini scroll card renderer ──────────────────────
 function renderFtfMiniCard(l) {
   const imgSrc = l.thumb_small || l.thumb;
+  const isProc = l.category === 'processors';
   const imgHtml = imgSrc
-    ? `<img src="${imgSrc}" alt="" loading="lazy" onerror="this.style.display='none'">`
-    : `<span style="font-size:24px">🥩</span>`;
-  const proteins = l.farm_proteins || [];
-  const topProteins = proteins.slice(0,3).map(p => ftfLabel(p)).join(', ');
-  const methods = l.farm_production_methods || [];
-  const topMethod = methods[0] ? `<div style="font-size:8px;color:#5a7a4a;font-weight:600;margin-top:2px">${ftfLabel(methods[0])}</div>` : '';
-  const displayTitle = l.farm_name || l.title;
-  return `<div class="ftf-mini-card" onclick="openListing(${l.id})">
-    <div class="ftf-mini-img">${imgHtml}</div>
+    ? `<img src="${escHtml(imgSrc)}" alt="" loading="lazy" onerror="this.style.display='none'">`
+    : `<span style="font-size:24px">${isProc ? '🏭' : '🥩'}</span>`;
+  const badge = l.tier === 'filet' ? '<span class="ftf-mini-badge">Prime</span>' : l.tier === 't_bone' ? '<span class="ftf-mini-badge">Choice</span>' : '';
+  const small = (txt, color) => txt ? `<div style="font-size:9px;color:${color};margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escHtml(txt)}</div>` : '';
+  let line1, line2;
+  if (isProc) {
+    line1 = small((l.proc_species || []).slice(0, 3).map(ftfLabel).join(', '), 'rgba(242,232,213,.7)');
+    line2 = small((l.proc_inspection || []).map(ftfLabel).join(', '), '#9bb88a');
+  } else {
+    line1 = small((l.farm_proteins || []).slice(0, 3).map(ftfLabel).join(', '), 'rgba(242,232,213,.7)');
+    line2 = small((l.farm_production_methods || [])[0] ? ftfLabel(l.farm_production_methods[0]) : '', '#9bb88a');
+  }
+  return `<div class="ftf-mini-card" onclick="openListing(${Number(l.id)})" onkeydown="if(event.key==='Enter'||event.key===' ')openListing(${Number(l.id)})" tabindex="0" role="button" aria-label="View ${escHtml(l.farm_name || l.title)}">
+    <div class="ftf-mini-img">${imgHtml}${badge}</div>
     <div class="ftf-mini-body">
-      <div class="ftf-mini-title">${displayTitle}</div>
-      <div class="ftf-mini-loc">📍 ${l.city||''}, ${l.state||''}</div>
-      ${topProteins ? `<div style="font-size:9px;color:var(--cream);opacity:.7;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${topProteins}</div>` : ''}
-      ${topMethod}
+      <div class="ftf-mini-title">${escHtml(isProc ? l.title : (l.farm_name || l.title))}</div>
+      <div class="ftf-mini-loc">📍 ${escHtml(l.city || '')}, ${escHtml(l.state || '')}</div>
+      ${line1}${line2}
     </div>
   </div>`;
 }
@@ -4182,7 +4203,8 @@ function renderFtfMiniCard(l) {
 const PLACEHOLDER_PRIME = `<div style="border:2px dashed rgba(196,160,96,.3);border-radius:8px;padding:32px;text-align:center;background:rgba(196,160,96,.04)"><div style="font-family:'Inter',sans-serif;font-size:11px;letter-spacing:.2em;color:var(--gold);margin-bottom:8px">PRIME ADVERTISER</div><div style="font-family:'Libre Baskerville',serif;font-size:18px;color:var(--cream);margin-bottom:8px">Your Brand Here</div><div style="font-size:13px;color:var(--muted);margin-bottom:16px">Reach thousands of cattle producers nationwide</div><a href="mailto:ad@theherdhub.com" style="background:var(--rust);color:var(--cream);padding:10px 20px;border-radius:4px;font-family:'Inter',sans-serif;font-size:12px;letter-spacing:.08em;text-decoration:none">Contact Us →</a></div>`;
 const PLACEHOLDER_CHOICE = `<div style="border:2px dashed rgba(196,160,96,.3);border-radius:8px;padding:24px;text-align:center;background:rgba(196,160,96,.03)"><div style="font-family:'Inter',sans-serif;font-size:10px;letter-spacing:.15em;color:var(--gold);margin-bottom:6px">CHOICE ADVERTISER</div><div style="font-size:12px;color:var(--muted);margin-bottom:12px">Feature your listing in the sidebar</div><a href="mailto:ad@theherdhub.com" style="color:var(--gold);font-size:12px;text-decoration:underline">Learn More</a></div>`;
 const PLACEHOLDER_PAID = `<div style="grid-column:1/-1;border:2px dashed rgba(139,50,20,.3);border-radius:8px;padding:24px;text-align:center"><div style="font-size:13px;color:var(--muted);margin-bottom:12px">Upgrade to Sirloin or Ribeye to appear here</div><button onclick="showPage('pricing')" style="background:var(--rust);color:var(--cream);border:none;padding:8px 18px;border-radius:4px;font-family:'Inter',sans-serif;font-size:12px;cursor:pointer">View Plans →</button></div>`;
-const PLACEHOLDER_FTF = `<p style="color:rgba(196,160,96,.5);font-size:13px;padding:16px 0">List your farm-direct beef, pork, or produce — always free. <span style="cursor:pointer;text-decoration:underline;color:var(--tan)" data-action="modal" data-modal="farm-to-table-listing">Post Farm to Table →</span></p>`;
+const PLACEHOLDER_FTF = `<p style="color:rgba(196,160,96,.5);font-size:13px;padding:8px 0 4px">Sell beef straight from your place: halves, quarters, boxes. Free to list. <span style="cursor:pointer;text-decoration:underline;color:var(--tan)" data-action="modal" data-modal="farm-to-table-listing">List your beef →</span></p>`;
+const PLACEHOLDER_PROC = `<p style="color:rgba(196,160,96,.5);font-size:13px;padding:8px 0 4px">Run a processing plant or locker? Let producers find you. Free to list. <span style="cursor:pointer;text-decoration:underline;color:var(--tan)" data-action="modal" data-modal="processor-listing">List your plant →</span></p>`;
 
 // ── Main homepage section loader — each section independent ──
 async function loadHomepageSections() {
@@ -4194,6 +4216,8 @@ async function loadHomepageSections() {
 
     const track = document.getElementById('ftf-scroll-track');
     if (track) track.innerHTML = d.farmToTable?.length ? d.farmToTable.map(renderFtfMiniCard).join('') : PLACEHOLDER_FTF;
+    const procTrack = document.getElementById('proc-scroll-track');
+    if (procTrack) procTrack.innerHTML = d.processors?.length ? d.processors.map(renderFtfMiniCard).join('') : PLACEHOLDER_PROC;
 
     const stakeEl = document.getElementById('tbone-sidebar-listings');
     if (stakeEl) stakeEl.innerHTML = d.stakeholders?.length ? d.stakeholders.map(l => renderSidebarAdCard(l, 'left')).join('') : PLACEHOLDER_PRIME;
@@ -4217,7 +4241,7 @@ async function loadHomepageSections() {
     if (recentGrid) recentGrid.innerHTML = d.recent?.length ? d.recent.map(renderCompactCard).join('') : '<div style="grid-column:1/-1;color:#aaa;padding:20px;text-align:center">No listings yet</div>';
   } catch(e) {
     console.error('Homepage load:', e);
-    ['ftf-scroll-track','tbone-sidebar-listings','filet-sidebar-listings','featured-cattle-grid','featured-equip-grid','recent-listings-grid'].forEach(id => {
+    ['ftf-scroll-track','proc-scroll-track','tbone-sidebar-listings','filet-sidebar-listings','featured-cattle-grid','featured-equip-grid','recent-listings-grid'].forEach(id => {
       const el = document.getElementById(id); if (el && el.querySelector('.loading')) el.innerHTML = '<div style="color:#aaa;text-align:center;padding:16px">Unable to load</div>';
     });
   }
@@ -4231,7 +4255,7 @@ function renderListingCard(l, darkBg) {
   const img = imgSrc
     ? `<img src="${imgSrc}" alt="${escHtml(l.title)}" loading="lazy" onerror="this.style.display='none'">`
     : `<div style="width:100%;height:100%;background:var(--light-tan);display:flex;align-items:center;justify-content:center;font-size:48px">${catEmoji(l.category)}</div>`;
-  const tierBadge = {filet:'🥩 Prime', t_bone:'🥩 Choice', sirloin:'🥩 Sirloin', ribeye:'🥩 Ribeye'}[l.tier] || '';
+  const tierBadge = {filet:'🥩 Prime', t_bone:'🥩 Choice', sirloin:'🥩 Sirloin', ribeye:'🥩 Ribeye', farm_to_table:'🌿 Farm to Table'}[l.tier] || '';
   const badge = l.is_featured
     ? `<span class="listing-badge featured">${tierBadge || '⭐ Featured'}</span>`
     : '<span class="listing-badge new">New</span>';
@@ -4307,8 +4331,10 @@ async function showFeaturedEquipAll() {
 function filterCategory(cat, label) {
   showPage('listings');
   document.getElementById('f-category').value = cat;
-  const heading = label || fmtCat(cat);
-  document.getElementById('listings-title').innerHTML = `${heading} <span>Listings</span>`;
+  const heading = escHtml(label || fmtCat(cat));
+  // Farm to Table categories read "Buy Beef / Farm to Table" rather than "Buy Beef Listings"
+  const tail = (cat === 'farm_to_table' || cat === 'processors') ? 'Farm to Table' : 'Listings';
+  document.getElementById('listings-title').innerHTML = `${heading} <span>${tail}</span>`;
   loadListings();
 }
 function filterState(state) {
@@ -4329,9 +4355,37 @@ function doHeroSearch() {
   loadListings();
 }
 
+// Extra filters for the two Farm to Table categories, drawn under the filter bar
+const F2T_FILTER_SETS = {
+  farm_to_table: [
+    ['forms', 'Sold as', ['whole_animal','half_animal','quarter_animal','custom_cuts','specialty_cuts','bulk_ground','live_to_locker']],
+    ['methods', 'How it is raised', ['grass_fed','grass_grain_finished','grain_fed','pasture_raised','certified_organic','no_hormones','regenerative']],
+    ['delivery', 'Getting it', ['farm_pickup','local_delivery','ships_regional','ships_nationwide']],
+  ],
+  processors: [
+    ['inspection', 'Inspection', ['usda','state','custom_exempt']],
+    ['species', 'Processes', ['beef','hogs','sheep_goats','bison','deer_game','poultry']],
+    ['services', 'Service', ['slaughter','mobile_slaughter','cut_wrap','sausage','smoking_curing','dry_aging','vacuum_pack']],
+  ],
+};
+function renderF2tFilters(cat) {
+  const box = document.getElementById('f-f2t');
+  const wg = document.getElementById('f-weight-group');
+  if (wg) wg.style.display = F2T_FILTER_SETS[cat] ? 'none' : 'flex';
+  if (!box) return;
+  if (box.dataset.cat === (cat || '')) return;
+  box.dataset.cat = cat || '';
+  const set = F2T_FILTER_SETS[cat];
+  if (!set) { box.hidden = true; box.innerHTML = ''; return; }
+  box.innerHTML = set.map(([key, label, vals]) => `<select id="f-x-${key}" data-f2t="${key}" onchange="loadListings()" aria-label="${label}"><option value="">${label}: any</option>${vals.map(v => `<option value="${v}">${escHtml(ftfLabel(v))}</option>`).join('')}</select>`).join('')
+    + (cat === 'processors' ? `<label><input type="checkbox" id="f-x-haul" data-f2t="haul" onchange="loadListings()"> Picks up live animals</label>` : '');
+  box.hidden = false;
+}
+
 async function loadListings(page=1) {
   listingsPage = page;
   const cat       = document.getElementById('f-category').value;
+  renderF2tFilters(cat);
   const state     = document.getElementById('f-state').value;
   const q         = document.getElementById('f-q').value;
   const sort      = document.getElementById('f-sort').value;
@@ -4348,6 +4402,10 @@ async function loadListings(page=1) {
   if (priceMax)  params.set('max_price', priceMax);
   if (weightMin) params.set('min_weight', weightMin);
   if (weightMax) params.set('max_weight', weightMax);
+  document.querySelectorAll('#f-f2t [data-f2t]').forEach(x => {
+    if (x.type === 'checkbox') { if (x.checked) params.set(x.dataset.f2t, '1'); }
+    else if (x.value) params.set(x.dataset.f2t, x.value);
+  });
 
   const el = document.getElementById('all-listings');
   el.innerHTML = '<div class="loading">Loading…</div>';
@@ -4373,6 +4431,7 @@ async function loadListings(page=1) {
 function clearFilters() {
   ['f-category','f-state','f-sort'].forEach(id => { const el = document.getElementById(id); if(el) el.value = id === 'f-sort' ? 'featured' : ''; });
   ['f-q','f-price-min','f-price-max','f-weight-min','f-weight-max'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+  document.querySelectorAll('#f-f2t [data-f2t]').forEach(x => { if (x.type === 'checkbox') x.checked = false; else x.value = ''; });
   loadListings();
 }
 
@@ -4391,7 +4450,7 @@ async function loadRecentListings() {
   const el = document.getElementById('recent-listings-grid');
   if (!el) return;
   try {
-    const r = await fetch(`${API}/api/listings?sort=newest&limit=10`);
+    const r = await fetch(`${API}/api/listings?sort=newest&limit=10&exclude_f2t_featured=1`);
     const d = await r.json();
     const listings = d.listings || [];
     if (!listings.length) { el.innerHTML = '<div style="grid-column:1/-1;color:#aaa;padding:20px 0;text-align:center">No listings yet — be the first to post!</div>'; return; }
