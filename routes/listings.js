@@ -201,7 +201,7 @@ router.get('/', optionalAuth, async (req, res) => {
       category, categories, state, breed, sex, min_price, max_price,
       min_weight, max_weight,
       q, page = 1, limit = 24, sort = 'featured',
-      tier, status = 'active',
+      tier, status = 'active', haul, exclude_f2t_featured,
     } = req.query;
 
     // Public browse: only live or sold listings, never pending/draft/deleted ones
@@ -232,6 +232,17 @@ router.get('/', optionalAuth, async (req, res) => {
     if (max_price)  { conditions.push(`l.price <= $${p}`);          params.push(+max_price);     p++; }
     if (min_weight) { conditions.push(`l.weight_lbs >= $${p}`);     params.push(+min_weight);    p++; }
     if (max_weight) { conditions.push(`l.weight_lbs <= $${p}`);     params.push(+max_weight);    p++; }
+    // Farm to Table filters: listings matching any of the picked values (comma-separated)
+    const F2T_FILTERS = { forms: 'farm_product_forms', methods: 'farm_production_methods', delivery: 'farm_delivery',
+      inspection: 'proc_inspection', species: 'proc_species', services: 'proc_services' };
+    for (const [param, col] of Object.entries(F2T_FILTERS)) {
+      if (!req.query[param]) continue;
+      const vals = String(req.query[param]).split(',').map(v => v.trim()).filter(v => OPTIONS[col].includes(v));
+      if (vals.length) { conditions.push(`l.${col} && $${p}::text[]`); params.push(vals); p++; }
+    }
+    if (haul === '1' || haul === 'true') conditions.push('l.proc_haul = TRUE');
+    // Recent Listings: Prime and Choice Farm to Table spots show in their own row and the side columns instead
+    if (exclude_f2t_featured === '1') conditions.push(`NOT (l.category IN ('farm_to_table','processors') AND l.tier IN ('filet','t_bone'))`);
 
     const where   = conditions.join(' AND ');
     const tsRank  = q ? `ts_rank(l.search_vector, plainto_tsquery('english', $2)) DESC, ` : '';
@@ -255,6 +266,7 @@ router.get('/', optionalAuth, async (req, res) => {
                 l.quantity, l.state, l.city, l.tier, l.is_featured,
                 l.views, l.created_at, l.lat, l.lng,
                 l.farm_name, l.farm_proteins, l.farm_production_methods,
+                l.proc_inspection, l.proc_species, l.proc_lead_weeks,
                 u.name AS seller_name, u.is_verified AS seller_verified,
                 (SELECT url FROM listing_photos WHERE listing_id=l.id ORDER BY sort_order LIMIT 1) AS thumb,
                 (SELECT thumb_url FROM listing_photos WHERE listing_id=l.id ORDER BY sort_order LIMIT 1) AS thumb_small
@@ -473,14 +485,17 @@ router.get('/homepage', async (_req, res) => {
     const ACTIVE = "l.status='active' AND (l.expires_at IS NULL OR l.expires_at>NOW())";
     const Q = (where, limit) => query(`SELECT ${SECTION_COLS_FULL} FROM listings l JOIN users u ON u.id=l.user_id WHERE ${where} AND ${ACTIVE} ORDER BY RANDOM() LIMIT ${limit}`);
 
-    const [stakeholders, featuredAds, featuredCattle, featuredEquipment, farmToTable, recent] = await Promise.all([
+    // Farm to Table rows: Prime first, then Choice, then the rest in a fresh order each time
+    const F2T_ORDER = `CASE l.tier WHEN 'filet' THEN 0 WHEN 't_bone' THEN 1 ELSE 2 END, RANDOM()`;
+    const [stakeholders, featuredAds, featuredCattle, featuredEquipment, farmToTable, processors, recent] = await Promise.all([
       // Steakholders and Featured Ads show every live placement; the side columns grow to fit
       Q("l.tier='filet'", 100),
       Q("l.tier='t_bone'", 100),
       Q("l.tier IN ('sirloin','ribeye') AND l.category IN ('bulls','bred_heifers','bred_cows','open_heifers','open_cows','cow_calf_pairs','feeder_stocker','showstock','dairy','bottle_calves','beef_cattle','fat_cattle','embryos','semen','full_herd')", 15),
       Q("l.tier IN ('sirloin','ribeye') AND l.category IN ('equipment','trailers','chutes_pens')", 8),
-      query(`SELECT ${SECTION_COLS_FULL}, l.farm_name, l.farm_proteins, l.farm_production_methods, l.farm_operation_size FROM listings l JOIN users u ON u.id=l.user_id WHERE l.category='farm_to_table' AND ${ACTIVE} ORDER BY RANDOM() LIMIT 8`),
-      query(`SELECT ${SECTION_COLS_FULL} FROM listings l JOIN users u ON u.id=l.user_id WHERE l.status='active' ORDER BY l.created_at DESC LIMIT 12`),
+      query(`SELECT ${SECTION_COLS_FULL}, l.farm_name, l.farm_proteins, l.farm_production_methods, l.farm_operation_size FROM listings l JOIN users u ON u.id=l.user_id WHERE l.category='farm_to_table' AND ${ACTIVE} ORDER BY ${F2T_ORDER} LIMIT 12`),
+      query(`SELECT ${SECTION_COLS_FULL}, l.proc_inspection, l.proc_species, l.proc_lead_weeks, l.proc_haul FROM listings l JOIN users u ON u.id=l.user_id WHERE l.category='processors' AND ${ACTIVE} ORDER BY ${F2T_ORDER} LIMIT 12`),
+      query(`SELECT ${SECTION_COLS_FULL} FROM listings l JOIN users u ON u.id=l.user_id WHERE l.status='active' AND NOT (l.category IN ('farm_to_table','processors') AND l.tier IN ('filet','t_bone')) ORDER BY l.created_at DESC LIMIT 12`),
     ]);
 
     const result = {
@@ -489,6 +504,7 @@ router.get('/homepage', async (_req, res) => {
       featuredCattle: featuredCattle.rows,
       featuredEquipment: featuredEquipment.rows,
       farmToTable: farmToTable.rows,
+      processors: processors.rows,
       recent: recent.rows,
     };
 
