@@ -4,6 +4,8 @@
  * showVerifyGateModal, showBeefBoxOffer, showPage, switchAcctTab,
  * loadMyListings, loadHomepageSections, loadRecentListings).
  * Steps: what -> details -> photos -> price and location -> plan -> review.
+ * Farm to Table has two kinds: 'beef' (Buy Beef, category farm_to_table) and
+ * 'processor' (Processors and Lockers, category processors).
  * Editing skips the plan step and opens on review.
  */
 (function () {
@@ -27,7 +29,7 @@
       ['breed_associations', 'Breed Associations', '📜'], ['livestock_services', 'Livestock Services', '🩺'],
       ['feed_stores', 'Feed and Supply Stores', '🏪'], ['insurance_finance', 'Insurance and Finance', '🏦'],
     ] },
-    { label: 'Farm to Table', cats: [['farm_to_table', 'Sell beef direct', '🌿']] },
+    { label: 'Farm to Table', cats: [['farm_to_table', 'Sell beef direct', '🥩'], ['processors', 'Processor or locker', '🏭']] },
   ];
   const CAT = {};
   GROUPS.forEach(g => g.cats.forEach(([v, l, e]) => { CAT[v] = { label: l, emoji: e, group: g.label }; }));
@@ -36,10 +38,28 @@
     if (cat === 'embryos' || cat === 'semen') return 'genetics';
     if (cat === 'working_dogs') return 'dog';
     if (['equipment', 'trailers', 'chutes_pens', 'feed_hay'].includes(cat)) return 'goods';
-    // Farm to Table is posted with its own form; when edited here it gets the simple business fields
-    if (['ranches_farms', 'sale_barns', 'breed_associations', 'livestock_services', 'feed_stores', 'insurance_finance', 'farm_to_table'].includes(cat)) return 'business';
+    if (cat === 'farm_to_table') return 'beef';
+    if (cat === 'processors') return 'processor';
+    if (['ranches_farms', 'sale_barns', 'breed_associations', 'livestock_services', 'feed_stores', 'insurance_finance'].includes(cat)) return 'business';
     return 'livestock';
   }
+  const isF2T = cat => cat === 'farm_to_table' || cat === 'processors';
+  // No head count or quantity for these kinds
+  const NO_QTY = ['business', 'beef', 'processor'];
+
+  // Farm to Table choices (values match the server's lists)
+  const OPT = {
+    farm_proteins: [['beef', 'Beef'], ['wagyu_beef', 'Wagyu beef'], ['bison', 'Bison'], ['pork', 'Pork'], ['lamb_goat', 'Lamb or goat'], ['chicken_poultry', 'Chicken'], ['chicken_eggs', 'Eggs'], ['other_protein', 'Other']],
+    farm_product_forms: [['whole_animal', 'Whole'], ['half_animal', 'Half'], ['quarter_animal', 'Quarter'], ['custom_cuts', 'Boxes and bundles'], ['specialty_cuts', 'Retail cuts'], ['bulk_ground', 'Ground in bulk'], ['live_to_locker', 'Live animal to the locker'], ['other_form', 'Other']],
+    farm_production_methods: [['grass_fed', '100% grass-fed'], ['grass_grain_finished', 'Grass-fed, grain-finished'], ['grain_fed', 'Grain-fed'], ['pasture_raised', 'Pasture-raised'], ['certified_organic', 'Certified organic'], ['no_hormones', 'No hormones or antibiotics'], ['regenerative', 'Regenerative']],
+    farm_processing: [['usda_inspected', 'USDA inspected plant'], ['custom_exempt', 'Custom exempt plant'], ['buyer_arranges', 'Buyer books the processor']],
+    farm_delivery: [['farm_pickup', 'Pickup at the farm'], ['local_delivery', 'Local delivery'], ['ships_regional', 'Ships in the region (frozen)'], ['ships_nationwide', 'Ships nationwide (frozen)']],
+    proc_inspection: [['usda', 'USDA inspected'], ['state', 'State inspected'], ['custom_exempt', 'Custom exempt']],
+    proc_species: [['beef', 'Beef'], ['hogs', 'Hogs'], ['sheep_goats', 'Sheep and goats'], ['bison', 'Bison'], ['deer_game', 'Deer and game'], ['poultry', 'Poultry']],
+    proc_services: [['slaughter', 'Harvest at the plant'], ['mobile_slaughter', 'On-farm harvest'], ['cut_wrap', 'Cut and wrap'], ['sausage', 'Sausage'], ['smoking_curing', 'Smoking and curing'], ['dry_aging', 'Dry aging'], ['vacuum_pack', 'Vacuum packing']],
+  };
+  const AVAIL = [['ready_now', 'Ready now'], ['pre_order', 'Taking orders'], ['seasonal', 'Seasonal'], ['sold_out', 'Sold out for now']];
+
   const AUTO_SEX = { bulls: 'bull', bucking_bulls: 'bull', bred_heifers: 'heifer', open_heifers: 'heifer',
     bred_cows: 'cow', open_cows: 'cow', cow_calf_pairs: 'cow' };
   const ASK_SEX = ['feeder_stocker', 'fat_cattle', 'bottle_calves', 'showstock', 'dairy', 'full_herd'];
@@ -65,10 +85,11 @@
       return u;
     }
     if (k === 'genetics') return [['each', 'Each'], ['fixed', 'Total for the lot']];
-    if (k === 'business') return [];
+    if (k === 'business' || k === 'processor') return [];
+    if (k === 'beef') return [['per_lb_hanging', 'Per lb hanging'], ['per_lb', 'Per lb take-home'], ['each', 'Per box'], ['fixed', 'Total price']];
     return [['fixed', 'Price'], ['each', 'Each']];
   }
-  const UNIT_WORD = { per_head: '/head', per_cwt: '/cwt', per_lb: '/lb', per_pair: '/pair', each: ' each', obo: ' OBO', negotiable: ', negotiable', firm: ' firm', fixed: '' };
+  const UNIT_WORD = { per_lb_hanging: '/lb hanging', per_head: '/head', per_cwt: '/cwt', per_lb: '/lb', per_pair: '/pair', each: ' each', obo: ' OBO', negotiable: ', negotiable', firm: ' firm', fixed: '' };
 
   // ── Plans ────────────────────────────────────────────────
   const PLANS = {
@@ -77,9 +98,10 @@
     ribeye: { name: 'Ribeye', icon: '🥩', photos: 3, price: 'Free', regular: 'Regularly <s>$9.99</s> one-time', where: 'Featured Cattle or Equipment row', days: '30 days free', launch: true },
     t_bone: { name: 'Choice', icon: '⭐', photos: 5, price: 'Free', regular: 'Regularly <s>$49.99</s> one-time', where: 'Featured Ads column', days: '30 days free, reviewed before it goes live', launch: true },
     filet: { name: 'Prime', icon: '👑', photos: 5, price: 'Free', regular: 'Regularly <s>$39.99/mo</s>, billed yearly', where: 'Our Steakholders, top placement', days: '30 days free, reviewed before it goes live', launch: true },
-    farm_to_table: { name: 'Farm to Table', icon: '🌿', photos: 8, price: 'Free', regular: '', where: 'Farm to Table row', days: '90 days' },
+    farm_to_table: { name: 'Farm to Table', icon: '🌿', photos: 8, price: 'Free', regular: '', where: 'Farm to Table section', days: '90 days' },
   };
   function plansFor(cat) {
+    if (isF2T(cat)) return ['farm_to_table', 't_bone', 'filet'];
     return kindOf(cat) === 'business' ? ['burger', 't_bone', 'filet'] : ['burger', 'sirloin', 'ribeye'];
   }
   function maxPhotos(cat) { return Math.max(...plansFor(cat).map(p => PLANS[p].photos)); }
@@ -95,6 +117,9 @@
       description: '', website_url: '', price: '', price_type: '', call: false,
       zip: '', city: u.city || '', state: u.state || '', place_ok: false,
       contact_pref: u.phone ? 'either' : 'message', phone: u.phone || '', tier: 'burger',
+      farm_name: '', farm_proteins: ['beef'], farm_product_forms: [], farm_production_methods: [], farm_processing: [], farm_delivery: [],
+      farm_availability: 'ready_now', farm_harvest_date: '', farm_deposit_amount: '',
+      proc_inspection: [], proc_species: ['beef'], proc_services: [], proc_lead_weeks: '', proc_haul: false, proc_capacity: '',
     };
   }
   function steps() {
@@ -157,7 +182,13 @@
           price: l.price == null ? '' : String(Number(l.price)), price_type: l.price_type || 'fixed', call: l.price_type === 'call',
           zip: l.zip || '', city: l.city || '', state: l.state || '', place_ok: true,
           contact_pref: l.contact_pref || 'either', phone: me().phone || '', tier: l.tier,
+          farm_name: l.farm_name || '', farm_availability: l.farm_availability || 'ready_now',
+          farm_harvest_date: l.farm_harvest_date ? String(l.farm_harvest_date).slice(0, 10) : '',
+          farm_deposit_amount: l.farm_deposit_amount == null ? '' : String(Number(l.farm_deposit_amount)),
+          proc_lead_weeks: l.proc_lead_weeks == null ? '' : String(l.proc_lead_weeks), proc_haul: !!l.proc_haul,
+          proc_capacity: l.proc_capacity == null ? '' : String(l.proc_capacity),
         });
+        Object.keys(OPT).forEach(key => { S.data[key] = (l[key] || []).filter(v => OPT[key].some(o => o[0] === v)); });
         S.photos = (l.photos || []).map(p => ({ kind: 'old', id: Number(p.id), url: p.thumb_url || p.url }));
         S.photoLimit = l.photo_limit || (PLANS[l.tier] || {}).photos || 1;
         S.step = steps().indexOf('review');
@@ -169,8 +200,15 @@
     }
 
     $('lf-heading').textContent = 'Post a Listing';
-    const draft = readDraft();
-    if (draft) S.draftOffer = draft;
+    // Opened from a Farm to Table button: start on that category's details
+    if (opts.category && CAT[opts.category]) {
+      S.data.category = opts.category;
+      S.data.tier = (S.presetPlan && plansFor(opts.category).includes(S.presetPlan)) ? S.presetPlan : plansFor(opts.category)[0];
+      S.step = steps().indexOf('details');
+    } else {
+      const draft = readDraft();
+      if (draft) S.draftOffer = draft;
+    }
     showModal();
     render();
     loadFeaturedTrial();
@@ -222,6 +260,14 @@
     return `<div class="form-group lf-field" id="lf-f-${id}"><label for="lf-${id}">${label}</label>${input}${hint ? `<div class="lf-hint">${hint}</div>` : ''}<div class="lf-ferr" id="lf-e-${id}"></div></div>`;
   }
 
+  // A group of checkboxes for a Farm to Table list field
+  function checks(key, label, hint) {
+    const cur = S.data[key] || [];
+    return `<div class="form-group lf-field" id="lf-f-${key}"><label>${label}</label><div class="lf-checks">${
+      OPT[key].map(([v, l]) => `<label class="lf-check"><input type="checkbox" data-arr="${key}" value="${v}" ${cur.includes(v) ? 'checked' : ''}> ${l}</label>`).join('')
+    }</div>${hint ? `<div class="lf-hint">${hint}</div>` : ''}<div class="lf-ferr" id="lf-e-${key}"></div></div>`;
+  }
+
   function viewWhat() {
     let html = '';
     if (S.draftOffer && S.mode === 'new') {
@@ -234,7 +280,7 @@
     if (S.mode === 'edit') {
       // Editing keeps the listing where its plan works: Farm to Table stays put,
       // business plans stay with businesses, seller plans stay with cattle and equipment.
-      if (S.data.category === 'farm_to_table') return `<p class="lf-lead">Farm to Table listings stay in the Farm to Table section. Tap Next to edit the details.</p>`;
+      if (isF2T(S.data.category)) return `<p class="lf-lead">Farm to Table listings stay in the Farm to Table section. Tap Next to edit the details.</p>`;
       const biz = ['t_bone', 'filet'].includes(S.data.tier), seller = ['sirloin', 'ribeye'].includes(S.data.tier);
       groups = GROUPS.filter(g => g.label !== 'Farm to Table' && (biz ? g.label === 'Businesses and services' : seller ? g.label !== 'Businesses and services' : true));
     }
@@ -249,15 +295,33 @@
     const d = S.data, cat = d.category, k = kindOf(cat);
     const catInfo = CAT[cat] || { label: cat, emoji: '' };
     const examples = { livestock: 'e.g. 12 Black Angus Bred Heifers, due March', genetics: 'e.g. Registered Angus semen, 10 straws',
-      dog: 'e.g. Started Border Collie, 2 yr, working cattle', goods: 'e.g. 2019 W-W Cattle Chute, used one season', business: 'e.g. Smith Ranch Supply, Amarillo' };
+      dog: 'e.g. Started Border Collie, 2 yr, working cattle', goods: 'e.g. 2019 W-W Cattle Chute, used one season', business: 'e.g. Smith Ranch Supply, Amarillo',
+      beef: 'e.g. Grass-fed beef halves and quarters', processor: 'e.g. Smith Meat Processing, Amarillo' };
     let html = `<div class="lf-chip">${catInfo.emoji} ${esc(catInfo.label)} <button type="button" class="lf-link" data-lf="goto" data-step="what">Change</button></div>`;
-    html += field('title', k === 'business' ? 'Business name and headline' : 'Title',
-      `<input type="text" id="lf-title" maxlength="120" value="${esc(d.title)}" placeholder="${examples[k]}">`, 'Buyers see this first. Say what it is and how many.');
+    html += field('title', k === 'business' || k === 'processor' ? 'Business name and headline' : 'Title',
+      `<input type="text" id="lf-title" maxlength="120" value="${esc(d.title)}" placeholder="${examples[k]}">`,
+      { business: 'Buyers see this first. Your business name and what you do.', processor: 'Buyers see this first. Your business name and town.', beef: 'Buyers see this first. Say what you sell, like halves and quarters.' }[k] || 'Buyers see this first. Say what it is and how many.');
     if (k === 'livestock' || k === 'genetics') {
       html += field('breed', 'Breed', `<select id="lf-breed"><option value="">Pick a breed (optional)</option>${BREEDS.map(b => `<option${d.breed === b ? ' selected' : ''}>${esc(b)}</option>`).join('')}${d.breed && !BREEDS.includes(d.breed) ? `<option selected>${esc(d.breed)}</option>` : ''}</select>`);
     }
     if (k === 'dog') html += field('breed', 'Breed', `<input type="text" id="lf-breed" maxlength="60" value="${esc(d.breed)}" placeholder="e.g. Border Collie">`);
-    if (k !== 'business') {
+    if (k === 'beef') {
+      html += field('farm_name', 'Farm or ranch name (optional)', `<input type="text" id="lf-farm_name" maxlength="150" value="${esc(d.farm_name)}" placeholder="e.g. Harrington Ranch">`);
+      html += checks('farm_proteins', 'What do you sell?');
+      html += checks('farm_product_forms', 'How do you sell it?');
+      html += checks('farm_production_methods', 'How is it raised? (optional)');
+      html += checks('farm_processing', 'Where is it processed? (optional)', 'Buyers ask. USDA inspected beef can be sold by the cut; custom exempt is sold by the share before harvest.');
+    }
+    if (k === 'processor') {
+      html += checks('proc_inspection', 'Inspection type');
+      html += checks('proc_species', 'What do you process?');
+      html += checks('proc_services', 'What services do you offer?');
+      html += `<div class="form-row">` +
+        field('proc_lead_weeks', 'Booking how far out? (weeks)', `<input type="number" id="lf-proc_lead_weeks" inputmode="numeric" min="0" max="104" value="${esc(d.proc_lead_weeks)}" placeholder="0 = taking animals now">`) +
+        field('proc_capacity', 'Head per week (optional)', `<input type="number" id="lf-proc_capacity" inputmode="numeric" min="1" value="${esc(d.proc_capacity)}" placeholder="optional">`) + `</div>`;
+      html += `<label class="lf-check"><input type="checkbox" id="lf-proc_haul" ${d.proc_haul ? 'checked' : ''}> We can pick up live animals</label>`;
+    }
+    if (!NO_QTY.includes(k)) {
       const qLabel = { livestock: 'How many head?', genetics: cat === 'semen' ? 'How many straws?' : 'How many embryos?', dog: 'How many dogs?', goods: 'How many?' }[k];
       html += `<div class="form-row">` + field('quantity', qLabel, `<input type="number" id="lf-quantity" inputmode="numeric" min="1" value="${esc(d.quantity)}">`);
       if (k === 'livestock') html += field('weight', 'Average weight (lb)', `<input type="number" id="lf-weight" inputmode="decimal" min="1" max="5000" value="${esc(d.weight_lbs)}" placeholder="optional">`);
@@ -271,10 +335,12 @@
         html += `</div>`;
       }
     }
-    if (k === 'business') html += field('website', 'Website (optional)', `<input type="url" id="lf-website" inputmode="url" value="${esc(d.website_url)}" placeholder="https://yourranch.com">`);
+    if (k === 'business' || k === 'beef' || k === 'processor') html += field('website', 'Website (optional)', `<input type="url" id="lf-website" inputmode="url" value="${esc(d.website_url)}" placeholder="https://yourranch.com">`);
     const descHint = { livestock: 'Health and vaccinations, breeding or calving dates, temperament, papers, why you are selling.',
       genetics: 'Sire or dam, registration numbers, EPDs, storage and shipping.', dog: 'Training, temperament, papers, what stock they work.',
-      goods: 'Year, make and model, condition, hours or miles, what is included.', business: 'What you offer, who you serve, hours, how to reach you.' }[k];
+      goods: 'Year, make and model, condition, hours or miles, what is included.', business: 'What you offer, who you serve, hours, how to reach you.',
+      beef: 'Breed, how the cattle are raised and finished, typical hanging weight, what a share includes, how ordering and pickup work.',
+      processor: 'Hours, how to book, drop-off days, what customers bring or pay, anything buyers should know.' }[k];
     html += field('description', 'Description', `<textarea id="lf-description" rows="5" maxlength="5000" placeholder="Write a few lines for buyers">${esc(d.description)}</textarea>`, descHint);
     return html;
   }
@@ -286,7 +352,7 @@
     html += `<div class="lf-photo-btns">
       <button type="button" class="btn-primary" data-lf="camera" ${n >= max ? 'disabled' : ''}>📷 Take a photo</button>
       <button type="button" class="btn-secondary" data-lf="library" ${n >= max ? 'disabled' : ''}>🖼 Choose from your photos</button></div>`;
-    html += `<div class="lf-hint" style="margin:8px 0 14px">${n} of ${max} photos${S.mode === 'new' ? (kindOf(S.data.category) === 'business' ? '. The free plan shows 1; Choice and Prime show up to 5.' : '. The free plan shows 1; Sirloin and Ribeye show up to 3.') : ` for the ${esc((PLANS[S.data.tier] || {}).name || S.data.tier)} plan.`} The first photo is the cover.</div>`;
+    html += `<div class="lf-hint" style="margin:8px 0 14px">${n} of ${max} photos${S.mode === 'new' ? (isF2T(S.data.category) ? '. The Farm to Table plan shows up to 8.' : kindOf(S.data.category) === 'business' ? '. The free plan shows 1; Choice and Prime show up to 5.' : '. The free plan shows 1; Sirloin and Ribeye show up to 3.') : ` for the ${esc((PLANS[S.data.tier] || {}).name || S.data.tier)} plan.`} The first photo is the cover.</div>`;
     html += `<div class="lf-photos" id="lf-photos">${S.photos.map((p, i) => `
       <div class="lf-photo">
         <img src="${esc(p.url)}" alt="Photo ${i + 1}">
@@ -305,7 +371,7 @@
   function viewPrice() {
     const d = S.data, k = kindOf(d.category);
     let html = '';
-    if (k !== 'business') {
+    if (k !== 'business' && k !== 'processor') {
       const units = priceUnits(d.category);
       if (!d.price_type || (d.price_type === 'call' && !d.call)) d.price_type = units[0][0];
       const cur = d.call ? units[0][0] : d.price_type;
@@ -314,6 +380,13 @@
         field('price', 'Price ($)', `<input type="number" id="lf-price" inputmode="decimal" min="0" step="0.01" value="${esc(d.price)}" ${d.call ? 'disabled' : ''} placeholder="0">`) +
         field('unit', 'Priced', `<select id="lf-unit" ${d.call ? 'disabled' : ''}>${units.map(([v, l]) => `<option value="${v}"${cur === v ? ' selected' : ''}>${l}</option>`).join('')}${extra}</select>`) +
         `</div><label class="lf-check"><input type="checkbox" id="lf-call" ${d.call ? 'checked' : ''}> Call for price (no price shown)</label>`;
+    }
+    if (k === 'beef') {
+      html += field('farm_deposit_amount', 'Deposit to hold an order ($, optional)', `<input type="number" id="lf-farm_deposit_amount" inputmode="decimal" min="0" step="1" value="${esc(d.farm_deposit_amount)}" placeholder="optional">`);
+      html += checks('farm_delivery', 'How do buyers get it?');
+      html += `<div class="form-row">` +
+        field('farm_availability', 'When is it ready?', `<select id="lf-farm_availability">${AVAIL.map(([v, l]) => `<option value="${v}"${d.farm_availability === v ? ' selected' : ''}>${l}</option>`).join('')}</select>`) +
+        field('farm_harvest_date', 'Next harvest date (optional)', `<input type="date" id="lf-farm_harvest_date" value="${esc(d.farm_harvest_date)}">`) + `</div>`;
     }
     html += field('zip', 'ZIP code', `<input type="text" id="lf-zip" inputmode="numeric" autocomplete="postal-code" maxlength="5" value="${esc(d.zip)}" placeholder="e.g. 79101">`,
       'We use it to fill in your town and put the listing on the map. Buyers see the town, never the ZIP.');
@@ -365,10 +438,13 @@
     const d = S.data, k = kindOf(d.category);
     const cover = S.photos[0];
     const limit = S.mode === 'edit' ? S.photoLimit : (PLANS[d.tier] || PLANS.burger).photos;
-    const price = k === 'business' ? '' : d.call || !d.price ? 'Call for price' : '$' + Number(d.price).toLocaleString() + (UNIT_WORD[d.price_type] || '');
+    const price = (k === 'business' || k === 'processor') ? '' : d.call || !d.price ? 'Call for price' : '$' + Number(d.price).toLocaleString() + (UNIT_WORD[d.price_type] || '');
+    const words = key => (d[key] || []).map(v => (OPT[key].find(o => o[0] === v) || [v, v])[1]).join(', ');
     const pills = [];
+    if (k === 'beef') { if (d.farm_name) pills.push(esc(d.farm_name)); if (words('farm_product_forms')) pills.push(esc(words('farm_product_forms'))); if (words('farm_production_methods')) pills.push(esc(words('farm_production_methods'))); }
+    if (k === 'processor') { pills.push(esc(words('proc_inspection'))); pills.push(esc(words('proc_species'))); if (d.proc_lead_weeks !== '') pills.push(Number(d.proc_lead_weeks) === 0 ? 'Taking animals now' : `Booking ${esc(d.proc_lead_weeks)} weeks out`); if (d.proc_haul) pills.push('Picks up live animals'); }
     if (d.breed) pills.push(esc(d.breed));
-    if (k !== 'business' && Number(d.quantity) > 1) pills.push(`${esc(d.quantity)} ${k === 'livestock' ? 'head' : ''}`.trim());
+    if (!NO_QTY.includes(k) && Number(d.quantity) > 1) pills.push(`${esc(d.quantity)} ${k === 'livestock' ? 'head' : ''}`.trim());
     if (d.weight_lbs) pills.push(`${Number(d.weight_lbs).toLocaleString()} lb avg`);
     if (d.age_value) pills.push(`${esc(d.age_value)} ${d.age_unit}`);
     const contact = { message: 'Herd Hub messages', phone: 'Call or text', either: 'Messages, call or text' }[d.contact_pref];
@@ -383,7 +459,8 @@
     html += row('Category', esc((CAT[d.category] || {}).label || d.category), 'what');
     html += row('Details', `${esc(d.title)}${pills.length ? '<br>' + pills.join(' · ') : ''}`, 'details');
     html += row('Photos', `${S.photos.length} photo${S.photos.length === 1 ? '' : 's'}${S.photos.length > limit ? `. This plan shows your first ${limit}.` : ''}`, 'photos');
-    html += row('Price and location', `${price ? esc(price) + '<br>' : ''}${esc(d.city)}, ${esc(d.state)}${d.zip ? ' ' + esc(d.zip) : ''}<br>Buyers reach you by: ${contact}${d.contact_pref !== 'message' && d.phone ? ' at ' + esc(d.phone) : ''}`, 'price');
+    const beefExtra = k === 'beef' ? `${words('farm_delivery') ? esc(words('farm_delivery')) + '<br>' : ''}${esc((AVAIL.find(a => a[0] === d.farm_availability) || ['', ''])[1])}${d.farm_harvest_date ? ', next harvest ' + esc(new Date(d.farm_harvest_date + 'T12:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })) : ''}${d.farm_deposit_amount ? `<br>$${esc(d.farm_deposit_amount)} deposit` : ''}<br>` : '';
+    html += row(k === 'processor' ? 'Location' : 'Price and location', `${price ? esc(price) + '<br>' : ''}${beefExtra}${esc(d.city)}, ${esc(d.state)}${d.zip ? ' ' + esc(d.zip) : ''}<br>Buyers reach you by: ${contact}${d.contact_pref !== 'message' && d.phone ? ' at ' + esc(d.phone) : ''}`, 'price');
     const P = PLANS[d.tier] || { name: d.tier };
     html += row('Plan', `${P.icon || ''} ${esc(P.name)}${P.launch ? ', free during launch' : ', free'}${d.tier === 't_bone' || d.tier === 'filet' ? '. Reviewed by hand before it goes live.' : ''}`, S.mode === 'new' ? 'plan' : null);
     html += `</div>`;
@@ -398,9 +475,17 @@
     if (name === 'details') {
       bind('lf-title', 'title'); bind('lf-breed', 'breed'); bind('lf-quantity', 'quantity'); bind('lf-weight', 'weight_lbs');
       bind('lf-age', 'age_value'); bind('lf-age-unit', 'age_unit'); bind('lf-sex', 'sex'); bind('lf-website', 'website_url'); bind('lf-description', 'description');
+      bind('lf-farm_name', 'farm_name'); bind('lf-proc_lead_weeks', 'proc_lead_weeks'); bind('lf-proc_capacity', 'proc_capacity');
+      const haul = $('lf-proc_haul'); if (haul) haul.addEventListener('change', () => { d.proc_haul = haul.checked; saveDraft(); });
     }
+    document.querySelectorAll('#lf-body input[data-arr]').forEach(cb => cb.addEventListener('change', () => {
+      const key = cb.dataset.arr, set = new Set(d[key] || []);
+      if (cb.checked) set.add(cb.value); else set.delete(cb.value);
+      d[key] = OPT[key].map(o => o[0]).filter(v => set.has(v)); saveDraft();
+    }));
     if (name === 'price') {
       bind('lf-price', 'price'); bind('lf-unit', 'price_type');
+      bind('lf-farm_deposit_amount', 'farm_deposit_amount'); bind('lf-farm_availability', 'farm_availability'); bind('lf-farm_harvest_date', 'farm_harvest_date');
       const call = $('lf-call');
       if (call) call.addEventListener('change', () => { d.call = call.checked; $('lf-price').disabled = call.checked; $('lf-unit').disabled = call.checked; saveDraft(); });
       document.querySelectorAll('input[name="lf-contact"]').forEach(r => r.addEventListener('change', () => { d.contact_pref = r.value; const w = $('lf-phone-wrap'); if (w) w.hidden = r.value === 'message'; saveDraft(); }));
@@ -444,12 +529,11 @@
     const a = el.dataset.lf;
     if (a === 'cat') {
       const v = el.dataset.v;
-      if (v === 'farm_to_table') { closeForm(); setTimeout(() => openModal('farm-to-table-listing'), 150); return; }
       const changedKind = S.data.category && kindOf(S.data.category) !== kindOf(v);
       S.data.category = v;
       S.data.sex = AUTO_SEX[v] || (ASK_SEX.includes(v) ? S.data.sex : '');
       if (changedKind) { S.data.price_type = ''; }
-      if (S.mode === 'new' && !plansFor(v).includes(S.data.tier)) S.data.tier = 'burger';
+      if (S.mode === 'new' && !plansFor(v).includes(S.data.tier)) S.data.tier = plansFor(v)[0];
       if (S.mode === 'new' && S.presetPlan && plansFor(v).includes(S.presetPlan)) S.data.tier = S.presetPlan;
       S.draftOffer = null; saveDraft();
       S.step = steps().indexOf('details'); render();
@@ -534,7 +618,14 @@
     const bad = (id, msg) => { ok = false; fieldErr(id, msg); };
     if (name === 'details') {
       if ((d.title || '').trim().length < 5) bad('title', 'Give it a title of at least a few words.');
-      if (k !== 'business' && !(parseInt(d.quantity) >= 1)) bad('quantity', 'Enter 1 or more.');
+      if (!NO_QTY.includes(k) && !(parseInt(d.quantity) >= 1)) bad('quantity', 'Enter 1 or more.');
+      const need = (key, msg) => { if (!(d[key] || []).length) bad(key, msg); };
+      if (k === 'beef') { need('farm_proteins', 'Pick at least one thing you sell.'); need('farm_product_forms', 'Pick at least one way you sell it.'); }
+      if (k === 'processor') {
+        need('proc_inspection', 'Pick your inspection type.'); need('proc_species', 'Pick at least one.'); need('proc_services', 'Pick at least one.');
+        if (d.proc_lead_weeks !== '' && !(Number.isInteger(Number(d.proc_lead_weeks)) && Number(d.proc_lead_weeks) >= 0 && Number(d.proc_lead_weeks) <= 104)) bad('proc_lead_weeks', 'Enter whole weeks from 0 to 104, or leave it blank.');
+        if (d.proc_capacity !== '' && !(Number.isInteger(Number(d.proc_capacity)) && Number(d.proc_capacity) > 0)) bad('proc_capacity', 'Enter a whole number, or leave it blank.');
+      }
       if (d.weight_lbs && !(Number(d.weight_lbs) > 0 && Number(d.weight_lbs) <= 5000)) bad('weight', 'Enter a weight between 1 and 5,000 lb, or leave it blank.');
       if (d.age_value && !(Number(d.age_value) >= 0 && Number.isInteger(Number(d.age_value)))) bad('age', 'Enter a whole number, or leave it blank.');
       if (d.age_value && Number(d.age_value) * (d.age_unit === 'years' ? 12 : 1) > 600) bad('age', 'That age looks too high. Check the number and the unit.');
@@ -546,7 +637,11 @@
       if (!S.photos.length) { showError('Add at least one photo. Listings with photos get far more calls.'); return false; }
     }
     if (name === 'price') {
-      if (k !== 'business' && !d.call && !(Number(d.price) > 0)) bad('price', 'Enter a price, or check Call for price.');
+      if (k !== 'business' && k !== 'processor' && !d.call && !(Number(d.price) > 0)) bad('price', 'Enter a price, or check Call for price.');
+      if (k === 'beef') {
+        if (!(d.farm_delivery || []).length) bad('farm_delivery', 'Pick at least one: pickup, delivery or shipping.');
+        if (d.farm_deposit_amount !== '' && !(Number(d.farm_deposit_amount) > 0)) bad('farm_deposit_amount', 'Enter a dollar amount, or leave it blank.');
+      }
       if (!d.city || !d.state) { ok = false; const e = $('lf-e-place'); if (e) e.textContent = 'Enter your ZIP, or your town and state.'; if (!S.editPlace && !d.place_ok) { S.editPlace = true; $('lf-place').innerHTML = placeHtml(); wirePlace(); } }
       if (d.zip && d.zip.length !== 5) bad('zip', 'A ZIP code is 5 digits. Or clear it and enter your town and state.');
       if (d.contact_pref !== 'message' && !phoneDigits(d.phone)) bad('phone', 'Enter a 10-digit phone number, or pick Message me on Herd Hub.');
@@ -565,14 +660,25 @@
     const p = {
       category: d.category, title: d.title.trim(), description: d.description.trim(),
       breed: (k === 'livestock' || k === 'genetics' || k === 'dog') ? d.breed : '',
-      quantity: k === 'business' ? '1' : String(parseInt(d.quantity) || 1),
+      quantity: NO_QTY.includes(k) ? '1' : String(parseInt(d.quantity) || 1),
       weight_lbs: k === 'livestock' ? d.weight_lbs : '', age_months: (k === 'livestock' || k === 'dog') ? age : '',
       sex: k === 'livestock' ? (AUTO_SEX[d.category] || d.sex || '') : '',
-      price: (k === 'business' || d.call) ? '' : d.price,
-      price_type: k === 'business' ? 'fixed' : d.call ? 'call' : (d.price_type || 'fixed'),
+      price: (k === 'business' || k === 'processor' || d.call) ? '' : d.price,
+      price_type: (k === 'business' || k === 'processor') ? 'fixed' : d.call ? 'call' : (d.price_type || 'fixed'),
       zip: d.zip || '', city: d.city.trim(), state: d.state, contact_pref: d.contact_pref,
-      website_url: k === 'business' ? (d.website_url || '').trim() : '',
+      website_url: ['business', 'beef', 'processor'].includes(k) ? (d.website_url || '').trim() : '',
     };
+    const list = key => JSON.stringify(d[key] || []);
+    if (k === 'beef') Object.assign(p, {
+      farm_name: (d.farm_name || '').trim(), farm_proteins: list('farm_proteins'), farm_product_forms: list('farm_product_forms'),
+      farm_production_methods: list('farm_production_methods'), farm_processing: list('farm_processing'), farm_delivery: list('farm_delivery'),
+      farm_availability: d.farm_availability || '', farm_harvest_date: d.farm_harvest_date || '', farm_deposit_amount: d.farm_deposit_amount || '',
+    });
+    if (k === 'processor') Object.assign(p, {
+      proc_inspection: list('proc_inspection'), proc_species: list('proc_species'), proc_services: list('proc_services'),
+      proc_lead_weeks: d.proc_lead_weeks === '' ? '' : String(d.proc_lead_weeks), proc_capacity: d.proc_capacity === '' ? '' : String(d.proc_capacity),
+      proc_haul: d.proc_haul ? 'true' : 'false',
+    });
     return p;
   }
 
@@ -696,9 +802,13 @@
   // Checks without touching the page (used before submit, after jumping around)
   function quickCheck(name) {
     const d = S.data, k = kindOf(d.category);
-    if (name === 'details') return (d.title || '').trim().length >= 5 && (d.description || '').trim().length >= 10 && (k === 'business' || parseInt(d.quantity) >= 1);
+    const has = key => (d[key] || []).length > 0;
+    if (name === 'details') return (d.title || '').trim().length >= 5 && (d.description || '').trim().length >= 10 && (NO_QTY.includes(k) || parseInt(d.quantity) >= 1)
+      && (k !== 'beef' || (has('farm_proteins') && has('farm_product_forms')))
+      && (k !== 'processor' || (has('proc_inspection') && has('proc_species') && has('proc_services')));
     if (name === 'photos') return S.photos.length > 0 && !S.processing;
-    if (name === 'price') return (k === 'business' || d.call || Number(d.price) > 0) && !!d.city && !!d.state && (d.contact_pref === 'message' || !!phoneDigits(d.phone));
+    if (name === 'price') return (k === 'business' || k === 'processor' || d.call || Number(d.price) > 0) && !!d.city && !!d.state && (d.contact_pref === 'message' || !!phoneDigits(d.phone))
+      && (k !== 'beef' || has('farm_delivery'));
     return true;
   }
 })();

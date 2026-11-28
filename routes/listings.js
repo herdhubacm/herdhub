@@ -19,7 +19,32 @@ function sanitizeText(str, maxLen) {
   return String(str).trim().slice(0, maxLen);
 }
 
-const PRICE_TYPES   = ['fixed','negotiable','obo','call','per_head','per_lb','per_cwt','firm','each','per_pair'];
+const PRICE_TYPES   = ['fixed','negotiable','obo','call','per_head','per_lb','per_cwt','firm','each','per_pair','per_lb_hanging'];
+// Farm to Table: Buy Beef ('farm_to_table') and Processors and Lockers ('processors')
+const F2T_CATEGORIES = ['farm_to_table','processors'];
+const F2T_TIERS      = ['farm_to_table','t_bone','filet'];
+const OPTIONS = {
+  farm_proteins:           ['beef','wagyu_beef','bison','pork','lamb_goat','chicken_poultry','chicken_eggs','other_protein'],
+  farm_product_forms:      ['whole_animal','half_animal','quarter_animal','custom_cuts','specialty_cuts','bulk_ground','live_to_locker','other_form'],
+  farm_production_methods: ['grass_fed','grass_grain_finished','grain_fed','pasture_raised','certified_organic','no_hormones','regenerative'],
+  farm_processing:         ['usda_inspected','custom_exempt','buyer_arranges'],
+  farm_delivery:           ['farm_pickup','local_delivery','ships_regional','ships_nationwide'],
+  proc_inspection:         ['usda','state','custom_exempt'],
+  proc_species:            ['beef','hogs','sheep_goats','bison','deer_game','poultry'],
+  proc_services:           ['slaughter','mobile_slaughter','cut_wrap','sausage','smoking_curing','dry_aging','vacuum_pack'],
+};
+const AVAILABILITY = ['ready_now','seasonal','pre_order','sold_out'];
+const OPTION_WORDS = {
+  farm_proteins: 'what you sell', farm_product_forms: 'how you sell it', farm_production_methods: 'how it is raised',
+  farm_processing: 'where it is processed', farm_delivery: 'how buyers get it',
+  proc_inspection: 'inspection type', proc_species: 'species', proc_services: 'services',
+};
+// A list field arrives as a JSON string (posting, multipart) or an array (editing, JSON).
+function optionList(v) {
+  if (v === '' || v == null) return [];
+  if (Array.isArray(v)) return v.map(String);
+  try { const a = JSON.parse(v); return Array.isArray(a) ? a.map(String) : null; } catch (e) { return null; }
+}
 const SEXES         = ['bull','cow','heifer','steer','calf'];
 const CONTACT_PREFS = ['message','phone','either'];
 
@@ -70,7 +95,56 @@ function listingExtras(b) {
     if (u && !/^https?:\/\//i.test(u)) return { error: 'Website should start with http:// or https://' };
     out.website_url = u;
   }
+  // Farm to Table fields
+  for (const key of Object.keys(OPTIONS)) {
+    if (!has(key)) continue;
+    const a = optionList(b[key]);
+    if (a === null || a.some(v => !OPTIONS[key].includes(v))) return { error: `Pick ${OPTION_WORDS[key]} from the list.` };
+    out[key] = a.length ? [...new Set(a)] : null;
+  }
+  if (has('farm_name')) out.farm_name = sanitizeText(b.farm_name, 150) || null;
+  if (has('farm_availability')) {
+    if (b.farm_availability && !AVAILABILITY.includes(b.farm_availability)) return { error: 'Pick when the beef is ready from the list.' };
+    out.farm_availability = b.farm_availability || null;
+  }
+  if (has('farm_harvest_date')) {
+    const d = b.farm_harvest_date;
+    if (d && !(/^\d{4}-\d{2}-\d{2}$/.test(d) && !isNaN(Date.parse(d)))) return { error: 'Enter the harvest date as a date, or leave it blank.' };
+    out.farm_harvest_date = d || null;
+  }
+  if (has('farm_deposit_amount')) {
+    const v = num(b.farm_deposit_amount);
+    if (v !== null && !(v > 0 && v <= 100000)) return { error: 'Enter a deposit amount in dollars, or leave it blank.' };
+    out.farm_deposit_amount = v;
+    out.farm_deposit_required = v !== null;
+  }
+  if (has('proc_lead_weeks')) {
+    const v = num(b.proc_lead_weeks);
+    if (v !== null && !(Number.isInteger(v) && v >= 0 && v <= 104)) return { error: 'Enter how many weeks out you are booking (0 to 104), or leave it blank.' };
+    out.proc_lead_weeks = v;
+  }
+  if (has('proc_capacity')) {
+    const v = num(b.proc_capacity);
+    if (v !== null && !(Number.isInteger(v) && v > 0 && v <= 100000)) return { error: 'Enter head per week as a whole number, or leave it blank.' };
+    out.proc_capacity = v;
+  }
+  if (has('proc_haul')) out.proc_haul = b.proc_haul === true || b.proc_haul === 'true';
   return out;
+}
+
+// Required pieces for the two Farm to Table categories, checked on the whole listing.
+function f2tMissing(category, v) {
+  if (category === 'farm_to_table') {
+    if (!(v.farm_proteins || []).length) return 'Pick at least one thing you sell.';
+    if (!(v.farm_product_forms || []).length) return 'Pick at least one way you sell it (whole, half, quarter, boxes...).';
+    if (!(v.farm_delivery || []).length) return 'Pick how buyers get it: pickup, delivery or shipping.';
+  }
+  if (category === 'processors') {
+    if (!(v.proc_inspection || []).length) return 'Pick your inspection type.';
+    if (!(v.proc_species || []).length) return 'Pick at least one species you process.';
+    if (!(v.proc_services || []).length) return 'Pick at least one service you offer.';
+  }
+  return null;
 }
 
 // ── Multer — memory storage only ──────────────────────
@@ -545,7 +619,7 @@ router.post('/', authenticateToken, requireVerifiedEmail, upload.array('photos',
       'embryos','semen','showstock','dairy',
       'equipment','trailers','chutes_pens','working_dogs','feed_hay',
       'sale_barns','ranches_farms','breed_associations',
-      'farm_to_table','livestock_services','feed_stores',
+      'farm_to_table','processors','livestock_services','feed_stores',
       'insurance_finance','full_herd'
     ];
     if (!validCategories.includes(category))
@@ -553,7 +627,13 @@ router.post('/', authenticateToken, requireVerifiedEmail, upload.array('photos',
     const extra = listingExtras(req.body);
     if (extra.error) return res.status(400).json({ error: extra.error });
     const place = extra.zip_place || null;
-    const safeTier   = ['burger','sirloin','ribeye','filet','t_bone','farm_to_table'].includes(tier) ? tier : 'burger';
+    // Farm to Table listings take the Farm to Table plan, Choice or Prime; the Farm to Table plan is only for them
+    const isF2T = F2T_CATEGORIES.includes(category);
+    let safeTier = ['burger','sirloin','ribeye','filet','t_bone','farm_to_table'].includes(tier) ? tier : 'burger';
+    if (isF2T && !F2T_TIERS.includes(safeTier)) safeTier = 'farm_to_table';
+    if (!isF2T && safeTier === 'farm_to_table') safeTier = 'burger';
+    const f2tProblem = f2tMissing(category, extra);
+    if (f2tProblem) return res.status(400).json({ error: f2tProblem });
     const isFeatured = ['sirloin','ribeye','filet','t_bone','farm_to_table'].includes(safeTier);
     const photoLimit = tierPhotoLimit(safeTier);
     const launchTrial   = plans.isLaunchTrial(safeTier);
@@ -587,10 +667,11 @@ router.post('/', authenticateToken, requireVerifiedEmail, upload.array('photos',
           farm_certifications, farm_price_hanging, farm_price_takehome,
           farm_deposit_required, farm_deposit_amount, farm_call_for_price,
           farm_tours, farm_operation_size, farm_years,
-          status, launch_promo, awaiting_approval, contact_pref)
+          status, launch_promo, awaiting_approval, contact_pref,
+          proc_inspection, proc_species, proc_services, proc_lead_weeks, proc_haul, proc_capacity)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,
                $21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,$38,$39,
-               $40,$41,$42,$43)
+               $40,$41,$42,$43,$44,$45,$46,$47,$48,$49)
        RETURNING id`,
       [
         req.user.id, sanitizeText(title, MAX_TITLE_LEN), sanitizeText(description, MAX_DESC_LEN), category,
@@ -606,25 +687,22 @@ router.post('/', authenticateToken, requireVerifiedEmail, upload.array('photos',
         extra.website_url ?? null,
         clientLat, clientLng,
         // Farm to Table fields
-        req.body.farm_name || null,
-        req.body.farm_proteins ? JSON.parse(req.body.farm_proteins) : null,
-        req.body.farm_product_forms ? JSON.parse(req.body.farm_product_forms) : null,
-        req.body.farm_production_methods ? JSON.parse(req.body.farm_production_methods) : null,
-        req.body.farm_processing ? JSON.parse(req.body.farm_processing) : null,
-        req.body.farm_delivery ? JSON.parse(req.body.farm_delivery) : null,
-        req.body.farm_availability || null,
-        req.body.farm_harvest_date || null,
-        req.body.farm_certifications ? JSON.parse(req.body.farm_certifications) : null,
-        req.body.farm_price_hanging ? +req.body.farm_price_hanging : null,
-        req.body.farm_price_takehome ? +req.body.farm_price_takehome : null,
-        req.body.farm_deposit_required === 'true',
-        req.body.farm_deposit_amount ? +req.body.farm_deposit_amount : null,
-        req.body.farm_call_for_price === 'true',
-        req.body.farm_tours === 'true',
-        req.body.farm_operation_size || null,
-        req.body.farm_years ? +req.body.farm_years : null,
+        extra.farm_name ?? null,
+        extra.farm_proteins ?? null,
+        extra.farm_product_forms ?? null,
+        extra.farm_production_methods ?? null,
+        extra.farm_processing ?? null,
+        extra.farm_delivery ?? null,
+        extra.farm_availability ?? null,
+        extra.farm_harvest_date ?? null,
+        null, null, null,
+        extra.farm_deposit_required === true,
+        extra.farm_deposit_amount ?? null,
+        false, false, null, null,
         needsApproval ? 'pending' : 'active', launchTrial, needsApproval,
         extra.contact_pref || 'either',
+        extra.proc_inspection ?? null, extra.proc_species ?? null, extra.proc_services ?? null,
+        extra.proc_lead_weeks ?? null, extra.proc_haul === true, extra.proc_capacity ?? null,
       ]
     );
     const listingId = rows[0].id;
@@ -736,7 +814,7 @@ const VALID_CATEGORIES = [
   'embryos','semen','showstock','dairy',
   'equipment','trailers','chutes_pens','working_dogs','feed_hay',
   'sale_barns','ranches_farms','breed_associations',
-  'farm_to_table','livestock_services','feed_stores',
+  'farm_to_table','processors','livestock_services','feed_stores',
   'insurance_finance','full_herd'
 ];
 
@@ -777,6 +855,14 @@ router.put('/:id', authenticateToken, async (req, res) => {
     if (extra.error) return res.status(400).json({ error: extra.error });
     const keep = (k) => Object.prototype.hasOwnProperty.call(extra, k) ? extra[k] : l[k];
     const place = extra.zip_place || null;
+    // Farm to Table listings stay in Farm to Table, and other listings stay out, so the plan keeps working
+    const newCat = has('category') ? b.category : l.category;
+    if (F2T_CATEGORIES.includes(l.category) !== F2T_CATEGORIES.includes(newCat))
+      return res.status(400).json({ error: F2T_CATEGORIES.includes(l.category) ? 'A Farm to Table listing stays in Farm to Table. Post a new listing for anything else.' : 'To list in Farm to Table, post a new Farm to Table listing.' });
+    const F2T_KEYS = [...Object.keys(OPTIONS), 'farm_name', 'farm_availability', 'farm_harvest_date', 'farm_deposit_amount', 'farm_deposit_required', 'proc_lead_weeks', 'proc_haul', 'proc_capacity'];
+    const merged = {}; F2T_KEYS.forEach(k => { merged[k] = keep(k); });
+    const f2tProblem = f2tMissing(newCat, merged);
+    if (f2tProblem) return res.status(400).json({ error: f2tProblem });
 
     await query(
       `UPDATE listings
@@ -786,6 +872,10 @@ router.put('/:id', authenticateToken, async (req, res) => {
            sold_at = CASE WHEN $11 THEN NOW() ELSE sold_at END,
            weight_lbs=$13, age_months=$14, sex=$15, contact_pref=$16, website_url=$17,
            lat = COALESCE($18, lat), lng = COALESCE($19, lng),
+           farm_name=$20, farm_proteins=$21, farm_product_forms=$22, farm_production_methods=$23,
+           farm_processing=$24, farm_delivery=$25, farm_availability=$26, farm_harvest_date=$27,
+           farm_deposit_amount=$28, farm_deposit_required=$29,
+           proc_inspection=$30, proc_species=$31, proc_services=$32, proc_lead_weeks=$33, proc_haul=$34, proc_capacity=$35,
            updated_at=NOW()
        WHERE id=$12`,
       [
@@ -799,6 +889,9 @@ router.put('/:id', authenticateToken, async (req, res) => {
         markSold, l.id,
         keep('weight_lbs'), keep('age_months'), keep('sex'), keep('contact_pref'), keep('website_url'),
         place ? place.lat : null, place ? place.lng : null,
+        ...['farm_name','farm_proteins','farm_product_forms','farm_production_methods','farm_processing','farm_delivery',
+            'farm_availability','farm_harvest_date','farm_deposit_amount'].map(k => merged[k]), merged.farm_deposit_required === true,
+        merged.proc_inspection, merged.proc_species, merged.proc_services, merged.proc_lead_weeks, merged.proc_haul === true, merged.proc_capacity,
       ]
     );
     if (global.apiCache?.clearListingCache) global.apiCache.clearListingCache();
@@ -862,12 +955,13 @@ router.post('/:id/renew', authenticateToken, async (req, res) => {
 
     // Active: add 30 days to whatever is left. Sold or expired: 30 days from now.
     const fromDate = l.status === 'active' && l.expires_at && new Date(l.expires_at) > new Date() ? new Date(l.expires_at) : new Date();
-    const newExpiry = new Date(fromDate.getTime() + plans.REGULAR_RUN_DAYS * 86400000);
+    const renewDays = F2T_CATEGORIES.includes(l.category) ? plans.runDays('farm_to_table') : plans.REGULAR_RUN_DAYS;
+    const newExpiry = new Date(fromDate.getTime() + renewDays * 86400000);
     const paidRunGoing = !l.launch_promo && plans.PAID_TIERS.includes(l.tier) && l.payment_status === 'paid';
     await query(
       `UPDATE listings
           SET status='active', sold_at=NULL, expires_at=$1, updated_at=NOW(),
-              tier = CASE WHEN $2 THEN tier WHEN category='farm_to_table' THEN 'farm_to_table' ELSE 'burger' END,
+              tier = CASE WHEN $2 THEN tier WHEN category IN ('farm_to_table','processors') THEN 'farm_to_table' ELSE 'burger' END,
               is_featured = CASE WHEN $2 THEN is_featured ELSE FALSE END,
               launch_promo = FALSE
         WHERE id=$3`,

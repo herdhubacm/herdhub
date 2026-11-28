@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS listings (
                                   'embryos','semen','showstock','dairy',
                                   'equipment','trailers','chutes_pens','working_dogs','feed_hay',
                                   'sale_barns','ranches_farms','breed_associations',
-                                  'farm_to_table','livestock_services','feed_stores',
+                                  'farm_to_table','processors','livestock_services','feed_stores',
                                   'insurance_finance','full_herd'
                                 )),
   subcategory      TEXT,
